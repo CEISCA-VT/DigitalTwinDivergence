@@ -86,6 +86,36 @@ python -m DigitalTwin.analysis.train_uncertainty "DigitalTwin/datasets/*attack-n
 The locked threshold and trained model artifacts are ignored by Git because
 they are generated from datasets.
 
+## Pre-Battery Wrap-Up
+
+Summarize stationary logs:
+
+```powershell
+python -m DigitalTwin.analysis.analyze_stationary
+```
+
+Summarize bench telemetry latency and packet health:
+
+```powershell
+python -m DigitalTwin.analysis.analyze_bench_telemetry
+```
+
+Replay bench telemetry logs through the digital twin and review consistency:
+
+```powershell
+python -m DigitalTwin.analysis.review_hardware_replay
+```
+
+Prepare tracked-rover calibration artifacts after the first powered runs:
+
+```powershell
+python -m DigitalTwin.analysis.calibration_prep straight raw_logs\telemetry\my_run.csv --distance-m 2.0 --out-prefix DigitalTwin\datasets\analysis\calibration\straight_run_01
+python -m DigitalTwin.analysis.calibration_prep turn raw_logs\telemetry\my_turn.csv --turn-angle-deg 180 --left-distance-m -0.62 --right-distance-m 0.61 --out-prefix DigitalTwin\datasets\analysis\calibration\turn_run_01
+python -m DigitalTwin.analysis.calibration_prep imu raw_logs\telemetry\my_turn.csv --expected-heading-change-deg 180 --out-prefix DigitalTwin\datasets\analysis\calibration\imu_turn_01
+python -m DigitalTwin.analysis.calibration_prep gps raw_logs\telemetry\my_run.csv --out-prefix DigitalTwin\datasets\analysis\calibration\gps_run_01
+python -m DigitalTwin.analysis.calibration_prep route-template --out-prefix DigitalTwin\datasets\analysis\calibration\route_reference_template
+```
+
 ## Hardware Receiver
 
 When the UGV01 is streaming packets over UDP:

@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import csv
+import math
 from pathlib import Path
 import re
+from statistics import median
 from typing import Iterable
 
 
@@ -47,3 +49,80 @@ def parse_run_name(path: Path) -> dict[str, str]:
 def is_attack_row(row: dict[str, str]) -> bool:
     label = row.get("attack_label", "none")
     return label not in {"", "none", "replay-warmup"}
+
+
+def parse_bool(value: object) -> bool:
+    return str(value).strip().lower() in {"1", "true", "yes"}
+
+
+def parse_float(value: object, default: float | None = None) -> float | None:
+    text = str(value).strip()
+    if text in {"", "None", "null", "nan"}:
+        return default
+    try:
+        return float(text)
+    except ValueError:
+        return default
+
+
+def parse_int(value: object, default: int | None = None) -> int | None:
+    parsed = parse_float(value, None)
+    if parsed is None:
+        return default
+    return int(round(parsed))
+
+
+def first_present(row: dict[str, str], *keys: str) -> str:
+    for key in keys:
+        if key in row:
+            return row[key]
+    return ""
+
+
+def cleaned_floats(values: Iterable[object]) -> list[float]:
+    cleaned: list[float] = []
+    for value in values:
+        parsed = parse_float(value, None)
+        if parsed is not None and math.isfinite(parsed):
+            cleaned.append(parsed)
+    return cleaned
+
+
+def quantile(values: Iterable[object], q: float) -> float | None:
+    cleaned = sorted(cleaned_floats(values))
+    if not cleaned:
+        return None
+    if q <= 0:
+        return cleaned[0]
+    if q >= 1:
+        return cleaned[-1]
+    index = (len(cleaned) - 1) * q
+    low = math.floor(index)
+    high = math.ceil(index)
+    if low == high:
+        return cleaned[low]
+    weight = index - low
+    return cleaned[low] * (1.0 - weight) + cleaned[high] * weight
+
+
+def stats_dict(values: Iterable[object], prefix: str) -> dict[str, float | int | None]:
+    cleaned = cleaned_floats(values)
+    if not cleaned:
+        return {
+            f"{prefix}_count": 0,
+            f"{prefix}_min": None,
+            f"{prefix}_median": None,
+            f"{prefix}_mean": None,
+            f"{prefix}_p95": None,
+            f"{prefix}_p99": None,
+            f"{prefix}_max": None,
+        }
+    return {
+        f"{prefix}_count": len(cleaned),
+        f"{prefix}_min": min(cleaned),
+        f"{prefix}_median": median(cleaned),
+        f"{prefix}_mean": sum(cleaned) / len(cleaned),
+        f"{prefix}_p95": quantile(cleaned, 0.95),
+        f"{prefix}_p99": quantile(cleaned, 0.99),
+        f"{prefix}_max": max(cleaned),
+    }

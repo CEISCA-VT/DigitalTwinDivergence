@@ -52,3 +52,9 @@ Core modules:
 
 The hardware-facing protocol is documented in `docs/telemetry_protocol.md`.
 Running commands are documented in `docs/running.md`.
+UGV01 firmware bring-up, wiring, protocol lock, and log dictionaries are in:
+
+- `docs/ugv01_esp32_bringup.md`
+- `docs/log_data_dictionary.md`
+- `docs/preregistered_protocol.md`
+- `docs/calibration_ready.md`
