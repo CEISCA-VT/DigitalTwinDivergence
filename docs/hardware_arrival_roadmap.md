@@ -1,21 +1,38 @@
 # Digital Twin Divergence Roadmap
 
-This roadmap reflects the current codebase state: the EKF, telemetry packet,
-attack injector, eigenvalue detectability math, confidence envelopes, logging,
-plotting, and synthetic experiment runner exist. The remaining work is now
-mostly integration, calibration, learned uncertainty estimation, and empirical
-validation.
+This roadmap reflects the current project state after UGV01 bench bring-up on
+July 9, 2026. The software stack, embedded GPS telemetry, bench logger, timing
+schema, and digital-twin replay path are now working. The remaining work is
+mostly field power, tracked-rover calibration, real baseline collection,
+threshold locking, learned uncertainty training, attack trials, and final
+results writing.
 
-## Current Status
+## Current Completion Estimate
 
-Already implemented:
+Overall project: about 60-65% complete.
 
-- Packed Arduino/Python telemetry protocol with CRC.
-- Python telemetry deserializer and UDP receiver.
-- Differential-drive kinematics.
+By area:
+
+- Synthetic digital-twin software: 85-90% complete.
+- Embedded UGV01 GPS/base/IMU telemetry: 80-85% complete.
+- Bench logging and timing instrumentation: 85-90% complete.
+- Digital-twin replay of real bench logs: 75-80% complete.
+- Tracked-rover calibration: 10-20% complete.
+- Real field baseline dataset: 0-10% complete.
+- Real attack campaign: 0% complete.
+- Final paper/results: 25-35% complete.
+
+The main external blocker is field power: batteries are still needed before
+moving deployment, track calibration, baseline runs, and attack trials.
+
+## Completed
+
+### Core Digital Twin
+
+- Differential-drive / tracked-drive-compatible kinematics scaffold.
 - EKF prediction and GPS update.
 - Mahalanobis innovation detector.
-- Proposal-faithful eigenvalue bound:
+- Detectability bound:
 
 ```text
 epsilon_min = sqrt(lambda_star * lambda_max(S_k))
@@ -34,125 +51,251 @@ Q_k = g(r_k, sigma_IMU, sigma_v, Delta t_k)
 ```
 
 - Step, replay, freeze, and random-drift attack injection.
-- CSV logging and plotting.
-- Quick synthetic experiment automation.
+- CSV logger, plotting, ROC, detection-probability summary, threshold-locking
+  utility, and Random Forest uncertainty-training stub.
+- Synthetic buffered latency / jitter emulator with queue-depth reporting.
+- Full synthetic quick-run path verified.
 
-Latest Phase 0 additions:
+### UGV01 Embedded Firmware
 
-- Synthetic buffered latency now changes edge timing stress, `Q_k`, `S_k`, and
-  `epsilon_min`.
-- The experiment runner supports the full `2^3` matrix.
-- Step-bias sweeps from `0.5 m` to `10 m` are implemented.
-- Empirical `P_D` summaries are implemented.
-- ROC and detection-probability plotting are implemented.
-- Threshold locking from nominal CSVs is implemented.
-- A Random Forest uncertainty-training pipeline stub is implemented.
+- `ugv01_gps_dev` contains the active embedded firmware.
+- BN-220 GPS is integrated with `TinyGPSPlus`.
+- GPS is kept on the original working UGV01 RX path:
 
-## Phase 0: Before UGV01 Arrives
+```text
+BN-220 white wire -> UGV01 RX
+BN-220 red wire   -> UGV01 5V
+BN-220 black wire -> UGV01 GND
+```
 
-Goal: make the software pipeline stronger while hardware is unavailable.
+- HTTP command `{"T":146}` returns GPS-only telemetry.
+- HTTP command `{"T":147}` returns combined base, encoder, IMU, voltage, GPS,
+  sequence, and firmware timing telemetry.
+- `T:147` now includes:
 
-Tasks:
+```text
+seq
+sample_ms
+send_ms
+millis
+L, R
+enc_left, enc_right
+voltage
+IMU attitude and raw motion fields
+gps_valid, gps_fix_type, lat, lon, sat, hdop
+gps_chars, gps_sentences, gps_failed_checksums
+```
 
-1. Use the synthetic tools to run a longer full-matrix rehearsal.
-2. Review the generated `P_D`, ROC, and threshold-locking outputs for sanity.
-3. Decide whether the confidence-envelope heuristic needs a clearer formula
-   before real experiments.
-4. Keep equations frozen unless a real data failure proves a specific change is
-   necessary.
+### Bench Logging And Timing
 
-Exit criteria:
+- `bench_logger.py` logs `T:147` telemetry.
+- The bench CSV includes:
 
-- Synthetic latency visibly increases `lambda_max(S_k)` and `epsilon_min`.
-- Synthetic step sweeps show detection probability increasing with attack size.
-- Full synthetic pipeline can run without manual file edits.
+```text
+edge send timestamp
+edge receive timestamp
+edge midpoint timestamp
+rover millis/sample time
+session clock-offset estimate
+clock calibration status
+packet/drop count
+stale-packet flag
+queue depth
+HTTP latency
+GPS/base/IMU/encoder fields
+```
 
-## Phase 1: Hardware Bring-Up
+- Successful bench run:
 
-Goal: prove the UGV01, GPS, encoders, IMU, Arduino, and Python receiver can
-communicate reliably.
+```text
+raw_logs/telemetry/ugv_t147_telemetry_20260709_131731.csv
+```
 
-Tasks:
+Run health:
 
-1. Assemble the UGV01.
-2. Wire the BN-220 GPS.
-3. Wire wheel encoder and IMU signals.
-4. Verify voltage levels and common ground.
-5. Flash the telemetry firmware.
-6. Start the receiver:
+```text
+Rows: 379
+Successful cycles: 379/379
+Drops: 0
+Seq: 0 -> 378, no gaps
+GPS valid: true
+Satellites: 8 -> 11
+HDOP: 1.48 -> 0.92
+GPS chars: 30152 -> 369862
+Voltage: about 12.36 V
+Encoders: 0/0, expected because rover was stationary
+```
+
+### Real Log Replay Into Digital Twin
+
+- Real UGV01 bench logs can now be replayed through the EKF/detector pipeline:
 
 ```powershell
-python -m DigitalTwin.telemetry_receiver --port 5005
+python -m DigitalTwin.analysis.replay_hardware_log raw_logs\telemetry\ugv_t147_telemetry_20260709_131731.csv --out DigitalTwin\datasets\hardware_bench\ugv_t147_telemetry_20260709_131731_digital_twin.csv
+```
+
+- The replayed CSV uses the standard digital-twin schema.
+- Plotting and summary analysis accept the replayed hardware CSV.
+- Hardware replay result for the successful bench run:
+
+```text
+Rows replayed: 379
+Packet gaps: 0
+Stale packets: 0
+Detections: 0
+Max Mahalanobis: 2.42 below threshold 5.99
+Stationary GPS local span: about 7.1 m x 9.6 m
+```
+
+## What Is Left
+
+### Blocked Until Batteries Arrive
+
+1. Field-powered rover operation.
+2. Straight-line tracked-drive calibration.
+3. In-place turn calibration for effective track width.
+4. Moving GPS/IMU/base validation.
+5. Benign field baseline dataset.
+6. Real attack campaign.
+
+### Still Doable Before Batteries
+
+1. Keep collecting stationary GPS logs in different placements:
+   - indoors
+   - window
+   - outside if safe on bench power
+2. Add a small stationary GPS summary script:
+   - lat/lon local variance
+   - HDOP distribution
+   - satellite count distribution
+   - checksum failure rate
+3. Review the digital-twin replay plots from the bench log.
+4. Confirm Arduino IDE can compile the current `ugv01_gps_dev` sketch.
+5. Document the exact UGV01 firmware flashing procedure and board settings.
+
+## Next Phase: Field Power And Safety Check
+
+Goal: prove the rover can run under its own batteries without changing the
+validated GPS wiring or telemetry protocol.
+
+Tasks:
+
+1. Install charged batteries.
+2. Lift tracks off the ground for first powered command test.
+3. Connect to UGV Wi-Fi.
+4. Send stop command:
+
+```powershell
+python firmware/python/ugv01_http_ctrl.py --cmd '{"T":1,"L":0,"R":0}'
+```
+
+5. Query base, IMU, GPS, and combined telemetry:
+
+```powershell
+python firmware/python/ugv01_http_ctrl.py --cmd '{"T":130}'
+python firmware/python/ugv01_http_ctrl.py --cmd '{"T":126}'
+python firmware/python/ugv01_http_ctrl.py --cmd '{"T":146}'
+python firmware/python/ugv01_http_ctrl.py --cmd '{"T":147}'
+```
+
+6. Run a short stationary logger test:
+
+```powershell
+python bench_logger.py
 ```
 
 Exit criteria:
 
-- CRC-valid packets arrive continuously.
-- `seq` increments normally.
-- Encoder ticks change with wheel motion.
-- GPS fix type, satellites, HDOP, latitude, and longitude are plausible.
-- IMU readings are stable when stationary and respond to motion.
+- `T:147` returns continuously.
+- `seq` increments without gaps.
+- `gps_valid` is true outdoors or near sky view.
+- Battery voltage looks healthy.
+- IMU/yaw values update.
+- Encoders remain stable while stationary.
+- Stop command works.
 
-## Phase 2: Calibration
+## Phase 2: Tracked-Rover Calibration
 
-Goal: make all physical units defensible before running research trials.
+Goal: estimate physical motion parameters for the tracked UGV01.
+
+Use tracked-drive terms, not wheel-radius language. The important calibrated
+parameters are:
+
+```text
+left_meters_per_tick
+right_meters_per_tick
+effective_track_width_m
+heading_sign
+```
 
 Tasks:
 
-1. Measure wheel radius.
-2. Measure wheel base.
-3. Confirm encoder ticks per revolution.
-4. Update `DifferentialDriveGeometry`.
-5. Run straight-line motion over a measured distance.
-6. Run in-place turns and verify heading sign.
-7. Collect 10-15 minutes of stationary GPS data.
-8. Estimate baseline GPS noise and HDOP behavior.
+1. Mark a straight 1-2 m path.
+2. Drive slowly forward while logging `T:147`.
+3. Compute left/right encoder-count deltas.
+4. Estimate:
+
+```text
+left_meters_per_tick  = measured_distance_m / left_tick_delta
+right_meters_per_tick = measured_distance_m / right_tick_delta
+```
+
+5. Repeat 3-5 times and average.
+6. Run clockwise and counterclockwise in-place turns.
+7. Estimate effective track width:
+
+```text
+effective_track_width_m = (right_distance_m - left_distance_m) / theta_rad
+```
+
+8. Update the digital-twin geometry/config.
+9. Re-run straight and turn tests to verify.
 
 Exit criteria:
 
-- Encoder distance roughly matches tape-measured distance.
+- Encoder-derived distance roughly matches tape-measured distance.
 - Turn direction and heading sign are correct.
-- GPS local-frame conversion produces meter-scale displacement correctly.
+- GPS local-frame conversion produces meter-scale displacement.
 - Stationary GPS variance is known.
 
 ## Phase 3: Benign Baseline Dataset
 
-Goal: collect clean nominal data for threshold locking and uncertainty training.
+Goal: collect clean nominal field data for threshold locking and uncertainty
+training.
 
-Run the proposal's `2^3` matrix:
+Target matrix:
 
 ```text
-velocity: 0.2 m/s, 0.8 m/s
+velocity: low, higher
 terrain: smooth, rough
-latency: baseline Wi-Fi, 200 ms buffered
+latency: baseline Wi-Fi, controlled buffered delay
 trials: 5 benign trials per condition
-trajectory: 2 m x 2 m square
+trajectory: repeatable square or waypoint path
 ```
 
-Total benign runs:
+Initial minimum target:
 
 ```text
-2 * 2 * 2 * 5 = 40 runs
+2 speeds * 2 terrains * 2 latency settings * 5 trials = 40 benign runs
 ```
 
 Exit criteria:
 
-- Every CSV contains GPS, encoder, IMU, EKF, innovation, `S_k`, `Q_k`,
-  `lambda_max_s`, `epsilon_min_m`, confidence, envelope region, and packet
-  timing.
+- Every run has GPS, encoder, IMU, EKF, innovation, `S_k`, `Q_k`,
+  `lambda_max_s`, `epsilon_min_m`, confidence, envelope region, packet timing,
+  packet loss, stale flags, and queue depth.
 - No attack labels appear in baseline data.
 - Runs are named by speed, terrain, latency, and trial.
 
 ## Phase 4: Threshold Locking
 
-Goal: replace the theoretical detector threshold with an empirical threshold
-from clean nominal data.
+Goal: lock the detector threshold from clean nominal field data.
 
 Tasks:
 
-1. Load all benign baseline CSVs.
-2. Compute the nominal Mahalanobis distribution.
-3. Choose `gamma_star` so empirical false alarm probability satisfies:
+1. Load benign baseline CSVs.
+2. Compute nominal Mahalanobis distribution.
+3. Choose `gamma_star` so empirical false-alarm probability satisfies:
 
 ```text
 P_FA <= 0.05
@@ -171,13 +314,13 @@ false alarm estimate
 Exit criteria:
 
 - A locked threshold file exists.
-- The baseline false alarm rate is measured, not assumed.
-- Future attack trials use the locked threshold.
+- Baseline false alarm rate is measured from real UGV01 data.
+- Attack trials use the locked threshold.
 
 ## Phase 5: Learned Uncertainty Estimator
 
-Goal: replace the deterministic placeholder with the proposal's learned
-self-calibrating uncertainty model.
+Goal: replace or compare the deterministic covariance heuristic with a learned
+uncertainty model trained only on benign data.
 
 Inputs:
 
@@ -185,13 +328,13 @@ Inputs:
 r_k          dead-reckoning residual
 sigma_IMU    rolling IMU vertical/yaw variability
 sigma_v      rolling velocity variance
-Delta t_k    packet inter-arrival time
+Delta t_k    edge-observed packet timing stress
 ```
 
 Tasks:
 
 1. Build training rows from benign baseline trials.
-2. Train a Random Forest regressor first.
+2. Train the Random Forest baseline.
 3. Predict the diagonal of `Q_k`.
 4. Compare learned adaptive EKF against fixed-covariance EKF.
 5. Measure false alarm rate under terrain and latency changes.
@@ -199,15 +342,16 @@ Tasks:
 
 Exit criteria:
 
-- Learned `g(.)` improves EKF consistency or false alarm behavior.
-- The model does not hide obvious attacks.
+- Learned `g(.)` improves EKF consistency or false-alarm behavior, or the
+  limitation is documented clearly.
+- The learned model does not hide obvious attacks.
 - Adaptive vs fixed covariance comparison is logged and plotted.
 
 ## Phase 6: Attack Campaign
 
 Goal: empirically validate the detectability boundary.
 
-Use the same `2^3` operating matrix as the benign phase.
+Use the same operating matrix as the benign phase.
 
 Attack types:
 
@@ -223,12 +367,6 @@ Step-bias magnitudes:
 0.5 m, 1 m, 2 m, 3 m, 5 m, 7.5 m, 10 m
 ```
 
-Attack start time:
-
-```text
-t = 30 s
-```
-
 Exit criteria:
 
 - Detection probability is computed for each attack size and condition.
@@ -236,11 +374,9 @@ Exit criteria:
 - False negatives are identified.
 - Empirical detection probability is compared against `epsilon_min`.
 
-## Phase 7: Detectability Maps
+## Phase 7: Figures And Results
 
-Goal: produce the figures that prove or disprove the core hypotheses.
-
-Required plots:
+Required outputs:
 
 - `epsilon_min(v, tau, l)`.
 - `lambda_max(S_k)` over time.
@@ -249,48 +385,49 @@ Required plots:
 - ROC curves.
 - Detection delay by condition.
 - Safe/warning/blind envelope timelines.
-- Adaptive covariance vs fixed covariance false alarm comparison.
+- Adaptive covariance vs fixed covariance false-alarm comparison.
+- Stationary GPS noise and HDOP summary.
+- Real hardware replay examples.
 
 Exit criteria:
 
-- You can clearly answer whether velocity, terrain roughness, and latency
-  expand `epsilon_min`.
+- You can answer whether velocity, terrain roughness, and latency expand
+  `epsilon_min`.
 - Blind regions correspond to weak detector conditions.
-- Learned uncertainty is either supported by evidence or honestly shown to be
-  limited.
+- Learned uncertainty is supported by evidence or honestly shown to be limited.
 
-## Phase 8: Results and Paper Writing
-
-Goal: turn experiment logs into defensible research claims.
+## Phase 8: Paper Writing
 
 Write:
 
 1. Hardware and telemetry setup.
-2. Calibration procedure.
-3. EKF and detectability formulation.
-4. Threshold-locking method.
-5. Learned uncertainty training method.
-6. Attack methodology.
-7. Detectability-bound validation.
-8. Confidence-envelope results.
-9. Limitations and failure cases.
-10. Future work.
+2. Bench validation and GPS wiring.
+3. Calibration procedure.
+4. EKF and detectability formulation.
+5. Threshold-locking method.
+6. Learned uncertainty training method.
+7. Attack methodology.
+8. Detectability-bound validation.
+9. Confidence-envelope results.
+10. Limitations and failure cases.
+11. Future work.
 
 Exit criteria:
 
-- Every claim is backed by a dataset, plot, or equation.
-- The paper distinguishes theory, synthetic validation, and real hardware
-  evidence.
+- Every claim is backed by a dataset, plot, equation, or logged artifact.
+- The paper distinguishes synthetic validation, stationary bench hardware, and
+  moving field hardware.
 - Any mismatch between theory and real data is documented rather than hidden.
 
-## Practical Order of Operations
+## Practical Order Of Operations
 
-Do not start with attacks when the hardware arrives. The correct order is:
+The correct remaining order is:
 
 ```text
-packets -> calibration -> benign baselines -> threshold locking
-        -> learned uncertainty -> attacks -> detectability maps -> paper
+batteries -> safety check -> track calibration -> moving validation
+          -> benign baselines -> threshold locking -> learned uncertainty
+          -> attacks -> detectability maps -> paper
 ```
 
-The project becomes much easier if the baseline data is clean. Bad baseline data
+Do not start attacks before calibration and benign baselines. Bad baseline data
 will poison the threshold, the uncertainty model, and the attack conclusions.

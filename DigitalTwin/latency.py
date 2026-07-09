@@ -21,6 +21,7 @@ class DelayedItem:
 class DeliveredItem:
     delivery_s: float
     generated_s: float
+    queue_depth_after_pop: int
     item: Any
 
 
@@ -65,5 +66,9 @@ class LatencyQueue:
         ready: list[DeliveredItem] = []
         while self.heap and self.heap[0].release_s <= t_s:
             delayed = heapq.heappop(self.heap)
-            ready.append(DeliveredItem(delayed.release_s, delayed.generated_s, delayed.item))
+            ready.append(DeliveredItem(delayed.release_s, delayed.generated_s, len(self.heap), delayed.item))
         return ready
+
+    @property
+    def depth(self) -> int:
+        return len(self.heap)

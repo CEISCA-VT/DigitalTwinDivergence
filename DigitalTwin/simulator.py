@@ -15,6 +15,7 @@ from .kinematics import DifferentialDriveGeometry, integrate_unicycle, trajector
 from .latency import LatencyQueue
 from .logger import CSVExperimentLogger
 from .telemetry import TelemetryPacket, gps_to_local_xy, local_xy_to_gps
+from .timing import SessionClockCalibrator
 from .uncertainty import TelemetryDrivenUncertaintyEstimator, TelemetryStatisticsWindow
 
 
@@ -47,6 +48,7 @@ def run_simulation(config: SimulationConfig, attack: AttackConfig, output_csv: s
     injector = AttackInjector(attack, dt_s=config.dt_s, seed=config.seed + 101)
     latency = LatencyQueue(config.latency_ms, jitter_ms=config.latency_jitter_ms, seed=config.seed + 303)
     ekf = RoverEKF()
+    clock = SessionClockCalibrator(min_samples=1)
 
     truth = np.array([0.0, 0.0, 0.0], dtype=float)
     prev_left = 0
@@ -55,6 +57,7 @@ def run_simulation(config: SimulationConfig, attack: AttackConfig, output_csv: s
     total_right = 0
     prev_packet_time_s: float | None = None
     prev_arrival_time_s: float | None = None
+    prev_seq: int | None = None
     last_dead_reckoning_residual_m = 0.0
 
     output_path = Path(output_csv)
@@ -97,12 +100,16 @@ def run_simulation(config: SimulationConfig, attack: AttackConfig, output_csv: s
                 parsed = TelemetryPacket.unpack(raw_frame)
                 gps_xy = np.array(gps_to_local_xy(parsed.gps_lat_deg, parsed.gps_lon_deg, config.origin_lat_deg, config.origin_lon_deg))
                 packet_time_s = parsed.timestamp_us / 1_000_000.0
+                clock_estimate = clock.observe(packet_time_s, delivered.delivery_s)
                 sensor_dt_s = config.dt_s if prev_packet_time_s is None else max(packet_time_s - prev_packet_time_s, 1e-6)
+                stale_packet = prev_packet_time_s is not None and packet_time_s <= prev_packet_time_s
                 prev_packet_time_s = packet_time_s
                 arrival_dt_s = sensor_dt_s if prev_arrival_time_s is None else max(delivered.delivery_s - prev_arrival_time_s, 1e-6)
                 prev_arrival_time_s = delivered.delivery_s
                 transport_latency_s = max(0.0, delivered.delivery_s - delivered.generated_s)
                 effective_packet_dt_s = arrival_dt_s + transport_latency_s
+                packet_loss_count = 0 if prev_seq is None else max(0, parsed.seq - prev_seq - 1)
+                prev_seq = parsed.seq
                 delta_left = parsed.enc_left_ticks - prev_left
                 delta_right = parsed.enc_right_ticks - prev_right
                 prev_left = parsed.enc_left_ticks
@@ -129,11 +136,23 @@ def run_simulation(config: SimulationConfig, attack: AttackConfig, output_csv: s
                 last_dead_reckoning_residual_m = dead_reckoning_residual_m
                 ekf.update_gps(gps_xy, R)
                 detection = detector.evaluate(ekf.last_innovation, ekf.last_S)
+                alarm_time_s = delivered.delivery_s if detection.detected else ""
 
                 logger.write(
                     {
                         "time_s": parsed.timestamp_us / 1_000_000.0,
                         "seq": parsed.seq,
+                        "source_sample_time_s": packet_time_s,
+                        "edge_send_time_s": delivered.generated_s,
+                        "edge_arrival_time_s": delivered.delivery_s,
+                        "queue_release_time_s": delivered.delivery_s,
+                        "estimate_time_s": delivered.delivery_s,
+                        "alarm_time_s": alarm_time_s,
+                        "clock_offset_s": clock_estimate.offset_s,
+                        "clock_calibrated": int(clock_estimate.calibrated),
+                        "packet_loss_count": packet_loss_count,
+                        "stale_packet": int(stale_packet),
+                        "queue_depth": delivered.queue_depth_after_pop,
                         "gps_x_m": gps_xy[0],
                         "gps_y_m": gps_xy[1],
                         "truth_x_m": delayed_truth[0],
