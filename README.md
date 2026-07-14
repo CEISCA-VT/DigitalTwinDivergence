@@ -58,3 +58,14 @@ UGV01 firmware bring-up, wiring, protocol lock, and log dictionaries are in:
 - `docs/log_data_dictionary.md`
 - `docs/preregistered_protocol.md`
 - `docs/calibration_ready.md`
+
+UGV01 Wi-Fi notes:
+
+- default AP mode: SSID `UGV`, password `12345678`, IP `192.168.4.1`
+- to connect the rover to another Wi-Fi network, use `T:404`:
+
+```json
+{"T":404,"ap_ssid":"Shreyas_UGV","ap_password":"DigitalTwin","sta_ssid":"your_ssid","sta_password":"your_password"}
+```
+
+After sending `T:404`, the OLED `ST` line should show the router-assigned IP.

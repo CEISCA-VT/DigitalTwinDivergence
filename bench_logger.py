@@ -1,5 +1,6 @@
 import csv
 import json
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -17,6 +18,7 @@ from DigitalTwin.timing import SessionClockCalibrator
 # Station-mode IP shown next to "ST" on the UGV01 OLED.
 ROVER_IP = "10.0.0.119"
 BASE_URL = f"http://{ROVER_IP}/js"
+
 
 
 # ============================================================================
@@ -44,40 +46,33 @@ HTTP_TIMEOUT_SECONDS = 2.0
 MOTION_SCRIPT_ENABLED = True
 MOTION_PLAN = "validation_triplet"
 
-# Official UGV01 nominal geometry from the Waveshare documentation:
-# - rail center distance: 170 mm
-# - track width: 44 mm
-# For the motion model, use the stock UGV01 firmware control constants so the
-# logger matches the rover's own vendor baseline exactly.
-OFFICIAL_RAIL_CENTER_DISTANCE_M = 0.170
-OFFICIAL_TRACK_BELT_WIDTH_M = 0.044
-OFFICIAL_RUNNING_SPEED_RANGE_MPS = (0.25, 1.0)
+# Derived from your current Week 2 calibration pass.
+ENCODER_COUNTS_PER_METER = 5632.373
+EFFECTIVE_TRACK_WIDTH_M = 0.1818
 
-# UGV01 nominal drivetrain constants from the embedded firmware's mainType == 3
-# configuration. This keeps the bench motion script aligned with the rover's
-# own baseline model while still using the official UGV01 geometry above.
-UGV01_FIRMWARE_WHEEL_DIAMETER_M = 0.0523
-UGV01_FIRMWARE_ENCODER_COUNTS_PER_REV = 1092
-UGV01_FIRMWARE_METERS_PER_COUNT = (
-    3.141592653589793 * UGV01_FIRMWARE_WHEEL_DIAMETER_M
-    / UGV01_FIRMWARE_ENCODER_COUNTS_PER_REV
-)
-UGV01_FIRMWARE_COUNTS_PER_METER = 1.0 / UGV01_FIRMWARE_METERS_PER_COUNT
-
-# Conservative motion commands based on the ranges seen in basic_test.csv.
-STRAIGHT_FORWARD_CMD = (-0.18, -0.18)
-STRAIGHT_BACKWARD_CMD = (0.18, 0.18)
-TURN_CCW_CMD = (-0.35, 0.35)
-TURN_CW_CMD = (0.35, -0.35)
-SQUARE_TURN_CW_CMD = (0.28, -0.28)
+# Asphalt-tuned commands: still moderate, but less under-rotating than the
+# slippery-floor version.
+STRAIGHT_FORWARD_CMD = (-0.20, -0.20)
+STRAIGHT_BACKWARD_CMD = (0.20, 0.20)
+TURN_CCW_CMD = (-0.32, 0.32)
+TURN_CW_CMD = (0.32, -0.32)
+SQUARE_STRAIGHT_FORWARD_CMD = (-0.14, -0.14)
+SQUARE_TURN_CW_CMD = (0.08, -0.08)
 
 STRAIGHT_DISTANCE_M = 1.0
 TURN_DEGREES = 360.0
 TURN_REPEAT_COUNT = 2
 SEQUENCE_REPEAT_COUNT = 3
-SQUARE_SIDE_LENGTH_M = 0.25
+SQUARE_SIDE_LENGTH_M = 1.0
 SQUARE_TURN_DEGREES = 90.0
 SQUARE_REPEAT_COUNT = 1
+SQUARE_SIDE_HOLD_SECONDS = 1.0
+SQUARE_CORNER_HOLD_SECONDS = 3.0
+SQUARE_STRAIGHT_WARMUP_CMD = (-0.08, -0.08)
+SQUARE_STRAIGHT_WARMUP_SECONDS = 0.35
+SQUARE_STRAIGHT_SECONDS = 4.2
+SQUARE_TURN_SECONDS = 1.65
+COMMAND_REFRESH_SECONDS = 0.10
 HOLD_SECONDS = 2.0
 INITIAL_HOLD_SECONDS = 5.0
 FINAL_HOLD_SECONDS = 3.0
@@ -175,30 +170,26 @@ class MotionStep:
     right_cmd: float
     target: float
     label: str
+    direction: str = ""
+
+
+@dataclass(frozen=True)
+class TimedCommandStep:
+    duration_s: float
+    left_cmd: float
+    right_cmd: float
+    label: str
 
 
 @dataclass(frozen=True)
 class MotionCalibration:
     encoder_counts_per_meter: float
     effective_track_width_m: float
-    nominal_track_width_m: float
-
-    @property
-    def straight_target_counts(self) -> float:
-        return self.encoder_counts_per_meter * STRAIGHT_DISTANCE_M
-
-    @property
-    def turn_target_counts(self) -> float:
-        return (
-            self.encoder_counts_per_meter
-            * (3.141592653589793 * self.effective_track_width_m)
-            * (TURN_DEGREES / 360.0)
-        )
 
     def distance_target_counts(self, distance_m: float) -> float:
         return self.encoder_counts_per_meter * distance_m
 
-    def turn_target_counts_for_degrees(self, turn_degrees: float) -> float:
+    def turn_target_counts(self, turn_degrees: float) -> float:
         return (
             self.encoder_counts_per_meter
             * (3.141592653589793 * self.effective_track_width_m)
@@ -207,21 +198,38 @@ class MotionCalibration:
 
 
 DEFAULT_MOTION_CALIBRATION = MotionCalibration(
-    encoder_counts_per_meter=UGV01_FIRMWARE_COUNTS_PER_METER,
-    effective_track_width_m=0.141,
-    nominal_track_width_m=0.141,
+    encoder_counts_per_meter=ENCODER_COUNTS_PER_METER,
+    effective_track_width_m=EFFECTIVE_TRACK_WIDTH_M,
 )
+
+
+def normalize_angle_deg(angle_deg: float) -> float:
+    while angle_deg <= -180.0:
+        angle_deg += 360.0
+    while angle_deg > 180.0:
+        angle_deg -= 360.0
+    return angle_deg
+
+
+def angular_distance_deg(start_deg: float, current_deg: float) -> float:
+    return abs(normalize_angle_deg(current_deg - start_deg))
 
 
 class MotionSequenceController:
     def __init__(self, calibration: MotionCalibration | None = None) -> None:
         self.calibration = calibration or DEFAULT_MOTION_CALIBRATION
-        turn_counts = self.calibration.turn_target_counts
-        straight_counts = self.calibration.straight_target_counts
+        turn_counts = self.calibration.turn_target_counts(TURN_DEGREES)
+        straight_counts = self.calibration.distance_target_counts(
+            STRAIGHT_DISTANCE_M
+        )
         self.steps: list[MotionStep] = []
         for sequence_idx in range(SEQUENCE_REPEAT_COUNT):
             run_label = f"run {sequence_idx + 1}/{SEQUENCE_REPEAT_COUNT}"
-            initial_hold_label = "initial hold" if sequence_idx == 0 else f"reset hold ({run_label})"
+            initial_hold_label = (
+                "initial hold"
+                if sequence_idx == 0
+                else f"reset hold ({run_label})"
+            )
             self.steps.extend(
                 [
                     MotionStep("hold", 0.0, 0.0, INITIAL_HOLD_SECONDS, initial_hold_label),
@@ -251,11 +259,14 @@ class MotionSequenceController:
                         f"hold after counterclockwise #{repeat_idx + 1} ({run_label})",
                     )
                 )
-        self.steps.append(MotionStep("hold", 0.0, 0.0, FINAL_HOLD_SECONDS, "final hold"))
+        self.steps.append(
+            MotionStep("hold", 0.0, 0.0, FINAL_HOLD_SECONDS, "final hold")
+        )
         self.index = 0
         self.step_started_s: float | None = None
         self.start_left: int | None = None
         self.start_right: int | None = None
+        self.start_yaw_deg: float | None = None
         self.completed = False
 
     @property
@@ -271,19 +282,28 @@ class MotionSequenceController:
 
         left_count = int(float(telemetry.get("enc_left", 0)))
         right_count = int(float(telemetry.get("enc_right", 0)))
+        yaw_deg = float(telemetry.get("y", 0.0))
 
         if self.step_started_s is None:
             self.step_started_s = now_s
             self.start_left = left_count
             self.start_right = right_count
+            self.start_yaw_deg = yaw_deg
 
         assert self.step_started_s is not None
         assert self.start_left is not None
         assert self.start_right is not None
+        assert self.start_yaw_deg is not None
 
         if step.kind == "hold":
             if now_s - self.step_started_s >= step.target:
-                self._advance(now_s, left_count, right_count)
+                self._advance(now_s, left_count, right_count, yaw_deg)
+                return self.update(telemetry, now_s)
+            return step.left_cmd, step.right_cmd, step.label
+
+        if step.kind == "turn_yaw":
+            if angular_distance_deg(self.start_yaw_deg, yaw_deg) >= step.target:
+                self._advance(now_s, left_count, right_count, yaw_deg)
                 return self.update(telemetry, now_s)
             return step.left_cmd, step.right_cmd, step.label
 
@@ -292,22 +312,30 @@ class MotionSequenceController:
         progress_counts = 0.5 * (left_progress + right_progress)
 
         if progress_counts >= step.target:
-            self._advance(now_s, left_count, right_count)
+            self._advance(now_s, left_count, right_count, yaw_deg)
             return self.update(telemetry, now_s)
 
         return step.left_cmd, step.right_cmd, step.label
 
-    def _advance(self, now_s: float, left_count: int, right_count: int) -> None:
+    def _advance(
+        self,
+        now_s: float,
+        left_count: int,
+        right_count: int,
+        yaw_deg: float,
+    ) -> None:
         self.index += 1
         if self.index >= len(self.steps):
             self.completed = True
             self.step_started_s = None
             self.start_left = None
             self.start_right = None
+            self.start_yaw_deg = None
             return
         self.step_started_s = now_s
         self.start_left = left_count
         self.start_right = right_count
+        self.start_yaw_deg = yaw_deg
 
 
 class SquareSequenceController(MotionSequenceController):
@@ -316,13 +344,17 @@ class SquareSequenceController(MotionSequenceController):
         straight_counts = self.calibration.distance_target_counts(
             SQUARE_SIDE_LENGTH_M
         )
-        turn_counts = self.calibration.turn_target_counts_for_degrees(
+        turn_counts = self.calibration.turn_target_counts(
             SQUARE_TURN_DEGREES
         )
         self.steps: list[MotionStep] = []
         for square_idx in range(SQUARE_REPEAT_COUNT):
             run_label = f"square {square_idx + 1}/{SQUARE_REPEAT_COUNT}"
-            initial_hold_label = "initial hold" if square_idx == 0 else f"reset hold ({run_label})"
+            initial_hold_label = (
+                "initial hold"
+                if square_idx == 0
+                else f"reset hold ({run_label})"
+            )
             self.steps.append(
                 MotionStep("hold", 0.0, 0.0, INITIAL_HOLD_SECONDS, initial_hold_label)
             )
@@ -348,10 +380,10 @@ class SquareSequenceController(MotionSequenceController):
                     self.steps.extend(
                         [
                             MotionStep(
-                                "turn",
+                                "turn_yaw",
                                 *SQUARE_TURN_CW_CMD,
-                                turn_counts,
-                                f"clockwise {int(SQUARE_TURN_DEGREES)} deg corner {edge_idx + 1} ({run_label})",
+                                SQUARE_TURN_DEGREES,
+                                f"clockwise {int(SQUARE_TURN_DEGREES)} deg yaw turn ({run_label}) corner {edge_idx + 1}",
                             ),
                             MotionStep(
                                 "hold",
@@ -362,7 +394,9 @@ class SquareSequenceController(MotionSequenceController):
                             ),
                         ]
                     )
-        self.steps.append(MotionStep("hold", 0.0, 0.0, FINAL_HOLD_SECONDS, "final hold"))
+        self.steps.append(
+            MotionStep("hold", 0.0, 0.0, FINAL_HOLD_SECONDS, "final hold")
+        )
         self.index = 0
         self.step_started_s: float | None = None
         self.start_left: int | None = None
@@ -370,8 +404,107 @@ class SquareSequenceController(MotionSequenceController):
         self.completed = False
 
 
+class TimedSquarePlan:
+    def __init__(self) -> None:
+        self.steps: list[TimedCommandStep] = []
+        for square_idx in range(SQUARE_REPEAT_COUNT):
+            run_label = f"square {square_idx + 1}/{SQUARE_REPEAT_COUNT}"
+            self.steps.append(
+                TimedCommandStep(
+                    INITIAL_HOLD_SECONDS if square_idx == 0 else SQUARE_CORNER_HOLD_SECONDS,
+                    0.0,
+                    0.0,
+                    "initial hold" if square_idx == 0 else f"reset hold ({run_label})",
+                )
+            )
+            for edge_idx in range(4):
+                self.steps.extend(
+                    [
+                        TimedCommandStep(
+                            SQUARE_STRAIGHT_WARMUP_SECONDS,
+                            *SQUARE_STRAIGHT_WARMUP_CMD,
+                            f"side {edge_idx + 1} warmup ({run_label})",
+                        ),
+                        TimedCommandStep(
+                            SQUARE_STRAIGHT_SECONDS,
+                            *SQUARE_STRAIGHT_FORWARD_CMD,
+                            f"side {edge_idx + 1} forward {SQUARE_SIDE_LENGTH_M:.2f} m ({run_label})",
+                        ),
+                        TimedCommandStep(
+                            SQUARE_SIDE_HOLD_SECONDS,
+                            0.0,
+                            0.0,
+                            f"hold after side {edge_idx + 1} ({run_label})",
+                        ),
+                    ]
+                )
+                if edge_idx < 3:
+                    self.steps.extend(
+                        [
+                            TimedCommandStep(
+                                SQUARE_TURN_SECONDS,
+                                *SQUARE_TURN_CW_CMD,
+                                f"clockwise timed {int(SQUARE_TURN_DEGREES)} deg corner {edge_idx + 1} ({run_label})",
+                            ),
+                            TimedCommandStep(
+                                SQUARE_CORNER_HOLD_SECONDS,
+                                0.0,
+                                0.0,
+                                f"hold after corner {edge_idx + 1} ({run_label})",
+                            ),
+                        ]
+                    )
+        self.steps.append(
+            TimedCommandStep(FINAL_HOLD_SECONDS, 0.0, 0.0, "final hold")
+        )
+
+    def command_at(self, elapsed_s: float) -> tuple[float, float, str, bool]:
+        cursor = 0.0
+        for step in self.steps:
+            cursor += step.duration_s
+            if elapsed_s < cursor:
+                return step.left_cmd, step.right_cmd, step.label, False
+        return 0.0, 0.0, "done", True
+
+
+class MotionCommandStreamer:
+    def __init__(self, plan: TimedSquarePlan) -> None:
+        self.plan = plan
+        self.start_time_s: float | None = None
+        self.current_label = "not started"
+        self.completed = False
+        self._stop_event = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    def start(self) -> None:
+        self.start_time_s = time.monotonic()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def _run(self) -> None:
+        assert self.start_time_s is not None
+        while not self._stop_event.is_set():
+            elapsed_s = time.monotonic() - self.start_time_s
+            left_cmd, right_cmd, label, completed = self.plan.command_at(elapsed_s)
+            self.current_label = label
+            self.completed = completed
+            try:
+                send_command({"T": 1, "L": left_cmd, "R": right_cmd})
+            except Exception:
+                self.current_label = f"{label} (command retry pending)"
+            if completed:
+                break
+            time.sleep(COMMAND_REFRESH_SECONDS)
+
+    def stop(self) -> None:
+        self._stop_event.set()
+        if self._thread is not None:
+            self._thread.join(timeout=1.0)
+        send_stop()
+
+
 def build_motion_controller() -> MotionSequenceController:
-    if MOTION_PLAN == "square_025m":
+    if MOTION_PLAN == "square_1m":
         return SquareSequenceController()
     return MotionSequenceController()
 
@@ -494,26 +627,15 @@ def main() -> None:
     if MOTION_SCRIPT_ENABLED:
         print()
         print("Motion script is ENABLED.")
-        if MOTION_PLAN == "square_025m":
+        if MOTION_PLAN == "square_1m":
             print(
-                "Plan: 0.25 m square with 4 short sides and 90 deg clockwise "
-                f"corners, repeated {SQUARE_REPEAT_COUNT} time(s)"
+                f"Sequence: 1.0 m square with timed clockwise corners, repeated {SQUARE_REPEAT_COUNT} times"
             )
         else:
             print(
                 "Sequence: hold -> forward 1 m -> backward 1 m -> clockwise 360 "
-                f"-> counterclockwise 360 x{TURN_REPEAT_COUNT}, repeated "
-                f"{SEQUENCE_REPEAT_COUNT} times"
+                f"-> counterclockwise 360 x{TURN_REPEAT_COUNT}, repeated {SEQUENCE_REPEAT_COUNT} times"
             )
-        print(
-            "Official UGV01 physical rail-center width from Waveshare docs: "
-            f"{OFFICIAL_RAIL_CENTER_DISTANCE_M:.3f} m"
-        )
-        print(
-            "Stock UGV01 firmware motion model: "
-            f"{DEFAULT_MOTION_CALIBRATION.encoder_counts_per_meter:.1f} counts/m, "
-            f"effective track width {DEFAULT_MOTION_CALIBRATION.effective_track_width_m:.4f} m"
-        )
         print("Lift the tracks or clear the test area before starting.")
     print()
 
@@ -545,6 +667,10 @@ def main() -> None:
     previous_rover_millis: int | None = None
     previous_sequence: int | None = None
     motion = build_motion_controller() if MOTION_SCRIPT_ENABLED else None
+    motion_streamer: MotionCommandStreamer | None = None
+    if MOTION_SCRIPT_ENABLED and MOTION_PLAN == "square_1m":
+        motion_streamer = MotionCommandStreamer(TimedSquarePlan())
+        motion_streamer.start()
 
     try:
         with OUTPUT_CSV.open(
@@ -664,7 +790,9 @@ def main() -> None:
                     successful_cycles += 1
 
                     motion_label = ""
-                    if motion is not None:
+                    if motion_streamer is not None:
+                        motion_label = motion_streamer.current_label
+                    elif motion is not None:
                         left_cmd, right_cmd, motion_label = motion.update(
                             telemetry,
                             time.monotonic(),
@@ -731,7 +859,10 @@ def main() -> None:
     finally:
         if MOTION_SCRIPT_ENABLED:
             try:
-                send_stop()
+                if motion_streamer is not None:
+                    motion_streamer.stop()
+                else:
+                    send_stop()
                 print("Sent final stop command.")
             except Exception as exc:
                 print(f"Warning: could not send final stop command: {exc}")
