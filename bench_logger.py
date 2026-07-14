@@ -57,7 +57,9 @@ STRAIGHT_BACKWARD_CMD = (0.20, 0.20)
 TURN_CCW_CMD = (-0.32, 0.32)
 TURN_CW_CMD = (0.32, -0.32)
 SQUARE_STRAIGHT_FORWARD_CMD = (-0.14, -0.14)
-SQUARE_TURN_CW_CMD = (0.08, -0.08)
+# With the same timed turn, 0.072 produced 80 degrees and 0.080 produced
+# 100 degrees. Linear interpolation gives 0.076 for a 90-degree corner.
+SQUARE_TURN_CW_CMD = (0.076, -0.076)
 
 STRAIGHT_DISTANCE_M = 1.0
 TURN_DEGREES = 360.0
@@ -73,6 +75,12 @@ SQUARE_STRAIGHT_WARMUP_SECONDS = 0.35
 SQUARE_STRAIGHT_SECONDS = 4.2
 SQUARE_TURN_SECONDS = 1.65
 COMMAND_REFRESH_SECONDS = 0.10
+HEADING_HOLD_GAIN = 0.012
+HEADING_HOLD_MAX_CORRECTION = 0.05
+HEADING_HOLD_DEADBAND_DEG = 3.0
+HEADING_HOLD_STARTUP_SECONDS = 1.0
+STRAIGHT_RAMP_SECONDS = 0.45
+STRAIGHT_RAMP_MIN_SCALE = 0.45
 HOLD_SECONDS = 2.0
 INITIAL_HOLD_SECONDS = 5.0
 FINAL_HOLD_SECONDS = 3.0
@@ -179,6 +187,9 @@ class TimedCommandStep:
     left_cmd: float
     right_cmd: float
     label: str
+    kind: str = "timed"
+    target: float = 0.0
+    direction: str = ""
 
 
 @dataclass(frozen=True)
@@ -202,6 +213,9 @@ DEFAULT_MOTION_CALIBRATION = MotionCalibration(
     effective_track_width_m=EFFECTIVE_TRACK_WIDTH_M,
 )
 
+_telemetry_state_lock = threading.Lock()
+_latest_yaw_deg: float | None = None
+
 
 def normalize_angle_deg(angle_deg: float) -> float:
     while angle_deg <= -180.0:
@@ -213,6 +227,51 @@ def normalize_angle_deg(angle_deg: float) -> float:
 
 def angular_distance_deg(start_deg: float, current_deg: float) -> float:
     return abs(normalize_angle_deg(current_deg - start_deg))
+
+
+def signed_yaw_delta_deg(start_deg: float, current_deg: float) -> float:
+    return normalize_angle_deg(current_deg - start_deg)
+
+
+def set_latest_yaw_deg(yaw_deg: float) -> None:
+    global _latest_yaw_deg
+    with _telemetry_state_lock:
+        _latest_yaw_deg = yaw_deg
+
+
+def get_latest_yaw_deg() -> float | None:
+    with _telemetry_state_lock:
+        return _latest_yaw_deg
+
+
+def apply_heading_hold(
+    left_cmd: float,
+    right_cmd: float,
+    target_yaw_deg: float,
+    current_yaw_deg: float,
+) -> tuple[float, float]:
+    yaw_error_deg = normalize_angle_deg(current_yaw_deg - target_yaw_deg)
+    if abs(yaw_error_deg) <= HEADING_HOLD_DEADBAND_DEG:
+        return left_cmd, right_cmd
+    correction = max(
+        -HEADING_HOLD_MAX_CORRECTION,
+        min(HEADING_HOLD_MAX_CORRECTION, HEADING_HOLD_GAIN * yaw_error_deg),
+    )
+    corrected_left = left_cmd + correction
+    corrected_right = right_cmd - correction
+    return corrected_left, corrected_right
+
+
+def apply_startup_ramp(
+    left_cmd: float,
+    right_cmd: float,
+    elapsed_s: float,
+) -> tuple[float, float]:
+    if elapsed_s >= STRAIGHT_RAMP_SECONDS:
+        return left_cmd, right_cmd
+    ramp_fraction = elapsed_s / STRAIGHT_RAMP_SECONDS if STRAIGHT_RAMP_SECONDS > 0 else 1.0
+    scale = STRAIGHT_RAMP_MIN_SCALE + (1.0 - STRAIGHT_RAMP_MIN_SCALE) * ramp_fraction
+    return left_cmd * scale, right_cmd * scale
 
 
 class MotionSequenceController:
@@ -301,6 +360,12 @@ class MotionSequenceController:
                 return self.update(telemetry, now_s)
             return step.left_cmd, step.right_cmd, step.label
 
+        if step.kind == "turn_timed":
+            if now_s - self.step_started_s >= step.target:
+                self._advance(now_s, left_count, right_count, yaw_deg)
+                return self.update(telemetry, now_s)
+            return step.left_cmd, step.right_cmd, step.label
+
         if step.kind == "turn_yaw":
             if angular_distance_deg(self.start_yaw_deg, yaw_deg) >= step.target:
                 self._advance(now_s, left_count, right_count, yaw_deg)
@@ -314,6 +379,9 @@ class MotionSequenceController:
         if progress_counts >= step.target:
             self._advance(now_s, left_count, right_count, yaw_deg)
             return self.update(telemetry, now_s)
+
+        if step.kind == "distance":
+            return step.left_cmd, step.right_cmd, step.label
 
         return step.left_cmd, step.right_cmd, step.label
 
@@ -344,9 +412,6 @@ class SquareSequenceController(MotionSequenceController):
         straight_counts = self.calibration.distance_target_counts(
             SQUARE_SIDE_LENGTH_M
         )
-        turn_counts = self.calibration.turn_target_counts(
-            SQUARE_TURN_DEGREES
-        )
         self.steps: list[MotionStep] = []
         for square_idx in range(SQUARE_REPEAT_COUNT):
             run_label = f"square {square_idx + 1}/{SQUARE_REPEAT_COUNT}"
@@ -363,7 +428,7 @@ class SquareSequenceController(MotionSequenceController):
                     [
                         MotionStep(
                             "distance",
-                            *STRAIGHT_FORWARD_CMD,
+                            *SQUARE_STRAIGHT_FORWARD_CMD,
                             straight_counts,
                             f"side {edge_idx + 1} forward {SQUARE_SIDE_LENGTH_M:.2f} m ({run_label})",
                         ),
@@ -371,7 +436,7 @@ class SquareSequenceController(MotionSequenceController):
                             "hold",
                             0.0,
                             0.0,
-                            HOLD_SECONDS,
+                            SQUARE_SIDE_HOLD_SECONDS,
                             f"hold after side {edge_idx + 1} ({run_label})",
                         ),
                     ]
@@ -380,16 +445,16 @@ class SquareSequenceController(MotionSequenceController):
                     self.steps.extend(
                         [
                             MotionStep(
-                                "turn_yaw",
+                                "turn_timed",
                                 *SQUARE_TURN_CW_CMD,
-                                SQUARE_TURN_DEGREES,
-                                f"clockwise {int(SQUARE_TURN_DEGREES)} deg yaw turn ({run_label}) corner {edge_idx + 1}",
+                                SQUARE_TURN_SECONDS,
+                                f"clockwise timed {int(SQUARE_TURN_DEGREES)} deg turn ({run_label}) corner {edge_idx + 1}",
                             ),
                             MotionStep(
                                 "hold",
                                 0.0,
                                 0.0,
-                                HOLD_SECONDS,
+                                SQUARE_CORNER_HOLD_SECONDS,
                                 f"hold after corner {edge_idx + 1} ({run_label})",
                             ),
                         ]
@@ -415,6 +480,7 @@ class TimedSquarePlan:
                     0.0,
                     0.0,
                     "initial hold" if square_idx == 0 else f"reset hold ({run_label})",
+                    "timed",
                 )
             )
             for edge_idx in range(4):
@@ -424,17 +490,20 @@ class TimedSquarePlan:
                             SQUARE_STRAIGHT_WARMUP_SECONDS,
                             *SQUARE_STRAIGHT_WARMUP_CMD,
                             f"side {edge_idx + 1} warmup ({run_label})",
+                            "timed",
                         ),
                         TimedCommandStep(
                             SQUARE_STRAIGHT_SECONDS,
                             *SQUARE_STRAIGHT_FORWARD_CMD,
                             f"side {edge_idx + 1} forward {SQUARE_SIDE_LENGTH_M:.2f} m ({run_label})",
+                            "timed",
                         ),
                         TimedCommandStep(
                             SQUARE_SIDE_HOLD_SECONDS,
                             0.0,
                             0.0,
                             f"hold after side {edge_idx + 1} ({run_label})",
+                            "timed",
                         ),
                     ]
                 )
@@ -442,58 +511,102 @@ class TimedSquarePlan:
                     self.steps.extend(
                         [
                             TimedCommandStep(
-                                SQUARE_TURN_SECONDS,
+                                0.0,
                                 *SQUARE_TURN_CW_CMD,
-                                f"clockwise timed {int(SQUARE_TURN_DEGREES)} deg corner {edge_idx + 1} ({run_label})",
+                                f"clockwise {int(SQUARE_TURN_DEGREES)} deg yaw corner {edge_idx + 1} ({run_label})",
+                                "turn_yaw",
+                                SQUARE_TURN_DEGREES,
+                                "cw",
                             ),
                             TimedCommandStep(
                                 SQUARE_CORNER_HOLD_SECONDS,
                                 0.0,
                                 0.0,
                                 f"hold after corner {edge_idx + 1} ({run_label})",
+                                "timed",
                             ),
                         ]
                     )
         self.steps.append(
-            TimedCommandStep(FINAL_HOLD_SECONDS, 0.0, 0.0, "final hold")
+            TimedCommandStep(FINAL_HOLD_SECONDS, 0.0, 0.0, "final hold", "timed")
         )
-
-    def command_at(self, elapsed_s: float) -> tuple[float, float, str, bool]:
-        cursor = 0.0
-        for step in self.steps:
-            cursor += step.duration_s
-            if elapsed_s < cursor:
-                return step.left_cmd, step.right_cmd, step.label, False
-        return 0.0, 0.0, "done", True
 
 
 class MotionCommandStreamer:
     def __init__(self, plan: TimedSquarePlan) -> None:
         self.plan = plan
-        self.start_time_s: float | None = None
         self.current_label = "not started"
         self.completed = False
+        self._current_step_index = 0
+        self._current_step_started_s: float | None = None
+        self._straight_target_yaw_deg: float | None = None
+        self._turn_target_yaw_deg: float | None = None
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
 
     def start(self) -> None:
-        self.start_time_s = time.monotonic()
+        self._current_step_started_s = time.monotonic()
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
 
     def _run(self) -> None:
-        assert self.start_time_s is not None
+        assert self._current_step_started_s is not None
         while not self._stop_event.is_set():
-            elapsed_s = time.monotonic() - self.start_time_s
-            left_cmd, right_cmd, label, completed = self.plan.command_at(elapsed_s)
-            self.current_label = label
-            self.completed = completed
+            if self._current_step_index >= len(self.plan.steps):
+                self.current_label = "done"
+                self.completed = True
+                break
+            step = self.plan.steps[self._current_step_index]
+            self.current_label = step.label
+            now_s = time.monotonic()
+            latest_yaw_deg = get_latest_yaw_deg()
+            left_cmd = step.left_cmd
+            right_cmd = step.right_cmd
+            if self._current_step_started_s is None:
+                self._current_step_started_s = now_s
+
+            if self._current_step_started_s == now_s:
+                if "warmup" in step.label or "forward" in step.label:
+                    self._straight_target_yaw_deg = latest_yaw_deg
+                elif step.kind == "turn_yaw":
+                    self._turn_target_yaw_deg = latest_yaw_deg
+
+            if (
+                latest_yaw_deg is not None
+                and self._straight_target_yaw_deg is not None
+                and ("warmup" in step.label or "forward" in step.label)
+                and now_s - self._current_step_started_s <= HEADING_HOLD_STARTUP_SECONDS
+            ):
+                left_cmd, right_cmd = apply_heading_hold(
+                    step.left_cmd,
+                    step.right_cmd,
+                    self._straight_target_yaw_deg,
+                    latest_yaw_deg,
+                )
+
+            advance_step = False
+            if step.kind == "timed":
+                advance_step = now_s - self._current_step_started_s >= step.duration_s
+            elif (
+                step.kind == "turn_yaw"
+                and latest_yaw_deg is not None
+                and self._turn_target_yaw_deg is not None
+            ):
+                signed_delta = normalize_angle_deg(latest_yaw_deg - self._turn_target_yaw_deg)
+                if step.direction == "cw":
+                    advance_step = signed_delta <= -step.target
+                elif step.direction == "ccw":
+                    advance_step = signed_delta >= step.target
+
             try:
                 send_command({"T": 1, "L": left_cmd, "R": right_cmd})
             except Exception:
-                self.current_label = f"{label} (command retry pending)"
-            if completed:
-                break
+                self.current_label = f"{step.label} (command retry pending)"
+            if advance_step:
+                self._current_step_index += 1
+                self._current_step_started_s = time.monotonic()
+                self._straight_target_yaw_deg = None
+                self._turn_target_yaw_deg = None
             time.sleep(COMMAND_REFRESH_SECONDS)
 
     def stop(self) -> None:
@@ -629,7 +742,7 @@ def main() -> None:
         print("Motion script is ENABLED.")
         if MOTION_PLAN == "square_1m":
             print(
-                f"Sequence: 1.0 m square with timed clockwise corners, repeated {SQUARE_REPEAT_COUNT} times"
+                f"Sequence: 1.0 m square with {SQUARE_TURN_SECONDS:g} s clockwise 90 deg corners, repeated {SQUARE_REPEAT_COUNT} times"
             )
         else:
             print(
@@ -667,10 +780,6 @@ def main() -> None:
     previous_rover_millis: int | None = None
     previous_sequence: int | None = None
     motion = build_motion_controller() if MOTION_SCRIPT_ENABLED else None
-    motion_streamer: MotionCommandStreamer | None = None
-    if MOTION_SCRIPT_ENABLED and MOTION_PLAN == "square_1m":
-        motion_streamer = MotionCommandStreamer(TimedSquarePlan())
-        motion_streamer.start()
 
     try:
         with OUTPUT_CSV.open(
@@ -721,6 +830,8 @@ def main() -> None:
                     for key, value in telemetry.items():
                         if key in row:
                             row[key] = value
+                    if "y" in telemetry:
+                        set_latest_yaw_deg(float(telemetry["y"]))
 
                     # -----------------------------------------------------------
                     # Rover clock calibration
@@ -790,9 +901,7 @@ def main() -> None:
                     successful_cycles += 1
 
                     motion_label = ""
-                    if motion_streamer is not None:
-                        motion_label = motion_streamer.current_label
-                    elif motion is not None:
+                    if motion is not None:
                         left_cmd, right_cmd, motion_label = motion.update(
                             telemetry,
                             time.monotonic(),
@@ -859,10 +968,7 @@ def main() -> None:
     finally:
         if MOTION_SCRIPT_ENABLED:
             try:
-                if motion_streamer is not None:
-                    motion_streamer.stop()
-                else:
-                    send_stop()
+                send_stop()
                 print("Sent final stop command.")
             except Exception as exc:
                 print(f"Warning: could not send final stop command: {exc}")
