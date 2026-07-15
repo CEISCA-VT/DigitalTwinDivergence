@@ -16,7 +16,7 @@ from DigitalTwin.timing import SessionClockCalibrator
 # ============================================================================
 
 # Station-mode IP shown next to "ST" on the UGV01 OLED.
-ROVER_IP = "10.0.0.119"
+ROVER_IP = "192.168.68.63"
 BASE_URL = f"http://{ROVER_IP}/js"
 
 
@@ -43,7 +43,7 @@ HTTP_TIMEOUT_SECONDS = 2.0
 
 # Safety default: keep disabled unless you explicitly want the logger to drive
 # the rover while recording.
-MOTION_SCRIPT_ENABLED = True
+MOTION_SCRIPT_ENABLED = False
 MOTION_PLAN = "validation_triplet"
 
 # Derived from your current Week 2 calibration pass.
@@ -742,7 +742,7 @@ def main() -> None:
         print("Motion script is ENABLED.")
         if MOTION_PLAN == "square_1m":
             print(
-                f"Sequence: 1.0 m square with {SQUARE_TURN_SECONDS:g} s clockwise 90 deg corners, repeated {SQUARE_REPEAT_COUNT} times"
+                f"Sequence: {SQUARE_SIDE_LENGTH_M:g} m square with {SQUARE_TURN_SECONDS:g} s clockwise 90 deg corners, repeated {SQUARE_REPEAT_COUNT} times"
             )
         else:
             print(
