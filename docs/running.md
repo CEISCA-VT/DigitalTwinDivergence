@@ -116,6 +116,20 @@ python -m DigitalTwin.analysis.calibration_prep gps raw_logs\telemetry\my_run.cs
 python -m DigitalTwin.analysis.calibration_prep route-template --out-prefix DigitalTwin\datasets\analysis\calibration\route_reference_template
 ```
 
+## Week 3 Square Loops
+
+Run three continuous loops of either calibrated square route:
+
+```powershell
+python bench_logger_square_1m.py --repeats 3
+python bench_logger_square_0_5m.py --repeats 3
+```
+
+The runner performs one initial hold, closes every loop with a fourth corner so
+the rover finishes on its starting heading, and stops logging automatically
+after the final hold. The loop count is part of the output filename. Protocol trial repetitions remain separate runs;
+for example, collect five separate `--repeats 3` files for five benign trials.
+
 ## Hardware Receiver
 
 When the UGV01 is streaming packets over UDP:

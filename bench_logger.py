@@ -41,10 +41,11 @@ HTTP_TIMEOUT_SECONDS = 2.0
 # OPTIONAL MOTION SCRIPT
 # ============================================================================
 
-# Safety default: keep disabled unless you explicitly want the logger to drive
-# the rover while recording.
-MOTION_SCRIPT_ENABLED = False
+# This entrypoint runs the motion-validation cycle while recording telemetry.
+# Set this to False for a stationary telemetry-only session.
+MOTION_SCRIPT_ENABLED = True
 MOTION_PLAN = "validation_triplet"
+STOP_WHEN_MOTION_COMPLETE = True
 
 # Derived from your current Week 2 calibration pass.
 ENCODER_COUNTS_PER_METER = 5632.373
@@ -63,7 +64,7 @@ SQUARE_TURN_CW_CMD = (0.076, -0.076)
 
 STRAIGHT_DISTANCE_M = 1.0
 TURN_DEGREES = 360.0
-TURN_REPEAT_COUNT = 2
+HALF_TURN_DEGREES = 180.0
 SEQUENCE_REPEAT_COUNT = 3
 SQUARE_SIDE_LENGTH_M = 1.0
 SQUARE_TURN_DEGREES = 90.0
@@ -277,7 +278,6 @@ def apply_startup_ramp(
 class MotionSequenceController:
     def __init__(self, calibration: MotionCalibration | None = None) -> None:
         self.calibration = calibration or DEFAULT_MOTION_CALIBRATION
-        turn_counts = self.calibration.turn_target_counts(TURN_DEGREES)
         straight_counts = self.calibration.distance_target_counts(
             STRAIGHT_DISTANCE_M
         )
@@ -296,28 +296,23 @@ class MotionSequenceController:
                     MotionStep("hold", 0.0, 0.0, HOLD_SECONDS, f"hold after forward ({run_label})"),
                     MotionStep("distance", *STRAIGHT_BACKWARD_CMD, straight_counts, f"backward 1 m ({run_label})"),
                     MotionStep("hold", 0.0, 0.0, HOLD_SECONDS, f"hold after backward ({run_label})"),
-                    MotionStep("turn", *TURN_CW_CMD, turn_counts, f"clockwise 360 ({run_label})"),
-                    MotionStep("hold", 0.0, 0.0, HOLD_SECONDS, f"hold after clockwise turn ({run_label})"),
                 ]
             )
-            for repeat_idx in range(TURN_REPEAT_COUNT):
-                self.steps.append(
-                    MotionStep(
-                        "turn",
-                        *TURN_CCW_CMD,
-                        turn_counts,
-                        f"counterclockwise 360 #{repeat_idx + 1} ({run_label})",
-                    )
-                )
-                self.steps.append(
-                    MotionStep(
-                        "hold",
-                        0.0,
-                        0.0,
-                        HOLD_SECONDS,
-                        f"hold after counterclockwise #{repeat_idx + 1} ({run_label})",
-                    )
-                )
+            self._append_quarter_turns(4, f"clockwise 360 ({run_label})")
+            self.steps.extend(
+                [
+                    MotionStep("distance", *STRAIGHT_FORWARD_CMD, straight_counts, f"forward 1 m after 360 ({run_label})"),
+                    MotionStep("hold", 0.0, 0.0, HOLD_SECONDS, f"hold before first 180 ({run_label})"),
+                ]
+            )
+            self._append_quarter_turns(2, f"clockwise 180 turnaround ({run_label})")
+            self.steps.extend(
+                [
+                    MotionStep("distance", *STRAIGHT_FORWARD_CMD, straight_counts, f"forward 1 m back to start ({run_label})"),
+                    MotionStep("hold", 0.0, 0.0, HOLD_SECONDS, f"hold before final 180 ({run_label})"),
+                ]
+            )
+            self._append_quarter_turns(2, f"clockwise 180 restore heading ({run_label})")
         self.steps.append(
             MotionStep("hold", 0.0, 0.0, FINAL_HOLD_SECONDS, "final hold")
         )
@@ -327,6 +322,26 @@ class MotionSequenceController:
         self.start_right: int | None = None
         self.start_yaw_deg: float | None = None
         self.completed = False
+
+    def _append_quarter_turns(self, count: int, label: str) -> None:
+        for quarter_idx in range(count):
+            self.steps.extend(
+                [
+                    MotionStep(
+                        "turn_timed",
+                        *SQUARE_TURN_CW_CMD,
+                        SQUARE_TURN_SECONDS,
+                        f"{label} quarter {quarter_idx + 1}/{count}",
+                    ),
+                    MotionStep(
+                        "hold",
+                        0.0,
+                        0.0,
+                        HOLD_SECONDS,
+                        f"hold after {label} quarter {quarter_idx + 1}/{count}",
+                    ),
+                ]
+            )
 
     @property
     def active_step(self) -> MotionStep | None:
@@ -412,17 +427,11 @@ class SquareSequenceController(MotionSequenceController):
         straight_counts = self.calibration.distance_target_counts(
             SQUARE_SIDE_LENGTH_M
         )
-        self.steps: list[MotionStep] = []
+        self.steps: list[MotionStep] = [
+            MotionStep("hold", 0.0, 0.0, INITIAL_HOLD_SECONDS, "initial hold")
+        ]
         for square_idx in range(SQUARE_REPEAT_COUNT):
             run_label = f"square {square_idx + 1}/{SQUARE_REPEAT_COUNT}"
-            initial_hold_label = (
-                "initial hold"
-                if square_idx == 0
-                else f"reset hold ({run_label})"
-            )
-            self.steps.append(
-                MotionStep("hold", 0.0, 0.0, INITIAL_HOLD_SECONDS, initial_hold_label)
-            )
             for edge_idx in range(4):
                 self.steps.extend(
                     [
@@ -441,24 +450,23 @@ class SquareSequenceController(MotionSequenceController):
                         ),
                     ]
                 )
-                if edge_idx < 3:
-                    self.steps.extend(
-                        [
-                            MotionStep(
-                                "turn_timed",
-                                *SQUARE_TURN_CW_CMD,
-                                SQUARE_TURN_SECONDS,
-                                f"clockwise timed {int(SQUARE_TURN_DEGREES)} deg turn ({run_label}) corner {edge_idx + 1}",
-                            ),
-                            MotionStep(
-                                "hold",
-                                0.0,
-                                0.0,
-                                SQUARE_CORNER_HOLD_SECONDS,
-                                f"hold after corner {edge_idx + 1} ({run_label})",
-                            ),
-                        ]
-                    )
+                self.steps.extend(
+                    [
+                        MotionStep(
+                            "turn_timed",
+                            *SQUARE_TURN_CW_CMD,
+                            SQUARE_TURN_SECONDS,
+                            f"clockwise timed {int(SQUARE_TURN_DEGREES)} deg turn ({run_label}) corner {edge_idx + 1}",
+                        ),
+                        MotionStep(
+                            "hold",
+                            0.0,
+                            0.0,
+                            SQUARE_CORNER_HOLD_SECONDS,
+                            f"hold after corner {edge_idx + 1} ({run_label})",
+                        ),
+                    ]
+                )
         self.steps.append(
             MotionStep("hold", 0.0, 0.0, FINAL_HOLD_SECONDS, "final hold")
         )
@@ -746,8 +754,10 @@ def main() -> None:
             )
         else:
             print(
-                "Sequence: hold -> forward 1 m -> backward 1 m -> clockwise 360 "
-                f"-> counterclockwise 360 x{TURN_REPEAT_COUNT}, repeated {SEQUENCE_REPEAT_COUNT} times"
+                "Sequence: forward 1 m -> backward 1 m -> clockwise 360 -> "
+                "forward 1 m -> clockwise 180 -> forward 1 m back to start -> "
+                "clockwise 180 restore heading; rotations use settled 90 deg segments, "
+                f"repeated {SEQUENCE_REPEAT_COUNT} times"
             )
         print("Lift the tracks or clear the test area before starting.")
     print()
@@ -799,6 +809,7 @@ def main() -> None:
 
             while time.monotonic() < end_time:
                 cycle_start_ns = time.monotonic_ns()
+                motion_completed = False
 
                 row: dict[str, Any] = {
                     key: None for key in FIELDNAMES
@@ -906,6 +917,7 @@ def main() -> None:
                             telemetry,
                             time.monotonic(),
                         )
+                        motion_completed = motion.completed
                         send_command(
                             {
                                 "T": 1,
@@ -953,6 +965,10 @@ def main() -> None:
                 file.flush()
 
                 sample_idx += 1
+
+                if STOP_WHEN_MOTION_COMPLETE and motion_completed:
+                    print("Motion sequence complete; stopping logger.")
+                    break
 
                 # Maintain a fixed polling schedule. The logger does not add
                 # another full delay after the HTTP request finishes.

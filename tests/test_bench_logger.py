@@ -1,5 +1,8 @@
+import bench_logger
+
 from bench_logger import (
     DEFAULT_MOTION_CALIBRATION,
+    HALF_TURN_DEGREES,
     HOLD_SECONDS,
     INITIAL_HOLD_SECONDS,
     MotionCalibration,
@@ -10,7 +13,6 @@ from bench_logger import (
     SquareSequenceController,
     STRAIGHT_DISTANCE_M,
     TURN_DEGREES,
-    TURN_REPEAT_COUNT,
 )
 
 
@@ -57,18 +59,27 @@ def test_motion_sequence_advances_after_hold_and_distance():
 def test_motion_sequence_contains_expected_turn_steps():
     motion = MotionSequenceController()
     labels = [step.label for step in motion.steps]
-    assert f"counterclockwise 360 #{TURN_REPEAT_COUNT} (run {SEQUENCE_REPEAT_COUNT}/{SEQUENCE_REPEAT_COUNT})" in labels
-    assert "clockwise 360 (run 1/3)" in labels
+    assert "clockwise 360 (run 1/3) quarter 4/4" in labels
     assert "backward 1 m (run 1/3)" in labels
+    assert "forward 1 m after 360 (run 1/3)" in labels
+    assert "clockwise 180 turnaround (run 1/3) quarter 2/2" in labels
+    assert "forward 1 m back to start (run 1/3)" in labels
+    assert "clockwise 180 restore heading (run 1/3) quarter 2/2" in labels
+    assert not any("counterclockwise" in label for label in labels)
     assert "final hold" in labels
 
+    bench_turns = [step for step in motion.steps if step.kind == "turn_timed"]
+    assert len(bench_turns) == 8 * SEQUENCE_REPEAT_COUNT
+    assert all(step.target == SQUARE_TURN_SECONDS for step in bench_turns)
 
-def test_square_sequence_contains_four_sides_and_three_corners():
+
+def test_square_sequence_contains_four_sides_and_four_corners():
     motion = SquareSequenceController()
     labels = [step.label for step in motion.steps]
     assert "side 1 forward 1.00 m (square 1/1)" in labels
     assert "side 4 forward 1.00 m (square 1/1)" in labels
     assert "clockwise timed 90 deg turn (square 1/1) corner 3" in labels
+    assert "clockwise timed 90 deg turn (square 1/1) corner 4" in labels
     assert "final hold" in labels
 
 
@@ -93,3 +104,19 @@ def test_square_turn_uses_original_timed_corner_duration():
     assert (left_cmd, right_cmd) == (0.0, 0.0)
     assert label.startswith("hold after corner")
     assert SQUARE_TURN_SECONDS == 1.65
+
+
+def test_repeated_squares_are_continuous_and_turn_between_loops():
+    original_repeats = bench_logger.SQUARE_REPEAT_COUNT
+    try:
+        bench_logger.SQUARE_REPEAT_COUNT = 3
+        motion = SquareSequenceController()
+    finally:
+        bench_logger.SQUARE_REPEAT_COUNT = original_repeats
+
+    assert sum(step.kind == "distance" for step in motion.steps) == 12
+    assert sum(step.kind == "turn_timed" for step in motion.steps) == 12
+    assert sum(step.label == "initial hold" for step in motion.steps) == 1
+    labels = [step.label for step in motion.steps]
+    assert "clockwise timed 90 deg turn (square 1/3) corner 4" in labels
+    assert "side 1 forward 1.00 m (square 2/3)" in labels
