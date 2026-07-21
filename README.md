@@ -65,7 +65,7 @@ UGV01 Wi-Fi notes:
 - to connect the rover to another Wi-Fi network, use `T:404`:
 
 ```json
-{"T":404,"ap_ssid":"Shreyas_UGV","ap_password":"DigitalTwin","sta_ssid":"your_ssid","sta_password":"your_password"}
+{"T":404,"ap_ssid":"UGV","ap_password":"12345678","sta_ssid":"Shrayus","sta_password":"Giraffe007"}
 ```
 
 After sending `T:404`, the OLED `ST` line should show the router-assigned IP.

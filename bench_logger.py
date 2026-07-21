@@ -16,7 +16,7 @@ from DigitalTwin.timing import SessionClockCalibrator
 # ============================================================================
 
 # Station-mode IP shown next to "ST" on the UGV01 OLED.
-ROVER_IP = "192.168.68.63"
+ROVER_IP = "192.168.68.62"
 BASE_URL = f"http://{ROVER_IP}/js"
 
 
@@ -31,6 +31,8 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_CSV = OUT_DIR / (
     f"ugv_t147_bench_{time.strftime('%Y%m%d_%H%M%S')}.csv"
 )
+
+RUN_METADATA: dict[str, Any] = {}
 
 DURATION_SECONDS = 900        # 15 minutes
 POLL_INTERVAL_SECONDS = 0.25
@@ -74,7 +76,7 @@ SQUARE_CORNER_HOLD_SECONDS = 3.0
 SQUARE_STRAIGHT_WARMUP_CMD = (-0.08, -0.08)
 SQUARE_STRAIGHT_WARMUP_SECONDS = 0.35
 SQUARE_STRAIGHT_SECONDS = 4.2
-SQUARE_TURN_SECONDS = 1.65
+SQUARE_TURN_SECONDS = 1.59
 COMMAND_REFRESH_SECONDS = 0.10
 HEADING_HOLD_GAIN = 0.012
 HEADING_HOLD_MAX_CORRECTION = 0.05
@@ -87,11 +89,161 @@ INITIAL_HOLD_SECONDS = 5.0
 FINAL_HOLD_SECONDS = 3.0
 
 
+@dataclass(frozen=True)
+class SquareTerrainProfile:
+    name: str
+    surface_label: str
+    turn_seconds: float
+    turn_left_cmd: float
+    turn_right_cmd: float
+    note: str
+    corner_turn_seconds: tuple[float, float, float, float] | None = None
+
+
+@dataclass(frozen=True)
+class SquareSpeedProfile:
+    name: str
+    straight_left_cmd: float
+    straight_right_cmd: float
+    note: str
+
+
+SQUARE_TERRAIN_PROFILES = {
+    "smooth": SquareTerrainProfile(
+        name="smooth",
+        surface_label="smooth_kitchen_floor",
+        turn_seconds=1.59,
+        turn_left_cmd=0.076,
+        turn_right_cmd=-0.076,
+        note="Smooth-floor 90 degree corner calibration from July 21 kitchen-floor tests.",
+        corner_turn_seconds=None,
+    ),
+    "rough": SquareTerrainProfile(
+        name="rough",
+        surface_label="rough_permeable_concrete",
+        turn_seconds=1.65,
+        turn_left_cmd=0.076,
+        turn_right_cmd=-0.076,
+        note=(
+            "Rough permeable-concrete profile tuned from July 20 outdoor "
+            "tests with separate per-corner turn timing."
+        ),
+        corner_turn_seconds=(1.80, 1.90, 1.75, 1.80),
+    ),
+}
+
+SQUARE_SPEED_PROFILES = {
+    "low": SquareSpeedProfile(
+        name="low",
+        straight_left_cmd=-0.14,
+        straight_right_cmd=-0.14,
+        note="Current low-speed square setting.",
+    ),
+    "medium": SquareSpeedProfile(
+        name="medium",
+        straight_left_cmd=-0.20,
+        straight_right_cmd=-0.20,
+        note="Medium-speed dataset setting; safety-check before formal trials.",
+    ),
+}
+
+SQUARE_TERRAIN_PROFILE_NAME = "smooth"
+SQUARE_SPEED_PROFILE_NAME = "low"
+SQUARE_TURN_SECONDS_BY_CORNER: tuple[float, float, float, float] | None = None
+
+
+def apply_square_terrain_profile(
+    profile_name: str,
+    *,
+    turn_seconds: float | None = None,
+    turn_cmd: tuple[float, float] | None = None,
+    turn_schedule: tuple[float, float, float, float] | None = None,
+) -> SquareTerrainProfile:
+    """Apply a named square-route terrain profile to module-level controls."""
+
+    global SQUARE_TERRAIN_PROFILE_NAME
+    global SQUARE_TURN_SECONDS
+    global SQUARE_TURN_CW_CMD
+    global SQUARE_TURN_SECONDS_BY_CORNER
+
+    if profile_name not in SQUARE_TERRAIN_PROFILES:
+        choices = ", ".join(sorted(SQUARE_TERRAIN_PROFILES))
+        raise ValueError(f"unknown terrain profile {profile_name!r}; choices: {choices}")
+
+    profile = SQUARE_TERRAIN_PROFILES[profile_name]
+    SQUARE_TERRAIN_PROFILE_NAME = profile.name
+    SQUARE_TURN_SECONDS = profile.turn_seconds if turn_seconds is None else turn_seconds
+    SQUARE_TURN_SECONDS_BY_CORNER = (
+        turn_schedule
+        if turn_schedule is not None
+        else (
+            None
+            if turn_seconds is not None
+            else profile.corner_turn_seconds
+        )
+    )
+    SQUARE_TURN_CW_CMD = (
+        (profile.turn_left_cmd, profile.turn_right_cmd)
+        if turn_cmd is None
+        else turn_cmd
+    )
+    return profile
+
+
+def apply_square_speed_profile(profile_name: str) -> SquareSpeedProfile:
+    """Apply a named square-route speed profile to module-level controls."""
+
+    global SQUARE_SPEED_PROFILE_NAME
+    global SQUARE_STRAIGHT_FORWARD_CMD
+
+    if profile_name not in SQUARE_SPEED_PROFILES:
+        choices = ", ".join(sorted(SQUARE_SPEED_PROFILES))
+        raise ValueError(f"unknown speed profile {profile_name!r}; choices: {choices}")
+
+    profile = SQUARE_SPEED_PROFILES[profile_name]
+    SQUARE_SPEED_PROFILE_NAME = profile.name
+    SQUARE_STRAIGHT_FORWARD_CMD = (
+        profile.straight_left_cmd,
+        profile.straight_right_cmd,
+    )
+    return profile
+
+
+def set_run_metadata(**metadata: Any) -> None:
+    RUN_METADATA.clear()
+    RUN_METADATA.update(
+        {
+            key: value
+            for key, value in metadata.items()
+            if value is not None
+        }
+    )
+
+
 FIELDNAMES = [
     # Logger status
     "sample_idx",
     "cycle_ok",
     "error",
+
+    # Dataset metadata
+    "run_id",
+    "route",
+    "surface",
+    "surface_profile",
+    "speed_label",
+    "network_condition",
+    "trial_id",
+    "attack_type",
+    "square_side_length_m",
+    "square_repeats",
+    "square_turn_profile",
+    "square_turn_left_cmd",
+    "square_turn_right_cmd",
+    "square_turn_seconds",
+    "square_turn_schedule_s",
+    "square_straight_left_cmd",
+    "square_straight_right_cmd",
 
     # Host timing
     "t_wall_unix_s",
@@ -275,6 +427,12 @@ def apply_startup_ramp(
     return left_cmd * scale, right_cmd * scale
 
 
+def square_turn_seconds_for_corner(edge_idx: int) -> float:
+    if SQUARE_TURN_SECONDS_BY_CORNER is None:
+        return SQUARE_TURN_SECONDS
+    return SQUARE_TURN_SECONDS_BY_CORNER[edge_idx % 4]
+
+
 class MotionSequenceController:
     def __init__(self, calibration: MotionCalibration | None = None) -> None:
         self.calibration = calibration or DEFAULT_MOTION_CALIBRATION
@@ -455,7 +613,7 @@ class SquareSequenceController(MotionSequenceController):
                         MotionStep(
                             "turn_timed",
                             *SQUARE_TURN_CW_CMD,
-                            SQUARE_TURN_SECONDS,
+                            square_turn_seconds_for_corner(edge_idx),
                             f"clockwise timed {int(SQUARE_TURN_DEGREES)} deg turn ({run_label}) corner {edge_idx + 1}",
                         ),
                         MotionStep(
@@ -741,6 +899,10 @@ def main() -> None:
     print(f"Polling interval: {POLL_INTERVAL_SECONDS} seconds")
     print(f"HTTP timeout: {HTTP_TIMEOUT_SECONDS} seconds")
     print(f"Output: {OUTPUT_CSV}")
+    if RUN_METADATA:
+        print("Run metadata:")
+        for key in sorted(RUN_METADATA):
+            print(f"  {key}: {RUN_METADATA[key]}")
     print()
     print("The logger uses short-lived HTTP connections to reduce interference")
     print("with simultaneous browser-based rover control.")
@@ -823,6 +985,9 @@ def main() -> None:
                 row["alarm_time_s"] = ""
                 row["stale_packet"] = False
                 row["queue_depth"] = 0
+                for key, value in RUN_METADATA.items():
+                    if key in row:
+                        row[key] = value
 
                 try:
                     telemetry, send_ns, rx_ns, latency_ms = query_telemetry()

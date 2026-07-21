@@ -7,12 +7,18 @@ from bench_logger import (
     INITIAL_HOLD_SECONDS,
     MotionCalibration,
     MotionSequenceController,
+    SQUARE_SPEED_PROFILES,
+    SQUARE_TERRAIN_PROFILES,
     SQUARE_TURN_DEGREES,
     SQUARE_TURN_SECONDS,
+    SQUARE_TURN_SECONDS_BY_CORNER,
     SEQUENCE_REPEAT_COUNT,
     SquareSequenceController,
     STRAIGHT_DISTANCE_M,
     TURN_DEGREES,
+    apply_square_speed_profile,
+    apply_square_terrain_profile,
+    set_run_metadata,
 )
 
 
@@ -120,3 +126,77 @@ def test_repeated_squares_are_continuous_and_turn_between_loops():
     labels = [step.label for step in motion.steps]
     assert "clockwise timed 90 deg turn (square 1/3) corner 4" in labels
     assert "side 1 forward 1.00 m (square 2/3)" in labels
+
+
+def test_square_profiles_have_separate_dataset_labels():
+    assert SQUARE_TERRAIN_PROFILES["smooth"].surface_label == "smooth_kitchen_floor"
+    assert SQUARE_TERRAIN_PROFILES["rough"].surface_label == "rough_permeable_concrete"
+    assert SQUARE_TERRAIN_PROFILES["smooth"].corner_turn_seconds is None
+    assert SQUARE_TERRAIN_PROFILES["rough"].corner_turn_seconds == (1.80, 1.90, 1.75, 1.80)
+    assert SQUARE_SPEED_PROFILES["low"].straight_left_cmd == -0.14
+    assert SQUARE_SPEED_PROFILES["medium"].straight_left_cmd == -0.20
+
+
+def test_square_profile_application_and_metadata():
+    original_turn = bench_logger.SQUARE_TURN_CW_CMD
+    original_turn_seconds = bench_logger.SQUARE_TURN_SECONDS
+    original_turn_schedule = bench_logger.SQUARE_TURN_SECONDS_BY_CORNER
+    original_straight = bench_logger.SQUARE_STRAIGHT_FORWARD_CMD
+    try:
+        apply_square_terrain_profile(
+            "rough",
+            turn_cmd=(0.078, -0.078),
+        )
+        apply_square_speed_profile("medium")
+        set_run_metadata(
+            run_id="demo",
+            surface="rough_permeable_concrete",
+            speed_label="medium",
+        )
+
+        assert bench_logger.SQUARE_TURN_CW_CMD == (0.078, -0.078)
+        assert bench_logger.SQUARE_TURN_SECONDS == 1.65
+        assert bench_logger.SQUARE_TURN_SECONDS_BY_CORNER == (1.80, 1.90, 1.75, 1.80)
+        assert bench_logger.SQUARE_STRAIGHT_FORWARD_CMD == (-0.20, -0.20)
+        assert bench_logger.RUN_METADATA["surface"] == "rough_permeable_concrete"
+    finally:
+        bench_logger.SQUARE_TURN_CW_CMD = original_turn
+        bench_logger.SQUARE_TURN_SECONDS = original_turn_seconds
+        bench_logger.SQUARE_TURN_SECONDS_BY_CORNER = original_turn_schedule
+        bench_logger.SQUARE_STRAIGHT_FORWARD_CMD = original_straight
+        set_run_metadata()
+
+
+def test_rough_square_uses_later_corner_boost_without_changing_smooth():
+    original_turn = bench_logger.SQUARE_TURN_CW_CMD
+    original_turn_seconds = bench_logger.SQUARE_TURN_SECONDS
+    original_turn_schedule = bench_logger.SQUARE_TURN_SECONDS_BY_CORNER
+    try:
+        apply_square_terrain_profile("rough")
+        rough = SquareSequenceController()
+        rough_turns = [step.target for step in rough.steps if step.kind == "turn_timed"][:4]
+        assert rough_turns == [1.80, 1.90, 1.75, 1.80]
+
+        apply_square_terrain_profile("smooth")
+        smooth = SquareSequenceController()
+        smooth_turns = [step.target for step in smooth.steps if step.kind == "turn_timed"][:4]
+        assert smooth_turns == [SQUARE_TURN_SECONDS] * 4
+        assert SQUARE_TURN_SECONDS_BY_CORNER is None
+    finally:
+        bench_logger.SQUARE_TURN_CW_CMD = original_turn
+        bench_logger.SQUARE_TURN_SECONDS = original_turn_seconds
+        bench_logger.SQUARE_TURN_SECONDS_BY_CORNER = original_turn_schedule
+
+
+def test_explicit_turn_schedule_overrides_profile_schedule():
+    original_turn_schedule = bench_logger.SQUARE_TURN_SECONDS_BY_CORNER
+    try:
+        apply_square_terrain_profile(
+            "rough",
+            turn_schedule=(1.81, 1.82, 1.83, 1.84),
+        )
+        motion = SquareSequenceController()
+        turns = [step.target for step in motion.steps if step.kind == "turn_timed"][:4]
+        assert turns == [1.81, 1.82, 1.83, 1.84]
+    finally:
+        bench_logger.SQUARE_TURN_SECONDS_BY_CORNER = original_turn_schedule

@@ -1,0 +1,353 @@
+\section{Research Roadmap and Current Implementation Status}
+\label{sec:roadmap}
+
+This roadmap reflects the current state of the project after UGV01 bench
+instrumentation, powered motion bring-up, and the first rough-surface benign
+baseline collection. The project is no longer blocked on hardware bring-up. The
+core software stack, embedded telemetry path, timestamped logging pipeline, and
+rough-terrain baseline collection are operational. The remaining work is to
+complete the benign matrix, lock thresholds from benign data only, evaluate
+adaptive covariance under semantic GPS manipulation, and generate the final
+attack and capability-map results.
+
+\subsection{Current Completed Foundation}
+
+The following components are already implemented and tested in the current
+codebase:
+
+\begin{itemize}
+    \item A nonlinear mobile digital-twin pipeline with tracked-drive-compatible
+    kinematics, EKF prediction and update, innovation covariance computation,
+    Mahalanobis/NIS detection, detectability-bound calculation, stealth-bound
+    calculation, and confidence/envelope logic.
+
+    \item Synthetic experiment support for step bias, coordinate freeze, value
+    replay, slow drift, strategic scheduling, latency perturbation, CSV
+    logging, plotting, ROC analysis, and empirical probability-of-detection
+    summaries.
+
+    \item UGV01 embedded telemetry through the active firmware path
+    \texttt{ugv01\_gps\_dev}, with BN220 GPS integrated on the verified
+    original RX wiring path.
+
+    \item Combined UGV01 telemetry through \texttt{T:147}, including GPS, IMU,
+    voltage, encoder counts, sequence number, firmware sample time, firmware
+    send time, GPS validity, satellite count, HDOP, and NMEA health counters.
+
+    \item Edge-side logging with source/sample time, send time, edge-arrival
+    time, estimate time, alarm time placeholder, clock-offset calibration,
+    packet-loss count, request-failure count, stale-packet flag, queue depth,
+    and HTTP latency.
+
+    \item Real-log replay utilities that pass hardware telemetry through the
+    digital-twin EKF and detector path.
+
+    \item Pre-battery analysis scripts for stationary GPS summaries, bench
+    telemetry latency and health reports, hardware replay consistency review,
+    and tracked-rover calibration preparation.
+
+    \item Dataset-oriented square-route logging scripts with run metadata for
+    route, surface, speed, network condition, trial number, attack type, square
+    turn settings, and straight-command settings.
+\end{itemize}
+
+\subsection{Current Dataset Status}
+
+The primary moving route for the benign baseline is a repeated
+$0.5\,\mathrm{m}$ square loop executed three times per trial
+(\texttt{square0p5x3}). The current surface definitions are:
+
+\begin{itemize}
+    \item \textbf{Smooth surface:} kitchen floor.
+    \item \textbf{Rough surface:} permeable concrete.
+\end{itemize}
+
+The rough-surface baseline Wi-Fi dataset is complete:
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+\textbf{Condition} & \textbf{Speed} & \textbf{Valid Trials} & \textbf{Status} \\
+\hline
+Permeable concrete, baseline Wi-Fi & Low & 5/5 & Complete \\
+Permeable concrete, baseline Wi-Fi & Medium & 5/5 & Complete \\
+\hline
+\end{tabular}
+\end{center}
+
+Thus, the rough-surface baseline subset is complete with
+\[
+2 \;\text{speeds} \times 1 \;\text{surface} \times 1 \;\text{transport condition}
+\times 5 \;\text{trials} = 10 \;\text{valid runs}.
+\]
+
+The remaining live benign baseline collection is the smooth-surface baseline
+Wi-Fi subset:
+\[
+2 \;\text{speeds} \times 1 \;\text{surface} \times 1 \;\text{transport condition}
+\times 5 \;\text{trials} = 10 \;\text{runs}.
+\]
+
+The buffered-delay condition should be generated as an edge-side transport
+stress condition or replay transformation rather than by changing rover
+firmware behavior. This preserves the primary A1 threat boundary and avoids
+making rover motion less repeatable during live data collection.
+
+\subsection{Phase 1: Complete Benign Baseline Collection}
+
+\textbf{Goal.} Complete the nominal hardware dataset needed for threshold
+locking, detector calibration, and later attack replay.
+
+\textbf{Remaining tasks.}
+
+\begin{itemize}
+    \item Collect five low-speed and five medium-speed smooth kitchen-floor
+    \texttt{square0p5x3} runs under baseline Wi-Fi.
+
+    \item Screen each run for completion, GPS validity, sequence continuity,
+    stale packets, request failures, route plausibility, and whether operator
+    intervention changed the run semantics.
+
+    \item Archive invalid or interrupted runs but exclude them from threshold
+    locking and held-out evaluation.
+
+    \item Generate a benign-run manifest with surface, speed, route, transport
+    condition, trial number, raw filename, validity flag, and exclusion reason
+    if applicable.
+\end{itemize}
+
+\textbf{Exit criteria.}
+
+\[
+2 \;\text{surfaces} \times 2 \;\text{speeds} \times
+1 \;\text{baseline Wi-Fi condition} \times 5 \;\text{trials}
+= 20 \;\text{valid live benign runs}.
+\]
+
+\subsection{Phase 2: Replay, Quality Screening, and Train/Validation/Test Splits}
+
+\textbf{Goal.} Convert the live benign dataset into a reproducible analysis
+artifact.
+
+\textbf{Tasks.}
+
+\begin{itemize}
+    \item Replay each valid benign run through the digital-twin pipeline.
+
+    \item Verify that EKF state, innovation, covariance, NIS/Mahalanobis score,
+    confidence, envelope region, timing fields, packet-loss fields, and queue
+    fields remain populated.
+
+    \item Produce nominal residual and NIS calibration plots separately for
+    smooth and rough surfaces and for low and medium speed.
+
+    \item Freeze development, validation, and held-out evaluation splits by
+    complete run rather than by individual row.
+\end{itemize}
+
+\textbf{Exit criteria.} A versioned benign dataset and split manifest exist,
+and every accepted run can be regenerated from raw logs through replay scripts.
+
+\subsection{Phase 3: Threshold Locking and Baseline Detector Suite}
+
+\textbf{Goal.} Lock detector thresholds using benign data only before any
+attack evaluation.
+
+\textbf{Tasks.}
+
+\begin{itemize}
+    \item Lock the main NIS/Mahalanobis threshold at a matched run-level
+    false-alarm target:
+    \[
+        P_{\mathrm{FA}} \leq 0.05.
+    \]
+
+    \item Report per-update NIS calibration separately from run-level
+    operational false alarms.
+
+    \item Implement or finalize baseline detectors:
+    fixed GPS residual threshold, fixed digital-twin residual threshold,
+    fixed-covariance EKF--NIS, innovation-gated EKF, robust measurement
+    handling, sequential drift detector, naive adaptive EKF,
+    GPS-independent adaptive EKF, and evidence-gated digital twin.
+
+    \item Freeze threshold files, detector configurations, and split metadata
+    before attack replay.
+\end{itemize}
+
+\textbf{Exit criteria.} All detector variants have frozen thresholds at matched
+false-alarm rates, and no attack data have been used to tune those thresholds.
+
+\subsection{Phase 4: Covariance-Poisoning Study}
+
+\textbf{Goal.} Test the central security claim that residual-coupled adaptive
+uncertainty can become an attack surface under slow semantic GPS drift.
+
+\textbf{Core paired replay design.}
+
+Each physical benign log should be replayed under:
+
+\begin{enumerate}
+    \item clean GPS,
+    \item drifted GPS with fixed covariance,
+    \item drifted GPS with naive residual-coupled adaptive covariance,
+    \item drifted GPS with frozen clean covariance,
+    \item drifted GPS with GPS-independent covariance prediction,
+    \item drifted GPS with evidence-gated adaptation.
+\end{enumerate}
+
+\textbf{Primary measurements.}
+
+\begin{itemize}
+    \item Change in $\mathrm{tr}(Q_k)$ and $\mathrm{tr}(S_k)$.
+    \item Change in NIS/Mahalanobis score.
+    \item Detection delay.
+    \item Maximum undetected reported-state cross-track error.
+    \item Time spent above the mission tolerance before alarm.
+    \item Gate-pass rate and covariance-escalation rate.
+\end{itemize}
+
+\textbf{Exit criteria.} The project can show, with paired runs on the same
+physical logs, whether naive adaptation inflates covariance under slow drift
+and whether GPS-independent or evidence-gated adaptation reduces the
+harmful-but-stealthy region.
+
+\subsection{Phase 5: Directional Detectability and Attack Curves}
+
+\textbf{Goal.} Estimate how attack detectability changes with direction,
+surface, speed, and transport stress.
+
+\textbf{Attack profiles.}
+
+\begin{itemize}
+    \item Step bias with magnitudes
+    \[
+        0.5,\;1,\;2,\;3,\;5,\;7.5,\;10 \;\mathrm{m}.
+    \]
+    \item Coordinate freeze.
+    \item Value replay.
+    \item Slow drift.
+    \item Strategic drift under matched amplitude, rate, injection-count, and
+    horizon budgets.
+\end{itemize}
+
+\textbf{Tasks.}
+
+\begin{itemize}
+    \item Estimate $\epsilon_{50}$, $\epsilon_{90}$, and $\epsilon_{95}$ for
+    along-track, cross-track, and least-favorable attack directions.
+
+    \item Compare empirical detection curves against the theoretical
+    direction-dependent target-detection amplitude and worst-case bound:
+    \[
+        \epsilon_{\mathrm{worst}}(k)
+        =
+        \sqrt{\lambda^\star \lambda_{\max}(S_k)}.
+    \]
+
+    \item Report harmful-but-stealthy probability, maximum undetected
+    cross-track error, detection delay, and time above
+    $\epsilon_{\mathrm{req}}$ before alarm.
+
+    \item Compare all detectors at matched run-level false-alarm rate.
+\end{itemize}
+
+\textbf{Exit criteria.} The paper has real-data attack curves showing where
+attacks are trivially detected, harmful-but-stealthy, or ambiguous.
+
+\subsection{Phase 6: Strategic Attacker and Evidence-Gate Evaluation}
+
+\textbf{Goal.} Evaluate whether an informed attacker gains additional stealth by
+injecting drift during naturally high-uncertainty windows, and whether
+evidence-gated adaptation limits that advantage.
+
+\textbf{Tasks.}
+
+\begin{itemize}
+    \item Compare oblivious slow drift against white-box strategic drift under
+    the same amplitude, rate, direction, injection-count, and horizon budgets.
+
+    \item Keep any hindsight-oracle attacker separate as a non-realistic upper
+    bound.
+
+    \item Measure strategic advantage in terms of alarm delay, covariance
+    escalation, gate-pass rate, and maximum undetected deviation.
+\end{itemize}
+
+\textbf{Exit criteria.} The manuscript can state whether evidence gating
+meaningfully reduces strategic uncertainty harvesting.
+
+\subsection{Phase 7: Transfer, Timing Stress, and Capability Maps}
+
+\textbf{Goal.} Show how the locked detector configuration transfers across
+surface, speed, route, and transport stress without retuning.
+
+\textbf{Tasks.}
+
+\begin{itemize}
+    \item Apply the edge-side delay and jitter emulator to generate stressed
+    transport conditions from accepted live logs.
+
+    \item Report p50/p95/p99 and maximum edge-pipeline latency, source-to-alarm
+    latency when clock-offset quality permits, packet loss, stale-packet rate,
+    queue depth, CPU use, and memory footprint.
+
+    \item Evaluate transfer on held-out routes if a reliable figure-eight or
+    additional route-reference setup is available.
+
+    \item Generate capability maps classifying operating conditions as
+    Detectable, Ambiguous, or Low Sensitivity relative to the mission tolerance
+    $\epsilon_{\mathrm{req}}$.
+\end{itemize}
+
+\textbf{Exit criteria.} The project has safety-anchored capability maps rather
+than only detector-score plots.
+
+\subsection{Phase 8: Artifact Freeze and Manuscript Assembly}
+
+\textbf{Goal.} Freeze the complete experimental artifact package and assemble a
+conference-ready manuscript.
+
+\textbf{Tasks.}
+
+\begin{itemize}
+    \item Freeze raw logs, processed logs, attack labels, train/validation/test
+    splits, threshold files, configuration files, scripts, lockfiles, and a
+    checksum manifest.
+
+    \item Regenerate every table and figure from the frozen artifact package.
+
+    \item Assemble the manuscript around the central claim:
+    residual-coupled covariance adaptation can become an attack surface;
+    GPS-independent features block direct covariance poisoning; and
+    evidence-gated adaptation limits strategic uncertainty harvesting.
+
+    \item Include a claims-versus-evidence table that maps each paper claim to
+    the figure, table, dataset, or theorem supporting it.
+
+    \item Clearly separate synthetic validation, stationary hardware logs,
+    moving benign hardware logs, replay-injected attacks, and any live attack
+    demonstrations.
+\end{itemize}
+
+\textbf{Exit criteria.} A complete manuscript draft, frozen artifact package,
+publication-quality figures, and final experimental logbook are available.
+
+\subsection{Immediate Next Actions}
+
+The next concrete steps are:
+
+\begin{enumerate}
+    \item Complete the smooth kitchen-floor baseline Wi-Fi dataset:
+    five low-speed and five medium-speed \texttt{square0p5x3} runs.
+
+    \item Run replay and quality screening on the full 20-run baseline Wi-Fi
+    dataset.
+
+    \item Freeze the train/validation/test split by complete run.
+
+    \item Lock thresholds at matched run-level false-alarm rate.
+
+    \item Implement the field-constrained attack injector for A1 semantic GPS
+    manipulation and begin the paired covariance-poisoning replay study.
+\end{enumerate}
