@@ -1,0 +1,21 @@
+{
+  "schema": "ugv01_alarm_policy_v1",
+  "status": "frozen_offline",
+  "threat_horizon": "after sustained tracked-drive motion begins",
+  "gps_initialization_samples": 5,
+  "motion_speed_threshold_mps": 0.02,
+  "motion_yaw_rate_threshold_radps": 0.1,
+  "motion_consecutive_updates": 2,
+  "alarm_window_size": 5,
+  "required_exceedances": 3,
+  "target_run_false_alarm_rate": 0.05,
+  "threshold_source": "all 20 checksum-identified benign runs",
+  "validation_method": "leave-one-run-out at complete-run level",
+  "thresholds": {
+    "fixed": 16.901478264342042,
+    "naive_adaptive": 28.071603978216903,
+    "frozen_clean": 28.071603978216903,
+    "gps_independent": 29.2839030410462,
+    "evidence_gated": 28.793355644699997
+  }
+}

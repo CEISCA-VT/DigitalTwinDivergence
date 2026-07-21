@@ -88,7 +88,7 @@ def test_analyze_bench_telemetry_uses_estimate_latency_when_available(tmp_path: 
         ],
     )
     summary = analyze_bench_telemetry_log(path)
-    assert summary["pipeline_latency_metric"] == "estimate_time_s - source_sample_time_s"
+    assert summary["pipeline_latency_metric"] == "estimate_time_s - calibrated_source_time_s"
     assert summary["packet_loss_total"] == 1
     assert summary["queue_depth_p95"] == 0.95
     assert summary["enc_left_total_change"] == 10

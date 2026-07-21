@@ -1,0 +1,24 @@
+{
+  "schema": "ugv01_covariance_poisoning_analysis_v1",
+  "status": "frozen_offline",
+  "primary_comparison": "naive_adaptive_vs_frozen_clean",
+  "primary_scope": "standard_drift_pooled",
+  "secondary_comparators": ["fixed", "gps_independent", "evidence_gated"],
+  "attack_types": ["drift", "strategic_drift"],
+  "directions": ["along", "cross"],
+  "standard_drift_rates_mps": [0.01, 0.03, 0.05],
+  "strategic_drift_rate_mps": 0.03,
+  "attack_start_fractions": [0.25, 0.5, 0.7],
+  "physical_run_is_sampling_unit": true,
+  "bootstrap_iterations": 2000,
+  "sign_flip_iterations": 10000,
+  "mechanism_decision_rule": "Q-ratio delta CI lower bound > 0 and NIS-ratio delta CI upper bound < 0",
+  "operational_advantage_decision_rule": "detection-probability delta CI upper bound < 0, harmful-probability delta CI lower bound > 0, or state-error delta CI lower bound > 0.10 m",
+  "minimum_operational_state_error_increase_m": 0.1,
+  "downstream_attacker_advantage_directions": {
+    "nis_ratio_delta": "negative",
+    "max_undetected_state_deviation_delta_m": "positive",
+    "harmful_but_stealthy_probability_delta": "positive",
+    "detection_probability_delta": "negative"
+  }
+}

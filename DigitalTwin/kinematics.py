@@ -14,9 +14,13 @@ def wrap_angle(angle: float) -> float:
 
 @dataclass(frozen=True, slots=True)
 class DifferentialDriveGeometry:
-    wheel_radius_m: float = 0.033
-    wheel_base_m: float = 0.175
-    ticks_per_rev: int = 360
+    """Tracked-drive geometry using the UGV01 vendor motion-model values."""
+
+    wheel_radius_m: float = 0.02615
+    wheel_base_m: float = 0.141
+    ticks_per_rev: int = 1092
+    left_tick_sign: float = -1.0
+    right_tick_sign: float = -1.0
 
     @property
     def meters_per_tick(self) -> float:
@@ -25,8 +29,8 @@ class DifferentialDriveGeometry:
     def ticks_to_control(self, delta_left: int, delta_right: int, dt_s: float) -> tuple[float, float]:
         if dt_s <= 0:
             return 0.0, 0.0
-        dl = delta_left * self.meters_per_tick
-        dr = delta_right * self.meters_per_tick
+        dl = delta_left * self.meters_per_tick * self.left_tick_sign
+        dr = delta_right * self.meters_per_tick * self.right_tick_sign
         v = (dr + dl) / (2.0 * dt_s)
         omega = (dr - dl) / (self.wheel_base_m * dt_s)
         return v, omega
@@ -34,7 +38,10 @@ class DifferentialDriveGeometry:
     def control_to_ticks(self, v_mps: float, omega_radps: float, dt_s: float) -> tuple[int, int]:
         dl = (v_mps - 0.5 * omega_radps * self.wheel_base_m) * dt_s
         dr = (v_mps + 0.5 * omega_radps * self.wheel_base_m) * dt_s
-        return round(dl / self.meters_per_tick), round(dr / self.meters_per_tick)
+        return (
+            round(dl / (self.meters_per_tick * self.left_tick_sign)),
+            round(dr / (self.meters_per_tick * self.right_tick_sign)),
+        )
 
 
 def integrate_unicycle(state: np.ndarray, v_mps: float, omega_radps: float, dt_s: float) -> np.ndarray:

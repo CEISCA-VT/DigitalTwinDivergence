@@ -1,6 +1,7 @@
 # Digital Twin Divergence
 
-Week 0 software-first scaffold for rover/GPS attack-detection experiments.
+Security-aware UGV01 digital-twin implementation, hardware telemetry pipeline,
+and reproducible offline GPS-attack evaluation.
 
 Run a quick synthetic experiment:
 
@@ -27,10 +28,43 @@ Summarize detection probability, lock thresholds, and plot ROC curves:
 python -m DigitalTwin.analysis.summarize_pd "DigitalTwin/datasets/*.csv"
 python -m DigitalTwin.analysis.threshold_lock "DigitalTwin/datasets/*attack-none*.csv"
 python -m DigitalTwin.analysis.plot_detection "DigitalTwin/datasets/*.csv"
-python -m DigitalTwin.analysis.train_uncertainty "DigitalTwin/datasets/*attack-none*.csv"
+python -m DigitalTwin.analysis.train_uncertainty
 ```
 
-Listen for UGV01 bridge packets later:
+Run the accepted-hardware-log study (manifest, run-level split, benign-only
+threshold lock, paired GPS attacks, summaries, and plots):
+
+```powershell
+python -m DigitalTwin.analysis.real_data_study
+```
+
+Regenerate plots and the report from an already completed campaign without
+rerunning all EKF replays:
+
+```powershell
+python -m DigitalTwin.analysis.real_data_study --summarize-existing
+```
+
+See `docs/real_data_study.md` for the threat boundary and interpretation
+limits.
+
+The completed statistical attack matrix is documented in
+`docs/statistical_attack_campaign.md`.
+
+Run or regenerate the paired covariance-poisoning analysis:
+
+```powershell
+python -m DigitalTwin.analysis.covariance_poisoning
+python -m DigitalTwin.analysis.covariance_poisoning --summarize-existing
+```
+
+The causal comparison and current conclusion are documented in
+`docs/covariance_poisoning_analysis.md`.
+
+The frozen uncertainty variants, learned target, and current model decision are
+documented in `docs/uncertainty_policy_freeze.md`.
+
+Listen for UGV01 bridge packets:
 
 ```powershell
 python -m DigitalTwin.telemetry_receiver --port 5005
@@ -40,15 +74,16 @@ Core modules:
 
 - `DigitalTwin/telemetry.py`: packet serializer/deserializer
 - `DigitalTwin/telemetry_receiver.py`: UDP hardware packet listener
-- `DigitalTwin/kinematics.py`: differential-drive model
+- `DigitalTwin/kinematics.py`: tracked-drive-compatible motion model
 - `DigitalTwin/ekf.py`: prediction and GPS update
 - `DigitalTwin/uncertainty.py`: `Q` and `R` estimator
 - `DigitalTwin/detector.py`: Mahalanobis, eigenvalue detectability bounds, confidence envelopes
+- `DigitalTwin/alarm.py`: robust initialization, motion gating, and persistent alarms
 - `DigitalTwin/attack.py`: step, freeze, replay, random drift
 - `DigitalTwin/logger.py`: experiment CSV schema
 - `DigitalTwin/experiments/experiment.py`: batch automation
 - `DigitalTwin/plotting/plot.py`: trajectory/detection plots
-- `DigitalTwin/analysis/`: threshold locking, P_D summaries, ROC plots, uncertainty training
+- `DigitalTwin/analysis/`: replay, attack campaigns, uncertainty training, and statistical analysis
 
 The hardware-facing protocol is documented in `docs/telemetry_protocol.md`.
 Running commands are documented in `docs/running.md`.
@@ -65,7 +100,7 @@ UGV01 Wi-Fi notes:
 - to connect the rover to another Wi-Fi network, use `T:404`:
 
 ```json
-{"T":404,"ap_ssid":"UGV","ap_password":"12345678","sta_ssid":"Shrayus","sta_password":"Giraffe007"}
+{"T":404,"ap_ssid":"UGV","ap_password":"12345678","sta_ssid":"YOUR_WIFI","sta_password":"YOUR_PASSWORD"}
 ```
 
 After sending `T:404`, the OLED `ST` line should show the router-assigned IP.

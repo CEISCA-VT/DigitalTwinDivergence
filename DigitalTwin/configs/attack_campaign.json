@@ -1,0 +1,21 @@
+{
+  "schema": "ugv01_offline_attack_campaign_v1",
+  "status": "frozen_offline",
+  "physical_runs": 20,
+  "attack_start_fractions_of_post_motion_horizon": [0.25, 0.5, 0.7],
+  "directions": ["along", "cross"],
+  "step_magnitudes_m": [0.5, 1.0, 2.0, 3.0, 5.0, 7.5, 10.0],
+  "drift_rates_mps": [0.01, 0.03, 0.05],
+  "freeze": true,
+  "replay_delay_s": 5.0,
+  "strategic_drift_rate_mps": 0.03,
+  "mission_tolerance_m": 5.0,
+  "epsilon_detection_targets": [0.5, 0.9, 0.95],
+  "confidence_interval": "stratified physical-run cluster bootstrap",
+  "bootstrap_iterations": 2000,
+  "bootstrap_seed": 20260721,
+  "threshold_policy": "DigitalTwin/configs/locked_alarm_policy.json",
+  "uncertainty_policy": "DigitalTwin/configs/uncertainty_policies.json",
+  "attack_location": "offline GPS-coordinate replay input only",
+  "raw_logs_modified": false
+}

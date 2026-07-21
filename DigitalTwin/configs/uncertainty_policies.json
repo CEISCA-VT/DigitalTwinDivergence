@@ -1,0 +1,69 @@
+{
+  "schema": "ugv01_uncertainty_policies_v1",
+  "status": "frozen_offline",
+  "units": {
+    "acceleration": "m/s^2",
+    "angular_rate": "rad/s",
+    "distance": "m",
+    "time": "s"
+  },
+  "fixed": {
+    "gps_sigma_m": 1.75,
+    "process_xy_sigma_mps": 0.05,
+    "process_heading_sigma_radps": 0.01
+  },
+  "naive_adaptive": {
+    "base_xy_sigma_mps": 0.01,
+    "residual_gain": 0.035,
+    "vertical_imu_gain": 0.006,
+    "yaw_imu_gain": 0.02,
+    "velocity_variance_gain": 0.03,
+    "timing_mismatch_gain": 0.35,
+    "base_heading_sigma_radps": 0.003,
+    "heading_yaw_gain": 0.04,
+    "heading_velocity_gain": 0.01,
+    "gps_sigma_hdop_gain_m": 0.55,
+    "minimum_hdop": 0.8,
+    "nominal_satellites": 8,
+    "satellite_penalty": 0.18,
+    "nominal_packet_dt_s": 0.1,
+    "gps_coordinate_residual_in_process_features": true
+  },
+  "gps_independent": {
+    "inherits": "naive_adaptive",
+    "gps_coordinate_residual_in_process_features": false
+  },
+  "evidence_gated": {
+    "inherits": "naive_adaptive",
+    "acceleration_deviation_mps2": 0.8,
+    "yaw_rate_radps": 0.35,
+    "timing_mismatch_s": 0.2,
+    "reject_stale_packets": true,
+    "residual_adaptation_rule": "accept only when independent IMU or timing evidence is present and previous NIS is below threshold"
+  },
+  "learned_gps_independent": {
+    "target_status": "frozen",
+    "current_model_status": "candidate_rejected_grouped_cv",
+    "enabled_in_primary_campaign": false,
+    "model": "RandomForestRegressor",
+    "features": [
+      "imu_vertical_std",
+      "imu_yaw_std",
+      "velocity_variance",
+      "packet_dt_s",
+      "gps_hdop",
+      "gps_satellites"
+    ],
+    "target": "future_window_benign_process_error_covariance",
+    "target_horizon_updates": 5,
+    "position_target": "median future per-axis squared error between GPS displacement and encoder/IMU displacement aligned to the GPS local frame, after subtracting stationary GPS step noise",
+    "heading_target": "median future squared wrapped disagreement between IMU yaw increment and encoder-predicted yaw increment",
+    "target_floor": 1e-8,
+    "target_clip_quantiles": [0.01, 0.99],
+    "coordinate_residual_feature_allowed": false,
+    "training_split": "complete-run grouped cross-validation",
+    "attack_rows_allowed": false,
+    "acceptance_rule": "positive complete-run cross-validated MAE improvement over the training-fold median baseline for q_xx, q_yy, and q_tt",
+    "activation_rule": "a learned model is disabled unless the acceptance rule passes before attack evaluation"
+  }
+}

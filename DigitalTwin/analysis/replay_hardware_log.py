@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 from pathlib import Path
 
 import numpy as np
@@ -79,8 +80,9 @@ def replay_hardware_log(input_csv: str | Path, output_csv: str | Path) -> Path:
             gps_xy = np.array(gps_to_local_xy(_float(row, "lat"), _float(row, "lon"), origin_lat, origin_lon))
             stats.observe(
                 dead_reckoning_residual_m=last_dead_reckoning_residual_m,
-                accel_z=_float(row, "az"),
-                gyro_z=_float(row, "gz"),
+                # T:147 reports acceleration in mg and gyro rate in deg/s.
+                accel_z=_float(row, "az") * 9.80665 / 1000.0,
+                gyro_z=math.radians(_float(row, "gz")),
                 velocity_mps=v_est,
                 packet_dt_s=arrival_dt_s,
             )

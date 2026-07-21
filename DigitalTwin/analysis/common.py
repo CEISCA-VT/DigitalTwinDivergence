@@ -15,6 +15,13 @@ RUN_RE = re.compile(
     r"_attack-(?P<attack>[a-z_]+)(?:_eps-(?P<epsilon>[0-9.]+))?_trial-(?P<trial>[0-9]+)"
 )
 
+HARDWARE_RUN_RE = re.compile(
+    r"speed-(?P<speed>low|medium)_surface-(?P<surface>.+?)"
+    r"_latency-(?P<latency>.+?)_route-(?P<route>.+?)"
+    r"_attack-(?P<attack>.+?)_trial-(?P<trial>[0-9]+)"
+    r"(?:_(?P<timestamp>[0-9]{8}_[0-9]{6}))?$"
+)
+
 
 def read_rows(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8") as f:
@@ -32,18 +39,30 @@ def write_rows(path: Path, rows: list[dict[str, object]], fieldnames: Iterable[s
 
 def parse_run_name(path: Path) -> dict[str, str]:
     match = RUN_RE.search(path.stem)
-    if not match:
-        return {
-            "speed": "",
-            "terrain": "",
-            "latency": "",
-            "attack": "",
-            "epsilon": "",
-            "trial": "",
-        }
-    data = match.groupdict()
-    data["epsilon"] = data.get("epsilon") or ""
-    return data
+    if match:
+        data = match.groupdict()
+        data["epsilon"] = data.get("epsilon") or ""
+        data.update({"surface": data.get("terrain", ""), "route": "", "timestamp": ""})
+        return data
+
+    match = HARDWARE_RUN_RE.search(path.stem)
+    if match:
+        data = match.groupdict()
+        data.update({"terrain": data.get("surface", ""), "epsilon": ""})
+        data["timestamp"] = data.get("timestamp") or ""
+        return data
+
+    return {
+        "speed": "",
+        "surface": "",
+        "terrain": "",
+        "latency": "",
+        "route": "",
+        "attack": "",
+        "epsilon": "",
+        "trial": "",
+        "timestamp": "",
+    }
 
 
 def is_attack_row(row: dict[str, str]) -> bool:

@@ -150,16 +150,17 @@ epsilon_stealth_max = sqrt(gamma_star * lambda_max(S_k))
 Attack vectors larger than this bound force the noncentrality parameter beyond
 the surrogate stealth constraint used in the proposal.
 
-## Self-Calibrating Uncertainty Estimator
+## Frozen Uncertainty Variants
 
-The proposal's uncertainty model treats process noise as an unknown nonlinear
-function inferred from rolling telemetry statistics:
+The study compares four preregistered uncertainty definitions. The fixed
+variant uses constant `Q` and `R`. The naive-adaptive variant treats process
+noise as a deterministic function of rolling telemetry statistics:
 
 ```text
 Q_k = g(r_k, sigma_IMU, sigma_v, Delta t_k)
 ```
 
-The implemented Week 0 feature vector is
+The naive-adaptive feature vector is
 
 ```text
 phi_k = [
@@ -180,10 +181,24 @@ sigma_v    = rolling velocity variance
 Delta t_k  = edge-observed timing stress: arrival gap plus packet age
 ```
 
-The current `TelemetryDrivenUncertaintyEstimator` is a deterministic baseline
-with this exact feature contract. Later benign rover data can train a Random
-Forest or tiny MLP to replace the mapping `g(.)` without changing the detector
-or logger interfaces.
+The GPS-independent variant uses the same mapping with `r_k = 0`. The
+evidence-gated variant admits residual feedback only when previous NIS is below
+threshold, the packet is not stale, and independent IMU or timing evidence is
+present. Exact coefficients and gates are frozen in
+`DigitalTwin/configs/uncertainty_policies.json`.
+
+The learned candidate uses no GPS coordinate or innovation residual as an
+input. Its six deployment features are rolling vertical-acceleration standard
+deviation, yaw-rate standard deviation, velocity variance, packet interval,
+HDOP, and satellite count. The frozen offline target is the median
+five-update-ahead process-error covariance surrogate derived from aligned
+GPS-versus-encoder/IMU displacement error and IMU-versus-encoder heading error.
+
+Complete-run grouped validation on 20 benign runs rejected the current Random
+Forest because it was worse than the training-fold median baseline for all
+three covariance targets. It is therefore not active in the primary campaign.
+See `docs/uncertainty_policy_freeze.md` for the target construction, metrics,
+and activation rule.
 
 ## Confidence Envelopes
 

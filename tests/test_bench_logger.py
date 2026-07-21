@@ -89,7 +89,7 @@ def test_square_sequence_contains_four_sides_and_four_corners():
     assert "final hold" in labels
 
 
-def test_square_turn_uses_original_timed_corner_duration():
+def test_square_turn_uses_current_smooth_timed_corner_duration():
     motion = SquareSequenceController()
     motion.index = next(i for i, step in enumerate(motion.steps) if step.kind == "turn_timed")
     motion.step_started_s = 0.0
@@ -109,7 +109,7 @@ def test_square_turn_uses_original_timed_corner_duration():
     )
     assert (left_cmd, right_cmd) == (0.0, 0.0)
     assert label.startswith("hold after corner")
-    assert SQUARE_TURN_SECONDS == 1.65
+    assert SQUARE_TURN_SECONDS == 1.59
 
 
 def test_repeated_squares_are_continuous_and_turn_between_loops():
@@ -190,6 +190,7 @@ def test_rough_square_uses_later_corner_boost_without_changing_smooth():
 
 def test_explicit_turn_schedule_overrides_profile_schedule():
     original_turn_schedule = bench_logger.SQUARE_TURN_SECONDS_BY_CORNER
+    original_turn_seconds = bench_logger.SQUARE_TURN_SECONDS
     try:
         apply_square_terrain_profile(
             "rough",
@@ -200,3 +201,4 @@ def test_explicit_turn_schedule_overrides_profile_schedule():
         assert turns == [1.81, 1.82, 1.83, 1.84]
     finally:
         bench_logger.SQUARE_TURN_SECONDS_BY_CORNER = original_turn_schedule
+        bench_logger.SQUARE_TURN_SECONDS = original_turn_seconds

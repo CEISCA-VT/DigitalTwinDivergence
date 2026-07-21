@@ -11,6 +11,7 @@ when lambda_star is replaced by the detector threshold gamma_star.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 import math
 
 import numpy as np
@@ -45,6 +46,7 @@ def chi_square_threshold(df: int, false_alarm_probability: float) -> float:
     return float(chi2.isf(false_alarm_probability, df))
 
 
+@lru_cache(maxsize=64)
 def noncentrality_for_detection_probability(
     df: int,
     threshold: float,
@@ -75,7 +77,14 @@ def _normal_quantile(probability: float) -> float:
         raise ValueError("probability must be in (0, 1)")
     a = [-39.6968302866538, 220.946098424521, -275.928510446969, 138.357751867269, -30.6647980661472, 2.50662827745924]
     b = [-54.4760987982241, 161.585836858041, -155.698979859887, 66.8013118877197, -13.2806815528857]
-    c = [-0.00778489400243029, -0.322396458041136, -2.40075827716184, -2.54973253934373, 4.37466414146497, 2.93816398269878]
+    c = [
+        -0.00778489400243029,
+        -0.322396458041136,
+        -2.40075827716184,
+        -2.54973253934373,
+        4.37466414146497,
+        2.93816398269878,
+    ]
     d = [0.00778469570904146, 0.32246712907004, 2.445134137143, 3.75440866190742]
     plow = 0.02425
     phigh = 1.0 - plow
@@ -136,12 +145,19 @@ class InnovationDetector:
         false_alarm_probability: float = 0.05,
         target_detection_probability: float = 0.95,
         blind_epsilon_m: float = 5.0,
+        threshold: float | None = None,
     ) -> None:
         self.measurement_dim = measurement_dim
         self.false_alarm_probability = false_alarm_probability
         self.target_detection_probability = target_detection_probability
         self.blind_epsilon_m = blind_epsilon_m
-        self.threshold = chi_square_threshold(measurement_dim, false_alarm_probability)
+        self.threshold = (
+            chi_square_threshold(measurement_dim, false_alarm_probability)
+            if threshold is None
+            else float(threshold)
+        )
+        if self.threshold <= 0.0:
+            raise ValueError("threshold must be positive")
         self.lambda_star = noncentrality_for_detection_probability(
             measurement_dim,
             self.threshold,

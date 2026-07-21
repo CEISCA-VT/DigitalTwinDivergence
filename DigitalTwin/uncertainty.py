@@ -10,6 +10,53 @@ import numpy as np
 
 
 @dataclass(frozen=True, slots=True)
+class AdaptiveUncertaintyPolicy:
+    base_xy_sigma_mps: float = 0.010
+    residual_gain: float = 0.035
+    vertical_imu_gain: float = 0.006
+    yaw_imu_gain: float = 0.020
+    velocity_variance_gain: float = 0.030
+    timing_mismatch_gain: float = 0.350
+    base_heading_sigma_radps: float = 0.003
+    heading_yaw_gain: float = 0.040
+    heading_velocity_gain: float = 0.010
+    gps_sigma_hdop_gain_m: float = 0.55
+    minimum_hdop: float = 0.8
+    nominal_satellites: int = 8
+    satellite_penalty: float = 0.18
+    nominal_packet_dt_s: float = 0.10
+
+
+@dataclass(frozen=True, slots=True)
+class FixedUncertaintyPolicy:
+    gps_sigma_m: float = 1.75
+    process_xy_sigma_mps: float = 0.05
+    process_heading_sigma_radps: float = 0.01
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceGatePolicy:
+    acceleration_deviation_mps2: float = 0.8
+    yaw_rate_radps: float = 0.35
+    timing_mismatch_s: float = 0.20
+    reject_stale_packets: bool = True
+
+
+DEFAULT_ADAPTIVE_POLICY = AdaptiveUncertaintyPolicy()
+DEFAULT_FIXED_POLICY = FixedUncertaintyPolicy()
+DEFAULT_EVIDENCE_GATE_POLICY = EvidenceGatePolicy()
+
+LEARNED_FEATURE_COLUMNS = (
+    "imu_vertical_std",
+    "imu_yaw_std",
+    "velocity_variance",
+    "packet_dt_s",
+    "gps_hdop",
+    "gps_satellites",
+)
+
+
+@dataclass(frozen=True, slots=True)
 class UncertaintyFeatures:
     dead_reckoning_residual_m: float
     imu_vertical_std: float
@@ -27,6 +74,21 @@ class UncertaintyFeatures:
                 self.imu_yaw_std,
                 self.velocity_variance,
                 self.packet_dt_s,
+            ],
+            dtype=float,
+        )
+
+    def gps_independent_model_vector(self) -> np.ndarray:
+        """Causal deployment features that exclude GPS coordinate residuals."""
+
+        return np.array(
+            [
+                self.imu_vertical_std,
+                self.imu_yaw_std,
+                self.velocity_variance,
+                self.packet_dt_s,
+                self.gps_hdop,
+                float(self.gps_satellites),
             ],
             dtype=float,
         )
@@ -82,33 +144,84 @@ def _pvariance(values: deque[float]) -> float:
 
 
 class TelemetryDrivenUncertaintyEstimator:
-    """Deterministic g(phi_k) baseline with the proposal's feature contract.
+    """Frozen naive-adaptive mapping with GPS-residual feedback."""
 
-    The coefficients are deliberately simple for Week 0 synthetic testing.  Real
-    benign rover data can later train a Random Forest/MLP with the same
-    `model_vector()` features and replace only this mapping.
-    """
+    def __init__(self, policy: AdaptiveUncertaintyPolicy = DEFAULT_ADAPTIVE_POLICY) -> None:
+        self.policy = policy
 
     def process_covariance(self, features: UncertaintyFeatures, dt_s: float) -> np.ndarray:
-        residual_term = 0.010 + 0.035 * features.dead_reckoning_residual_m
-        imu_term = 0.006 * features.imu_vertical_std + 0.020 * features.imu_yaw_std
-        velocity_term = 0.030 * features.velocity_variance
-        jitter_term = 0.350 * abs(features.packet_dt_s - dt_s)
+        policy = self.policy
+        residual_term = policy.base_xy_sigma_mps + policy.residual_gain * features.dead_reckoning_residual_m
+        imu_term = policy.vertical_imu_gain * features.imu_vertical_std + policy.yaw_imu_gain * features.imu_yaw_std
+        velocity_term = policy.velocity_variance_gain * features.velocity_variance
+        jitter_term = policy.timing_mismatch_gain * abs(features.packet_dt_s - dt_s)
 
         q_xy_sigma = residual_term + imu_term + velocity_term + jitter_term
-        q_theta_sigma = 0.003 + 0.040 * features.imu_yaw_std + 0.010 * features.velocity_variance
+        q_theta_sigma = (
+            policy.base_heading_sigma_radps
+            + policy.heading_yaw_gain * features.imu_yaw_std
+            + policy.heading_velocity_gain * features.velocity_variance
+        )
         return np.diag([(q_xy_sigma * dt_s) ** 2, (q_xy_sigma * dt_s) ** 2, (q_theta_sigma * dt_s) ** 2])
 
     def measurement_covariance(self, features: UncertaintyFeatures) -> np.ndarray:
-        hdop = max(features.gps_hdop, 0.8)
-        sat_penalty = 1.0 + max(0, 8 - features.gps_satellites) * 0.18
-        timing_penalty = 1.0 + max(0.0, features.packet_dt_s - 0.10)
-        sigma = 0.55 * hdop * sat_penalty * timing_penalty
+        policy = self.policy
+        hdop = max(features.gps_hdop, policy.minimum_hdop)
+        sat_penalty = 1.0 + max(0, policy.nominal_satellites - features.gps_satellites) * policy.satellite_penalty
+        timing_penalty = 1.0 + max(0.0, features.packet_dt_s - policy.nominal_packet_dt_s)
+        sigma = policy.gps_sigma_hdop_gain_m * hdop * sat_penalty * timing_penalty
         return np.diag([sigma * sigma, sigma * sigma])
 
 
+class GPSIndependentUncertaintyEstimator(TelemetryDrivenUncertaintyEstimator):
+    """Adaptive process covariance that excludes GPS residual feedback."""
+
+    def process_covariance(self, features: UncertaintyFeatures, dt_s: float) -> np.ndarray:
+        policy = self.policy
+        imu_term = policy.vertical_imu_gain * features.imu_vertical_std + policy.yaw_imu_gain * features.imu_yaw_std
+        velocity_term = policy.velocity_variance_gain * features.velocity_variance
+        jitter_term = policy.timing_mismatch_gain * abs(features.packet_dt_s - dt_s)
+        q_xy_sigma = policy.base_xy_sigma_mps + imu_term + velocity_term + jitter_term
+        q_theta_sigma = (
+            policy.base_heading_sigma_radps
+            + policy.heading_yaw_gain * features.imu_yaw_std
+            + policy.heading_velocity_gain * features.velocity_variance
+        )
+        return np.diag([(q_xy_sigma * dt_s) ** 2, (q_xy_sigma * dt_s) ** 2, (q_theta_sigma * dt_s) ** 2])
+
+
+# Preserve the original class name for compatibility while exposing the
+# preregistered variant name used in reports and experiment manifests.
+NaiveAdaptiveUncertaintyEstimator = TelemetryDrivenUncertaintyEstimator
+
+
+class FixedUncertaintyEstimator:
+    """Fixed Q/R baseline for matched replay comparisons."""
+
+    def __init__(
+        self,
+        policy: FixedUncertaintyPolicy = DEFAULT_FIXED_POLICY,
+    ) -> None:
+        self.policy = policy
+
+    def process_covariance(self, features: UncertaintyFeatures, dt_s: float) -> np.ndarray:
+        del features
+        return np.diag(
+            [
+                (self.policy.process_xy_sigma_mps * dt_s) ** 2,
+                (self.policy.process_xy_sigma_mps * dt_s) ** 2,
+                (self.policy.process_heading_sigma_radps * dt_s) ** 2,
+            ]
+        )
+
+    def measurement_covariance(self, features: UncertaintyFeatures) -> np.ndarray:
+        del features
+        variance = self.policy.gps_sigma_m**2
+        return np.diag([variance, variance])
+
+
 class LearnedUncertaintyModel:
-    """Random Forest wrapper for the proposal's self-calibrating g(phi_k)."""
+    """GPS-independent candidate model for the frozen offline target."""
 
     def __init__(self) -> None:
         self.model = None
@@ -121,10 +234,18 @@ class LearnedUncertaintyModel:
         self.model = RandomForestRegressor(n_estimators=80, random_state=7, min_samples_leaf=3)
         self.model.fit(X, y)
 
+    @classmethod
+    def from_estimator(cls, estimator: object) -> "LearnedUncertaintyModel":
+        instance = cls()
+        instance.model = estimator
+        return instance
+
     def predict_q_diagonal(self, features: UncertaintyFeatures) -> np.ndarray:
         if self.model is None:
             raise RuntimeError("model is not fitted")
-        prediction = np.asarray(self.model.predict(features.model_vector().reshape(1, -1))[0], dtype=float)
+        prediction = np.asarray(
+            self.model.predict(features.gps_independent_model_vector().reshape(1, -1))[0], dtype=float
+        )
         if prediction.shape[0] != 3:
             raise RuntimeError("learned uncertainty model must predict three Q diagonal values")
         return np.maximum(prediction, 0.0)

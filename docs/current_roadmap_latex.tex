@@ -2,13 +2,20 @@
 \label{sec:roadmap}
 
 This roadmap reflects the current state of the project after UGV01 bench
-instrumentation, powered motion bring-up, and the first rough-surface benign
-baseline collection. The project is no longer blocked on hardware bring-up. The
-core software stack, embedded telemetry path, timestamped logging pipeline, and
-rough-terrain baseline collection are operational. The remaining work is to
-complete the benign matrix, lock thresholds from benign data only, evaluate
-adaptive covariance under semantic GPS manipulation, and generate the final
-attack and capability-map results.
+instrumentation, powered motion bring-up, and the complete smooth/rough benign
+square-route baseline collection. The project is no longer blocked on hardware
+bring-up or nominal data collection. The core software stack, embedded
+telemetry path, timestamped logging pipeline, 20-run benign matrix,
+reproducible run-level split, and real-log attack replay are
+operational. The frozen alarm and uncertainty definitions and the complete
+multi-start offline statistical attack campaign are now also operational. The
+remaining work is to complete the matched strategic-attacker comparison,
+evaluate transport transfer, add independent prospective validation, and
+generate final capability maps and manuscript results.
+
+The project is approximately 90\% complete overall: engineering implementation
+is approximately 95\% complete, experimental analysis approximately 90\%, and
+publication preparation approximately 80--85\%.
 
 \subsection{Current Completed Foundation}
 
@@ -62,7 +69,7 @@ $0.5\,\mathrm{m}$ square loop executed three times per trial
     \item \textbf{Rough surface:} permeable concrete.
 \end{itemize}
 
-The rough-surface baseline Wi-Fi dataset is complete:
+The baseline Wi-Fi dataset is complete:
 
 \begin{center}
 \begin{tabular}{lccc}
@@ -71,22 +78,21 @@ The rough-surface baseline Wi-Fi dataset is complete:
 \hline
 Permeable concrete, baseline Wi-Fi & Low & 5/5 & Complete \\
 Permeable concrete, baseline Wi-Fi & Medium & 5/5 & Complete \\
+Kitchen floor, baseline Wi-Fi & Low & 5/5 & Complete \\
+Kitchen floor, baseline Wi-Fi & Medium & 5/5 & Complete \\
 \hline
 \end{tabular}
 \end{center}
 
-Thus, the rough-surface baseline subset is complete with
+Thus, the full baseline subset is complete with
 \[
-2 \;\text{speeds} \times 1 \;\text{surface} \times 1 \;\text{transport condition}
-\times 5 \;\text{trials} = 10 \;\text{valid runs}.
+2 \;\text{speeds} \times 2 \;\text{surfaces} \times 1 \;\text{transport condition}
+\times 5 \;\text{trials} = 20 \;\text{valid runs}.
 \]
 
-The remaining live benign baseline collection is the smooth-surface baseline
-Wi-Fi subset:
-\[
-2 \;\text{speeds} \times 1 \;\text{surface} \times 1 \;\text{transport condition}
-\times 5 \;\text{trials} = 10 \;\text{runs}.
-\]
+No additional live baseline run is required for the current offline replay
+stage. Additional rover runs should be reserved for a larger held-out set,
+route-transfer evaluation, or final deployment validation.
 
 The buffered-delay condition should be generated as an edge-side transport
 stress condition or replay transformation rather than by changing rover
@@ -98,22 +104,22 @@ making rover motion less repeatable during live data collection.
 \textbf{Goal.} Complete the nominal hardware dataset needed for threshold
 locking, detector calibration, and later attack replay.
 
-\textbf{Remaining tasks.}
+\textbf{Completed tasks.}
 
 \begin{itemize}
-    \item Collect five low-speed and five medium-speed smooth kitchen-floor
-    \texttt{square0p5x3} runs under baseline Wi-Fi.
+    \item Collected five low-speed and five medium-speed runs on both the
+    smooth kitchen floor and rough permeable concrete.
 
-    \item Screen each run for completion, GPS validity, sequence continuity,
+    \item Screened each run for completion, GPS validity, sequence continuity,
     stale packets, request failures, route plausibility, and whether operator
     intervention changed the run semantics.
 
-    \item Archive invalid or interrupted runs but exclude them from threshold
+    \item Archived invalid or interrupted runs and excluded them from threshold
     locking and held-out evaluation.
 
-    \item Generate a benign-run manifest with surface, speed, route, transport
-    condition, trial number, raw filename, validity flag, and exclusion reason
-    if applicable.
+    \item Generated a checksum-backed benign-run manifest and candidate audit
+    with surface, speed, route, transport condition, trial, source filename,
+    validity fields, and exclusion evidence.
 \end{itemize}
 
 \textbf{Exit criteria.}
@@ -148,6 +154,10 @@ artifact.
 \textbf{Exit criteria.} A versioned benign dataset and split manifest exist,
 and every accepted run can be regenerated from raw logs through replay scripts.
 
+\textbf{Current status.} This exit criterion is met. The accepted manifest
+contains 20 checksum-identified runs split by complete trial into 12
+development, four validation, and four held-out test runs.
+
 \subsection{Phase 3: Threshold Locking and Baseline Detector Suite}
 
 \textbf{Goal.} Lock detector thresholds using benign data only before any
@@ -177,6 +187,17 @@ attack evaluation.
 
 \textbf{Exit criteria.} All detector variants have frozen thresholds at matched
 false-alarm rates, and no attack data have been used to tune those thresholds.
+
+\textbf{Current status.} The operational alarm policy is frozen for the current
+offline study. It uses robust five-fix GPS initialization, motion-gated mission
+start, and a three-of-five persistent NIS rule. Because the earlier trial-5
+results were inspected during alarm diagnosis, all 20 benign runs form the
+design corpus and false alarms are estimated with complete-run leave-one-out
+evaluation. The naturally anomalous run remains included and produces the
+single leave-one-out alarm, giving the preregistered point estimate
+$P_{\mathrm{FA}}=1/20=0.05$ for every variant. This meets the empirical target
+but still requires a confidence interval and is not an independent prospective
+validation claim.
 
 \subsection{Phase 4: Covariance-Poisoning Study}
 
@@ -211,6 +232,19 @@ Each physical benign log should be replayed under:
 physical logs, whether naive adaptation inflates covariance under slow drift
 and whether GPS-independent or evidence-gated adaptation reduces the
 harmful-but-stealthy region.
+
+\textbf{Current status.} This analysis is complete for the current design
+corpus. Against the primary frozen-clean control, naive residual-coupled
+adaptation increases the attacked/clean $Q$ ratio by $0.0243$ with a 95\%
+physical-run-clustered interval of $[0.0185, 0.0300]$ and decreases the
+attacked/clean NIS ratio by $0.0135$ with interval
+$[-0.0174, -0.0090]$. The covariance-poisoning mechanism is therefore
+measurable. However, the additional undetected state error is only
+$0.013\,\mathrm{m}$, detection probability is unchanged, and the harmful-run
+probability difference is not statistically established. The correct current
+claim is that the mechanism exists, while operational attacker advantage is
+not yet established. The evidence gate admits residual feedback during about
+36.6\% of updates and is not itself activated more often by the tested drift.
 
 \subsection{Phase 5: Directional Detectability and Attack Curves}
 
@@ -254,6 +288,15 @@ surface, speed, and transport stress.
 
 \textbf{Exit criteria.} The paper has real-data attack curves showing where
 attacks are trivially detected, harmful-but-stealthy, or ambiguous.
+
+\textbf{Current status.} The offline attack campaign on the existing corpus is
+complete. It evaluates 24 attack profiles at three post-motion injection times
+for five detector variants across all 20 accepted physical runs, producing
+7,200 paired attacked scenarios. Directional $\epsilon_{50}$, $\epsilon_{90}$,
+and $\epsilon_{95}$ estimates, physical-run-clustered confidence intervals,
+detection delays, and harmful-but-stealthy probabilities are generated. These
+results describe the current design corpus; a separate prospective dataset is
+still required for independent generalization claims.
 
 \subsection{Phase 6: Strategic Attacker and Evidence-Gate Evaluation}
 
@@ -338,16 +381,15 @@ publication-quality figures, and final experimental logbook are available.
 The next concrete steps are:
 
 \begin{enumerate}
-    \item Complete the smooth kitchen-floor baseline Wi-Fi dataset:
-    five low-speed and five medium-speed \texttt{square0p5x3} runs.
+    \item Complete the matched ordinary-versus-strategic drift comparison under
+    identical attack budgets.
 
-    \item Run replay and quality screening on the full 20-run baseline Wi-Fi
-    dataset.
+    \item Expand the buffered delay/jitter condition and evaluate transfer without
+    changing rover firmware or rerunning nominal motion.
 
-    \item Freeze the train/validation/test split by complete run.
+    \item Collect a small untouched prospective benign validation set for the
+    final frozen alarm and detector definitions.
 
-    \item Lock thresholds at matched run-level false-alarm rate.
-
-    \item Implement the field-constrained attack injector for A1 semantic GPS
-    manipulation and begin the paired covariance-poisoning replay study.
+    \item Generate final causal figures, capability maps, and the
+    claims-versus-evidence table for manuscript assembly.
 \end{enumerate}

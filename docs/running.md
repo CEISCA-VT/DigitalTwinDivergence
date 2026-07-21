@@ -1,7 +1,7 @@
 # Running the Project
 
-This guide covers the current pre-hardware workflow and the commands to use
-once the UGV01 starts streaming telemetry.
+This guide covers the current hardware, replay, analysis, and reproduction
+workflows.
 
 ## Environment
 
@@ -77,14 +77,33 @@ Generate ROC and detection-probability plots:
 python -m DigitalTwin.analysis.plot_detection "DigitalTwin/datasets/*.csv"
 ```
 
-Train the uncertainty-model stub from benign runs:
+Train the GPS-independent uncertainty candidate from the canonical benign-run
+manifest:
 
 ```powershell
-python -m DigitalTwin.analysis.train_uncertainty "DigitalTwin/datasets/*attack-none*.csv"
+python -m DigitalTwin.analysis.train_uncertainty
 ```
 
-The locked threshold and trained model artifacts are ignored by Git because
-they are generated from datasets.
+The command uses complete-run grouped validation and records whether the model
+beats the median target baseline. A rejected candidate remains disabled. The
+locked threshold and trained model artifacts are ignored by Git because they
+are generated from datasets.
+
+Run the complete real-data attack campaign or regenerate its report from
+existing artifacts:
+
+```powershell
+python -m DigitalTwin.analysis.real_data_study
+python -m DigitalTwin.analysis.real_data_study --summarize-existing
+```
+
+Run the targeted paired covariance-poisoning analysis or regenerate its
+statistics from the completed targeted replay:
+
+```powershell
+python -m DigitalTwin.analysis.covariance_poisoning
+python -m DigitalTwin.analysis.covariance_poisoning --summarize-existing
+```
 
 ## Pre-Battery Wrap-Up
 
