@@ -1,6 +1,6 @@
 # Digital Twin Divergence Project Handoff
 
-Current as of July 21, 2026. This document gives another collaborator enough
+Current as of July 29, 2026. This document gives another collaborator enough
 context to continue without reconstructing the full development history.
 
 ## Project Goal
@@ -14,14 +14,15 @@ undetected.
 
 ## Current Status
 
-- Overall roadmap: approximately 90% complete.
 - Engineering implementation: approximately 95% complete.
-- Experimental analysis: approximately 90% complete.
-- Publication preparation: approximately 80-85% complete.
+- Current experimental program: approximately 85-90% complete.
+- Strong-publication readiness: approximately 55-60% complete.
 
-Hardware bring-up, powered motion tests, the 20-run benign corpus, alarm
-freezing, uncertainty-policy freezing, the statistical attack campaign, and
-the covariance-poisoning analysis are complete for the current design corpus.
+Hardware bring-up, powered motion tests, and the 20-run benign corpus are
+complete. The independent security predictor and revised evidence gate are
+implemented. The pre-revision attack campaign remains available as provenance,
+but its alarm lock, attack summaries, and figures must be regenerated before
+being quoted as current results.
 
 ## Hardware and Firmware
 
@@ -82,10 +83,11 @@ The checksum-backed manifest is generated under
 
 ## Alarm and Uncertainty Policies
 
-The frozen alarm uses robust five-fix GPS initialization, monitoring after
-sustained tracked-drive motion, and a three-of-five persistent NIS rule. The
-leave-one-run-out false-alarm estimate is `1/20 = 0.05` for each variant, with
-the naturally anomalous run retained.
+The alarm uses robust five-fix GPS initialization, monitoring after sustained
+tracked-drive motion, and a three-of-five persistent NIS rule. The previous
+numerical alarm lock is superseded because NIS now uses the independent
+security predictor. A new benign-only run-level lock is required before attack
+evaluation; prospective validation remains required.
 
 Frozen uncertainty comparisons:
 
@@ -93,7 +95,7 @@ Frozen uncertainty comparisons:
 - naive GPS-residual-coupled adaptation
 - frozen-clean covariance schedule
 - GPS-coordinate-independent adaptation
-- evidence-gated residual adaptation
+- bounded GPS-independent adaptation with trusted-NIS and persistent-bias gating
 
 The learned GPS-independent target is implemented, but the current Random
 Forest candidate is disabled because grouped validation was 17-38% worse than
@@ -105,7 +107,10 @@ References:
 - `DigitalTwin/configs/uncertainty_policies.json`
 - `docs/uncertainty_policy_freeze.md`
 
-## Statistical Attack Campaign
+## Historical Statistical Attack Campaign
+
+The numbers in this section describe the pre-security-predictor campaign. Run
+the current regeneration workflow before using them in a manuscript.
 
 Attacks are injected only into GPS coordinates during offline replay. Raw logs,
 firmware, and rover behavior remain unchanged.
@@ -168,14 +173,19 @@ Generated analysis artifacts are ignored by Git and live under
 
 ## Remaining Roadmap
 
-1. Compare ordinary and strategically scheduled drift under identical attack
+1. Correct the prospective false-alarm protocol before collecting new data.
+2. Add independent overhead-video or fiducial trajectory ground truth.
+3. Reproduce covariance poisoning on a standard adaptive Kalman method and add
+   the missing robust and sequential detector baselines.
+4. Compare ordinary and strategically scheduled drift under identical attack
    budgets.
-2. Expand buffered delay/jitter evaluation and generate capability maps.
-3. Collect a small untouched prospective rover dataset for independent
-   confirmation.
-4. Freeze publication figures, tables, checksums, and the claims-versus-
-   evidence map.
-5. Complete manuscript results, discussion, limitations, and conclusion.
+5. Run the frozen detector live at the edge and expand buffered delay/jitter
+   transfer evaluation.
+6. Collect an untouched prospective benign corpus. A target of 60 independent
+   runs supports a one-sided 95% upper false-alarm bound near 0.05 when no
+   alarms occur; a smaller set must be reported with its wider interval.
+7. Freeze publication figures, tables, checksums, dependencies, and the
+   claims-versus-evidence map before assembling the results manuscript.
 
 Do not claim prospective deployment validation from the current 20 runs. They
 form the design corpus and the attacks are counterfactual offline replays.

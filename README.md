@@ -38,6 +38,11 @@ threshold lock, paired GPS attacks, summaries, and plots):
 python -m DigitalTwin.analysis.real_data_study
 ```
 
+The July 29 security-predictor revision supersedes the previously generated
+alarm thresholds and attack-campaign outputs. Regenerate them before quoting
+security results. The existing rover logs are sufficient for this software
+rerun.
+
 Regenerate plots and the report from an already completed campaign without
 rerunning all EKF replays:
 
@@ -48,7 +53,7 @@ python -m DigitalTwin.analysis.real_data_study --summarize-existing
 See `docs/real_data_study.md` for the threat boundary and interpretation
 limits.
 
-The completed statistical attack matrix is documented in
+The previously completed statistical attack matrix is documented in
 `docs/statistical_attack_campaign.md`.
 
 Run or regenerate the paired covariance-poisoning analysis:
@@ -70,12 +75,26 @@ Listen for UGV01 bridge packets:
 python -m DigitalTwin.telemetry_receiver --port 5005
 ```
 
+Open the visual digital-twin replay dashboard:
+
+```powershell
+python -m DigitalTwin.dashboard.server --open
+```
+
+The dashboard reads the 20 accepted benign `T:147` logs and shows BN220 GPS,
+the GPS-fused operational EKF, and the GPS-independent security predictor.
+It also shows current rover pose, sensor state, uncertainty, security-branch
+NIS, and edge packet health. EKF-to-GPS distance is labeled as sensor
+agreement rather than physical accuracy because the current logs do not
+contain independent ground truth.
+
 Core modules:
 
 - `DigitalTwin/telemetry.py`: packet serializer/deserializer
 - `DigitalTwin/telemetry_receiver.py`: UDP hardware packet listener
 - `DigitalTwin/kinematics.py`: tracked-drive-compatible motion model
 - `DigitalTwin/ekf.py`: prediction and GPS update
+- `DigitalTwin/security.py`: GPS-independent predictor, covariance bounds, and trusted evidence gate
 - `DigitalTwin/uncertainty.py`: `Q` and `R` estimator
 - `DigitalTwin/detector.py`: Mahalanobis, eigenvalue detectability bounds, confidence envelopes
 - `DigitalTwin/alarm.py`: robust initialization, motion gating, and persistent alarms
@@ -84,6 +103,13 @@ Core modules:
 - `DigitalTwin/experiments/experiment.py`: batch automation
 - `DigitalTwin/plotting/plot.py`: trajectory/detection plots
 - `DigitalTwin/analysis/`: replay, attack campaigns, uncertainty training, and statistical analysis
+- `DigitalTwin/dashboard/`: visual accepted-log replay and sensor-health interface
+
+Generate the benign digital-twin accuracy and consistency report:
+
+```powershell
+python -m DigitalTwin.analysis.digital_twin_accuracy
+```
 
 The hardware-facing protocol is documented in `docs/telemetry_protocol.md`.
 Running commands are documented in `docs/running.md`.

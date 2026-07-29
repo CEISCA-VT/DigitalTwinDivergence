@@ -36,10 +36,12 @@ class FixedUncertaintyPolicy:
 
 @dataclass(frozen=True, slots=True)
 class EvidenceGatePolicy:
-    acceleration_deviation_mps2: float = 0.8
-    yaw_rate_radps: float = 0.35
+    soft_nis_threshold: float = 10.480551254279684
+    persistent_bias_threshold: float = 155.30477241316595
+    bias_memory: float = 0.90
     timing_mismatch_s: float = 0.20
     reject_stale_packets: bool = True
+    reject_sequence_gaps: bool = True
 
 
 DEFAULT_ADAPTIVE_POLICY = AdaptiveUncertaintyPolicy()
@@ -99,6 +101,8 @@ class TelemetryStatisticsWindow:
 
     def __init__(self, maxlen: int = 25) -> None:
         self.dead_reckoning_residuals: deque[float] = deque(maxlen=maxlen)
+        self.raw_dead_reckoning_residuals: deque[float] = deque(maxlen=maxlen)
+        self.residual_admissions: deque[float] = deque(maxlen=maxlen)
         self.accel_z_values: deque[float] = deque(maxlen=maxlen)
         self.gyro_z_values: deque[float] = deque(maxlen=maxlen)
         self.velocity_values: deque[float] = deque(maxlen=maxlen)
@@ -112,12 +116,29 @@ class TelemetryStatisticsWindow:
         gyro_z: float,
         velocity_mps: float,
         packet_dt_s: float,
+        residual_admitted: bool = True,
     ) -> None:
-        self.dead_reckoning_residuals.append(abs(dead_reckoning_residual_m))
+        residual = abs(float(dead_reckoning_residual_m))
+        admitted = bool(residual_admitted)
+        self.raw_dead_reckoning_residuals.append(residual)
+        self.residual_admissions.append(float(admitted))
+        self.dead_reckoning_residuals.append(residual if admitted else 0.0)
         self.accel_z_values.append(float(accel_z))
         self.gyro_z_values.append(float(gyro_z))
         self.velocity_values.append(float(velocity_mps))
         self.packet_dt_values.append(max(float(packet_dt_s), 0.0))
+
+    @property
+    def residual_gate_pass_fraction(self) -> float:
+        return _mean(self.residual_admissions)
+
+    @property
+    def residual_cover_bound_m(self) -> float:
+        if not self.raw_dead_reckoning_residuals:
+            return 0.0
+        return self.residual_gate_pass_fraction * max(
+            self.raw_dead_reckoning_residuals
+        )
 
     def features(self, *, gps_hdop: float, gps_satellites: int, fallback_dt_s: float) -> UncertaintyFeatures:
         return UncertaintyFeatures(
@@ -149,18 +170,31 @@ class TelemetryDrivenUncertaintyEstimator:
     def __init__(self, policy: AdaptiveUncertaintyPolicy = DEFAULT_ADAPTIVE_POLICY) -> None:
         self.policy = policy
 
-    def process_covariance(self, features: UncertaintyFeatures, dt_s: float) -> np.ndarray:
+    def gps_independent_process_sigmas(
+        self,
+        features: UncertaintyFeatures,
+        dt_s: float,
+    ) -> tuple[float, float]:
         policy = self.policy
-        residual_term = policy.base_xy_sigma_mps + policy.residual_gain * features.dead_reckoning_residual_m
         imu_term = policy.vertical_imu_gain * features.imu_vertical_std + policy.yaw_imu_gain * features.imu_yaw_std
         velocity_term = policy.velocity_variance_gain * features.velocity_variance
         jitter_term = policy.timing_mismatch_gain * abs(features.packet_dt_s - dt_s)
-
-        q_xy_sigma = residual_term + imu_term + velocity_term + jitter_term
+        q_xy_sigma = policy.base_xy_sigma_mps + imu_term + velocity_term + jitter_term
         q_theta_sigma = (
             policy.base_heading_sigma_radps
             + policy.heading_yaw_gain * features.imu_yaw_std
             + policy.heading_velocity_gain * features.velocity_variance
+        )
+        return q_xy_sigma, q_theta_sigma
+
+    def process_covariance(self, features: UncertaintyFeatures, dt_s: float) -> np.ndarray:
+        policy = self.policy
+        q_xy_independent, q_theta_sigma = self.gps_independent_process_sigmas(
+            features, dt_s
+        )
+        q_xy_sigma = (
+            q_xy_independent
+            + policy.residual_gain * features.dead_reckoning_residual_m
         )
         return np.diag([(q_xy_sigma * dt_s) ** 2, (q_xy_sigma * dt_s) ** 2, (q_theta_sigma * dt_s) ** 2])
 
@@ -177,17 +211,35 @@ class GPSIndependentUncertaintyEstimator(TelemetryDrivenUncertaintyEstimator):
     """Adaptive process covariance that excludes GPS residual feedback."""
 
     def process_covariance(self, features: UncertaintyFeatures, dt_s: float) -> np.ndarray:
-        policy = self.policy
-        imu_term = policy.vertical_imu_gain * features.imu_vertical_std + policy.yaw_imu_gain * features.imu_yaw_std
-        velocity_term = policy.velocity_variance_gain * features.velocity_variance
-        jitter_term = policy.timing_mismatch_gain * abs(features.packet_dt_s - dt_s)
-        q_xy_sigma = policy.base_xy_sigma_mps + imu_term + velocity_term + jitter_term
-        q_theta_sigma = (
-            policy.base_heading_sigma_radps
-            + policy.heading_yaw_gain * features.imu_yaw_std
-            + policy.heading_velocity_gain * features.velocity_variance
+        q_xy_sigma, q_theta_sigma = self.gps_independent_process_sigmas(
+            features, dt_s
         )
         return np.diag([(q_xy_sigma * dt_s) ** 2, (q_xy_sigma * dt_s) ** 2, (q_theta_sigma * dt_s) ** 2])
+
+
+def residual_planar_variance_delta(
+    *,
+    gps_independent_sigma_mps: float,
+    attacked_rolling_residual_m: float,
+    reference_rolling_residual_m: float,
+    residual_gain: float,
+    dt_s: float,
+) -> float:
+    """Exact planar Q difference from the residual-coupled term."""
+
+    c_k = float(gps_independent_sigma_mps)
+    attacked_residual = float(attacked_rolling_residual_m)
+    reference_residual = float(reference_rolling_residual_m)
+    gain = float(residual_gain)
+    dt = float(dt_s)
+    if min(c_k, attacked_residual, reference_residual, gain, dt) < 0.0:
+        raise ValueError("variance-delta inputs must be nonnegative")
+    return float(
+        dt**2
+        * gain
+        * (attacked_residual - reference_residual)
+        * (2.0 * c_k + gain * (attacked_residual + reference_residual))
+    )
 
 
 # Preserve the original class name for compatibility while exposing the

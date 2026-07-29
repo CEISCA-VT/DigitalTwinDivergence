@@ -6,3 +6,9 @@ DigitalTwin/datasets/
 DigitalTwin/configs/locked_threshold.json
 DigitalTwin/configs/uncertainty_model.json
 DigitalTwin/configs/uncertainty_model.pkl
+results/
+pdf_extracted_text*.txt
+.tmp_*
+ugv01_gps_dev/General_Driver/build/
+ugv01_gps_dev/General_Driver/data/devConfig.json
+ugv01_gps_dev/General_Driver/data/wifiConfig.json

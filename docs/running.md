@@ -97,6 +97,17 @@ python -m DigitalTwin.analysis.real_data_study
 python -m DigitalTwin.analysis.real_data_study --summarize-existing
 ```
 
+Regenerate the complete paper-facing package with the primary and expanded
+campaigns, revised mathematical diagnostics, statistical summaries, threshold
+sweep, covariance analysis, runtime benchmark, and figures:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\regenerate_all_results.ps1
+```
+
+This is the long-running reproduction command. It copies the final
+paper-facing artifacts to `results/` after every analysis succeeds.
+
 Run the targeted paired covariance-poisoning analysis or regenerate its
 statistics from the completed targeted replay:
 
@@ -252,6 +263,42 @@ turn schedule: 2.10, 2.10, 2.10, 2.10 seconds
 Use `--dry-run` to print the queued commands without moving the rover.
 Use `--auto` only when the area is controlled and it is safe to start each
 trial after a countdown.
+
+## Visual Digital-Twin Dashboard
+
+Start the local replay dashboard from the repository root:
+
+```powershell
+python -m DigitalTwin.dashboard.server
+```
+
+Open `http://127.0.0.1:8765`, or launch the browser automatically:
+
+```powershell
+python -m DigitalTwin.dashboard.server --open
+```
+
+The first selection takes a few seconds while the accepted hardware log is
+replayed through the revised digital twin. Replays are cached in memory after
+loading. The interface provides:
+
+- synchronized BN220 GPS, GPS-fused operational EKF, and GPS-independent
+  security-predictor trajectory trails
+- current position, heading direction, and encoder-derived velocity
+- GNSS satellite/HDOP, IMU, motor, voltage, and edge-transport state
+- operational EKF-to-GPS agreement and security-branch NIS histories
+- packet loss, stale-packet, queue, and latency summaries
+- play, pause, step, scrub, and playback-speed controls
+
+The displayed EKF-to-GPS distance is an internal sensor-agreement measure. It
+must not be reported as physical localization error until an independent
+camera/AprilTag trajectory is available.
+
+Generate the complete benign-log agreement and consistency report with:
+
+```powershell
+python -m DigitalTwin.analysis.digital_twin_accuracy
+```
 
 ## Hardware Receiver
 

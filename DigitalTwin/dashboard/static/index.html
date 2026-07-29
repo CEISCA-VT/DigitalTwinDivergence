@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UGV01 Digital Twin</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">DT</span>
+      <div>
+        <strong>UGV01 Digital Twin</strong>
+        <span>Edge telemetry replay</span>
+      </div>
+    </div>
+    <div class="run-picker">
+      <label for="runSelect">Benign run</label>
+      <select id="runSelect" disabled><option>Loading logs...</option></select>
+    </div>
+    <div class="system-state">
+      <span id="stateDot" class="state-dot loading"></span>
+      <div><strong id="systemState">Loading</strong><span id="systemDetail">Connecting to replay service</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="context-strip" aria-label="Run context">
+      <div><span>Surface</span><strong id="metaSurface">--</strong></div>
+      <div><span>Speed</span><strong id="metaSpeed">--</strong></div>
+      <div><span>Route</span><strong id="metaRoute">--</strong></div>
+      <div><span>Network</span><strong id="metaNetwork">--</strong></div>
+      <div><span>Trial</span><strong id="metaTrial">--</strong></div>
+    </section>
+
+    <section class="workspace">
+      <article class="trajectory-panel panel">
+        <div class="panel-heading">
+          <div><span class="eyebrow">LOCAL FRAME</span><h1>Trajectory</h1></div>
+          <div class="legend" aria-label="Trajectory legend">
+            <span><i class="line ekf"></i>Operational EKF</span>
+            <span><i class="line security"></i>Security predictor</span>
+            <span><i class="line gps"></i>BN220 GPS</span>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="trajectoryCanvas" aria-label="GPS and EKF trajectory map"></canvas>
+          <div class="map-readout">
+            <span id="mapTime">00:00.0</span>
+            <strong id="mapPosition">E 0.00 m · N 0.00 m</strong>
+          </div>
+          <div id="mapScale" class="map-scale">1 m</div>
+        </div>
+      </article>
+
+      <aside class="inspector">
+        <section class="pose-block panel">
+          <div class="panel-heading compact">
+            <div><span class="eyebrow">CURRENT STATE</span><h2>Rover pose</h2></div>
+            <span id="regionBadge" class="badge">--</span>
+          </div>
+          <div class="pose-grid">
+            <div><span>East</span><strong id="poseX">0.00</strong><small>m</small></div>
+            <div><span>North</span><strong id="poseY">0.00</strong><small>m</small></div>
+            <div><span>Heading</span><strong id="poseTheta">0.0</strong><small>deg</small></div>
+            <div><span>Velocity</span><strong id="poseVelocity">0.00</strong><small>m/s</small></div>
+          </div>
+        </section>
+
+        <section class="agreement-block panel">
+          <div class="metric-title"><span>Operational EKF-GPS agreement</span><strong id="currentResidual">0.00 m</strong></div>
+          <div class="meter"><i id="residualMeter"></i></div>
+          <div class="metric-foot"><span>Operational RMSE <b id="runRmse">--</b></span><span>Security RMSE <b id="runP95">--</b></span></div>
+        </section>
+
+        <section class="consistency-block panel">
+          <div class="metric-title"><span>Security-branch NIS</span><strong id="currentNis">0.00</strong></div>
+          <div class="meter nis"><i id="nisMeter"></i><em id="thresholdMark"></em></div>
+          <div class="metric-foot"><span>Threshold <b id="nisThreshold">--</b></span><span>Confidence <b id="confidence">--</b></span></div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="sensor-grid">
+      <article class="sensor-card">
+        <div class="sensor-label"><span class="sensor-icon gps-icon">G</span>GNSS</div>
+        <strong id="sensorSat">--</strong><small>satellites</small>
+        <footer><span>HDOP</span><b id="sensorHdop">--</b></footer>
+      </article>
+      <article class="sensor-card">
+        <div class="sensor-label"><span class="sensor-icon encoder-icon">E</span>Tracked drive</div>
+        <strong id="sensorVelocity">--</strong><small>m/s</small>
+        <footer><span>Yaw rate</span><b id="sensorOmega">--</b></footer>
+      </article>
+      <article class="sensor-card">
+        <div class="sensor-label"><span class="sensor-icon imu-icon">I</span>IMU</div>
+        <strong id="sensorYaw">--</strong><small>deg yaw</small>
+        <footer><span>Gyro Z</span><b id="sensorGyro">--</b></footer>
+      </article>
+      <article class="sensor-card">
+        <div class="sensor-label"><span class="sensor-icon power-icon">V</span>Power</div>
+        <strong id="sensorVoltage">--</strong><small>volts</small>
+        <footer><span>Motor L / R</span><b id="sensorMotors">--</b></footer>
+      </article>
+      <article class="sensor-card">
+        <div class="sensor-label"><span class="sensor-icon network-icon">N</span>Transport</div>
+        <strong id="sensorLatency">--</strong><small>ms HTTP</small>
+        <footer><span>Queue / loss</span><b id="sensorPacket">--</b></footer>
+      </article>
+    </section>
+
+    <section class="charts">
+      <article class="chart-panel panel">
+        <div class="panel-heading compact"><div><span class="eyebrow">MODEL AGREEMENT</span><h2>Residual history</h2></div><strong id="residualNow">--</strong></div>
+        <canvas id="residualChart" aria-label="EKF GPS residual history"></canvas>
+      </article>
+      <article class="chart-panel panel">
+        <div class="panel-heading compact"><div><span class="eyebrow">EDGE PIPELINE</span><h2>Latency history</h2></div><strong id="latencyNow">--</strong></div>
+        <canvas id="latencyChart" aria-label="HTTP latency history"></canvas>
+      </article>
+      <article class="run-summary panel">
+        <div class="panel-heading compact"><div><span class="eyebrow">RUN HEALTH</span><h2>Summary</h2></div></div>
+        <dl>
+          <div><dt>Updates</dt><dd id="sumUpdates">--</dd></div>
+          <div><dt>Duration</dt><dd id="sumDuration">--</dd></div>
+          <div><dt>Packet loss</dt><dd id="sumLoss">--</dd></div>
+          <div><dt>Stale packets</dt><dd id="sumStale">--</dd></div>
+          <div><dt>Median latency</dt><dd id="sumLatency">--</dd></div>
+          <div><dt>Satellite range</dt><dd id="sumSat">--</dd></div>
+        </dl>
+      </article>
+    </section>
+  </main>
+
+  <footer class="transport-bar">
+    <button id="jumpStart" title="Jump to start" aria-label="Jump to start">|◀</button>
+    <button id="stepBack" title="Previous sample" aria-label="Previous sample">◀</button>
+    <button id="playPause" class="primary-control" title="Play or pause" aria-label="Play">▶</button>
+    <button id="stepForward" title="Next sample" aria-label="Next sample">▶</button>
+    <input id="timeline" type="range" min="0" max="0" value="0" aria-label="Replay position">
+    <span id="timelineTime">00:00.0 / 00:00.0</span>
+    <label for="speedSelect">Speed</label>
+    <select id="speedSelect">
+      <option value="0.5">0.5×</option>
+      <option value="1" selected>1×</option>
+      <option value="2">2×</option>
+      <option value="4">4×</option>
+    </select>
+  </footer>
+
+  <div id="errorView" class="error-view" hidden>
+    <strong>Dashboard could not load this replay.</strong>
+    <span id="errorText"></span>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

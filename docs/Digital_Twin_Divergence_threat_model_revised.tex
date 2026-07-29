@@ -1,0 +1,1240 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs, array}
+\usepackage{graphicx}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newtheorem{proposition}{Proposition}
+
+\title{\textbf{Research Proposal}\\ Adaptive Uncertainty as an Attack Surface: Evidence-Gated State Estimation for Edge-Hosted Mobile Digital Twins}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{quote}
+\textbf{Implementation status (July 29, 2026):} The GPS-independent security
+predictor and trusted evidence gate described here are implemented. Numerical
+results later in this document refer to the pre-revision replay architecture
+and are retained as provenance pending software-only regeneration.
+\end{quote}
+
+\section{Problem Statement and Research Question}
+
+This research establishes the physical and network-induced limits of semantic-telemetry attack detection for an edge-hosted digital twin monitoring a resource-constrained mobile Internet of Things (IoT) platform (UGV01). Moving state estimation from the rover to a proximal edge workstation couples physical uncertainty---wheel slip, terrain disturbance, and kinematic-model mismatch---with cyber-transport uncertainty from packet delay and jitter \cite{ref48,ref61}. The resulting uncertainty changes both the detector's sensitivity and the amount of path deviation that an adversary can conceal. The study further asks whether a self-calibrating uncertainty mechanism can itself become a security attack surface and how to defend that mechanism against both direct and strategic exploitation.
+
+Prior work commonly evaluates digital-twin security with fixed filter covariances, stationary processes, or single attack magnitudes \cite{ref3,ref40}. In a mobile platform, however, the process-noise covariance $\mathbf{Q}_k$ and innovation covariance $\mathbf{S}_k$ vary with motion, terrain, and timing conditions. A further security problem follows when an adaptive filter learns its covariance from a residual that contains attacker-controlled GPS data: a patient attacker may induce the model to interpret malicious drift as benign uncertainty, thereby increasing $\mathbf{S}_k$ and reducing normalized innovation sensitivity. This proposal therefore studies both the \emph{detectability limit} of a mobile edge-hosted twin and the \emph{security of the uncertainty-adaptation mechanism} used to track changing conditions.
+
+The core scientific question is: \textit{How do mobility, terrain disturbance, and edge-telemetry conditions change the smallest semantic GPS manipulation that an edge-hosted digital twin can reliably detect, and can uncertainty adaptation remain calibrated and secure when an informed attacker attempts either to poison it directly or to exploit naturally high-uncertainty operating windows?}
+
+Specifically, this study answers:
+\begin{enumerate}
+    \item What direction-dependent GPS manipulation magnitude achieves a target detection probability under changing vehicle motion, terrain disturbance, and edge-network conditions?
+    \item Can telemetry-driven covariance adaptation improve nominal calibration and false-alarm stability relative to a fixed-covariance EKF?
+    \item Can a slow semantic GPS drift poison a GPS-residual-dependent adaptive covariance mechanism by causing covariance inflation and reduced normalized innovation sensitivity?
+    \item Can GPS-independent covariance prediction prevent direct covariance poisoning while retaining the benign-calibration benefits of adaptation?
+    \item Can evidence-gated adaptation limit the additional advantage of an informed attacker that schedules drift during naturally high-uncertainty windows?
+\end{enumerate}
+
+\subsection{Technological Context: Semantic Exploits vs. Edge Offloading}
+The experimental threat is an \emph{application-layer semantic GPS-coordinate manipulation}: the attacker changes the GPS coordinates presented to the edge-hosted estimator while preserving syntactically valid telemetry packets and normal packet cadence. This emulates the navigation-layer consequence of GPS spoofing without claiming an over-the-air radio-frequency attack. Such semantic manipulation differs from conventional network-layer attacks because packet format, volume, and protocol-level validity can remain normal \cite{ref2,ref43,ref65}.
+
+\subsection{Threat Boundary and Edge-Observed Timing}
+The primary attacker is coordinate-only. It can alter GPS coordinate fields at the edge-side injection point after a packet has arrived, but it cannot modify encoder, IMU, command, sequence, or edge-observed arrival-time fields. Accordingly, $\Delta t_k^{\mathrm{edge}}$ is measured by a monotonic clock at the edge receiver, rather than copied from a sender-provided timestamp, and is independent of the manipulated GPS coordinates within the stated threat model. The attacker may know the detector design and may choose \emph{when} to inject drift, but it cannot delay, drop, reorder, forge, or modify non-GPS telemetry. A stronger telemetry-path adversary with those capabilities is outside the primary scope and is treated as a limitation rather than silently assumed away.
+
+Resource constraints prevent a low-cost UGV from executing a heavy analytical estimator and evaluation pipeline locally \cite{ref7,ref16}. Offloading estimation to an edge workstation makes a richer detector feasible but introduces variable packet age, queueing delay, and transport jitter \cite{ref61}. The central design challenge is therefore not simply to identify a large GPS jump; it is to distinguish adversarial trajectory deviation from legitimate mobility- and network-induced uncertainty while recognizing when the detector lacks sufficient sensitivity for a mission-relevant deviation.
+
+\subsection{Practical Stakes and Operational Consequences}
+A detector tuned conservatively for high-speed or high-latency operation may fail to recognize small but safety-relevant path deviations under nominal conditions. Conversely, a threshold tuned too aggressively can turn benign terrain variation or timing jitter into repeated false alarms. An adaptive detector that silently inflates uncertainty in response to a slow spoofing drift is particularly concerning because it may appear well calibrated while becoming less sensitive to the attack that caused the inflation. The intended output is therefore a real-time, safety-anchored statement of detection capability rather than an unconditional binary ``attack/no attack'' decision.
+
+\section{Threat Model and Attack Campaign}
+\label{sec:threat-model}
+
+This work studies when semantic GPS manipulations against a mobile rover become
+detectable or remain hidden under real operating uncertainty. The defended
+system is a tracked UGV01 rover that reports GPS, encoder, IMU, voltage,
+commands, sequence information, and timing telemetry to an edge-side digital
+twin. The detector uses a GPS-independent security-prediction branch, a
+Mahalanobis innovation test, packet-health metadata, edge-observed timing, and
+uncertainty-aware detectability bounds.
+
+The primary adversary cannot command the rover motors, alter the physical
+route, modify the estimator or detector implementation, suppress the alarm, or
+change the protected experimental logs. It can modify only the GPS coordinate
+values presented to the detector and may choose the attack direction and
+injection schedule with white-box knowledge of the defense. Normal and
+experimentally stressed communication conditions are treated as operating
+conditions that shape the detection boundary. A stronger delivery-path
+adversary is evaluated only as a secondary robustness extension and is not part
+of the central security claim.
+
+\subsection{Primary Adversary and Trust Boundary}
+
+The overarching threat model is a white-box, coordinate-only semantic GPS
+attacker. The adversary knows the rover motion model, estimator architecture,
+detector statistic, published thresholds, covariance predictor, evidence-gate
+logic, and the current read-only telemetry packet. It seeks to induce a
+mission-relevant navigation-state error while keeping the divergence alarm
+below threshold. The adversary may bias, drift, freeze, or replay the GPS
+coordinate fields, but it cannot modify trusted control inputs, encoder or IMU
+measurements, sequence values, GPS-quality fields, edge-observed arrival times,
+the security-prediction branch, the detector, the alarm path, or the
+independent ground-truth logs.
+
+Sender-provided sample and send timestamps are preserved by the coordinate-only
+injector but are not treated as independently trustworthy merely because they
+appear in the packet. The trusted time base for the primary analysis is the
+edge receiver's monotonic clock and its locally recorded arrival, queue,
+estimate, and alarm times. Sequence continuity is also evaluated from the
+received stream. These protections are assumptions of the controlled
+experimental threat boundary, not claims of cryptographic authentication.
+
+\begin{table}[t]
+\centering
+\caption{Attack families and their role in the evaluation. Injection location is
+an implementation detail unless it changes attacker control or the trusted
+evidence available to the detector.}
+\label{tab:attack-families}
+\scriptsize
+\begin{tabular}{L{0.06\linewidth} L{0.17\linewidth} L{0.20\linewidth} L{0.23\linewidth} L{0.14\linewidth}}
+\toprule
+\textbf{ID} & \textbf{Attack family and status} & \textbf{Attacker controls} &
+\textbf{Protected components and evidence} & \textbf{Parameters} \\
+\midrule
+A1 & Semantic GPS-content manipulation; primary threat &
+Reported GPS coordinate values and the injection schedule &
+Commands, encoder, IMU, GPS-quality fields, sequence values, edge time,
+security prediction, detector, alarm, and ground-truth logs &
+Magnitude, direction, ramp rate, freeze duration, replay age \\
+A2 & Delivery manipulation; secondary extension &
+Packet arrival time, ordering, repetition, or loss &
+Payload values, source metadata under the experimental replay assumption,
+detector implementation, alarm, and ground-truth logs &
+Delay, jitter, burst loss, reorder depth, replay age \\
+A3 & Coordinated content-and-delivery manipulation; secondary composite test &
+Union of A1 and A2 &
+Same protected estimator, detector, alarm, and evaluation reference &
+Joint content and delivery parameters \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Sensor-side, rover-side, network-side, replay-side, and edge-side injection are
+therefore treated as possible \emph{realizations} of these attack families, not
+as separate threat models merely because the injection point differs. If two
+realizations produce the same GPS sequence and leave the same trusted evidence
+unchanged, they are observationally equivalent at the detector input.
+
+\paragraph{Controlled edge-side injection.}
+All primary attacks are implemented after packet receipt by a dedicated replay
+or injection process. This process modifies only the permitted GPS coordinate
+fields before the packet is supplied to the estimator. It is an experimental
+mechanism for reproducing the detector-visible consequence of semantic GPS
+corruption; it does not represent compromise of the edge host, EKF,
+security-prediction process, detector thresholds, alarm, or logs. Genuine
+same-host compromise with permission to alter those protected components could
+disable or falsify the defense and is outside scope.
+
+\subsection{Security-Twin Independence and Common-Mode Protection}
+
+The security detector does not use the attacked GPS stream as the sole source
+of its own prediction. It maintains a GPS-independent security-prediction
+branch propagated from trusted commands, wheel encoders, IMU measurements, and
+the edge-observed update interval. The GPS measurement is scored against the
+\emph{pre-update} prediction of this branch. During an attack evaluation, GPS
+coordinates are never used to reset, reinitialize, or directly correct the
+state of the security-prediction branch.
+
+A separate GPS-fused operational estimate may be maintained for navigation or
+for comparison, but its posterior state is not fed back as the sole reference
+for the security residual. The security branch is initialized and aligned
+during a benign pre-attack settling interval using the measured route start and
+then locked before the attack window. The independently calibrated
+webcam--AprilTag trajectory
+reference remains evaluation-only and is never supplied to the detector. This
+separation prevents the attacked GPS stream from pulling both the monitored
+estimate and its security reference toward the same false trajectory.
+
+\subsection{Attack and Transport-Stress Profiles}
+
+The central campaign evaluates A1 semantic GPS-content manipulation. Controlled
+delay, jitter, loss, and reordering are primarily used as communication
+operating conditions that shape estimator uncertainty. The study does not infer
+malicious intent when a timing trace is statistically indistinguishable from
+benign communication variation. A2 and A3 are reported separately as secondary
+robustness extensions.
+
+\begin{table}[t]
+\centering
+\caption{Primary attack profiles and secondary transport-stress profiles.}
+\label{tab:attack-profiles}
+\scriptsize
+\begin{tabular}{L{0.12\linewidth} L{0.13\linewidth} L{0.29\linewidth} L{0.23\linewidth}}
+\toprule
+\textbf{Profile} & \textbf{Role} & \textbf{Description} & \textbf{Parameters} \\
+\midrule
+Step bias & A1 primary &
+Adds a fixed position offset to the GPS measurement after attack start. &
+Offset magnitude $\epsilon \in \{0.5,1,2,3,5,7.5,10\}$ m; direction; start time \\
+Coordinate freeze & A1 primary &
+Holds the GPS position at the last valid coordinate while the rover continues moving. &
+Start time; duration \\
+Value replay & A1 primary &
+Replaces current GPS coordinates with an earlier coordinate segment while preserving
+the protected non-GPS fields. &
+Replay age; segment length; start time \\
+Slow or strategic drift & A1 primary &
+Gradually changes the GPS position offset, either on a fixed schedule or during
+estimated high-uncertainty windows. &
+Rate; maximum offset; direction; start time; injection budget \\
+Delay/jitter & Operating condition; A2 extension &
+Adds controlled packet delay and timing variation before estimation. &
+Delay magnitude; jitter distribution \\
+Drop & Operating condition; A2 extension &
+Removes selected packets before replay or detection. &
+Drop rate; burst length \\
+Stale/reorder & Operating condition; A2 extension &
+Delivers previously received packets or changes their delivery order. &
+Stale interval; reorder depth \\
+Combined & A3 secondary composite &
+Applies an A1 GPS manipulation under an A2 delivery-manipulation profile. &
+Content profile; GPS magnitude; delivery profile \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Step-bias attacks form the main detectability-bound experiment because their
+magnitude is directly comparable to the theoretical target-detection
+amplitude. Coordinate freezing, value replay, and slow or strategic drift
+evaluate temporal and stealthier GPS manipulations. Transport stress is used to
+measure how benign or adversarial delivery variation changes the detection
+boundary, not to claim that the detector can infer whether delay was malicious.
+
+\subsection{Experimental Procedure}
+
+The experimental program separates the existing design corpus from the
+prospective validation corpus. The design corpus contains 20 accepted physical
+UGV01 runs:
+\[
+2\ \text{speeds} \times 2\ \text{surfaces} \times
+5\ \text{trials}=20\ \text{runs}.
+\]
+Each run follows a $0.5\,\mathrm{m}$ square route repeated three times. The
+surfaces are a smooth kitchen floor and rough permeable concrete. Low and
+medium speed refer to the two frozen rover command profiles used during
+collection; no absolute velocity is claimed unless it is independently
+measured.
+
+All 20 design-corpus runs use baseline Wi-Fi. Controlled delay and jitter are
+applied at the edge during replay without changing source telemetry or physical
+rover motion. Consequently, buffered transport is an analysis condition rather
+than a second set of physical benign runs.
+
+The existing corpus is used for detector development, covariance-policy
+ablation, attack-profile development, and exploratory analysis. Because these
+runs were available during alarm design, they are not presented as untouched
+evidence of generalization. The current leave-one-run-out false-alarm result of
+$1/20$ is reported only as a design-corpus diagnostic.
+
+No additional accepted rover runs are collected until the independent webcam
+and AprilTag reference has been installed and validated. After validation, one
+untouched prospective corpus will be collected using the frozen detector and
+protocol. The target is
+\[
+2\ \text{speeds} \times 2\ \text{surfaces} \times
+15\ \text{trials}=60\ \text{prospective runs}.
+\]
+This single prospective collection supports both run-level false-alarm
+evaluation and independent physical-trajectory evaluation. If fewer than 60
+runs are practical, the achieved sample size and exact run-level confidence
+interval will be reported without claiming that its upper bound satisfies
+$P_{\mathrm{FA,run}}\leq0.05$.
+
+After threshold locking, no attack data are used to tune the detector.
+
+Attacks are injected using a replay-based red-team pipeline:
+\[
+\begin{aligned}
+\text{raw benign telemetry}
+&\rightarrow \text{field-constrained attack injector}\\
+&\rightarrow \text{attacked telemetry}
+\rightarrow \text{digital-twin replay}\\
+&\rightarrow \text{detector output}.
+\end{aligned}
+\]
+The injector enforces the A1 field-level permissions and records every changed
+field. This allows each benign hardware run to be reused for controlled sweeps
+over attack magnitude, attack start time, duration, direction, and transport
+condition without overwriting the original raw logs.
+
+\subsection{Detection and Attack-Success Metrics}
+
+For each attacked run, the detector records whether the attack is detected, the
+first detection time, detection delay, Mahalanobis distance, locked threshold,
+innovation covariance, packet-health state, and reported-state cross-track
+error. The theoretical target-detection amplitude is
+\[
+\epsilon_{\mathrm{worst}}(k) =
+\sqrt{\lambda^\star \lambda_{\max}(\mathbf{S}_k)},
+\]
+where $\mathbf{S}_k$ is the innovation covariance and $\lambda^\star$ is the
+noncentrality required to achieve the pre-specified target detection
+probability at the locked false-alarm level.
+
+The operational security outcome is the harmful-but-stealthy event. Let
+$\epsilon_{\mathrm{req}}$ be the pre-registered mission-level tolerated
+cross-track error and let $L_{\mathrm{req}}$ be the minimum number of
+consecutive decision intervals for which that error must persist. For run $j$, define the persistence window
+$\mathcal{I}_k=\{k,\ldots,k+L_{\mathrm{req}}-1\}$. The harmful-but-stealthy
+indicator is
+\begin{equation}
+\mathcal{H}^{\mathrm{HS}}_j =
+\mathbb{I}\!\left[
+\exists k:
+\min_{\ell\in\mathcal{I}_k}d^{\mathrm{rep}}_{\perp,j}(\ell)
+\geq\epsilon_{\mathrm{req}}
+\ \wedge\
+\max_{\ell\in\mathcal{I}_k}\mathcal{A}_{j,\ell}=0
+\right].
+\label{eq:harmful-stealthy}
+\end{equation}
+The study reports the probability of this event, the maximum undetected
+cross-track error, and the time spent above $\epsilon_{\mathrm{req}}$ before
+alarm, all at a matched run-level false-alarm rate. This directly identifies
+the harmful-but-stealthy region rather than reporting only a minimum detectable
+magnitude.
+
+Each attacked run stores the attack family and profile; start time and
+duration; magnitude and direction; replay age; delay, jitter, and drop rate;
+surface, speed, and transport condition; route; and trial identifier.
+
+\subsection{Campaign-Level Hypotheses}
+
+\begin{itemize}
+    \item \textbf{H1:} Detection probability increases when attack magnitude
+    exceeds the direction-dependent target-detection amplitude.
+    \item \textbf{H2:} Rougher terrain increases
+    $\lambda_{\max}(\mathbf{S}_k)$ and therefore increases the manipulation
+    magnitude required for a target detection probability.
+    \item \textbf{H3:} Higher speed increases uncertainty, detection delay, and
+    the harmful-but-stealthy region relative to low-speed operation.
+    \item \textbf{H4:} Controlled delay and jitter, treated as transport
+    uncertainty, increase queue depth and expand the condition-dependent
+    detection boundary; the detector does not infer attacker intent from a
+    statistically normal timing trace.
+    \item \textbf{H5:} Value replay, coordinate freezing, and slow drift remain
+    undetected longer than abrupt step-bias attacks with comparable harmful
+    reported-state deviation.
+\end{itemize}
+
+\subsection{Baselines}
+
+To separate the contribution of the proposed uncertainty-aware security twin
+from simpler detectors, we compare against a fixed GPS residual threshold, a
+fixed-covariance NIS detector, robust measurement-handling methods, a
+sequential drift detector, and the covariance-adaptation ablations in
+Section~\ref{sec:baselines}. Timing-aware queue and latency features are
+evaluated as uncertainty inputs under the primary A1 threat boundary. The main
+claim is not that an EKF alone detects attacks or that timing anomalies reveal
+malicious intent, but that the proposed analysis explains when semantic GPS
+manipulations become visible or remain harmful and stealthy under real motion,
+terrain, GPS-quality, and transport uncertainty.
+
+\section{Theoretical Framework: Adversary-Aware Detectability}
+
+\subsection{Nonlinear State, Measurement, and Attack Model}
+Let the mobile platform state be $\mathbf{x}_k \in \mathbb{R}^n$ and the control input be $\mathbf{u}_{k-1}$. The UGV evolves according to the nonlinear discrete-time model
+\begin{equation}
+\mathbf{x}_k = f(\mathbf{x}_{k-1},\mathbf{u}_{k-1}) + \mathbf{w}_{k-1},
+\qquad
+\mathbf{w}_{k-1} \sim \mathcal{N}(\mathbf{0},\mathbf{Q}_{k-1}),
+\end{equation}
+where $\mathbf{Q}_{k-1}$ captures unmodeled motion, slip, and terrain-dependent disturbance \cite{ref11,ref12,ref14}. The GPS measurement is
+\begin{equation}
+\mathbf{z}_k = h(\mathbf{x}_k) + \mathbf{v}_k,
+\qquad
+\mathbf{v}_k \sim \mathcal{N}(\mathbf{0},\mathbf{R}_k),
+\end{equation}
+with measurement dimension $m$. The edge workstation maintains a GPS-independent security-prediction branch that propagates state from trusted commands, encoders, IMU measurements, and the edge-observed update interval. Throughout the detection equations, $\hat{\mathbf{x}}_{k|k-1}$ and $\mathbf{P}_{k|k-1}$ denote the pre-GPS prediction and covariance of this security branch \cite{ref63}.
+
+The application-layer attacker presents a compromised GPS measurement
+\begin{equation}
+\mathbf{z}^{a}_k = \mathbf{z}_k + \mathbf{a}_k,
+\end{equation}
+where $\mathbf{a}_k \in \mathbb{R}^{m}$ is a semantic manipulation vector. The experiments include step, slow-drift, strategic adaptive-drift, replay, and coordinate-freezing profiles. The baseline adversary is a slow drift
+\begin{equation}
+\mathbf{a}_k = \rho_k \mathbf{u}, \qquad \rho_{k+1}=\rho_k+\Delta\rho, \qquad \|\mathbf{u}\|_2=1,
+\end{equation}
+where $\mathbf{u}$ specifies the manipulation direction. This profile is physically plausible over short windows and can expose weaknesses in online covariance adaptation.
+
+The strongest primary attacker is a \,\emph{white-box strategic coordinate attacker}. It knows the estimator architecture, published thresholds, covariance predictor, gate logic, current command state, and the current read-only telemetry packet before it modifies the GPS coordinate fields. It cannot observe future packet arrivals or future terrain, and it cannot alter encoder, IMU, command, sequence, GPS-quality, or edge-arrival fields. The attacker selects only the GPS perturbation direction and the times at which a bounded increment is applied.
+
+For an attack window $\mathcal{W}=[k_s,k_e]$, every drift attacker is constrained by the same amplitude, rate, and injection-count budget:
+\begin{equation}
+\|\mathbf{a}_k\|_2\leq A_{\max},
+\qquad
+\|\mathbf{a}_{k+1}-\mathbf{a}_k\|_2\leq \rho_{\max}\Delta t_k,
+\qquad
+\sum_{k\in\mathcal{W}} I_k=N_I.
+\label{eq:attacker-budget}
+\end{equation}
+The pre-registered strategic objective is to maximize the largest undetected \emph{reported-state} cross-track error relative to the independent trajectory reference, subject to the shared budget and no alarm before the evaluation horizon:
+\begin{equation}
+\max_{\{I_k\}}\ \max_{k\in\mathcal{W}} d^{\mathrm{rep}}_{\perp}(k)
+\quad\text{s.t.}\quad
+\mathcal{A}_k=0\ \text{for}\ k\leq k_e,\ \text{and Equation~\eqref{eq:attacker-budget} holds}.
+\label{eq:attacker-objective}
+\end{equation}
+The physical rover trajectory is unchanged because manipulation occurs after packet receipt; $d^{\mathrm{rep}}_{\perp}(k)$ is therefore a navigation-state error, not a claim that the attacker physically moved the rover. Let $\mathcal{A}_k\in\{0,1\}$ denote the detector alarm state. A run is classified as a successful harmful-but-stealthy attack only when the mission-level error and persistence condition in Equation~\eqref{eq:harmful-stealthy} is satisfied.
+
+Let $I_k\in\{0,1\}$ denote a strategic injection decision based on current, pre-injection evidence:
+\begin{equation}
+\mathbf{a}_{k+1}=\mathbf{a}_k+I_k\Delta\rho\,\mathbf{u},
+\qquad
+I_k=\mathbb{I}\!\left[\widehat{\epsilon}_{\mathrm{worst}}(k)\geq\tau_{\epsilon}\ \wedge\ \widehat{b}^{(0)}_k=1\right].
+\label{eq:strategic-attack}
+\end{equation}
+Here $\widehat{\epsilon}_{\mathrm{worst}}(k)$ is the attacker's real-time estimate of uncertainty cover, and $\widehat{b}^{(0)}_k$ is a pre-injection estimate of gate passage based on unmodified trusted evidence. The evaluation includes: (i) an \emph{oblivious} drift with a fixed schedule, (ii) the white-box strategic drift above, and (iii) an optional hindsight-oracle upper bound that may use future information but is clearly labeled as non-realistic and is not the primary result. All principal comparisons use the same $A_{\max}$, $\rho_{\max}$, $N_I$, attack direction, physical log, and evaluation horizon. This isolates scheduling advantage from attack strength.
+
+\subsection{GPS-Independent Security-Prediction Branch}
+
+The security branch uses trusted proprioceptive and command information for its
+time and measurement updates and does not accept GPS coordinates as a state
+correction during the attack-evaluation window. Its initial state and frame
+alignment are established during a benign settling interval and frozen before
+attack injection. Consequently, an accumulated GPS drift cannot pull the
+security prediction toward the attacked trajectory through repeated posterior
+feedback.
+
+A separate operational GPS-fused EKF may be retained as an output being
+monitored, but it is not the sole reference used to generate the security
+innovation. The independent webcam--AprilTag trajectory is used only
+to evaluate reported-state error and is not available online to either
+estimator. This architecture separates the monitored GPS-fused state, the
+GPS-independent security reference, and the experimental ground truth.
+
+\subsection{Innovation Test and Statistical Detector}
+Let $\mathbf{z}^{\mathrm{obs}}_k$ denote the GPS value presented to the
+detector, where $\mathbf{z}^{\mathrm{obs}}_k=\mathbf{z}_k$ under nominal
+operation and $\mathbf{z}^{\mathrm{obs}}_k=\mathbf{z}^{a}_k$ under attack. The
+security innovation and innovation covariance are
+\begin{equation}
+\boldsymbol{\nu}_k =
+\mathbf{z}^{\mathrm{obs}}_k-h(\hat{\mathbf{x}}_{k|k-1}),
+\qquad
+\mathbf{S}_k =
+\mathbf{H}_k\mathbf{P}_{k|k-1}\mathbf{H}_k^T+\mathbf{R}_k,
+\end{equation}
+where $\mathbf{H}_k$ is the local measurement Jacobian of the
+GPS-independent security prediction. The normalized innovation squared (NIS)
+statistic is
+\begin{equation}
+\delta_k=\boldsymbol{\nu}_k^T\mathbf{S}_k^{-1}\boldsymbol{\nu}_k.
+\end{equation}
+Under nominal operation and bounded EKF linearization error, $\delta_k$ is approximately distributed as $\chi^2_m$. A detection threshold $\gamma_\alpha$ is selected to target a nominal false-alarm probability $\alpha$:
+\begin{equation}
+\Pr(\delta_k>\gamma_\alpha\mid \mathcal{H}_0)=\alpha.
+\end{equation}
+Under an injected measurement shift $\mathbf{a}_k$, the statistic is approximately noncentral chi-squared with noncentrality parameter
+\begin{equation}
+\lambda_k=\mathbf{a}_k^T\mathbf{S}_k^{-1}\mathbf{a}_k.
+\end{equation}
+This parameter is the statistical footprint of the attack after normalization by the detector's predicted uncertainty.
+
+\subsection{Naive Adaptive Covariance and Covariance-Poisoning Threat}
+A conventional adaptive implementation may estimate a diagonal \emph{effective process covariance} from benign proprioceptive features and a GPS--dead-reckoning residual:
+\begin{equation}
+\mathbf{Q}^{\mathrm{naive}}_k=g_{\mathrm{naive}}\left(r_k,\boldsymbol{\sigma}_{\mathrm{IMU},k},\sigma_{v,k},\Delta t_k\right),
+\label{eq:naive-q}
+\end{equation}
+where $r_k$ is a sliding GPS--encoder discrepancy, $\boldsymbol{\sigma}_{\mathrm{IMU},k}$ summarizes vibration and angular-rate variability, $\sigma_{v,k}$ summarizes command or encoder variability, and $\Delta t_k$ describes packet timing. This design is deliberately treated as a vulnerable pattern rather than as a claim that GPS disagreement is intrinsically process noise. GPS disagreement can originate in either process mismatch or measurement error; a residual-coupled $\mathbf{Q}$ update is included because it is a plausible but security-sensitive self-calibration shortcut.
+
+The covariance-poisoning mechanism is
+\begin{equation}
+\mathbf{a}_k \uparrow \;\Rightarrow\; r_k \uparrow \;\Rightarrow\; \mathbf{Q}^{\mathrm{naive}}_k \uparrow \;\Rightarrow\; \mathbf{S}_k \uparrow \;\Rightarrow\; \lambda_k \downarrow.
+\label{eq:poisoning-chain}
+\end{equation}
+A slow drift may cause a naive adaptive estimator to explain attack-induced discrepancy as increased uncertainty. The proposal tests this chain causally with paired replay experiments rather than assuming adaptation is automatically beneficial.
+
+\begin{proposition}[Covariance-inflation stealth monotonicity]
+Let $\mathbf{S}_1\succ\mathbf{0}$ and $\mathbf{S}_2\succeq\mathbf{S}_1$. For any fixed nonzero attack vector $\mathbf{a}$,
+\begin{equation}
+\mathbf{a}^{T}\mathbf{S}_2^{-1}\mathbf{a}
+\leq
+\mathbf{a}^{T}\mathbf{S}_1^{-1}\mathbf{a}.
+\label{eq:covariance-monotonicity}
+\end{equation}
+Consequently, whenever an adaptive covariance update increases the predicted innovation covariance in the positive-semidefinite order, it cannot increase the instantaneous noncentrality parameter for the same attack vector.
+\end{proposition}
+
+\begin{proof}
+For positive-definite matrices, inversion reverses the Loewner order: $\mathbf{S}_2\succeq\mathbf{S}_1\succ\mathbf{0}$ implies $\mathbf{S}_2^{-1}\preceq\mathbf{S}_1^{-1}$. Premultiplying and postmultiplying by $\mathbf{a}^{T}$ and $\mathbf{a}$ yields Equation~\eqref{eq:covariance-monotonicity}. \qed
+\end{proof}
+
+The proposition does not claim that every increase in $\mathbf{Q}_k$ produces a globally ordered increase in $\mathbf{S}_k$ over all nonlinear EKF trajectories. It establishes the local statistical mechanism once covariance inflation reaches the innovation covariance. The physical study verifies the full causal path empirically using identical raw rover logs, frozen hyperparameters, and attack-only GPS replay.\subsection{GPS-Independent Covariance Prediction and Evidence-Gated Adaptation}
+The proposed covariance predictor excludes GPS-derived residuals from its input. It uses a GPS-independent feature vector
+\begin{equation}
+\mathbf{f}^{\mathrm{GI}}_k=
+[\boldsymbol{\sigma}_{\mathrm{IMU},k},\;\sigma_{v,k},\;s_k,\;\Delta t_k^{\mathrm{edge}},\;\eta_k^{\mathrm{edge}}]^T,
+\end{equation}
+where $s_k$ is an encoder--IMU slip proxy, $\Delta t_k^{\mathrm{edge}}$ is the inter-arrival time measured by the edge receiver, and $\eta_k^{\mathrm{edge}}\in\{0,1\}$ summarizes edge-observed sequence continuity, timestamp consistency, stale-packet indicators, and allowable jitter. Under the coordinate-only threat boundary, these inputs are not modified by the attacker. A lightweight regressor trained only on benign data predicts a bounded diagonal covariance proposal:
+\begin{equation}
+\widetilde{\mathbf{Q}}_k=g_{\mathrm{GI}}\left(\mathbf{f}^{\mathrm{GI}}_k\right).
+\end{equation}
+
+GPS-independent prediction blocks the direct poisoning path in which a manipulated GPS--dead-reckoning discrepancy is reinterpreted as benign process noise. It is not, however, sufficient against an informed attacker that waits for naturally high-uncertainty conditions---for example, genuine vibration, wheel slip, acceleration, or transport jitter---when the GPS-independent regressor legitimately proposes a larger covariance. Such an attacker does not poison the feature vector; it harvests legitimate uncertainty as cover for semantic drift.
+
+The evidence gate is a second line of defense. In addition to edge-transport consistency and a soft instantaneous NIS condition, it tests whether the recent whitened innovation has developed a persistent directional bias. Define
+\begin{equation}
+\mathbf{c}_k=\lambda_c\mathbf{c}_{k-1}+(1-\lambda_c)\mathbf{S}_{k-1}^{-1/2}\boldsymbol{\nu}_k,
+\qquad 0<\lambda_c<1,
+\end{equation}
+where $\mathbf{c}_k$ is an exponentially smoothed innovation-bias statistic. The gate is
+\begin{equation}
+b_k=\mathbb{I}\!\left[\eta_k^{\mathrm{edge}}=1\;\wedge\;\delta_k\leq\gamma_{\mathrm{soft}}\;\wedge\;\|\mathbf{c}_k\|_2\leq c_{\mathrm{soft}}\right],
+\qquad \gamma_{\mathrm{soft}}<\gamma_\alpha,
+\label{eq:evidence-gate}
+\end{equation}
+where $\gamma_{\mathrm{soft}}$ and $c_{\mathrm{soft}}$ are selected on held-out benign trajectories. The final covariance update is
+\begin{equation}
+\mathbf{Q}^{\mathrm{EG}}_k=
+\begin{cases}
+\operatorname{clip}\!\left(\varphi_Q\mathbf{Q}^{\mathrm{EG}}_{k-1}+(1-\varphi_Q)\widetilde{\mathbf{Q}}_k\right), & b_k=1,\\[4pt]
+\mathbf{Q}^{\mathrm{EG}}_{k-1}, & b_k=0,
+\end{cases}
+\label{eq:evidence-gated-update}
+\end{equation}
+where $0<\varphi_Q<1$. A failed gate freezes covariance at its most recently accepted value; it never expands covariance in response to suspicious evidence. The objective is not to claim that every stealthy attack is eliminated, but to prevent both direct residual poisoning and the immediate use of persistent suspicious evidence to increase the uncertainty used for normalization.
+
+\subsection{Directional Detectability and Worst-Case Stealth Bound}
+For a desired probability of detection $P_D=\beta$ at false-alarm level $\alpha$, let $\lambda^*$ be the noncentrality value satisfying
+\begin{equation}
+1-F_{\chi^2_m(\lambda^*)}(\gamma_\alpha)=\beta.
+\end{equation}
+Writing the attack as $\mathbf{a}_k=\epsilon\mathbf{u}$ with $\|\mathbf{u}\|_2=1$, the direction-dependent attack magnitude required to reach the target detection probability is
+\begin{equation}
+\epsilon_{\mathrm{det}}(\mathbf{u};k)=
+\sqrt{\frac{\lambda^*}{\mathbf{u}^T\mathbf{S}_k^{-1}\mathbf{u}}}.
+\label{eq:directional-bound}
+\end{equation}
+Equation~\eqref{eq:directional-bound} distinguishes along-track, cross-track, and least-favorable attack directions. The worst-case target-detection amplitude is
+\begin{equation}
+\epsilon_{\mathrm{worst}}(k)=
+\sqrt{\lambda^*\lambda_{\max}(\mathbf{S}_k)}.
+\label{eq:worst-bound}
+\end{equation}
+This is not a universal lower bound for all attack geometries. It is the required target-detection amplitude under the least favorable direction, which aligns with the eigenvector associated with $\lambda_{\max}(\mathbf{S}_k)$. The study tests whether the observed ordering of empirical detection thresholds follows the directional and worst-case predictions.
+
+\subsection{Safety-Anchored Detection-Capability Map}
+Rather than using arbitrary ``safe,'' ``warning,'' and ``blind'' confidence scores, the operating map is defined relative to a mission-level tolerated trajectory deviation $\epsilon_{\mathrm{req}}$. From held-out attack trials, let $\epsilon_{50}$, $\epsilon_{90}$, and $\epsilon_{95}$ denote the attack amplitudes that yield 50\%, 90\%, and 95\% run-level detection probability, respectively. Each operating condition is classified as:
+\begin{itemize}
+    \item \textbf{Detectable:} $\epsilon_{90}\leq\epsilon_{\mathrm{req}}$ and nominal NIS calibration remains within the prespecified tolerance.
+    \item \textbf{Ambiguous:} $\epsilon_{90}>\epsilon_{\mathrm{req}}$, or the nominal NIS distribution shows meaningful calibration degradation.
+    \item \textbf{Low Sensitivity:} held-out trials demonstrate that manipulations near $\epsilon_{\mathrm{req}}$ cannot be reliably separated from benign variation.
+\end{itemize}
+The resulting map communicates a condition-dependent detection capability to the operator without claiming deterministic blindness.
+
+\section{Research Hypotheses}
+\begin{description}[style=unboxed,leftmargin=0cm]
+    \item[\textbf{H1 (Condition-Dependent Directional Detectability):}] The empirical manipulation magnitude required to reach a target detection probability increases under adverse motion disturbance and edge-telemetry conditions, and its condition ranking is predicted by $\epsilon_{\mathrm{det}}(\mathbf{u};k)$ and $\epsilon_{\mathrm{worst}}(k)$.
+    \item[\textbf{H2 (Causal Covariance-Poisoning Vulnerability):}] Under paired replay of the same physical logs and matched run-level false-alarm rate, a slow semantic drift causes a GPS-residual-dependent adaptive EKF to increase $\operatorname{tr}(\mathbf{Q}_k)$ and $\operatorname{tr}(\mathbf{S}_k)$, reduce normalized innovation sensitivity, and increase maximum undetected reported-state cross-track error relative to fixed and robust external baselines.
+    \item[\textbf{H3 (Direct-Poisoning Resistance):}] GPS-independent covariance prediction prevents the direct residual-to-covariance pathway in Equation~\eqref{eq:poisoning-chain} while retaining benign calibration benefits relative to a fixed-covariance EKF.
+    \item[\textbf{H4 (Strategic-Attacker Resistance):}] At the same amplitude, rate, and injection-count budget, a white-box attacker that schedules drift during estimated high-uncertainty, likely-gate-pass windows achieves greater stealth against ungated adaptation than against the evidence-gated method.
+    \item[\textbf{H5 (Transfer and Edge Feasibility):}] With thresholds frozen before evaluation, the proposed method retains calibrated run-level false-alarm behavior and its comparative advantage on held-out route, surface, and operating-condition splits; the end-to-end monitoring pipeline completes before the configured GPS update interval in at least 99\% of measured trials.
+    \item[\textbf{H6 (Capability-Map Reliability):}] The proposed capability map correctly distinguishes held-out operating conditions in which a mission-relevant manipulation is Detectable, Ambiguous, or Low Sensitivity.
+\end{description}
+
+\section{Methodology}
+
+\subsection{Experimental Platform, Instrumentation, and Architecture}
+The physical testbed is a Waveshare UGV01 differential-drive rover with wheel encoders and onboard IMU, augmented with a BN220 GPS receiver. The UGV01 ESP32 controller serves as the primary telemetry endpoint; the Arduino UNO Q is retained only as an optional development backup. The rover transmits timestamped GPS, encoder, IMU, command, and packet-integrity telemetry by Wi-Fi to an edge workstation. The workstation runs the Python Digital Twin, a GPS-independent security-prediction branch, any parallel GPS-fused operational EKF variants, the controlled transport emulator, the field-constrained application-layer attack injector, the logger, and the evaluation scripts. The security branch is propagated from commands, encoders, IMU measurements, and edge-observed timing; attacked GPS coordinates are scored against its pre-update prediction and are not used to reset or correct that branch during the attack window.
+
+Every packet and detector decision is instrumented with $t_{\mathrm{sample}}$, $t_{\mathrm{send}}$, $t_{\mathrm{rx}}$, $t_{\mathrm{queue}}$, $t_{\mathrm{estimate}}$, and $t_{\mathrm{alarm}}$. A session-level clock-offset calibration is performed before each collection session. If its uncertainty is too large for defensible one-way timing, source-to-alarm latency is reported as a bounded estimate and the paper reports the directly observable edge-pipeline latency $t_{\mathrm{alarm}}-t_{\mathrm{rx}}$ separately. All GPS manipulations occur only in the edge-side telemetry path after packet receipt. This injector is isolated from the estimator, security-prediction, detector, threshold, alarm, and logging processes and is not modeled as general edge-host compromise. The physical rover follows its commanded trajectory unchanged; the independent reference therefore measures the discrepancy between reported navigation state and physical trajectory rather than an attacker-induced physical displacement.
+
+\subsection{Physical Conditions and Prospective Generalization Design}
+
+The physical evaluation uses a tracked UGV01 rover on a repeated
+$0.5\,\mathrm{m}$ square route. The current design corpus covers two frozen
+commanded-speed profiles and two surfaces: a smooth kitchen floor and rough
+permeable concrete. Five accepted baseline-Wi-Fi trials are available for each
+speed--surface condition.
+
+The 20 existing runs form the design corpus. Complete physical runs, rather
+than individual telemetry rows or attack-injection instances, are treated as
+the independent experimental units. The corpus may be used for method
+development, ablation, and exploratory attack replay, but not as prospective
+confirmation of the final frozen detector.
+
+The prospective experiment will retain the same two speed profiles, two
+surfaces, and repeated-square route. Fifteen independently executed trials per
+speed--surface condition are targeted, producing 60 runs. Detector thresholds,
+alarm persistence, uncertainty policies, attack budgets, accepted-run rules,
+and statistical tests will be frozen before these runs are collected.
+
+Baseline Wi-Fi is the physical transport condition. Controlled buffered delay
+and jitter are generated by the edge-side transport emulator and evaluated as
+paired transformations of the same source streams. Delivery manipulation is
+treated as an A2 robustness extension and is not conflated with the primary A1
+coordinate-only attacker.
+
+Independent trajectory ground truth will be obtained using one fixed USB
+webcam mounted approximately $1.5$--$2\,\mathrm{m}$ high at an oblique corner
+view of the route. Camera intrinsics will be calibrated using a ChArUco board.
+Four or more AprilTags with measured world coordinates will define the
+evaluation frame, while a rigid multi-tag board mounted on the UGV01 will
+provide rover position and yaw through calibrated multi-marker pose
+estimation.
+
+The camera pipeline will record camera timestamp, planar position, yaw,
+visible-marker count, reprojection error, and tracking validity. Camera time
+will be aligned with telemetry source time using a recorded synchronization
+event. Before accepted collection, the system will be validated at measured
+static positions and known headings, and its RMS error, maximum error,
+detection coverage, and reprojection error will be reported.
+
+The external trajectory is used only for evaluation. It is never supplied to
+the rover controller, state estimator, uncertainty adaptation mechanism, or
+detector.
+
+\subsection{Phase A: Benign Data, Calibration, and Parameter Locking}
+For every retained physical run, the raw sensor stream, reference trajectory,
+command profile, route identity, surface identity, loading condition, and
+transport condition are logged. Data are split by complete run, never by
+individual time step.
+
+The naive residual-coupled model and GPS-independent covariance predictor are trained only on benign development runs. Their outputs are bounded diagonal covariance proposals and are selected with held-out innovation negative log-likelihood, NIS coverage, and innovation-whiteness diagnostics. Gate parameters $(\gamma_{\mathrm{soft}},c_{\mathrm{soft}},\lambda_c)$ and every detector threshold are frozen before attack evaluation. Per-update NIS calibration is reported separately from operational detection performance.
+
+\subsection{Matched-False-Alarm Evaluation Protocol}
+A detector is compared fairly only after it has been calibrated to the same \emph{run-level} nominal false-alarm target. For detector $d$ and benign run $j$, let $q^{(d)}_{j,k}$ be its alarm score after a fixed settling period and define the run-level score
+\begin{equation}
+M^{(d)}_j=\max_{k\in\mathcal{W}_{\mathrm{eval}}}q^{(d)}_{j,k},
+\qquad
+A^{(d)}_j=\mathbb{I}[M^{(d)}_j>\theta_d].
+\label{eq:run-level-alarm}
+\end{equation}
+For each method, $\theta_d$ is selected only from training/validation benign runs so that
+\begin{equation}
+\widehat{P}_{\mathrm{FA,run}}^{(d)}\approx\alpha_{\mathrm{run}}=0.05
+\label{eq:matched-far}
+\end{equation}
+under the same evaluation horizon, burn-in period, and packet-delay profile. The threshold is not retuned on held-out nominal or attack runs. Detection probability is then
+\begin{equation}
+\widehat{P}_{\mathrm{D,run}}^{(d)}=\Pr(A^{(d)}_j=1\mid\text{attack}),
+\end{equation}
+with run-level false alarms, median and 95th-percentile detection delay, and maximum undetected reported-state cross-track error reported at matched $\widehat{P}_{\mathrm{FA,run}}$. This avoids the misleading comparison of detectors that have different opportunities to trigger false alarms over a full drive.
+
+\subsection{Phase B: Causal Covariance-Poisoning Study}
+The covariance-poisoning result uses paired replay: the same raw physical trajectory, trusted sensor stream, transport profile, attack direction, and attack budget are replayed through multiple estimators. The only manipulated input is the GPS coordinate stream. For each physical log, the following counterfactual conditions are evaluated:
+\begin{enumerate}
+    \item clean GPS with the naive adaptive estimator;
+    \item drifted GPS with the naive adaptive estimator;
+    \item drifted GPS with the naive covariance sequence frozen to its clean-log counterfactual; and
+    \item drifted GPS with GPS-independent ungated and evidence-gated adaptation.
+\end{enumerate}
+This protocol isolates whether a reduction in statistical sensitivity arises specifically through covariance adaptation rather than from the drift alone. Paired effect sizes are reported for $\Delta\operatorname{tr}(\mathbf{Q}_k)$, $\Delta\operatorname{tr}(\mathbf{S}_k)$, $\Delta\lambda_k$, NIS score trajectory, detection delay, and maximum undetected reported-state cross-track error.
+
+\subsection{Pre-Registered Decisive Causal Figure}
+The main result is a four-panel paired trace generated from the same physical run and attack budget: (a) GPS--dead-reckoning residual and injected drift; (b) $\operatorname{tr}(\mathbf{Q}_k)$ and $\operatorname{tr}(\mathbf{S}_k)$ for naive, frozen-covariance, GPS-independent, and evidence-gated variants; (c) NIS or matched run-level alarm score with detector thresholds and gate state; and (d) reported-state cross-track error relative to the independent trajectory reference, with first-alarm markers. The caption explicitly states the shared physical log, shared attacker budget, matched run-level false-alarm calibration, and whether a trace is representative or selected by a pre-specified median-effect rule. A companion aggregate panel reports bootstrap confidence intervals of the paired effects across independent logs.
+
+\subsection{Phase C: Attacks and Detectability Curves}
+After a fixed nominal settling period, the following A1 coordinate-manipulation attacks are evaluated. A2 delivery manipulation and A3 combined tests are analyzed separately as secondary robustness extensions:
+\begin{itemize}
+    \item \textbf{Directional step bias:} $\mathbf{a}_k=\epsilon\mathbf{u}$ for along-track, cross-track, and least-favorable covariance-eigenvector directions when implementable. The sweep estimates $\epsilon_{50}$, $\epsilon_{90}$, and $\epsilon_{95}$.
+    \item \textbf{Oblivious slow drift:} a fixed-schedule bounded-rate drift that tests direct covariance poisoning.
+    \item \textbf{White-box strategic drift:} the same bounded budget is scheduled according to Equation~\eqref{eq:strategic-attack} to exploit naturally high uncertainty and likely gate-passage windows without altering trusted fields.
+    \item \textbf{Replay and coordinate freezing:} secondary robustness tests reported separately from the central covariance-attack claim.
+\end{itemize}
+For transition-region conditions, 15--20 independent attack replays are collected per attack amplitude or schedule. Bootstrap confidence intervals are reported for $\epsilon_{50}$, $\epsilon_{90}$, detection probability, detection delay, covariance-escalation ratio, gate activation rate, and maximum undetected reported-state cross-track error.
+
+\subsection{End-to-End Edge Performance and Robustness Measurements}
+The deployment claim is validated with measured rather than assumed timing. For each configuration, the study reports packet rate, loss, stale-packet rate, queue depth, p50/p95/p99 and maximum edge-pipeline latency, source-to-alarm latency when clock-offset quality permits, CPU utilization, memory footprint, and the fraction of decisions completed within one GPS update interval. The latency experiment is repeated under baseline and controlled stressed delay/jitter operating conditions and while all baseline detectors are active. A separate A2 analysis may apply adversarial delivery schedules, but the detector is not claimed to infer intent from timing alone. The detector must not be credited for security performance if it violates the real-time timing budget during the corresponding operating condition.
+
+\subsection{Statistical Reporting and Capability Maps}
+The primary security metrics are matched-$P_{\mathrm{FA,run}}$ detection probability and maximum undetected reported-state cross-track error. Secondary metrics are $\epsilon_{50}$, $\epsilon_{90}$, $\epsilon_{95}$, detection delay, NIS coverage, calibration error, innovation autocorrelation, covariance-escalation ratio, gate-pass rate, and theory-to-observation error between $\epsilon_{\mathrm{worst}}$ and empirical thresholds. Confidence intervals are bootstrap intervals over independent physical runs, preserving within-run time structure. The safety-anchored map classifies an operating condition as Detectable, Ambiguous, or Low Sensitivity using held-out results and the pre-specified mission tolerance $\epsilon_{\mathrm{req}}$.
+
+\section{Baselines and Ablations}
+\label{sec:baselines}
+
+The evaluation separates state prediction, uncertainty normalization, robust measurement handling, sequential drift detection, covariance adaptation, trusted features, and evidence-gated updates. Every principal baseline receives the matched run-level false-alarm calibration in Equation~\eqref{eq:matched-far}.
+
+\begin{table}[t]
+\centering
+\caption{Primary baselines and ablations, all compared at matched run-level false-alarm rate.}
+\label{tab:baselines}
+\scriptsize
+\begin{tabular}{L{0.19\linewidth} L{0.42\linewidth} L{0.28\linewidth}}
+\toprule
+\textbf{Method} & \textbf{Core logic} & \textbf{Purpose} \\
+\midrule
+B1: GPS jump threshold & Consecutive-position displacement rule. & Basic plausibility reference. \\
+B2: Fixed DT residual & Raw GPS--security-prediction Euclidean residual. & Tests unnormalized model mismatch. \\
+B3: Fixed security EKF--NIS & GPS-independent prediction with fixed $\mathbf{Q}$/$\mathbf{R}$ and NIS score. & Conventional innovation detector with an independent prediction reference. \\
+B4: Robust innovation-gated EKF & Rejects or downweights measurements beyond a calibrated innovation gate. & Standard robust measurement-handling baseline. \\
+B5: Huber-weighted EKF & Applies bounded-influence innovation weighting before the measurement update. & Robust estimator baseline against outlier-like GPS corruption. \\
+B6: CUSUM whitened-innovation detector & Sequentially accumulates small persistent whitened-innovation shifts. & Strong baseline for slow drift. \\
+B7: Naive adaptive EKF & GPS residual contributes to covariance proposal. & Direct covariance-poisoning vulnerability baseline. \\
+B8: GPS-independent adaptive EKF & Trusted proprioceptive/timing features only; no gate. & Isolates direct-poisoning resistance. \\
+B9: Proposed evidence-gated DT & GPS-independent proposal, evidence gate, NIS, and capability map. & Tests defense against strategic uncertainty harvesting. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{External Robust Baselines}
+B4 uses a conventional innovation gate with a calibrated reject/downweight rule. B5 uses a Huber-style bounded-influence update \cite{huber1981robust}; the tuning constant is selected only on benign development runs. B6 applies a Page--CUSUM statistic to the whitened innovation or NIS stream \cite{page1954}; its allowance and decision threshold are locked at the same run-level false-alarm target. These are not custom variants of the proposed method. They test whether ordinary robustification or sequential detection eliminates the observed weakness without the GPS-independent, evidence-gated covariance design.
+
+\subsection{Naive, GPS-Independent, and Evidence-Gated Ablations}
+B7 includes GPS--dead-reckoning disagreement in covariance adaptation through Equation~\eqref{eq:naive-q}. B8 removes the attacker-controlled residual while still allowing continuous adaptation. B9 adds the evidence gate in Equation~\eqref{eq:evidence-gate}. This B7$\rightarrow$B8$\rightarrow$B9 chain separates: (i) direct residual poisoning, (ii) legitimate high-uncertainty cover, and (iii) the added protection against strategic scheduling. GPS-quality-only flags and replay/freeze heuristics are retained as secondary diagnostic references for their corresponding scenarios; they are not treated as central comparisons for the covariance-attack claim \cite{shen2020drift,sathaye2021semperfi,satchidanandan2017dynamic,yaghooti2021physical}.
+\section{Offline Real-Log Attack Campaign Results}
+\label{sec:offline_results}
+
+The offline attack campaign was executed on the accepted UGV01 benign corpus using the frozen real-log replay pipeline. The corpus contains 20 physical rover runs collected across two surfaces, two speed settings, and five trials per condition. All attacks were injected only into the replayed GPS-coordinate stream; the raw rover logs, firmware behavior, encoder readings, IMU readings, packet timing fields, and stored telemetry were not modified.
+
+The completed campaign evaluated 11 detector and baseline variants over 24 attack profiles and three attack start times. This produced 15,840 baseline-transport attack scenarios:
+\[
+20 \; \text{runs}
+\times 11 \; \text{variants}
+\times 24 \; \text{attack profiles}
+\times 3 \; \text{start times}
+= 15{,}840.
+\]
+The generated validation artifact reported that all 15,840 expected scenarios were observed and that no condition groups were invalid.
+
+\begin{table}[t]
+\centering
+\caption{Summary of the completed offline campaign.}
+\label{tab:offline_campaign_summary}
+\begin{tabular}{lr}
+\hline
+Quantity & Value \\
+\hline
+Physical benign runs & 20 \\
+Detector / baseline variants & 11 \\
+Attack profiles & 24 \\
+Attack start fractions & 25\%, 50\%, 70\% \\
+Total attack scenarios & 15,840 \\
+Invalid condition groups & 0 \\
+Validation status & Pass \\
+\hline
+\end{tabular}
+\end{table}
+
+The comparator suite included GPS-jump detection, raw digital-twin position residual, fixed normalized innovation squared (NIS), robust innovation gating, Huber-weighted EKF, CUSUM whitened-innovation detection, naive adaptive covariance, innovation-matching adaptive covariance, GPS-independent adaptive covariance, evidence-gated adaptive covariance, and a frozen-clean oracle reference.
+
+Benign-only threshold locking produced one leave-one-run-out false alarm out of 20 benign runs for every comparator. Thus, the point estimate matched the preregistered target,
+\[
+\hat{P}_{FA} = \frac{1}{20} = 0.05,
+\]
+but the Wilson 95\% confidence interval remained wide, approximately $[0.009, 0.236]$, because only 20 physical benign runs were available. This result should therefore be interpreted as controlled design-corpus behavior, not yet as final prospective false-alarm validation.
+
+\begin{table}[t]
+\centering
+\caption{Representative benign threshold-lock results.}
+\label{tab:threshold_lock_summary}
+\begin{tabular}{lrr}
+\hline
+Variant & Threshold & LORO False Alarms \\
+\hline
+Fixed NIS & 16.9015 & 1/20 \\
+Naive adaptive & 28.0716 & 1/20 \\
+GPS-independent adaptive & 29.2839 & 1/20 \\
+Evidence-gated adaptive & 28.7934 & 1/20 \\
+GPS jump & 5.0264 m & 1/20 \\
+Raw DT residual & 7.3078 m & 1/20 \\
+Robust innovation gate & 25.3239 & 1/20 \\
+Huber EKF & 6.4993 & 1/20 \\
+CUSUM whitened innovation & 190.3806 & 1/20 \\
+Innovation-matching adaptive & 10.2770 & 1/20 \\
+\hline
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:step_detection_probability} shows the directional step-attack detection probability. Sudden GPS jumps were detectable once the injected position offset became large. The GPS-jump baseline was strongest for abrupt offsets, reaching approximately $\epsilon_{90} \approx 7.05$--$7.08$ m. Fixed-NIS and raw-residual detectors required larger offsets, approximately 9.7--10 m for high detection probability, while several adaptive variants did not reach 90\% detection within the tested 10 m grid.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{results/step_detection_probability.png}
+\caption{Run-level step-attack detection probability for along-track and cross-track GPS offsets.}
+\label{fig:step_detection_probability}
+\end{figure}
+
+Figure~\ref{fig:drift_attack_outcomes} shows the slow-drift attack results. The main finding is that slow semantic GPS drift is much harder than a sudden jump. In the representative 0.05 m/s cross-track drift condition, all variants had zero run-level detection probability in the completed replay campaign. However, the harmful-but-stealthy probability differed across variants. The naive adaptive covariance variant showed the highest harmful-but-stealthy probability, approximately 0.150, compared with approximately 0.017 for several fixed or robust baselines.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{results/drift_attack_outcomes.png}
+\caption{Detection probability and harmful-but-stealthy probability for slow drift attacks.}
+\label{fig:drift_attack_outcomes}
+\end{figure}
+
+Figure~\ref{fig:covariance_poisoning} summarizes the covariance-poisoning behavior. The naive residual-coupled adaptive method can increase uncertainty under attack, which reduces normalized innovation sensitivity and allows larger paired state deviation before alarm. This supports the central mechanism studied in this project: uncertainty adaptation can itself become a security-relevant attack surface when GPS residuals are allowed to influence covariance estimates without independent evidence.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{results/covariance_poisoning.png}
+\caption{Covariance and paired-state response under slow drift, illustrating the covariance-poisoning effect.}
+\label{fig:covariance_poisoning}
+\end{figure}
+
+Overall, the completed offline results support three conclusions. First, the replay framework and attack campaign are complete and reproducible over the accepted real UGV01 logs. Second, large step attacks are detectable under matched false-alarm calibration, but slow drift attacks remain difficult for standard detectors. Third, naive adaptive uncertainty can increase stealth risk, motivating GPS-independent and evidence-gated uncertainty logic. The remaining limitation is that these are counterfactual replay results against real logs rather than prospective live attacks with independent physical ground truth.
+\section{Expected Contributions}
+\begin{itemize}
+    \item \textbf{C1: Formal covariance-inflation attack mechanism.} A monotonicity proposition showing why an increase in predicted innovation covariance reduces the instantaneous normalized statistical footprint of a fixed semantic attack, together with a paired physical replay protocol that tests the full causal chain.
+    \item \textbf{C2: Adversary-aware adaptive-state-estimation evaluation.} An experiment that distinguishes direct covariance poisoning from strategic uncertainty harvesting by enforcing shared attacker budgets, explicit attacker knowledge, and matched operational false-alarm rates.
+    \item \textbf{C3: GPS-independent and evidence-gated adaptation.} A lightweight covariance estimator that removes GPS-residual dependence and freezes adaptation on persistent suspicious evidence, evaluated against external robust estimators and sequential drift detectors.
+    \item \textbf{C4: Generalization-aware physical evidence.} Frozen-parameter route, surface, speed, network, and loading/traction transfer tests that distinguish condition-calibrated performance from out-of-condition robustness.
+    \item \textbf{C5: Safety-anchored detectability maps.} Directional bounds and held-out empirical $\epsilon_{90}$ estimates that report when a mission-relevant reported-state deviation is Detectable, Ambiguous, or Low Sensitivity.
+    \item \textbf{C6: Measured edge deployment and reproducible artifacts.} An end-to-end timing characterization plus a release package containing telemetry schema, firmware changes, raw and processed logs, attack labels, frozen configurations, analysis scripts, and instructions to regenerate every result.
+\end{itemize}
+
+\section{Artifact and Reproducibility Package}
+The project will release a versioned artifact package after removing credentials and any location-sensitive metadata. The package contains: (i) firmware and packet-schema documentation; (ii) a data dictionary with units, coordinate frames, route/surface/operating-condition metadata, and timing semantics; (iii) raw telemetry, independent trajectory-reference traces, processed aligned logs, and attack labels; (iv) fixed configuration files for every estimator, gate, attacker budget, latency profile, and train/validation/test split; (v) deterministic attack-injection and analysis scripts; (vi) environment lockfiles or container instructions; and (vii) a single command sequence that regenerates every table and figure from the released data. Each artifact version records a Git commit identifier, random seed, and cryptographic checksum for datasets. The manuscript reports which results use physical reruns and which use controlled attack replays of fixed physical logs.
+
+\section{Scope and Limitations}
+The physical evaluation uses one low-cost differential-drive platform, one GPS receiver class, and a coordinate-only application-layer attacker. The contribution is therefore a mechanism-level characterization of adaptive mobile-state-estimation attack surfaces, not a claim that one numerical threshold transfers unchanged across vehicles, sensors, or environments. Each new platform requires benign recalibration of covariance bounds, gate thresholds, and mission tolerance $\epsilon_{\mathrm{req}}$.
+
+The white-box attacker is intentionally strong with respect to knowledge of the detector but limited in modification capability. It cannot alter IMU, encoder, command, sequence, GPS-quality, or edge-arrival fields. Delivery manipulation is therefore outside the primary A1 threat model and appears only as the separately labeled A2/A3 robustness extension. Under A2, edge-arrival timing is attacker-influenced and cannot be treated as independent evidence; a deployable defense would require authenticated source metadata, additional sensor or clock redundancy, or a detector designed for that distinct trust boundary.
+
+General compromise of the edge host is also outside scope. An attacker able to modify the security-prediction branch, EKF implementation, detector thresholds, alarm, or logs could simply disable or falsify the defense. The controlled edge-side injector has only field-constrained access to the replayed GPS coordinates and is not granted those privileges. The project does not claim over-the-air RF GPS spoofing detection; it studies the navigation-layer semantic consequence of coordinate manipulation under a controlled, reproducible injection path.
+
+
+\begin{thebibliography}{99}
+\bibitem{ref2} Aldosari, W. (2023). Deep Learning-Based Location Spoofing Attack Detection and Time-of-Arrival Estimation through Power Received in IoT Networks. Sensors, 23(23), 9606. https://doi.org/10.3390/s23239606
+\bibitem{ref3} Arbanas, B., Petric, F., Batinović, A., Polić, M., Vatavuk, I., Marković, L., Car, M., Hrabar, I., Ivanović, A., \& Bogdan, S. (2022). From ERL to MBZIRC: Development of An Aerial-Ground Robotic Team for Search and Rescue. https://doi.org/10.5772/intechopen.99210
+\bibitem{ref7} Cai, S., Gou, W., Wen, W., Lu, X., Fan, J., \& Guo, X. (2023). Design and Development of a Low-Cost UGV 3D Phenotyping Platform with Integrated LiDAR and Electric Slide Rail. Plants, 12(3), 483. https://doi.org/10.3390/plants12030483
+\bibitem{ref11} González, R., \& Iagnemma, K. (2017). Slippage estimation and compensation for planetary exploration rovers: State of the art and future challenges. Journal of Field Robotics, 35(4), 564–577. https://doi.org/10.1002/rob.21761
+\bibitem{ref12} He, Y., Chen, C., Bu, C., \& Han, J. (2015). A Polar Rover for Large-Scale Scientific Surveys: Design, Implementation and Field Test Results. International Journal of Advanced Robotic Systems, 12(10). https://doi.org/10.5772/60974
+\bibitem{ref14} Hidalgo, J., Poulakis, P., Köhler, J., Cerro, J. del, \& Barrientos, A. (2012). Improving Planetary Rover Attitude Estimation via MEMS Sensor Characterization. Sensors, 12(2), 2219–2235. https://doi.org/10.3390/s120202219
+\bibitem{ref16} Iqbal, J., Xu, R., Halloran, H., \& Li, C. (2020a). Development of a Multi-Purpose Autonomous Differential Drive Mobile Robot for Plant Phenotyping and Soil Sensing. Electronics, 9(9), 1550. https://doi.org/10.3390/electronics9091550
+\bibitem{ref37} Nkwocha, C. L., \& Chandel, A. K. (2025a). Initial prototyping of a low-cost unoccupied ground vehicle platform for crop problem risk and severity mapping in agricultural fields. 17. https://doi.org/10.1117/12.3054122
+\bibitem{ref40} Ouerdane, F., Abubaker, A., Aremu, M. B., Abdel-Nasser, M., Eltayeb, A., Sattar, K., Javaid, A., Ibnouf, A., Ferik, S. E., \& Al-Naser, M. (2025). Multi-Domain Robot Swarm for Industrial Mapping and Asset Monitoring: Technical Challenges and Solutions. Sensors, 25(20), 6295. https://doi.org/10.3390/s25206295
+\bibitem{ref43} Pettorru, G., Pilloni, V., \& Martalò, M. (2024). Trustworthy Localization in IoT Networks: A Survey of Localization Techniques, Threats, and Mitigation. Sensors, 24(7), 2214. https://doi.org/10.3390/s24072214
+\bibitem{ref48} Reis, M. J. C. S., \& Reis, A. J. D. (2025). Edge-Based Real-Time Fault Detection in UAV Systems via B-Spline Telemetry Reconstruction and Lightweight Hybrid AI. Sensors, 25(16), 4944. https://doi.org/10.3390/s25164944
+\bibitem{ref53} Shaju, S., George, T. F., Francis, J. K., Joseph, M., \& Thomas, M. J. (2023). Conceptual design and simulation study of an autonomous indoor medical waste collection robot. IAES International Journal of Robotics and Automation (IJRA), 12(1), 29. https://doi.org/10.11591/ijra.v12i1.pp29-40
+\bibitem{ref60} Tharayil, K. S., Farshteindiker, B., Eyal, S., Hasidim, N., Hershkovitz, R., Houri, S., Yoffe, I., Oren, M., \& Oren, Y. (2019). Sensor Defense In-Software (SDI): Practical Software Based Detection of Spoofing Attacks on Position Sensor. https://doi.org/10.48550/arxiv.1905.04691
+\bibitem{ref61} Toma, C., Popa, M., Iancu, B., Doinea, M., Pascu, A., \& Ioan-Dutescu, F. (2022). Edge Machine Learning for the Automated Decision and Visual Computing of the Robots, IoT Embedded Devices or UAV-Drones. Electronics, 11(21), 3507. https://doi.org/10.11213307
+\bibitem{ref63} Widjiantoro, B. L., Indriawati, K., Buyung, T. S. N. A., \& Wahyuadnyana, K. D. (2024). Experimental Validation: Perception and Localization Systems for Autonomous Vehicles using the Extended Kalman Filter Algorithm. International Journal on Smart Sensing and Intelligent Systems, 17(1). https://doi.org/10.2478/ijssis-2024-0002
+\bibitem{ref65} Yu, Z., Kaplan, Z., Yan, Q., \& Zhang, N. (2021). Security and Privacy in the Emerging Cyber-Physical World: A Survey. IEEE Communications Surveys \& Tutorials, 23(3), 1879–1919. https://doi.org/10.1109/comst.2021.3081450
+
+\bibitem{ref71} Mo, Y. and Sinopoli, B., 2010, April. False data injection attacks in control systems. In Preprints of the 1st workshop on Secure Control Systems (Vol. 1, pp. 1-1).
+
+\bibitem{pasqualetti2013attack}
+Pasqualetti, Fabio, Florian Dörfler, and Francesco Bullo.
+``Attack Detection and Identification in Cyber-Physical Systems.''
+\textit{IEEE Transactions on Automatic Control} 58, no. 11 (2013): 2715--2729.
+https://arxiv.org/abs/1202.6144.
+
+\bibitem{fawzi2014secure}
+Fawzi, Hamza, Paulo Tabuada, and Suhas Diggavi.
+``Secure Estimation and Control for Cyber-Physical Systems Under Adversarial Attacks.''
+\textit{IEEE Transactions on Automatic Control} 59, no. 6 (2014): 1454--1467.
+https://arxiv.org/abs/1205.5073.
+
+\bibitem{satchidanandan2017dynamic}
+Satchidanandan, Bharadwaj, and P. R. Kumar.
+``Dynamic Watermarking: Active Defense of Networked Cyber-Physical Systems.''
+\textit{Proceedings of the IEEE} 105, no. 2 (2017): 219--240.
+https://arxiv.org/abs/1606.08741.
+
+\bibitem{shen2020drift}
+Shen, Junjie, Jun Yeon Won, Zeyuan Chen, and Qi Alfred Chen.
+``Drift with Devil: Security of Multi-Sensor Fusion Based Localization in High-Level Autonomous Driving Under GPS Spoofing.''
+In \textit{Proceedings of the 29th USENIX Security Symposium}, 931--948.
+USENIX Association, 2020.
+https://arxiv.org/abs/2006.10318.
+
+\bibitem{sathaye2021semperfi}
+Sathaye, Harshad, Gerald LaMountain, Pau Closas, and Aanjhan Ranganathan.
+``SemperFi: A Spoofer Eliminating GPS Receiver for UAVs.''
+In \textit{Proceedings of the Network and Distributed System Security Symposium}.
+Internet Society, 2022.
+https://arxiv.org/abs/2105.01860.
+
+\bibitem{akhlaghi2017adaptive}
+Akhlaghi, Shahrokh, Ning Zhou, and Zhenyu Huang.
+``Adaptive Adjustment of Noise Covariance in Kalman Filter for Dynamic State Estimation.''
+In \textit{Proceedings of the IEEE Power \& Energy Society General Meeting}.
+IEEE, 2017.
+https://arxiv.org/abs/1702.00884.
+
+\bibitem{havangi2010adaptive}
+Havangi, Ramazan, Mohammad Ali Nekoui, and Mohammad Teshnehlab.
+``Adaptive Neuro-Fuzzy Extended Kalman Filtering for Robot Localization.''
+\textit{International Journal of Computer and Electrical Engineering} 2, no. 5 (2010): 804--808.
+https://arxiv.org/abs/1004.3267.
+
+\bibitem{yaghooti2021physical}
+Yaghooti, Bahram, Raffaele Romagnoli, and Bruno Sinopoli.
+``Physical Watermarking for Replay Attack Detection in Continuous-Time Systems.''
+arXiv preprint arXiv:2103.00790, 2021.
+https://arxiv.org/abs/2103.00790.
+\end{thebibliography}
+
+\section{Publication-Focused Research Roadmap}
+\label{sec:roadmap}
+
+This roadmap replaces the earlier hardware-arrival schedule. The rover,
+telemetry path, benign corpus, replay infrastructure, frozen uncertainty
+variants, statistical attack campaign, and initial covariance-poisoning study
+are complete. The remaining work is not primarily additional software volume;
+it is the independent validation and comparative evidence needed to support a
+strong publication claim.
+
+Three completion measures are therefore reported separately:
+
+\begin{itemize}
+    \item \textbf{Engineering implementation: approximately 95\% complete.}
+    The firmware, logging, replay, detector, alarm, uncertainty variants,
+    attack injection, and statistical analysis paths are operational.
+
+    \item \textbf{Current experimental program: approximately 85--90\%
+    complete.} The 20-run design corpus and the primary offline campaigns are
+    complete, but strategic, transport-transfer, and prospective validation
+    experiments remain.
+
+    \item \textbf{Strong-publication readiness: approximately 55--60\%
+    complete.} Independent false-alarm validation, physical trajectory ground
+    truth, standard adaptive-filter reproduction, live edge execution, and a
+    results-oriented manuscript are still required.
+\end{itemize}
+
+\subsection{Completed and Frozen Foundation}
+
+The following artifacts are complete and should be changed only through an
+explicit versioned revision:
+
+\begin{itemize}
+    \item UGV01 firmware under \texttt{ugv01\_gps\_dev}, including the verified
+    BN220 RX wiring and combined \texttt{T:147} telemetry.
+
+    \item Edge logging of source, send, arrival, estimate, and alarm timing,
+    together with clock-offset calibration, packet loss, stale-packet state,
+    queue depth, and HTTP latency.
+
+    \item A checksum-identified 20-run physical benign corpus covering two
+    speeds, two surfaces, and five trials per condition on the repeated
+    $0.5\,\mathrm{m}$ square route.
+
+    \item Real-log EKF replay, a persistent three-of-five alarm, and fixed,
+    naive-adaptive, frozen-clean, GPS-independent, and evidence-gated
+    uncertainty variants.
+
+    \item A 7,200-scenario replay-injected attack campaign with run-clustered
+    confidence intervals, directional detection curves, detection delay, and
+    harmful-but-stealthy outcomes.
+
+    \item A paired covariance-poisoning analysis showing statistically
+    measurable covariance inflation and NIS suppression, but no established
+    operational attacker advantage against the frozen-clean control.
+
+    \item A rejected learned Random Forest uncertainty candidate, retained as
+    a documented negative result rather than activated as a weak model.
+\end{itemize}
+
+The existing 20 runs are now the \emph{design corpus}. They may be used for
+method development, ablation, and exploratory analysis, but not for a new claim
+of independent generalization.
+
+\subsection{Stage 1: Freeze the Defensible Scientific Claim}
+
+\textbf{Goal.} Align the paper claim with the evidence before performing more
+experiments.
+
+\begin{enumerate}
+    \item State the primary current result precisely: residual-coupled
+    uncertainty adaptation permits measurable covariance inflation and NIS
+    suppression under semantic GPS drift.
+
+    \item Do not yet claim that this mechanism creates a practically harmful
+    attacker advantage or that evidence gating eliminates such an advantage.
+
+    \item Treat the digital twin as an edge-hosted security estimator and
+    replay framework, not as a production autonomous controller.
+
+    \item Freeze the coordinate-only A1 threat model. Delivery manipulation
+    remains a separately labeled A2 robustness extension.
+\end{enumerate}
+
+\textbf{Exit criterion.} The abstract, contribution list, threat model, and
+hypotheses make no claim stronger than the current evidence.
+
+\subsection{Stage 2: Correct False-Alarm Calibration and Validation}
+
+\textbf{Goal.} Replace the current design-corpus leave-one-run-out result with
+a genuinely prospective run-level false-alarm evaluation.
+
+\begin{enumerate}
+    \item Keep the alarm initialization, motion gate, three-of-five persistence
+    rule, uncertainty coefficients, and detector thresholds frozen before new
+    data are collected.
+
+    \item Describe the current $1/20$ leave-one-run-out result only as a
+    design-corpus diagnostic. A maximum benign run statistic produces an
+    order-statistic effect and is not independent confirmation of
+    $P_{\mathrm{FA}} \leq 0.05$.
+
+    \item Defer all new accepted rover runs until the webcam and AprilTag
+    ground-truth system in Stage~3 has been installed, calibrated, and passed
+    its accuracy checks. Runs collected before that point would not provide the
+    independent physical reference required by the paper.
+
+    \item After ground-truth validation, collect one new untouched prospective
+    benign set using the frozen policy. This single collection serves both
+    run-level false-alarm validation and physical trajectory evaluation. A
+    balanced target is 60 complete runs:
+    \[
+        2\ \text{surfaces} \times 2\ \text{speeds} \times
+        15\ \text{trials} = 60\ \text{runs}.
+    \]
+    With zero run alarms, 59 or more independent runs are required for the
+    one-sided 95\% binomial upper bound to fall below approximately 0.05.
+
+    \item If 60 runs are infeasible, collect the largest untouched set that is
+    practical and report the false-alarm estimate with its confidence interval
+    without claiming that the upper bound satisfies 0.05.
+\end{enumerate}
+
+\textbf{Exit criterion.} Prospective run-level false alarms are reported with
+an exact binomial or run-clustered interval, and no prospective result has been
+used to retune the policy.
+
+\subsection{Stage 3: Add Independent Physical Ground Truth}
+
+\textbf{Goal.} Measure physical and reported trajectory error independently of
+the attacked GPS and paired clean EKF replay.
+
+\begin{enumerate}
+    \item Use the frozen ground-truth design: one fixed USB webcam mounted
+    approximately $1.5$--$2\,\mathrm{m}$ high at an oblique corner view of the
+    route, four or more measured AprilTag world references, and a rigid
+    multi-tag board on the UGV01. The camera is an external evaluator and must
+    not provide input to the rover, EKF, detector, or uncertainty policy.
+
+    \item Calibrate camera intrinsics with a ChArUco board. Estimate the rover
+    board pose with calibrated multi-marker PnP, not an uncalibrated image-plane
+    homography. Freeze camera focus, exposure, resolution, frame rate, pose,
+    marker family, printed dimensions, and measured world coordinates for each
+    collection session.
+
+    \item Export a separate ground-truth stream containing camera timestamp,
+    $x$, $y$, yaw, visible-marker count, reprojection error, and validity. Align
+    it to telemetry source time using a recorded synchronization event, then
+    preserve both the raw and aligned files.
+
+    \item Validate the system before accepted collection at measured static
+    points and known headings. Report RMS and maximum position and yaw error,
+    marker-detection coverage, and reprojection error; do not assume nominal
+    camera accuracy without this validation.
+
+    \item Capture ground truth for the prospective benign runs, or at minimum
+    a balanced subset across both speeds and both surfaces.
+
+    \item Report route error, turn error, physical cross-track error, and
+    repeatability separately from GPS-reported and EKF-estimated error.
+
+    \item Use the external trajectory only for evaluation; it must not enter
+    the detector or uncertainty adaptation logic.
+\end{enumerate}
+
+\textbf{Exit criterion.} The paper can distinguish physical rover deviation,
+reported GPS deviation, and digital-twin state deviation with a quantified
+reference uncertainty.
+
+\subsection{Ground-Truth Hardware Delivery Window}
+
+The following work should be completed before the webcam and mounting hardware
+arrive so that delivery does not block research progress:
+
+\begin{enumerate}
+    \item Freeze the prospective alarm configuration, accepted-run rules,
+    filenames, trial matrix, and statistical analysis before viewing any new
+    validation outcomes.
+
+    \item Implement and test the AprilTag/ChArUco video-processing pipeline on
+    prerecorded or synthetic video. Define the raw and aligned ground-truth CSV
+    schemas and add quality-control summaries.
+
+    \item Implement the standard residual-adaptive covariance baseline, robust
+    innovation baseline, fixed NIS baseline, and CUSUM baseline on the existing
+    design corpus.
+
+    \item Complete the matched ordinary-versus-strategic attack comparison and
+    the full-corpus transport delay/jitter replay.
+
+    \item Integrate the frozen detector into live edge execution and verify
+    replay-versus-live agreement on existing logs without collecting new rover
+    data.
+\end{enumerate}
+
+The existing 20 physical runs are sufficient for all work in this delivery
+window. No new accepted, threshold-setting, or prospective rover run should be
+collected without synchronized independent ground truth. Synthetic video,
+public calibration samples, or deliberately excluded test footage may be used
+to develop the camera software.
+
+After the hardware arrives, first calibrate and quantify the camera system,
+then collect excluded pilot runs. Only after the setup passes its frozen
+quality checks should the untouched prospective runs begin.
+
+\subsection{Stage 4: Reproduce the Vulnerability on Standard Estimators}
+
+\textbf{Goal.} Show that covariance poisoning is not merely a consequence of
+one custom residual-gain formula.
+
+\begin{enumerate}
+    \item Implement at least one recognized innovation- or residual-based
+    adaptive Kalman covariance method, such as innovation covariance matching
+    or a Sage--Husa-style update.
+
+    \item Compare it with fixed covariance, frozen-clean covariance,
+    GPS-independent adaptation, and evidence-gated adaptation under identical
+    attacks and thresholds.
+
+    \item Add the external detector baselines promised by the manuscript:
+    raw GPS/dead-reckoning residual, fixed NIS, robust innovation handling, and
+    a sequential drift detector such as CUSUM.
+
+    \item Report benign estimation quality as well as attack behavior. An
+    adaptive method is useful only if it improves benign calibration or state
+    estimation before security costs are considered.
+\end{enumerate}
+
+\textbf{Exit criterion.} The covariance-inflation and NIS-suppression result is
+either reproduced on a standard adaptive estimator or explicitly narrowed to
+the custom policy studied here.
+
+\subsection{Stage 5: Complete the Matched Strategic-Attacker Study}
+
+\textbf{Goal.} Test whether an informed attacker can harvest naturally
+high-uncertainty windows and whether evidence gating reduces that advantage.
+
+\begin{enumerate}
+    \item Compare ordinary drift and white-box strategic drift using identical
+    direction, maximum amplitude, rate, injection count, start horizon, and
+    total attack duration.
+
+    \item Keep a hindsight-oracle schedule separate as a non-realistic upper
+    bound.
+
+    \item Measure detection probability, delay, maximum undetected physical
+    and estimated deviation, time above mission tolerance, covariance
+    escalation, and evidence-gate pass rate.
+
+    \item Use complete physical runs as the statistical unit and report paired
+    effects with run-clustered confidence intervals.
+\end{enumerate}
+
+\textbf{Exit criterion.} The study can state whether strategic scheduling
+provides additional attacker advantage and whether evidence gating reduces it.
+
+\subsection{Stage 6: Transport Transfer and Live Edge Execution}
+
+\textbf{Goal.} Demonstrate that the claimed edge-hosted detector operates live
+and characterize its behavior under timing stress.
+
+\begin{enumerate}
+    \item Integrate the EKF, frozen uncertainty policy, persistent alarm, and
+    alarm timestamp into the edge logger or a dedicated streaming process.
+
+    \item Preserve rover firmware behavior and keep attack injection outside
+    the trusted detector process.
+
+    \item Evaluate frozen policies under baseline transport and preregistered
+    delay/jitter profiles over the complete accepted corpus, not only a small
+    diagnostic subset.
+
+    \item Report update rate, p50/p95/p99 source-to-estimate and
+    source-to-alarm latency, packet loss, stale rate, queue depth, CPU use, and
+    memory use.
+
+    \item Do not claim that timing stress is malicious unless the A2 delivery
+    attacker is explicitly enabled. Under A1 it is an operating condition.
+\end{enumerate}
+
+\textbf{Exit criterion.} A live UGV01-to-edge run produces the same detector
+fields as offline replay, and replay-versus-live outputs agree within stated
+numeric and timing tolerances.
+
+\subsection{Stage 7: Final Analysis and Claim Decision}
+
+After prospective validation, the paper should follow one of two evidence-led
+paths:
+
+\begin{itemize}
+    \item \textbf{Operational vulnerability path.} Use this framing only if
+    residual-coupled adaptation significantly worsens detection, harmful-run
+    probability, or mission-relevant undetected deviation against a matched
+    clean-covariance control.
+
+    \item \textbf{Mechanism and safe-design path.} If operational advantage
+    remains unsupported, frame the work as a measurement study that identifies
+    a measurable feedback vulnerability, establishes its practical limits, and
+    derives design rules for GPS-independent or gated adaptation.
+\end{itemize}
+
+Both paths should include directional capability maps classifying operating
+conditions as Detectable, Ambiguous, or Low Sensitivity relative to the frozen
+mission tolerance. A negative operational result is acceptable; hiding it or
+overstating a small effect is not.
+
+\textbf{Exit criterion.} Every primary claim maps to a prospective result,
+paired analysis, theorem, or explicitly labeled limitation.
+
+\subsection{Stage 8: Artifact Freeze and Manuscript Assembly}
+
+\begin{enumerate}
+    \item Pin dependency versions and add an automated test workflow.
+
+    \item Freeze raw logs, ground-truth files, manifests, checksums, thresholds,
+    attack configurations, analysis scripts, and generated figures.
+
+    \item Regenerate every paper table and figure from one documented command
+    sequence in a clean environment.
+
+    \item Replace the current proposal-style PDF with a results paper. Remove
+    outdated battery and 40-run planning text, and reconcile every promised
+    baseline with the implementation.
+
+    \item Add a claims-versus-evidence table, limitations section, ethics and
+    threat-boundary statement, and artifact availability statement.
+\end{enumerate}
+
+\textbf{Exit criterion.} The repository and manuscript reproduce the same
+frozen results, and an independent reader can identify exactly which evidence
+supports each claim.
+
+\subsection{Immediate Execution Order}
+
+The next actions, in order, are:
+
+\begin{enumerate}
+    \item Immediately mark the existing 20 runs as the design corpus and freeze
+    the prospective alarm policy, hypotheses, trial matrix, accepted-run rules,
+    filenames, and statistical tests. Do not collect new accepted rover data
+    during the equipment-delivery window.
+    \item Using only the design corpus, finish the missing estimator/detector
+    baselines, matched strategic comparison, live edge integration, and full
+    transport-stress replay.
+    \item Implement the camera calibration, AprilTag tracking, time-alignment,
+    ground-truth CSV, and quality-reporting software using synthetic, public,
+    or explicitly excluded video.
+    \item After delivery, mount the webcam, print and measure the tags,
+    calibrate the camera, and validate position and yaw error at known points.
+    \item Run two to four explicitly excluded pilots covering both surfaces;
+    repair the procedure only if a preregistered quality check fails.
+    \item Freeze the validated setup and collect the untouched prospective
+    benign matrix. Target 60 runs, balanced as 15 runs in each of the two-speed
+    by two-surface conditions; if fewer are feasible, report the exact
+    run-level confidence interval and weaken the false-alarm claim accordingly.
+    \item Join camera ground truth to telemetry by source time, verify run
+    quality without retuning the detector, and execute the frozen prospective
+    attack evaluation exactly once.
+    \item Generate physical, reported, and digital-twin error figures; freeze
+    the artifact and assemble the results manuscript.
+\end{enumerate}
+
+\end{document}

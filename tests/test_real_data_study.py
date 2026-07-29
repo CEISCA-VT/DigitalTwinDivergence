@@ -9,8 +9,10 @@ from DigitalTwin.analysis.real_data_study import (
     DRIFT_RATES_MPS,
     EPSILON_TARGETS,
     STEP_MAGNITUDES_M,
+    VARIANTS,
     AttackSpec,
     ReplayResult,
+    _alarm_config,
     _attack_measurements,
     _epsilon_at_probability,
     _isotonic_non_decreasing,
@@ -18,6 +20,7 @@ from DigitalTwin.analysis.real_data_study import (
     _wilson_interval,
 )
 from DigitalTwin.detector import InnovationDetector
+from DigitalTwin.ekf import RoverEKF
 from DigitalTwin.kinematics import DifferentialDriveGeometry
 
 
@@ -112,6 +115,15 @@ def test_frozen_attack_campaign_config_matches_code():
     assert payload["step_magnitudes_m"] == list(STEP_MAGNITUDES_M)
     assert payload["drift_rates_mps"] == list(DRIFT_RATES_MPS)
     assert payload["epsilon_detection_targets"] == list(EPSILON_TARGETS)
+    assert payload["detector_variants"] == list(VARIANTS)
+    for expected in {
+        "gps_jump",
+        "raw_position_residual",
+        "robust_innovation_gate",
+        "huber_ekf",
+        "cusum_whitened_innovation",
+    }:
+        assert expected in payload["external_baselines"]
 
 
 def test_detector_accepts_locked_empirical_threshold():
@@ -153,3 +165,20 @@ def test_wilson_interval_for_one_alarm_in_twenty_contains_point_estimate():
     assert low < 0.05 < high
     assert round(low, 3) == 0.009
     assert round(high, 3) == 0.236
+
+
+def test_baseline_alarm_rules_use_expected_persistence():
+    assert _alarm_config("fixed").window_size == 5
+    assert _alarm_config("fixed").required_exceedances == 3
+    assert _alarm_config("gps_jump").window_size == 1
+    assert _alarm_config("cusum_whitened_innovation").required_exceedances == 1
+
+
+def test_huber_weighted_gps_update_has_bounded_influence():
+    full = RoverEKF()
+    weighted = RoverEKF()
+    measurement = np.array([10.0, 0.0])
+    covariance = np.eye(2)
+    full.update_gps(measurement, covariance)
+    weighted.update_gps(measurement, covariance, measurement_weight=0.25)
+    assert weighted.state.x[0] < full.state.x[0]

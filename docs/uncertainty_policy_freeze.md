@@ -1,6 +1,8 @@
 # Uncertainty Policy Freeze
 
-Status: frozen for the current offline real-log study on July 21, 2026.
+Status: revised architecture and evidence gate frozen on the existing benign
+development split July 29, 2026. Matched run-level alarm thresholds still
+require regeneration before the attack campaign is rerun.
 
 The machine-readable specification is
 `DigitalTwin/configs/uncertainty_policies.json`. Changes to features,
@@ -14,17 +16,19 @@ increment and a new benign-only validation pass before attack evaluation.
 | Fixed | Constant position sigma `0.05 m/s` and heading sigma `0.01 rad/s`, scaled by update time | Constant GPS sigma `1.75 m` | No |
 | Naive adaptive | Deterministic function of previous GPS/dead-reckoning residual, rolling IMU variation, velocity variance, and packet timing mismatch | Deterministic HDOP, satellite-count, and timing rule | Yes, without an independent evidence gate |
 | GPS-independent | Same deterministic adaptive coefficients, with the GPS/dead-reckoning residual forced to zero | Same rule as naive adaptive | No |
-| Evidence-gated | Naive adaptive only when independent motion or timing evidence passes the gate; otherwise GPS-independent | Same rule as naive adaptive | Conditional |
+| Evidence-gated | Bounded, smoothed GPS-independent proposal; rejected updates freeze the last accepted covariance | Same rule as GPS-independent | No |
 
-The evidence gate passes only when the previous NIS is at or below its frozen
-threshold, the packet is not stale, and at least one condition is true:
+The revised evidence gate passes only when:
 
-- vertical acceleration differs from gravity by at least `0.8 m/s^2`
-- absolute yaw rate is at least `0.35 rad/s`
-- edge/source update-time mismatch is at least `0.20 s`
+- the packet is not stale and sequence continuity is intact
+- edge/source update-time mismatch is at most `0.20 s`
+- trusted NIS is at most `10.4806`
+- the exponentially weighted trusted-whitened bias score is at most `155.3048`
 
-This gate is deliberately deterministic. Attack labels and attack outcomes
-were not used to fit these coefficients.
+These are the 95th per-update quantiles from 1,797 monitored updates in the 12
+complete benign development runs. The relatively high bias threshold records
+the existing encoder/GPS model mismatch rather than hiding it. Attack outcomes
+were not used.
 
 ## Learned Target
 

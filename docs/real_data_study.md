@@ -21,6 +21,17 @@ python -m DigitalTwin.analysis.real_data_study --manifest-only
 Generated artifacts are written under
 `DigitalTwin/datasets/analysis/real_data_study/`, which is ignored by Git.
 
+To regenerate the complete paper-facing analysis package, including the
+expanded attack grid, covariance study, threshold sweep, revised mathematical
+diagnostics, and figures copied under `results/`, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\regenerate_all_results.ps1
+```
+
+The optional combined GPS-content and buffered-transport campaign is excluded
+by default. Add `-IncludeBufferedAttackCampaign` to include it.
+
 ## Reproducibility Contract
 
 - The canonical manifest contains exactly five trials for each combination of
@@ -45,11 +56,15 @@ threshold is frozen from all 20 runs. Attack data never tune the alarm.
   median and observed spread.
 - Enable mission monitoring after two consecutive tracked-drive motion
   updates, using `0.02 m/s` translation or `0.10 rad/s` yaw rate as motion.
-- Keep raw NIS for every update, but alarm only when three of the latest five
-  monitored updates exceed the variant threshold.
-- Derive each threshold from the maximum benign 3-of-5 operational statistic.
-- Preserve the naturally anomalous run; it becomes the single leave-one-run-out
-  false alarm, yielding `1/20 = 0.05` for every variant.
+- Keep the variant score for every update. The primary NIS-family detectors
+  alarm when three of the latest five monitored scores exceed the variant
+  threshold; GPS-jump and CUSUM use a one-of-one sequential threshold.
+- Derive each threshold from the maximum benign operational statistic for that
+  variant.
+- Preserve any naturally anomalous run; leave-one-run-out false alarms are
+  reported rather than removed post hoc. Because the final threshold is an
+  order statistic from the design corpus, this result is not independent
+  false-alarm validation.
 
 The machine-readable policy is `DigitalTwin/configs/locked_alarm_policy.json`.
 
@@ -66,14 +81,41 @@ The `T:147` IMU units are normalized before uncertainty estimation:
 acceleration is converted from `mg` to `m/s^2`, and angular rate is converted
 from `deg/s` to `rad/s`.
 
-The paired variants are fixed covariance, naive residual-coupled adaptation,
-frozen-clean covariance, GPS-independent adaptation, and evidence-gated
-adaptation. The evidence gate admits GPS-residual feedback only when IMU or
-timing evidence independently indicates a disturbance.
+The paired primary variants are fixed covariance, naive residual-coupled
+adaptation, frozen-clean covariance, GPS-independent adaptation, and
+evidence-gated adaptation. The expanded comparator suite adds GPS-jump, raw
+digital-twin residual, robust innovation gate, Huber EKF, CUSUM whitened
+innovation, and innovation-matching adaptive EKF baselines. In the revised
+architecture, the evidence gate controls only bounded GPS-independent
+covariance proposals; GPS residual feedback is never admitted.
 
-The four primary uncertainty definitions and evidence thresholds are frozen in
-`DigitalTwin/configs/uncertainty_policies.json`; their rationale and learned
-target are recorded in `docs/uncertainty_policy_freeze.md`.
+The policy definitions are recorded in
+`DigitalTwin/configs/uncertainty_policies.json`. Because the security-reference
+architecture changed on July 29, 2026, the previous locked thresholds and
+attack-campaign outputs are provenance artifacts and must be regenerated
+before they are quoted as results.
+
+## Revised Mathematical Diagnostics
+
+The paired replay now retains each branch's pre-update innovation and
+innovation covariance. For every attack window it records:
+
+- the counterfactual attacked NIS under the paired reference covariance;
+- normalization credit, reference-metric innovation change, and their exact
+  NIS score decomposition;
+- empirical innovation-covariance ordering frequency;
+- directional and worst-direction detectability-loss factors;
+- rolling residual gate-pass fraction and residual-cover bound checks.
+
+Run only this summary stage after generating `campaign_summary.csv` with:
+
+```powershell
+python -m DigitalTwin.analysis.math_revision_analysis
+```
+
+The summary writes `math_mechanism_summary.csv`,
+`math_revision_validation.json`, `math_revision_report.md`, and
+`math_score_decomposition.png`.
 
 ## Attack Matrix
 
@@ -84,9 +126,9 @@ target are recorded in `docs/uncertainty_policy_freeze.md`.
 - Cross-track strategic drift during the upper quartile of independent
   uncertainty evidence
 
-Attacks begin at 30 percent of each recorded run. Impact is measured against
-the paired clean replay of the same physical log. This is a counterfactual
-replay reference, not independent position ground truth.
+Attacks begin at 25, 50, and 70 percent of each post-motion run horizon. Impact
+is measured against the paired clean replay of the same physical log. This is a
+counterfactual replay reference, not independent position ground truth.
 
 The held-out runs are also replayed through a deterministic edge-side buffered
 condition with `200 ms` added delay and `40 ms` jitter. This transformation
@@ -99,4 +141,5 @@ times and reports physical-run-clustered confidence intervals. Because all 20
 runs were available during alarm design, the results characterize the current
 design corpus rather than an independent prospective test. Publication claims
 about covariance poisoning or evidence-gated mitigation still require the
-paired ablations and a small untouched validation dataset.
+paired ablations and an untouched prospective validation corpus sized to the
+strength of the intended false-alarm claim.

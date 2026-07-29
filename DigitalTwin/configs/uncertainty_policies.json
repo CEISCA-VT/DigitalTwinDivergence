@@ -1,6 +1,6 @@
 {
   "schema": "ugv01_uncertainty_policies_v1",
-  "status": "frozen_offline",
+  "status": "revised_math_gate_frozen_on_benign_development_split",
   "units": {
     "acceleration": "m/s^2",
     "angular_rate": "rad/s",
@@ -34,12 +34,21 @@
     "gps_coordinate_residual_in_process_features": false
   },
   "evidence_gated": {
-    "inherits": "naive_adaptive",
-    "acceleration_deviation_mps2": 0.8,
-    "yaw_rate_radps": 0.35,
+    "inherits": "gps_independent",
+    "soft_nis_threshold": 10.480551254279684,
+    "persistent_bias_threshold": 155.30477241316595,
+    "bias_memory": 0.9,
     "timing_mismatch_s": 0.2,
     "reject_stale_packets": true,
-    "residual_adaptation_rule": "accept only when independent IMU or timing evidence is present and previous NIS is below threshold"
+    "reject_sequence_gaps": true,
+    "threshold_source": "95th per-update quantile over 1797 monitored updates from the 12 complete benign development runs",
+    "residual_adaptation_rule": "GPS residual is never a process-covariance feature; accept a bounded GPS-independent proposal only when protected edge evidence is healthy and both trusted-NIS and persistent-bias tests pass"
+  },
+  "bounded_covariance_adaptation": {
+    "smoothing_factor": 0.9,
+    "minimum_diagonal": [1e-10, 1e-10, 1e-12],
+    "maximum_diagonal": [0.25, 0.25, 0.04],
+    "rejected_gate_behavior": "freeze the most recently accepted covariance"
   },
   "learned_gps_independent": {
     "target_status": "frozen",

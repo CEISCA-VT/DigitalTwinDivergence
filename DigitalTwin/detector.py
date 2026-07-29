@@ -30,6 +30,23 @@ class DetectionResult:
     envelope_region: str
 
 
+@dataclass(frozen=True, slots=True)
+class NISScoreDecomposition:
+    """Paired NIS terms from the revised covariance-suppression analysis."""
+
+    attacked_nis: float
+    reference_nis: float
+    counterfactual_attacked_nis: float
+    normalization_credit: float
+    reference_metric_innovation_change: float
+    nis_delta: float
+    covariance_order_holds: bool
+
+    @property
+    def suppression_condition_holds(self) -> bool:
+        return self.normalization_credit >= self.reference_metric_innovation_change
+
+
 def chi_square_threshold(df: int, false_alarm_probability: float) -> float:
     """Return gamma* for P(delta > gamma* | H0) = P_FA.
 
@@ -112,6 +129,104 @@ def lambda_max(matrix: np.ndarray) -> float:
 def structural_detectability_bound(S: np.ndarray, lambda_star: float) -> float:
     """Paper Eq. (8): sqrt(lambda* * lambda_max(S_k))."""
     return float(math.sqrt(max(lambda_star, 0.0) * lambda_max(S)))
+
+
+def directional_detectability_bound(
+    S: np.ndarray,
+    lambda_star: float,
+    direction: np.ndarray,
+) -> float:
+    """Conditional attack magnitude for a target detection probability."""
+
+    covariance = np.asarray(S, dtype=float)
+    unit_direction = _unit_direction(direction, covariance.shape[0])
+    directional_information = float(
+        unit_direction.T @ np.linalg.solve(covariance, unit_direction)
+    )
+    return float(
+        math.sqrt(max(float(lambda_star), 0.0) / max(directional_information, 1e-15))
+    )
+
+
+def detectability_loss_factor(
+    attacked_S: np.ndarray,
+    reference_S: np.ndarray,
+    direction: np.ndarray,
+) -> float:
+    """Ratio of attacked to reference directional detection magnitudes."""
+
+    attacked = np.asarray(attacked_S, dtype=float)
+    reference = np.asarray(reference_S, dtype=float)
+    if attacked.shape != reference.shape:
+        raise ValueError("innovation covariances must have the same shape")
+    unit_direction = _unit_direction(direction, attacked.shape[0])
+    attacked_information = float(
+        unit_direction.T @ np.linalg.solve(attacked, unit_direction)
+    )
+    reference_information = float(
+        unit_direction.T @ np.linalg.solve(reference, unit_direction)
+    )
+    return float(
+        math.sqrt(
+            max(reference_information, 0.0) / max(attacked_information, 1e-15)
+        )
+    )
+
+
+def nis_score_decomposition(
+    attacked_innovation: np.ndarray,
+    attacked_S: np.ndarray,
+    reference_innovation: np.ndarray,
+    reference_S: np.ndarray,
+    *,
+    order_tolerance: float = 1e-10,
+) -> NISScoreDecomposition:
+    """Compute the exact paired score decomposition d_a-d_0 = G-C."""
+
+    attacked_innovation = np.asarray(attacked_innovation, dtype=float)
+    reference_innovation = np.asarray(reference_innovation, dtype=float)
+    attacked_S = np.asarray(attacked_S, dtype=float)
+    reference_S = np.asarray(reference_S, dtype=float)
+    if attacked_S.shape != reference_S.shape:
+        raise ValueError("innovation covariances must have the same shape")
+    if attacked_innovation.shape != reference_innovation.shape:
+        raise ValueError("innovation vectors must have the same shape")
+
+    attacked_nis = float(
+        attacked_innovation.T @ np.linalg.solve(attacked_S, attacked_innovation)
+    )
+    reference_nis = float(
+        reference_innovation.T @ np.linalg.solve(reference_S, reference_innovation)
+    )
+    counterfactual = float(
+        attacked_innovation.T
+        @ np.linalg.solve(reference_S, attacked_innovation)
+    )
+    credit = counterfactual - attacked_nis
+    innovation_change = counterfactual - reference_nis
+    return NISScoreDecomposition(
+        attacked_nis=attacked_nis,
+        reference_nis=reference_nis,
+        counterfactual_attacked_nis=counterfactual,
+        normalization_credit=credit,
+        reference_metric_innovation_change=innovation_change,
+        nis_delta=attacked_nis - reference_nis,
+        covariance_order_holds=bool(
+            np.linalg.eigvalsh(attacked_S - reference_S).min() >= -order_tolerance
+        ),
+    )
+
+
+def _unit_direction(direction: np.ndarray, expected_size: int) -> np.ndarray:
+    vector = np.asarray(direction, dtype=float).reshape(-1)
+    if vector.size != expected_size:
+        raise ValueError(
+            f"direction has size {vector.size}; expected {expected_size}"
+        )
+    norm = float(np.linalg.norm(vector))
+    if norm <= 0.0:
+        raise ValueError("direction must be nonzero")
+    return vector / norm
 
 
 def instantaneous_stealth_bound(S: np.ndarray, threshold: float) -> float:

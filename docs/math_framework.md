@@ -181,11 +181,17 @@ sigma_v    = rolling velocity variance
 Delta t_k  = edge-observed timing stress: arrival gap plus packet age
 ```
 
-The GPS-independent variant uses the same mapping with `r_k = 0`. The
-evidence-gated variant admits residual feedback only when previous NIS is below
-threshold, the packet is not stale, and independent IMU or timing evidence is
-present. Exact coefficients and gates are frozen in
-`DigitalTwin/configs/uncertainty_policies.json`.
+The GPS-independent variant uses the same mapping with `r_k = 0`. The revised
+evidence-gated variant never admits GPS residuals into its process-covariance
+proposal. It clips and exponentially smooths a GPS-independent proposal, then
+accepts the update only when packet/timing evidence is healthy, trusted NIS is
+below the soft limit, and the trusted-whitened persistent-bias statistic is
+below its limit. A rejection freezes the last accepted covariance.
+
+The detector innovation is now formed against a separate security predictor
+that is propagated by encoder-derived controls and is not corrected by GPS
+during the monitored interval. The GPS-fused EKF remains a distinct
+operational estimate. See `docs/revised_math_implementation.md`.
 
 The learned candidate uses no GPS coordinate or innovation residual as an
 input. Its six deployment features are rolling vertical-acceleration standard

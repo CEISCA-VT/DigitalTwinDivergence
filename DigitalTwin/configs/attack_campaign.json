@@ -6,11 +6,33 @@
   "directions": ["along", "cross"],
   "step_magnitudes_m": [0.5, 1.0, 2.0, 3.0, 5.0, 7.5, 10.0],
   "drift_rates_mps": [0.01, 0.03, 0.05],
+  "optional_replay_only_fine_step_magnitudes_m": [5.5, 6.0, 6.5, 7.0, 8.0, 9.0],
+  "optional_replay_only_expanded_drift_rates_mps": [0.005, 0.02, 0.075, 0.1],
   "freeze": true,
   "replay_delay_s": 5.0,
   "strategic_drift_rate_mps": 0.03,
   "mission_tolerance_m": 5.0,
   "epsilon_detection_targets": [0.5, 0.9, 0.95],
+  "detector_variants": [
+    "fixed",
+    "naive_adaptive",
+    "frozen_clean",
+    "gps_independent",
+    "evidence_gated",
+    "gps_jump",
+    "raw_position_residual",
+    "robust_innovation_gate",
+    "huber_ekf",
+    "cusum_whitened_innovation",
+    "innovation_matching_adaptive"
+  ],
+  "external_baselines": [
+    "gps_jump",
+    "raw_position_residual",
+    "robust_innovation_gate",
+    "huber_ekf",
+    "cusum_whitened_innovation"
+  ],
   "confidence_interval": "stratified physical-run cluster bootstrap",
   "bootstrap_iterations": 2000,
   "bootstrap_seed": 20260721,
@@ -18,4 +40,14 @@
   "uncertainty_policy": "DigitalTwin/configs/uncertainty_policies.json",
   "attack_location": "offline GPS-coordinate replay input only",
   "raw_logs_modified": false
+  ,"terminology": {
+    "physical_runs": 20,
+    "unique_attack_run_start_combinations": 1440,
+    "detector_run_evaluations": 15840,
+    "note": "detector-run evaluations are clustered replay evaluations, not independent physical attack trials"
+  },
+  "optional_combined_content_delivery_replay": {
+    "implemented_transport": "buffered_200ms_jitter40ms",
+    "command": "python -m DigitalTwin.analysis.real_data_study --include-buffered-attacks --bootstrap-iterations 2000"
+  }
 }

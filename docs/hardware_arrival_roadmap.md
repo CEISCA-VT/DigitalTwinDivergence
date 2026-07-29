@@ -3,13 +3,21 @@
 Status: completed and retained as a hardware-stage summary. The authoritative
 current research roadmap is `docs/current_roadmap_latex.tex`.
 
+The campaign figures in this historical summary predate the July 29, 2026
+GPS-independent security-predictor revision. Hardware and dataset completion
+remain valid; thresholds, attack summaries, and figures require a software-only
+regeneration.
+
 ## Current Completion
 
-The project is approximately 90% complete overall:
+The original hardware and implementation roadmap is complete for the current
+offline study, but strong-publication readiness is still limited by missing
+independent validation:
 
-- engineering implementation: approximately 95%
-- experimental analysis: approximately 90%
-- publication preparation: approximately 80-85%
+- engineering implementation: approximately 98%
+- offline analysis package: approximately 95-97%
+- current manuscript package: approximately 80-85%
+- strong top-venue readiness without new validation: approximately 60-68%
 
 The project is no longer blocked on batteries, firmware bring-up, calibration,
 or benign data collection.
@@ -59,10 +67,20 @@ No additional rover operation is required for current offline analysis.
 - Frozen fixed, naive-adaptive, frozen-clean, GPS-independent, and
   evidence-gated uncertainty variants.
 - Rejected learned Random Forest candidate documented without activating it.
-- Complete 7,200-scenario statistical GPS-attack campaign.
+- Complete frozen statistical GPS-attack campaign: 1,440 unique
+  attack-run-start combinations and 15,840 detector-run evaluations.
+- Expanded replay-only grid: 2,640 unique attack-run-start combinations and
+  29,040 detector-run evaluations.
 - Physical-run-clustered confidence intervals, detection delays,
-  harmful-but-stealthy probabilities, and directional epsilon estimates.
+  tolerance-exceeding paired-divergence probabilities, and directional epsilon
+  estimates.
 - Paired covariance-poisoning analysis over 2,400 targeted attacked replays.
+- External comparator baselines are implemented in the real-data study:
+  GPS-jump, raw digital-twin residual, fixed NIS, robust innovation gate,
+  Huber EKF, CUSUM whitened innovation, and innovation-matching adaptive EKF.
+- Post-campaign tables now include multiple tolerance thresholds, paired
+  detector differences, gate-behavior summaries, runtime estimates, threshold
+  sweep output, and result provenance hashes.
 
 The covariance-poisoning mechanism is statistically measurable, but an
 operational attacker advantage is not established against the primary
@@ -70,11 +88,13 @@ frozen-clean control.
 
 ## Remaining Work
 
-1. Complete the matched ordinary-versus-strategic drift comparison.
-2. Expand buffered-delay/jitter transfer evaluation and capability maps.
-3. Collect a small untouched prospective validation dataset.
-4. Freeze final figures, tables, checksums, and manuscript artifacts.
-5. Complete the paper results, discussion, limitations, and conclusion.
+1. For the no-new-validation path, finish paper polish: stronger theory,
+   expanded related work, paired-difference tables, multiple-tolerance tables,
+   threshold-sweep interpretation, and artifact packaging.
+2. If later pursuing a stronger empirical claim, add independent
+   camera/AprilTag ground truth and an untouched prospective benign dataset.
+3. Optional extension: run the combined GPS-content plus buffered delay/jitter
+   replay campaign as an A3 robustness section.
 
 ## Current References
 

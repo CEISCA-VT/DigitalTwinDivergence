@@ -33,6 +33,13 @@ class RoverEKF:
         self.last_K = np.zeros((3, 2))
         self.last_mahalanobis = 0.0
 
+    def gps_innovation(self, z_xy: np.ndarray, R: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        H = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+        z_xy = np.array(z_xy, dtype=float)
+        innovation = z_xy - H @ self.state.x
+        S = H @ self.state.P @ H.T + R
+        return innovation, S
+
     def predict(self, v_mps: float, omega_radps: float, dt_s: float, Q: np.ndarray) -> EKFState:
         x = self.state.x
         theta = float(x[2])
@@ -47,10 +54,11 @@ class RoverEKF:
         self.state.P = 0.5 * (self.state.P + self.state.P.T)
         return self.state
 
-    def update_gps(self, z_xy: np.ndarray, R: np.ndarray) -> EKFState:
+    def update_gps(self, z_xy: np.ndarray, R: np.ndarray, *, measurement_weight: float = 1.0) -> EKFState:
         H = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-        z_xy = np.array(z_xy, dtype=float)
-        innovation = z_xy - H @ self.state.x
+        weight = max(float(measurement_weight), 1e-6)
+        R = np.asarray(R, dtype=float) / (weight * weight)
+        innovation, S = self.gps_innovation(z_xy, R)
         S = H @ self.state.P @ H.T + R
         K = self.state.P @ H.T @ np.linalg.inv(S)
 

@@ -1,0 +1,7 @@
+{
+  "wifi_mode_on_boot": 1,
+  "sta_ssid": "YOUR_WIFI",
+  "sta_password": "YOUR_PASSWORD",
+  "ap_ssid": "UGV",
+  "ap_password": "CHANGE_ME"
+}

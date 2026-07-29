@@ -24,10 +24,21 @@ from DigitalTwin.alarm import (
     operational_run_statistic,
     robust_initial_state,
 )
-from DigitalTwin.detector import InnovationDetector
+from DigitalTwin.detector import (
+    InnovationDetector,
+    detectability_loss_factor,
+    lambda_max,
+    nis_score_decomposition,
+)
 from DigitalTwin.ekf import RoverEKF
 from DigitalTwin.kinematics import DifferentialDriveGeometry, wrap_angle
 from DigitalTwin.latency import LatencyQueue
+from DigitalTwin.security import (
+    BoundedCovarianceAdapter,
+    SecurityPredictor,
+    TrustedInnovationGate,
+    initial_security_heading,
+)
 from DigitalTwin.telemetry import gps_to_local_xy
 from DigitalTwin.uncertainty import (
     DEFAULT_EVIDENCE_GATE_POLICY,
@@ -40,9 +51,44 @@ from DigitalTwin.uncertainty import (
 from .common import parse_bool, parse_float, parse_int, parse_run_name, quantile, read_rows, write_rows
 
 
-VARIANTS = ("fixed", "naive_adaptive", "frozen_clean", "gps_independent", "evidence_gated")
+PRIMARY_VARIANTS = ("fixed", "naive_adaptive", "frozen_clean", "gps_independent", "evidence_gated")
+EXTERNAL_BASELINE_VARIANTS = (
+    "gps_jump",
+    "raw_position_residual",
+    "robust_innovation_gate",
+    "huber_ekf",
+    "cusum_whitened_innovation",
+)
+STANDARD_ADAPTIVE_VARIANTS = ("innovation_matching_adaptive",)
+VARIANTS = PRIMARY_VARIANTS + EXTERNAL_BASELINE_VARIANTS + STANDARD_ADAPTIVE_VARIANTS
+INSTANT_ALARM_CONFIG = AlarmConfig(window_size=1, required_exceedances=1)
+ROBUST_GATE_NIS = 9.21
+HUBER_WHITENED_NORM = 2.5
+CUSUM_ALLOWANCE_SIGMA = 0.25
+INNOVATION_MATCHING_ALPHA = 0.08
+INNOVATION_MATCHING_SCALE_LIMITS = (0.25, 16.0)
+VARIANT_LABELS = {
+    "fixed": "B3 fixed NIS",
+    "naive_adaptive": "B7 naive adaptive",
+    "frozen_clean": "frozen clean oracle",
+    "gps_independent": "B8 GPS-independent adaptive",
+    "evidence_gated": "B9 evidence-gated adaptive",
+    "gps_jump": "B1 GPS jump",
+    "raw_position_residual": "B2 raw DT residual",
+    "robust_innovation_gate": "B4 robust innovation gate",
+    "huber_ekf": "B5 Huber EKF",
+    "cusum_whitened_innovation": "B6 CUSUM whitened innovation",
+    "innovation_matching_adaptive": "standard innovation-matching adaptive",
+}
+VARIANT_SCORE_NAMES = {
+    "gps_jump": "consecutive GPS displacement (m)",
+    "raw_position_residual": "raw GPS-to-prediction residual (m)",
+    "cusum_whitened_innovation": "Page CUSUM of whitened innovation norm",
+}
 STEP_MAGNITUDES_M = (0.5, 1.0, 2.0, 3.0, 5.0, 7.5, 10.0)
 DRIFT_RATES_MPS = (0.01, 0.03, 0.05)
+FINE_STEP_MAGNITUDES_M = (0.5, 1.0, 2.0, 3.0, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 9.0, 10.0)
+EXPANDED_DRIFT_RATES_MPS = (0.005, 0.01, 0.02, 0.03, 0.05, 0.075, 0.1)
 ATTACK_START_FRACTIONS = (0.25, 0.50, 0.70)
 EPSILON_TARGETS = (0.50, 0.90, 0.95)
 BOOTSTRAP_ITERATIONS = 2000
@@ -88,6 +134,9 @@ class ReplayResult:
     active: np.ndarray
     alarm_enabled: np.ndarray
     rows: list[dict[str, object]]
+    innovations: np.ndarray | None = None
+    s_matrices: list[np.ndarray] | None = None
+    security_states_xy: np.ndarray | None = None
 
 
 @dataclass(slots=True)
@@ -272,12 +321,50 @@ def _attack_specs() -> list[AttackSpec]:
     return specs
 
 
+def _expanded_attack_specs() -> list[AttackSpec]:
+    specs = [AttackSpec()]
+    for direction in ("along", "cross"):
+        specs.extend(AttackSpec("step", direction, magnitude_m=value) for value in FINE_STEP_MAGNITUDES_M)
+    specs.extend([AttackSpec("freeze"), AttackSpec("replay", replay_delay_s=5.0)])
+    for direction in ("along", "cross"):
+        specs.extend(AttackSpec("drift", direction, rate_mps=value) for value in EXPANDED_DRIFT_RATES_MPS)
+    for direction in ("along", "cross"):
+        specs.append(AttackSpec("strategic_drift", direction, rate_mps=0.03))
+    return specs
+
+
 def _estimator(mode: str):
-    if mode == "fixed":
+    if mode in {
+        "fixed",
+        "gps_jump",
+        "raw_position_residual",
+        "robust_innovation_gate",
+        "huber_ekf",
+        "cusum_whitened_innovation",
+        "innovation_matching_adaptive",
+    }:
         return FixedUncertaintyEstimator()
     if mode == "gps_independent":
         return GPSIndependentUncertaintyEstimator()
     return NaiveAdaptiveUncertaintyEstimator()
+
+
+def _replay_mode(mode: str) -> str:
+    return "naive_adaptive" if mode == "frozen_clean" else mode
+
+
+def _alarm_config(mode: str) -> AlarmConfig:
+    if mode in {"gps_jump", "cusum_whitened_innovation"}:
+        return INSTANT_ALARM_CONFIG
+    return ALARM_CONFIG
+
+
+def _score_name(mode: str) -> str:
+    return VARIANT_SCORE_NAMES.get(mode, "normalized innovation squared")
+
+
+def _pre_update_nis(innovation: np.ndarray, covariance: np.ndarray) -> float:
+    return float(innovation.T @ np.linalg.inv(covariance) @ innovation)
 
 
 def _wilson_interval(successes: int, trials: int, z: float = 1.959963984540054) -> tuple[float, float]:
@@ -440,25 +527,43 @@ def replay(
         uncertainty_proxy,
         earliest_index=mission_start,
     )
-    alarm_enabled = np.arange(len(rows)) >= mission_start
+    security_initialization_end = min(
+        mission_start + ALARM_CONFIG.initialization_gps_samples,
+        max(len(rows) - 1, 0),
+    )
+    alarm_enabled = np.arange(len(rows)) >= security_initialization_end
     initial_state, initial_covariance = robust_initial_state(attacked_xy, mission_start, ALARM_CONFIG)
 
     estimator = _estimator(mode)
     stats = TelemetryStatisticsWindow()
     detector = InnovationDetector(threshold=threshold)
-    alarm = PersistentAlarm(detector.threshold, ALARM_CONFIG)
-    ekf = RoverEKF()
+    alarm_config = _alarm_config(mode)
+    alarm = PersistentAlarm(detector.threshold, alarm_config)
+    operational_ekf = RoverEKF()
+    security_predictor = SecurityPredictor(
+        np.zeros(3, dtype=float),
+        np.diag([2.0, 2.0, 0.5]),
+    )
+    covariance_adapter = BoundedCovarianceAdapter()
+    trusted_gate = TrustedInnovationGate()
     scores: list[float] = []
     detections: list[bool] = []
     states: list[np.ndarray] = []
+    security_states: list[np.ndarray] = []
     q_trace: list[float] = []
     s_trace: list[float] = []
     q_matrices: list[np.ndarray] = []
     r_matrices: list[np.ndarray] = []
+    innovations: list[np.ndarray] = []
+    s_matrices: list[np.ndarray] = []
     output_rows: list[dict[str, object]] = []
     last_residual = 0.0
     previous_score = 0.0
     previous_arrival: float | None = None
+    previous_gps_xy: np.ndarray | None = None
+    cusum_score = 0.0
+    innovation_matching_scale = 1.0
+    previous_seq: int | None = None
 
     for index, row in enumerate(rows):
         dt_s = 0.1 if index == 0 else max(elapsed[index] - elapsed[index - 1], 1e-3)
@@ -471,33 +576,29 @@ def replay(
         previous_arrival = arrival
         accel_z_mps2 = _f(row, "az") * STANDARD_GRAVITY_MPS2 / 1000.0
         yaw_rate_radps = math.radians(_f(row, "gz"))
-        independent_evidence = (
-            abs(accel_z_mps2 - STANDARD_GRAVITY_MPS2)
-            >= DEFAULT_EVIDENCE_GATE_POLICY.acceleration_deviation_mps2
-            or abs(yaw_rate_radps) >= DEFAULT_EVIDENCE_GATE_POLICY.yaw_rate_radps
-            or abs(arrival_dt - dt_s) >= DEFAULT_EVIDENCE_GATE_POLICY.timing_mismatch_s
-        )
-        evidence_allowed = (
-            previous_score <= detector.threshold
-            and independent_evidence
+        current_seq = _i(row, "seq", index)
+        sequence_ok = previous_seq is None or current_seq == previous_seq + 1
+        previous_seq = current_seq
+        edge_evidence_ok = (
+            abs(arrival_dt - dt_s) <= DEFAULT_EVIDENCE_GATE_POLICY.timing_mismatch_s
             and (
                 not DEFAULT_EVIDENCE_GATE_POLICY.reject_stale_packets
                 or not parse_bool(row.get("stale_packet", "False"))
             )
+            and (
+                not DEFAULT_EVIDENCE_GATE_POLICY.reject_sequence_gaps
+                or sequence_ok
+            )
         )
-        observed_residual = last_residual
-        if mode == "gps_independent" or (mode == "evidence_gated" and not evidence_allowed):
-            observed_residual = 0.0
-        residual_feedback_active = mode == "naive_adaptive" or (
-            mode == "evidence_gated" and evidence_allowed
-        )
+        residual_feedback_active = mode == "naive_adaptive"
         stats.observe(
-            dead_reckoning_residual_m=observed_residual,
+            dead_reckoning_residual_m=last_residual,
             # T:147 reports acceleration in mg and gyro rate in deg/s.
             accel_z=accel_z_mps2,
             gyro_z=yaw_rate_radps,
             velocity_mps=float(controls[index, 0]),
             packet_dt_s=arrival_dt,
+            residual_admitted=residual_feedback_active,
         )
         features = stats.features(
             gps_hdop=_f(row, "hdop", 99.99),
@@ -508,24 +609,116 @@ def replay(
             Q = frozen_schedule[0][index]
             R = frozen_schedule[1][index]
         else:
-            Q = estimator.process_covariance(features, dt_s)
+            proposal_Q = estimator.process_covariance(features, dt_s)
             R = estimator.measurement_covariance(features)
+            if mode == "evidence_gated":
+                Q = (
+                    covariance_adapter.update(proposal_Q)
+                    if covariance_adapter.current is None
+                    else covariance_adapter.current.copy()
+                )
+            elif mode in {"naive_adaptive", "gps_independent"}:
+                Q = covariance_adapter.update(proposal_Q)
+            else:
+                Q = proposal_Q
+        if mode == "innovation_matching_adaptive":
+            scale = float(np.clip(innovation_matching_scale, *INNOVATION_MATCHING_SCALE_LIMITS))
+            Q = Q * scale
+            R = R * scale
         if index == mission_start:
-            ekf = RoverEKF(initial_state=initial_state, initial_covariance=initial_covariance)
+            initial_state = initial_state.copy()
+            initial_state[2] = initial_security_heading(attacked_xy, mission_start)
+            operational_ekf = RoverEKF(
+                initial_state=initial_state,
+                initial_covariance=initial_covariance,
+            )
+            security_predictor = SecurityPredictor(initial_state, initial_covariance)
+            trusted_gate = TrustedInnovationGate()
         else:
-            ekf.predict(float(controls[index, 0]), float(controls[index, 1]), dt_s, Q)
-        last_residual = float(np.linalg.norm(attacked_xy[index] - ekf.state.x[:2]))
-        ekf.update_gps(attacked_xy[index], R)
-        detection = detector.evaluate(ekf.last_innovation, ekf.last_S)
-        alarm_detected = alarm.observe(detection.mahalanobis, enabled=bool(alarm_enabled[index]))
-        previous_score = detection.mahalanobis
-        scores.append(detection.mahalanobis)
+            operational_ekf.predict(
+                float(controls[index, 0]), float(controls[index, 1]), dt_s, Q
+            )
+            security_predictor.predict(
+                float(controls[index, 0]), float(controls[index, 1]), dt_s, Q
+            )
+
+        security_innovation, security_covariance = security_predictor.innovation(
+            attacked_xy[index], R
+        )
+        last_residual = float(np.linalg.norm(security_innovation))
+        pre_update_nis = _pre_update_nis(security_innovation, security_covariance)
+        gate_decision = trusted_gate.evaluate(
+            security_innovation,
+            security_covariance,
+            edge_evidence_ok=edge_evidence_ok,
+        )
+        if mode == "evidence_gated" and frozen_schedule is None:
+            covariance_adapter.update(proposal_Q, allowed=gate_decision.allowed)
+
+        operational_innovation, operational_covariance = operational_ekf.gps_innovation(
+            attacked_xy[index], R
+        )
+        operational_nis = _pre_update_nis(
+            operational_innovation, operational_covariance
+        )
+        measurement_weight = 1.0
+        update_enabled = True
+        if mode == "robust_innovation_gate" and operational_nis > ROBUST_GATE_NIS:
+            update_enabled = False
+        elif mode == "huber_ekf":
+            whitened_norm = math.sqrt(max(operational_nis, 0.0))
+            if whitened_norm > HUBER_WHITENED_NORM:
+                measurement_weight = HUBER_WHITENED_NORM / whitened_norm
+
+        if update_enabled:
+            operational_ekf.update_gps(
+                attacked_xy[index], R, measurement_weight=measurement_weight
+            )
+        else:
+            operational_ekf.last_innovation = operational_innovation
+            operational_ekf.last_S = operational_covariance
+            operational_ekf.last_K = np.zeros((3, 2))
+            operational_ekf.last_mahalanobis = operational_nis
+
+        if mode == "gps_jump":
+            score = (
+                0.0
+                if previous_gps_xy is None
+                else float(np.linalg.norm(attacked_xy[index] - previous_gps_xy))
+            )
+        elif mode == "raw_position_residual":
+            score = last_residual
+        elif mode == "cusum_whitened_innovation":
+            whitened_norm = math.sqrt(max(pre_update_nis, 0.0))
+            if not alarm_enabled[index]:
+                cusum_score = 0.0
+            else:
+                cusum_score = max(0.0, cusum_score + whitened_norm - CUSUM_ALLOWANCE_SIGMA)
+            score = cusum_score
+        else:
+            detection = detector.evaluate(security_innovation, security_covariance)
+            score = detection.mahalanobis
+
+        if mode == "innovation_matching_adaptive":
+            normalized = np.clip(pre_update_nis / 2.0, *INNOVATION_MATCHING_SCALE_LIMITS)
+            innovation_matching_scale = (
+                (1.0 - INNOVATION_MATCHING_ALPHA) * innovation_matching_scale
+                + INNOVATION_MATCHING_ALPHA * float(normalized)
+            )
+
+        alarm_detected = alarm.observe(score, enabled=bool(alarm_enabled[index]))
+        previous_score = score
+        previous_gps_xy = attacked_xy[index].copy()
+        scores.append(score)
         detections.append(alarm_detected)
-        states.append(ekf.state.x[:2].copy())
+        states.append(operational_ekf.state.x[:2].copy())
+        security_states.append(security_predictor.state.x[:2].copy())
         q_trace.append(float(np.trace(Q)))
-        s_trace.append(float(np.trace(ekf.last_S)))
+        s_trace.append(float(np.trace(security_covariance)))
         q_matrices.append(Q.copy())
         r_matrices.append(R.copy())
+        innovations.append(security_innovation.copy())
+        s_matrices.append(security_covariance.copy())
         output_rows.append(
             {
                 "elapsed_s": elapsed[index],
@@ -534,22 +727,42 @@ def replay(
                 "clean_gps_y_m": clean_xy[index, 1],
                 "attacked_gps_x_m": attacked_xy[index, 0],
                 "attacked_gps_y_m": attacked_xy[index, 1],
-                "ekf_x_m": ekf.state.x[0],
-                "ekf_y_m": ekf.state.x[1],
-                "mahalanobis": detection.mahalanobis,
-                "threshold": detection.threshold,
-                "instantaneous_exceedance": int(detection.detected),
+                "ekf_x_m": operational_ekf.state.x[0],
+                "ekf_y_m": operational_ekf.state.x[1],
+                "security_x_m": security_predictor.state.x[0],
+                "security_y_m": security_predictor.state.x[1],
+                "mahalanobis": pre_update_nis,
+                "score": score,
+                "score_name": _score_name(mode),
+                "threshold": detector.threshold,
+                "instantaneous_exceedance": int(score > detector.threshold),
                 "alarm_enabled": int(alarm_enabled[index]),
                 "detected": int(alarm_detected),
                 "q_trace": q_trace[-1],
                 "s_trace": s_trace[-1],
+                "measurement_update_enabled": int(update_enabled),
+                "measurement_weight": measurement_weight,
+                "innovation_matching_scale": innovation_matching_scale,
                 "attack_active": int(active[index]),
                 "attack_label": attack.label,
                 "attack_start_fraction": attack.start_fraction if attack.kind != "none" else "",
                 "detector_variant": mode,
                 "transport": transport,
-                "independent_evidence": int(independent_evidence),
+                "independent_evidence": int(edge_evidence_ok),
+                "edge_evidence_ok": int(edge_evidence_ok),
+                "trusted_nis": gate_decision.trusted_nis,
+                "persistent_bias_score": gate_decision.persistent_bias_score,
+                "gate_allowed": int(gate_decision.allowed),
+                "covariance_updates_accepted": covariance_adapter.accepted_updates,
                 "residual_feedback_active": int(residual_feedback_active),
+                "rolling_residual_m": features.dead_reckoning_residual_m,
+                "residual_gate_pass_fraction": stats.residual_gate_pass_fraction,
+                "residual_cover_bound_m": stats.residual_cover_bound_m,
+                "innovation_x_m": security_innovation[0],
+                "innovation_y_m": security_innovation[1],
+                "s_xx_m2": security_covariance[0, 0],
+                "s_xy_m2": security_covariance[0, 1],
+                "s_yy_m2": security_covariance[1, 1],
             }
         )
 
@@ -567,6 +780,9 @@ def replay(
         active=active,
         alarm_enabled=alarm_enabled,
         rows=output_rows,
+        innovations=np.asarray(innovations),
+        s_matrices=s_matrices,
+        security_states_xy=np.asarray(security_states),
     )
 
 
@@ -574,10 +790,11 @@ def lock_thresholds(manifest: list[dict[str, object]], out_dir: Path) -> dict[st
     calibration = list(manifest)
     thresholds: dict[str, dict[str, object]] = {}
     for mode in VARIANTS:
-        clean_mode = "naive_adaptive" if mode == "frozen_clean" else mode
+        clean_mode = _replay_mode(mode)
+        alarm_config = _alarm_config(mode)
         results = [replay(Path(row["source_csv"]), clean_mode, AttackSpec()) for row in calibration]
         run_statistics = [
-            operational_run_statistic(result.scores, result.alarm_enabled, ALARM_CONFIG)
+            operational_run_statistic(result.scores, result.alarm_enabled, alarm_config)
             for result in results
         ]
         all_scores = [
@@ -606,12 +823,14 @@ def lock_thresholds(manifest: list[dict[str, object]], out_dir: Path) -> dict[st
             "leave_one_run_out_pfa_wilson95_high": pfa_high,
             "per_update_p95": quantile(all_scores, 0.95),
             "per_update_p99": quantile(all_scores, 0.99),
-            "alarm_window_size": ALARM_CONFIG.window_size,
-            "alarm_required_exceedances": ALARM_CONFIG.required_exceedances,
+            "score_name": _score_name(mode),
+            "alarm_window_size": alarm_config.window_size,
+            "alarm_required_exceedances": alarm_config.required_exceedances,
             "initialization_gps_samples": ALARM_CONFIG.initialization_gps_samples,
             "policy": (
                 "all-benign final freeze plus leave-one-run-out false-alarm "
-                "estimate; 3-of-5 alarm after motion-gated robust initialization"
+                "estimate; motion-gated robust initialization followed by "
+                f"{alarm_config.required_exceedances}-of-{alarm_config.window_size} persistence"
             ),
         }
     (out_dir / "locked_thresholds.json").write_text(json.dumps(thresholds, indent=2), encoding="utf-8")
@@ -623,17 +842,137 @@ def lock_thresholds(manifest: list[dict[str, object]], out_dir: Path) -> dict[st
         "motion_speed_threshold_mps": ALARM_CONFIG.motion_speed_threshold_mps,
         "motion_yaw_rate_threshold_radps": ALARM_CONFIG.motion_yaw_rate_threshold_radps,
         "motion_consecutive_updates": ALARM_CONFIG.motion_consecutive_updates,
-        "alarm_window_size": ALARM_CONFIG.window_size,
-        "required_exceedances": ALARM_CONFIG.required_exceedances,
         "target_run_false_alarm_rate": TARGET_RUN_FALSE_ALARM,
         "threshold_source": "all 20 checksum-identified benign runs",
         "validation_method": "leave-one-run-out at complete-run level",
         "thresholds": {mode: values["threshold"] for mode, values in thresholds.items()},
+        "variant_alarm_rules": {
+            mode: {
+                "display_name": VARIANT_LABELS[mode],
+                "score_name": _score_name(mode),
+                "alarm_window_size": _alarm_config(mode).window_size,
+                "required_exceedances": _alarm_config(mode).required_exceedances,
+            }
+            for mode in VARIANTS
+        },
     }
     policy_path = Path("DigitalTwin/configs/locked_alarm_policy.json")
     policy_path.parent.mkdir(parents=True, exist_ok=True)
     policy_path.write_text(json.dumps(locked_policy, indent=2), encoding="utf-8")
     return thresholds
+
+
+def _paired_math_metrics(
+    attacked: ReplayResult,
+    clean: ReplayResult,
+    indices: np.ndarray,
+) -> dict[str, object]:
+    """Summarize the revised paired NIS and detectability identities."""
+
+    empty = {
+        "mean_counterfactual_attacked_nis": "",
+        "mean_normalization_credit": "",
+        "mean_reference_metric_innovation_change": "",
+        "mean_paired_nis_delta": "",
+        "max_score_decomposition_identity_error": "",
+        "innovation_covariance_order_fraction": "",
+        "normalization_credit_nonnegative_fraction": "",
+        "nis_suppression_condition_fraction": "",
+        "observed_nis_suppression_fraction": "",
+        "mean_directional_detectability_loss_factor": "",
+        "max_directional_detectability_loss_factor": "",
+        "mean_worst_direction_detectability_loss_factor": "",
+    }
+    if (
+        not len(indices)
+        or attacked.innovations is None
+        or clean.innovations is None
+        or attacked.s_matrices is None
+        or clean.s_matrices is None
+    ):
+        return empty
+
+    decompositions = [
+        nis_score_decomposition(
+            attacked.innovations[index],
+            attacked.s_matrices[index],
+            clean.innovations[index],
+            clean.s_matrices[index],
+        )
+        for index in indices
+    ]
+    identity_errors = [
+        abs(
+            item.nis_delta
+            - (
+                item.reference_metric_innovation_change
+                - item.normalization_credit
+            )
+        )
+        for item in decompositions
+    ]
+    directional_losses: list[float] = []
+    worst_direction_losses: list[float] = []
+    offsets = attacked.attacked_gps_xy - attacked.clean_gps_xy
+    for index in indices:
+        direction = offsets[index]
+        if float(np.linalg.norm(direction)) <= 1e-12:
+            continue
+        directional_losses.append(
+            detectability_loss_factor(
+                attacked.s_matrices[index],
+                clean.s_matrices[index],
+                direction,
+            )
+        )
+        worst_direction_losses.append(
+            math.sqrt(
+                max(lambda_max(attacked.s_matrices[index]), 0.0)
+                / max(lambda_max(clean.s_matrices[index]), 1e-15)
+            )
+        )
+
+    return {
+        "mean_counterfactual_attacked_nis": float(
+            np.mean([item.counterfactual_attacked_nis for item in decompositions])
+        ),
+        "mean_normalization_credit": float(
+            np.mean([item.normalization_credit for item in decompositions])
+        ),
+        "mean_reference_metric_innovation_change": float(
+            np.mean(
+                [
+                    item.reference_metric_innovation_change
+                    for item in decompositions
+                ]
+            )
+        ),
+        "mean_paired_nis_delta": float(
+            np.mean([item.nis_delta for item in decompositions])
+        ),
+        "max_score_decomposition_identity_error": float(max(identity_errors)),
+        "innovation_covariance_order_fraction": float(
+            np.mean([item.covariance_order_holds for item in decompositions])
+        ),
+        "normalization_credit_nonnegative_fraction": float(
+            np.mean([item.normalization_credit >= -1e-10 for item in decompositions])
+        ),
+        "nis_suppression_condition_fraction": float(
+            np.mean([item.suppression_condition_holds for item in decompositions])
+        ),
+        "observed_nis_suppression_fraction": float(
+            np.mean([item.attacked_nis <= item.reference_nis for item in decompositions])
+        ),
+        "mean_directional_detectability_loss_factor": (
+            float(np.mean(directional_losses)) if directional_losses else ""
+        ),
+        "max_directional_detectability_loss_factor": (
+            float(max(directional_losses)) if directional_losses else ""
+        ),
+        "mean_worst_direction_detectability_loss_factor": (
+            float(np.mean(worst_direction_losses)) if worst_direction_losses else ""
+        ),
+    }
 
 
 def _metrics(
@@ -691,9 +1030,36 @@ def _metrics(
     )
     feedback_fraction = sum(feedback) / len(feedback) if feedback else 0.0
     clean_feedback_fraction = sum(clean_feedback) / len(clean_feedback) if clean_feedback else 0.0
+    rolling_residuals = (
+        [
+            float(attacked.rows[index].get("rolling_residual_m", 0.0))
+            for index in attack_window
+        ]
+        if attacked.rows
+        else []
+    )
+    residual_cover_bounds = (
+        [
+            float(attacked.rows[index].get("residual_cover_bound_m", 0.0))
+            for index in attack_window
+        ]
+        if attacked.rows
+        else []
+    )
+    gate_pass_fractions = (
+        [
+            float(attacked.rows[index].get("residual_gate_pass_fraction", 0.0))
+            for index in attack_window
+        ]
+        if attacked.rows
+        else []
+    )
+    math_metrics = _paired_math_metrics(attacked, clean, attack_window)
     return {
         **{field: manifest_row[field] for field in ("run_id", "speed", "surface", "trial", "split", "source_csv")},
         "detector_variant": mode,
+        "detector_label": VARIANT_LABELS.get(mode, mode),
+        "score_name": _score_name(mode),
         "transport": transport,
         "threshold": threshold,
         "attack": attack.kind,
@@ -713,6 +1079,7 @@ def _metrics(
             if first_detection is None or attack.kind == "none"
             else float(attacked.elapsed_s[first_detection] - attack_start_s)
         ),
+        "max_score": float(attacked.scores.max()),
         "max_nis": float(attacked.scores.max()),
         "mean_attack_window_q_trace": mean_attack_q,
         "mean_clean_window_q_trace": mean_clean_q,
@@ -732,9 +1099,29 @@ def _metrics(
             if independent_evidence
             else 0.0
         ),
+        "mean_rolling_gate_pass_fraction": (
+            float(np.mean(gate_pass_fractions)) if gate_pass_fractions else 0.0
+        ),
+        "max_residual_cover_bound_violation_m": (
+            float(
+                max(
+                    (
+                        residual - bound
+                        for residual, bound in zip(
+                            rolling_residuals, residual_cover_bounds
+                        )
+                    ),
+                    default=0.0,
+                )
+            )
+        ),
+        **math_metrics,
         "max_attack_offset_m": float(attack_offset.max()),
         "max_paired_state_deviation_m": float(deviation.max()),
         "max_undetected_state_deviation_m": max_undetected,
+        "tolerance_exceeding_paired_divergence_before_alarm": int(
+            max_undetected > MISSION_TOLERANCE_M
+        ),
         "harmful_but_stealthy": int(max_undetected > MISSION_TOLERANCE_M),
         "time_above_5m_before_alarm_s": time_above,
         "mean_q_trace_ratio": float(attacked.q_trace.mean() / max(clean.q_trace.mean(), 1e-15)),
@@ -750,6 +1137,7 @@ def run_campaign(
     attacks: list[AttackSpec] | None = None,
     start_fractions: tuple[float, ...] = ATTACK_START_FRACTIONS,
     include_buffered: bool = True,
+    include_buffered_attacks: bool = False,
     summary_filename: str = "campaign_summary.csv",
 ) -> list[dict[str, object]]:
     summaries: list[dict[str, object]] = []
@@ -763,7 +1151,7 @@ def run_campaign(
         for transport in transports:
             clean_cache: dict[str, ReplayResult] = {}
             for mode in VARIANTS:
-                clean_mode = "naive_adaptive" if mode == "frozen_clean" else mode
+                clean_mode = _replay_mode(mode)
                 threshold = float(thresholds[mode]["threshold"])
                 clean_cache[mode] = replay(
                     path,
@@ -779,9 +1167,10 @@ def run_campaign(
                     )
                 )
 
-            # Buffered transport is retained as a benign transfer check. The
-            # statistical attack matrix is evaluated on all 20 baseline runs.
-            if transport != "baseline":
+            # Buffered transport defaults to a benign transfer check. Use
+            # include_buffered_attacks for the optional A3-style content plus
+            # delay/jitter replay matrix.
+            if transport != "baseline" and not include_buffered_attacks:
                 continue
             for base_attack in attacks or _attack_specs()[1:]:
                 for start_fraction in start_fractions:
@@ -944,9 +1333,31 @@ def aggregate_campaign(
                 "run_detection_probability": _probability(group, "run_detected"),
                 "run_detection_probability_ci95_low": pd_low,
                 "run_detection_probability_ci95_high": pd_high,
+                "tolerance_exceeding_paired_divergence_before_alarm_scenarios": sum(
+                    int(row.get(
+                        "tolerance_exceeding_paired_divergence_before_alarm",
+                        row["harmful_but_stealthy"],
+                    ))
+                    for row in group
+                ),
                 "harmful_but_stealthy_scenarios": sum(
                     int(row["harmful_but_stealthy"]) for row in group
                 ),
+                "tolerance_exceeding_paired_divergence_before_alarm_probability": _probability(
+                    [
+                        {
+                            **row,
+                            "_paired_divergence_flag": row.get(
+                                "tolerance_exceeding_paired_divergence_before_alarm",
+                                row["harmful_but_stealthy"],
+                            ),
+                        }
+                        for row in group
+                    ],
+                    "_paired_divergence_flag",
+                ),
+                "tolerance_exceeding_paired_divergence_before_alarm_probability_ci95_low": harmful_low,
+                "tolerance_exceeding_paired_divergence_before_alarm_probability_ci95_high": harmful_high,
                 "harmful_but_stealthy_probability": _probability(group, "harmful_but_stealthy"),
                 "harmful_but_stealthy_probability_ci95_low": harmful_low,
                 "harmful_but_stealthy_probability_ci95_high": harmful_high,
@@ -1109,6 +1520,8 @@ def validate_campaign(
     rows: list[dict[str, object]],
     manifest: list[dict[str, object]],
     out_dir: Path,
+    *,
+    expected_attack_profiles: int | None = None,
 ) -> dict[str, object]:
     baseline_attacks = [
         row for row in rows if row["transport"] == "baseline" and row["attack"] != "none"
@@ -1138,9 +1551,12 @@ def validate_campaign(
             or fractions != set(ATTACK_START_FRACTIONS)
         ):
             invalid_conditions.append(list(key))
-    expected_profiles = len(_attack_specs()) - 1
+    expected_profiles = expected_attack_profiles or max(1, len(grouped) // len(VARIANTS))
     expected_attack_scenarios = (
         expected_runs * expected_profiles * len(ATTACK_START_FRACTIONS) * len(VARIANTS)
+    )
+    unique_attack_run_start_combinations = (
+        expected_runs * expected_profiles * len(ATTACK_START_FRACTIONS)
     )
     payload = {
         "schema": "ugv01_attack_campaign_validation_v1",
@@ -1151,6 +1567,8 @@ def validate_campaign(
         "detector_variants": len(VARIANTS),
         "attack_profiles": expected_profiles,
         "starts_per_run": len(ATTACK_START_FRACTIONS),
+        "unique_attack_run_start_combinations": unique_attack_run_start_combinations,
+        "detector_run_evaluations": len(baseline_attacks),
         "expected_attack_scenarios": expected_attack_scenarios,
         "observed_attack_scenarios": len(baseline_attacks),
         "expected_scenarios_per_condition": expected_scenarios_per_condition,
@@ -1203,14 +1621,14 @@ def _make_plots(
                 marker="o",
                 linewidth=1.4,
                 capsize=2,
-                label=mode.replace("_", " "),
+                label=VARIANT_LABELS.get(mode, mode),
             )
         axis.set_title(f"{direction.title()}-track step")
         axis.set_xlabel("Injected offset (m)")
         axis.set_ylim(-0.03, 1.03)
         axis.grid(alpha=0.25)
     axes[0].set_ylabel("Detection probability (run-clustered 95% CI)")
-    axes[1].legend(fontsize=8, loc="lower right")
+    axes[1].legend(fontsize=6, loc="lower right")
     fig.suptitle("Real-log step-attack detection: 20 runs, three start times")
     fig.tight_layout()
     fig.savefig(out_dir / "step_detection_probability.png", dpi=180)
@@ -1226,7 +1644,7 @@ def _make_plots(
             if row["detector_variant"] == mode
             and row["attack_label"] == "drift_cross_0.05mps"
         ]
-        labels.append(mode.replace("_", "\n"))
+        labels.append(VARIANT_LABELS.get(mode, mode).replace(" ", "\n"))
         q_ratios.append(sum(float(row["mean_q_trace_ratio"]) for row in group) / len(group))
         stealth.append(sum(float(row["max_undetected_state_deviation_m"]) for row in group) / len(group))
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.2))
@@ -1258,19 +1676,19 @@ def _make_plots(
                 and float(row["rate_mps"]) == rate
             )
             detection.append(float(aggregate["run_detection_probability"]))
-            harmful.append(float(aggregate["harmful_but_stealthy_probability"]))
-        label = mode.replace("_", " ")
+            harmful.append(float(aggregate["tolerance_exceeding_paired_divergence_before_alarm_probability"]))
+        label = VARIANT_LABELS.get(mode, mode)
         axes[0].plot(DRIFT_RATES_MPS, detection, marker="o", label=label)
         axes[1].plot(DRIFT_RATES_MPS, harmful, marker="o", label=label)
     axes[0].set_title("Detection probability")
-    axes[1].set_title("Harmful-but-stealthy probability")
+    axes[1].set_title("Tolerance-exceeding paired divergence")
     for axis in axes:
         axis.set_xlabel("Cross-track drift rate (m/s)")
         axis.grid(alpha=0.25)
-    axes[0].set_ylim(-0.005, 0.05)
+    axes[0].set_ylim(-0.03, 1.03)
     axes[1].set_ylim(-0.01, 0.20)
     axes[0].set_ylabel("Probability")
-    axes[1].legend(fontsize=8, loc="upper left")
+    axes[1].legend(fontsize=6, loc="upper left")
     fig.suptitle("Slow-drift outcomes across all accepted runs")
     fig.tight_layout()
     fig.savefig(out_dir / "drift_attack_outcomes.png", dpi=180)
@@ -1332,14 +1750,21 @@ def _render_report(
             "of each post-motion run horizon."
         ),
         (
-            f"- Baseline-transport attack scenarios: {len(attack_rows):,}, "
-            f"clustered within {len(manifest)} physical runs."
+            f"- Baseline-transport unique attack-run-start combinations: "
+            f"{len(attack_rows) // len(VARIANTS):,}; detector-run evaluations: "
+            f"{len(attack_rows):,}, clustered within {len(manifest)} physical runs."
+        ),
+        (
+            "- Comparator suite: GPS jump, raw digital-twin residual, fixed NIS, "
+            "robust innovation gate, Huber EKF, CUSUM, naive adaptive, "
+            "innovation-matching adaptive, GPS-independent adaptive, and "
+            "evidence-gated adaptive."
         ),
         "",
         "## Benign-only threshold lock",
         "",
-        "| Variant | Locked NIS threshold | Benign runs | LORO false alarms | P_FA (95% Wilson CI) |",
-        "| --- | ---: | ---: | ---: | ---: |",
+        "| Variant | Score | Locked threshold | Benign runs | LORO false alarms | P_FA (95% Wilson CI) |",
+        "| --- | --- | ---: | ---: | ---: | ---: |",
     ]
     for mode in VARIANTS:
         false_alarms = int(thresholds[mode]["leave_one_run_out_false_alarms"])
@@ -1347,7 +1772,8 @@ def _render_report(
         low = float(thresholds[mode]["leave_one_run_out_pfa_wilson95_low"])
         high = float(thresholds[mode]["leave_one_run_out_pfa_wilson95_high"])
         lines.append(
-            f"| {mode} | {float(thresholds[mode]['threshold']):.4f} | "
+            f"| {VARIANT_LABELS.get(mode, mode)} | {_score_name(mode)} | "
+            f"{float(thresholds[mode]['threshold']):.4f} | "
             f"{thresholds[mode]['calibration_runs']} | "
             f"{false_alarms}/{thresholds[mode]['calibration_runs']} | "
             f"{rate:.3f} [{low:.3f}, {high:.3f}] |"
@@ -1358,7 +1784,8 @@ def _render_report(
         (
             "The operational policy uses robust pre-mission GPS initialization, "
             "enables monitoring at sustained tracked-drive motion, and alarms "
-            "after 3 of 5 NIS updates exceed the variant threshold."
+            "after the variant-specific score persistence rule exceeds the "
+            "benign-locked threshold."
         ),
         (
             "For each leave-one-run-out fold, the threshold is computed from the "
@@ -1366,9 +1793,9 @@ def _render_report(
             "frozen from all 20 benign runs. No attack data are used."
         ),
         (
-            "The retained anomalous run is the single leave-one-run-out false "
-            "alarm, giving the target point estimate 1/20 = 0.05 rather than "
-            "removing the run post hoc."
+            "Any leave-one-run-out alarms are retained in the report rather "
+            "than removed post hoc; the point estimate and Wilson interval are "
+            "shown separately for every comparator."
         ),
         "",
         "## Directional step detectability",
@@ -1390,7 +1817,7 @@ def _render_report(
                 if row["detector_variant"] == mode and row["direction"] == direction
             }
             lines.append(
-                f"| {mode} | {direction} | {_epsilon_text(values[0.50])} | "
+                f"| {VARIANT_LABELS.get(mode, mode)} | {direction} | {_epsilon_text(values[0.50])} | "
                 f"{_epsilon_text(values[0.90])} | {_epsilon_text(values[0.95])} |"
             )
 
@@ -1404,7 +1831,7 @@ def _render_report(
             "case."
         ),
         "",
-        "| Variant | P_D (95% CI) | Median detected delay (95% CI) | Harmful-but-stealthy P (95% CI) |",
+        "| Variant | P_D (95% CI) | Median detected delay (95% CI) | Tolerance-exceeding paired divergence P (95% CI) |",
         "| --- | ---: | ---: | ---: |",
     ])
     for mode in VARIANTS:
@@ -1423,12 +1850,13 @@ def _render_report(
             f"{float(aggregate['median_detection_delay_ci95_high_s']):.2f}]"
         )
         lines.append(
-            f"| {mode} | {float(aggregate['run_detection_probability']):.3f} "
+            f"| {VARIANT_LABELS.get(mode, mode)} | {float(aggregate['run_detection_probability']):.3f} "
             f"[{float(aggregate['run_detection_probability_ci95_low']):.3f}, "
             f"{float(aggregate['run_detection_probability_ci95_high']):.3f}] | "
-            f"{delay_text} | {float(aggregate['harmful_but_stealthy_probability']):.3f} "
-            f"[{float(aggregate['harmful_but_stealthy_probability_ci95_low']):.3f}, "
-            f"{float(aggregate['harmful_but_stealthy_probability_ci95_high']):.3f}] |"
+            f"{delay_text} | "
+            f"{float(aggregate['tolerance_exceeding_paired_divergence_before_alarm_probability']):.3f} "
+            f"[{float(aggregate['tolerance_exceeding_paired_divergence_before_alarm_probability_ci95_low']):.3f}, "
+            f"{float(aggregate['tolerance_exceeding_paired_divergence_before_alarm_probability_ci95_high']):.3f}] |"
         )
 
     lines.extend([
@@ -1447,7 +1875,7 @@ def _render_report(
     for mode in VARIANTS:
         benign = [row for row in buffered_test if row["detector_variant"] == mode and row["attack"] == "none"]
         alarms = sum(int(row["run_detected"]) for row in benign)
-        lines.append(f"| {mode} | {alarms}/{len(benign)} |")
+        lines.append(f"| {VARIANT_LABELS.get(mode, mode)} | {alarms}/{len(benign)} |")
 
     lines.extend([
         "",
@@ -1488,14 +1916,14 @@ def _render_report(
             "`DigitalTwin/configs/locked_alarm_policy.json`: benign-only "
             "thresholds and frozen operational policy."
         ),
-        "- `campaign_summary.csv` and `campaign_aggregate.csv`: per-run and grouped attack metrics.",
+        "- `campaign_summary.csv` and `campaign_aggregate.csv`: per-detector-run and grouped attack metrics.",
         "- `campaign_validation.json`: matrix-completeness certificate.",
         (
             "- `epsilon_summary.csv`: directional epsilon_50, epsilon_90, and "
             "epsilon_95 estimates and censoring information."
         ),
         "- `step_detection_probability.png`: direction-dependent step results with clustered intervals.",
-        "- `drift_attack_outcomes.png`: drift detection and harmful-but-stealthy probabilities.",
+        "- `drift_attack_outcomes.png`: drift detection and tolerance-exceeding paired-divergence probabilities.",
         "- `covariance_poisoning.png`: covariance and paired-state response to slow drift.",
     ])
     return "\n".join(lines) + "\n"
@@ -1507,6 +1935,16 @@ def main() -> None:
     parser.add_argument("--out-dir", default="DigitalTwin/datasets/analysis/real_data_study")
     parser.add_argument("--manifest-only", action="store_true")
     parser.add_argument(
+        "--include-buffered-attacks",
+        action="store_true",
+        help="also replay attacks under the buffered delay/jitter transport condition",
+    )
+    parser.add_argument(
+        "--expanded-attack-grid",
+        action="store_true",
+        help="use finer step magnitudes and expanded drift rates for replay-only sensitivity analysis",
+    )
+    parser.add_argument(
         "--summarize-existing",
         action="store_true",
         help="regenerate plots/report from existing campaign CSV artifacts",
@@ -1515,6 +1953,8 @@ def main() -> None:
     args = parser.parse_args()
 
     out_dir = Path(args.out_dir)
+    if args.expanded_attack_grid and out_dir.name != "expanded_grid":
+        out_dir = out_dir / "expanded_grid"
     out_dir.mkdir(parents=True, exist_ok=True)
     manifest = build_benign_manifest(Path(args.input_dir), out_dir)
     if args.manifest_only:
@@ -1522,7 +1962,8 @@ def main() -> None:
         return
     if args.summarize_existing:
         thresholds = json.loads((out_dir / "locked_thresholds.json").read_text(encoding="utf-8"))
-        campaign = read_rows(out_dir / "campaign_summary.csv")
+        summary_name = "campaign_summary_expanded_grid.csv" if args.expanded_attack_grid else "campaign_summary.csv"
+        campaign = read_rows(out_dir / summary_name)
         aggregates = read_rows(out_dir / "campaign_aggregate.csv")
         epsilons = read_rows(out_dir / "epsilon_summary.csv")
         validate_campaign(campaign, manifest, out_dir)
@@ -1534,7 +1975,16 @@ def main() -> None:
         print(out_dir / "real_data_study_report.md")
         return
     thresholds = lock_thresholds(manifest, out_dir)
-    campaign = run_campaign(manifest, thresholds, out_dir)
+    attack_specs = _expanded_attack_specs()[1:] if args.expanded_attack_grid else None
+    expected_attack_profiles = len(attack_specs) if attack_specs is not None else len(_attack_specs()) - 1
+    campaign = run_campaign(
+        manifest,
+        thresholds,
+        out_dir,
+        attacks=attack_specs,
+        include_buffered_attacks=args.include_buffered_attacks,
+        summary_filename="campaign_summary_expanded_grid.csv" if args.expanded_attack_grid else "campaign_summary.csv",
+    )
     aggregates = aggregate_campaign(
         campaign,
         out_dir,
@@ -1545,7 +1995,12 @@ def main() -> None:
         out_dir,
         bootstrap_iterations=args.bootstrap_iterations,
     )
-    validate_campaign(campaign, manifest, out_dir)
+    validate_campaign(
+        campaign,
+        manifest,
+        out_dir,
+        expected_attack_profiles=expected_attack_profiles,
+    )
     _make_plots(campaign, aggregates, out_dir)
     (out_dir / "real_data_study_report.md").write_text(
         _render_report(manifest, thresholds, campaign, aggregates, epsilons),
