@@ -125,9 +125,9 @@ function render() {
   setText("sensorSat", point.satellites);
   setText("sensorHdop", fmt(point.hdop));
   setText("sensorVelocity", fmt(point.velocity, 3));
-  setText("sensorOmega", `${fmt(point.omega * 180 / Math.PI, 1)}°/s`);
+  setText("sensorOmega", `${fmt(point.omega * 180 / Math.PI, 1)}°/s / ${fmt(point.slip_indicator, 2)}`);
   setText("sensorYaw", fmt(point.yaw, 1));
-  setText("sensorGyro", `${fmt(point.gyro_z, 2)}°/s`);
+  setText("sensorGyro", `${fmt(point.imu_omega * 180 / Math.PI, 2)}°/s / ${fmt(point.gyro_bias_deg_s, 2)}°/s`);
   setText("sensorVoltage", fmt(point.voltage, 2));
   setText("sensorMotors", `${fmt(point.motor_l, 2)} / ${fmt(point.motor_r, 2)}`);
   setText("sensorLatency", fmt(point.latency_ms, 0));

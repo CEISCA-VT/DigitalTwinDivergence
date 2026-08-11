@@ -35,9 +35,19 @@ class FixedUncertaintyPolicy:
 
 
 @dataclass(frozen=True, slots=True)
+class TurnSlipUncertaintyPolicy:
+    """Empirical tracked-turn uncertainty from AprilTag turn-event residuals."""
+
+    nominal_turn_fraction: float = 0.10
+    robust_turn_fraction: float = 0.312
+    calibration_events: int = 9
+    median_absolute_angle_error_deg: float = 10.432206720810896
+
+
+@dataclass(frozen=True, slots=True)
 class EvidenceGatePolicy:
-    soft_nis_threshold: float = 10.480551254279684
-    persistent_bias_threshold: float = 155.30477241316595
+    soft_nis_threshold: float = 5.991464547107982
+    persistent_bias_threshold: float = 90.54974331591768
     bias_memory: float = 0.90
     timing_mismatch_s: float = 0.20
     reject_stale_packets: bool = True
@@ -46,6 +56,7 @@ class EvidenceGatePolicy:
 
 DEFAULT_ADAPTIVE_POLICY = AdaptiveUncertaintyPolicy()
 DEFAULT_FIXED_POLICY = FixedUncertaintyPolicy()
+DEFAULT_TURN_SLIP_POLICY = TurnSlipUncertaintyPolicy()
 DEFAULT_EVIDENCE_GATE_POLICY = EvidenceGatePolicy()
 
 LEARNED_FEATURE_COLUMNS = (
@@ -94,6 +105,34 @@ class UncertaintyFeatures:
             ],
             dtype=float,
         )
+
+
+def turn_slip_heading_sigma(
+    omega_radps: float,
+    dt_s: float,
+    policy: TurnSlipUncertaintyPolicy = DEFAULT_TURN_SLIP_POLICY,
+) -> float:
+    """Return one-sigma heading uncertainty for an encoder-predicted turn."""
+
+    turn_increment_rad = abs(float(omega_radps) * max(float(dt_s), 0.0))
+    return policy.nominal_turn_fraction * turn_increment_rad
+
+
+def add_turn_slip_uncertainty(
+    process_covariance: np.ndarray,
+    omega_radps: float,
+    dt_s: float,
+    policy: TurnSlipUncertaintyPolicy = DEFAULT_TURN_SLIP_POLICY,
+) -> np.ndarray:
+    """Add GPS-independent tracked-turn uncertainty without shifting the mean."""
+
+    covariance = np.asarray(process_covariance, dtype=float)
+    if covariance.shape != (3, 3):
+        raise ValueError("process covariance must have shape (3, 3)")
+    result = covariance.copy()
+    sigma = turn_slip_heading_sigma(omega_radps, dt_s, policy)
+    result[2, 2] += sigma * sigma
+    return result
 
 
 class TelemetryStatisticsWindow:

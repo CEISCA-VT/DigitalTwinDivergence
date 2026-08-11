@@ -89,6 +89,12 @@ numerical alarm lock is superseded because NIS now uses the independent
 security predictor. A new benign-only run-level lock is required before attack
 evaluation; prospective validation remains required.
 
+The current motion predictor preserves Waveshare geometry, estimates z-gyro
+bias from each run's stationary prefix, low-pass filters `gz`, and applies a
+conservative 5% IMU correction to encoder yaw. A 16-update GPS-prefix
+Procrustes alignment initializes local heading before monitoring. The
+encoder/IMU yaw disagreement is retained as a slip indicator.
+
 Frozen uncertainty comparisons:
 
 - fixed covariance

@@ -16,7 +16,7 @@ from DigitalTwin.timing import SessionClockCalibrator
 # ============================================================================
 
 # Station-mode IP shown next to "ST" on the UGV01 OLED.
-ROVER_IP = "192.168.68.62"
+ROVER_IP = "192.168.68.66"
 BASE_URL = f"http://{ROVER_IP}/js"
 
 
@@ -45,7 +45,7 @@ HTTP_TIMEOUT_SECONDS = 2.0
 
 # This entrypoint runs the motion-validation cycle while recording telemetry.
 # Set this to False for a stationary telemetry-only session.
-MOTION_SCRIPT_ENABLED = True
+MOTION_SCRIPT_ENABLED = False
 MOTION_PLAN = "validation_triplet"
 STOP_WHEN_MOTION_COMPLETE = True
 
@@ -59,10 +59,11 @@ STRAIGHT_FORWARD_CMD = (-0.20, -0.20)
 STRAIGHT_BACKWARD_CMD = (0.20, 0.20)
 TURN_CCW_CMD = (-0.32, 0.32)
 TURN_CW_CMD = (0.32, -0.32)
-SQUARE_STRAIGHT_FORWARD_CMD = (-0.14, -0.14)
-# With the same timed turn, 0.072 produced 80 degrees and 0.080 produced
-# 100 degrees. Linear interpolation gives 0.076 for a 90-degree corner.
-SQUARE_TURN_CW_CMD = (0.076, -0.076)
+SQUARE_STRAIGHT_FORWARD_CMD = (-0.10, -0.10)
+# Smooth-floor square turns now use the same slow encoder-count calibration
+# that produced the most repeatable manual 90-degree turns on August 10.
+SQUARE_TURN_CW_CMD = (0.038, -0.038)
+SQUARE_TURN_COUNTS_PER_90 = 575.0
 
 STRAIGHT_DISTANCE_M = 1.0
 TURN_DEGREES = 360.0
@@ -71,10 +72,12 @@ SEQUENCE_REPEAT_COUNT = 3
 SQUARE_SIDE_LENGTH_M = 1.0
 SQUARE_TURN_DEGREES = 90.0
 SQUARE_REPEAT_COUNT = 1
-SQUARE_SIDE_HOLD_SECONDS = 1.0
-SQUARE_CORNER_HOLD_SECONDS = 3.0
-SQUARE_STRAIGHT_WARMUP_CMD = (-0.08, -0.08)
-SQUARE_STRAIGHT_WARMUP_SECONDS = 0.35
+SQUARE_SIDE_HOLD_SECONDS = 1.5
+SQUARE_CORNER_HOLD_SECONDS = 4.0
+SQUARE_STRAIGHT_BREAKAWAY_CMD = (0.0, 0.0)
+SQUARE_STRAIGHT_BREAKAWAY_SECONDS = 0.0
+SQUARE_STRAIGHT_WARMUP_CMD = (-0.05, -0.05)
+SQUARE_STRAIGHT_WARMUP_SECONDS = 0.6
 SQUARE_STRAIGHT_SECONDS = 4.2
 SQUARE_TURN_SECONDS = 1.59
 COMMAND_REFRESH_SECONDS = 0.10
@@ -96,6 +99,7 @@ class SquareTerrainProfile:
     turn_seconds: float
     turn_left_cmd: float
     turn_right_cmd: float
+    turn_counts_per_90: float
     note: str
     corner_turn_seconds: tuple[float, float, float, float] | None = None
 
@@ -113,20 +117,22 @@ SQUARE_TERRAIN_PROFILES = {
         name="smooth",
         surface_label="smooth_kitchen_floor",
         turn_seconds=1.59,
-        turn_left_cmd=0.076,
-        turn_right_cmd=-0.076,
-        note="Smooth-floor 90 degree corner calibration from July 21 kitchen-floor tests.",
+        turn_left_cmd=0.038,
+        turn_right_cmd=-0.038,
+        turn_counts_per_90=575.0,
+        note="Smooth-floor 90 degree corner calibration from August 10 encoder-count tests.",
         corner_turn_seconds=None,
     ),
     "rough": SquareTerrainProfile(
         name="rough",
         surface_label="rough_permeable_concrete",
         turn_seconds=1.65,
-        turn_left_cmd=0.076,
-        turn_right_cmd=-0.076,
+        turn_left_cmd=0.038,
+        turn_right_cmd=-0.038,
+        turn_counts_per_90=575.0,
         note=(
-            "Rough permeable-concrete profile tuned from July 20 outdoor "
-            "tests with separate per-corner turn timing."
+            "Rough permeable-concrete profile uses the conservative encoder-count "
+            "turn setting unless overridden for a new surface."
         ),
         corner_turn_seconds=(1.80, 1.90, 1.75, 1.80),
     ),
@@ -135,9 +141,9 @@ SQUARE_TERRAIN_PROFILES = {
 SQUARE_SPEED_PROFILES = {
     "low": SquareSpeedProfile(
         name="low",
-        straight_left_cmd=-0.14,
-        straight_right_cmd=-0.14,
-        note="Current low-speed square setting.",
+        straight_left_cmd=-0.10,
+        straight_right_cmd=-0.10,
+        note="Gentle low-speed square setting to reduce post-turn one-track twitch.",
     ),
     "medium": SquareSpeedProfile(
         name="medium",
@@ -165,6 +171,7 @@ def apply_square_terrain_profile(
     global SQUARE_TURN_SECONDS
     global SQUARE_TURN_CW_CMD
     global SQUARE_TURN_SECONDS_BY_CORNER
+    global SQUARE_TURN_COUNTS_PER_90
 
     if profile_name not in SQUARE_TERRAIN_PROFILES:
         choices = ", ".join(sorted(SQUARE_TERRAIN_PROFILES))
@@ -187,6 +194,7 @@ def apply_square_terrain_profile(
         if turn_cmd is None
         else turn_cmd
     )
+    SQUARE_TURN_COUNTS_PER_90 = profile.turn_counts_per_90
     return profile
 
 
@@ -242,6 +250,7 @@ FIELDNAMES = [
     "square_turn_right_cmd",
     "square_turn_seconds",
     "square_turn_schedule_s",
+    "square_turn_counts_per_90",
     "square_straight_left_cmd",
     "square_straight_right_cmd",
 
@@ -604,24 +613,30 @@ class SquareSequenceController(MotionSequenceController):
                             0.0,
                             0.0,
                             SQUARE_SIDE_HOLD_SECONDS,
-                            f"hold after side {edge_idx + 1} ({run_label})",
+                            f"settle after side {edge_idx + 1} ({run_label})",
                         ),
                     ]
                 )
                 self.steps.extend(
                     [
                         MotionStep(
-                            "turn_timed",
+                            "turn_encoder",
                             *SQUARE_TURN_CW_CMD,
-                            square_turn_seconds_for_corner(edge_idx),
-                            f"clockwise timed {int(SQUARE_TURN_DEGREES)} deg turn ({run_label}) corner {edge_idx + 1}",
+                            SQUARE_TURN_COUNTS_PER_90 * (SQUARE_TURN_DEGREES / 90.0),
+                            f"clockwise encoder {int(SQUARE_TURN_DEGREES)} deg turn ({run_label}) corner {edge_idx + 1}",
                         ),
                         MotionStep(
                             "hold",
                             0.0,
                             0.0,
                             SQUARE_CORNER_HOLD_SECONDS,
-                            f"hold after corner {edge_idx + 1} ({run_label})",
+                            f"settle after corner {edge_idx + 1} ({run_label})",
+                        ),
+                        MotionStep(
+                            "turn_timed",
+                            *SQUARE_STRAIGHT_BREAKAWAY_CMD,
+                            SQUARE_STRAIGHT_BREAKAWAY_SECONDS,
+                            f"symmetric straight breakaway after corner {edge_idx + 1} ({run_label})",
                         ),
                     ]
                 )
@@ -912,7 +927,7 @@ def main() -> None:
         print("Motion script is ENABLED.")
         if MOTION_PLAN == "square_1m":
             print(
-                f"Sequence: {SQUARE_SIDE_LENGTH_M:g} m square with {SQUARE_TURN_SECONDS:g} s clockwise 90 deg corners, repeated {SQUARE_REPEAT_COUNT} times"
+                f"Sequence: {SQUARE_SIDE_LENGTH_M:g} m square with {SQUARE_TURN_COUNTS_PER_90:g} encoder-count clockwise 90 deg corners, repeated {SQUARE_REPEAT_COUNT} times"
             )
         else:
             print(

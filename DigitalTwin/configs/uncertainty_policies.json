@@ -1,6 +1,6 @@
 {
-  "schema": "ugv01_uncertainty_policies_v1",
-  "status": "revised_math_gate_frozen_on_benign_development_split",
+  "schema": "ugv01_uncertainty_policies_v3",
+  "status": "revised_math_gate_with_apriltag_calibrated_turn_slip_uncertainty",
   "units": {
     "acceleration": "m/s^2",
     "angular_rate": "rad/s",
@@ -11,6 +11,16 @@
     "gps_sigma_m": 1.75,
     "process_xy_sigma_mps": 0.05,
     "process_heading_sigma_radps": 0.01
+  },
+  "turn_slip": {
+    "nominal_turn_fraction": 0.1,
+    "robust_turn_fraction": 0.312,
+    "calibration_events": 9,
+    "median_absolute_angle_error_deg": 10.432206720810896,
+    "mean_state_effect": "none",
+    "covariance_rule": "Q_theta_theta += (nominal_turn_fraction * abs(omega * dt))^2",
+    "activation": "all nonzero encoder-predicted turns",
+    "source": "AprilTag turn-event audit; invalid tracking-gap event and long-spin event excluded"
   },
   "naive_adaptive": {
     "base_xy_sigma_mps": 0.01,
@@ -35,13 +45,13 @@
   },
   "evidence_gated": {
     "inherits": "gps_independent",
-    "soft_nis_threshold": 10.480551254279684,
-    "persistent_bias_threshold": 155.30477241316595,
+    "soft_nis_threshold": 5.991464547107982,
+    "persistent_bias_threshold": 90.54974331591768,
     "bias_memory": 0.9,
     "timing_mismatch_s": 0.2,
     "reject_stale_packets": true,
     "reject_sequence_gaps": true,
-    "threshold_source": "95th per-update quantile over 1797 monitored updates from the 12 complete benign development runs",
+    "threshold_source": "95th per-update quantiles after scalar covariance calibration on 1665 monitored updates from the 12 complete benign development runs",
     "residual_adaptation_rule": "GPS residual is never a process-covariance feature; accept a bounded GPS-independent proposal only when protected edge evidence is healthy and both trusted-NIS and persistent-bias tests pass"
   },
   "bounded_covariance_adaptation": {
@@ -49,6 +59,13 @@
     "minimum_diagonal": [1e-10, 1e-10, 1e-12],
     "maximum_diagonal": [0.25, 0.25, 0.04],
     "rejected_gate_behavior": "freeze the most recently accepted covariance"
+  },
+  "covariance_calibration": {
+    "scale": 1.6481096867023477,
+    "applied_to": ["initial_P", "Q", "R"],
+    "selection_rule": "development NIS p95 divided by chi-square(2) p95",
+    "development_updates": 1665,
+    "state_effect": "none when P, Q, and R are scaled together; Kalman gain is unchanged"
   },
   "learned_gps_independent": {
     "target_status": "frozen",

@@ -20,11 +20,18 @@ class CovarianceAdaptationPolicy:
 
 
 @dataclass(frozen=True, slots=True)
+class CovarianceCalibrationPolicy:
+    """Benign-development scalar applied consistently to P, Q, and R."""
+
+    scale: float = 1.6481096867023477
+
+
+@dataclass(frozen=True, slots=True)
 class TrustedGatePolicy:
     """Frozen parameters for the PDF's trusted-whitened evidence gate."""
 
-    soft_nis_threshold: float = 10.480551254279684
-    persistent_bias_threshold: float = 155.30477241316595
+    soft_nis_threshold: float = 5.991464547107982
+    persistent_bias_threshold: float = 90.54974331591768
     bias_memory: float = 0.90
     timing_mismatch_s: float = 0.20
     reject_stale_packets: bool = True
@@ -41,6 +48,7 @@ class GateDecision:
 
 
 DEFAULT_COVARIANCE_ADAPTATION_POLICY = CovarianceAdaptationPolicy()
+DEFAULT_COVARIANCE_CALIBRATION_POLICY = CovarianceCalibrationPolicy()
 DEFAULT_TRUSTED_GATE_POLICY = TrustedGatePolicy()
 
 

@@ -55,6 +55,8 @@ limit. Otherwise the last accepted covariance is frozen.
 
 - `DigitalTwin/security.py`: security predictor, covariance bounds/smoothing,
   and trusted-whitened gate.
+- `DigitalTwin/motion.py`: stationary gyro-bias estimation, conservative
+  encoder/IMU yaw fusion, slip diagnostics, and local-frame initialization.
 - `DigitalTwin/analysis/real_data_study.py`: paired security/operational replay
   and exported gate, innovation, covariance, and state fields.
 - `DigitalTwin/analysis/digital_twin_accuracy.py`: benign sensor-agreement,
@@ -64,14 +66,19 @@ limit. Otherwise the last accepted covariance is frozen.
 
 ## Gate Freeze and Remaining Alarm Re-Freeze
 
-The gate limits were frozen at the 95th per-update quantiles from 1,797
-monitored updates in the 12 complete benign development runs:
+The covariance scale and gate limits were frozen from 1,665 monitored updates
+in the 12 complete benign development runs:
 
 ```text
-gamma_soft = 10.480551254279684
-h_c        = 155.30477241316595
+covariance scale = 1.6481096867023477
+gamma_soft       = 5.991464547107982
+h_c              = 90.54974331591768
 lambda_c   = 0.90
 ```
+
+The scalar is applied to initial `P`, `Q`, and `R`, so it changes NIS
+calibration without changing the Kalman gain. Held-out coverage remains below
+95%; see `docs/existing_log_model_calibration.md`.
 
 The architecture change invalidates the numerical comparability of the old
 alarm thresholds and attack-campaign results. Before rerunning attacks:

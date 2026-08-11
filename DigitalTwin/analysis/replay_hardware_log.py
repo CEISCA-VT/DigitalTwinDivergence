@@ -11,10 +11,14 @@ import numpy as np
 
 from DigitalTwin.detector import InnovationDetector
 from DigitalTwin.ekf import RoverEKF
-from DigitalTwin.kinematics import DifferentialDriveGeometry
+from DigitalTwin.kinematics import ugv01_calibrated_geometry
 from DigitalTwin.logger import CSVExperimentLogger
 from DigitalTwin.telemetry import gps_to_local_xy
-from DigitalTwin.uncertainty import TelemetryDrivenUncertaintyEstimator, TelemetryStatisticsWindow
+from DigitalTwin.uncertainty import (
+    TelemetryDrivenUncertaintyEstimator,
+    TelemetryStatisticsWindow,
+    add_turn_slip_uncertainty,
+)
 
 
 def _float(row: dict[str, str], key: str, default: float = 0.0) -> float:
@@ -47,7 +51,7 @@ def replay_hardware_log(input_csv: str | Path, output_csv: str | Path) -> Path:
     origin_lat = _float(rows[0], "lat")
     origin_lon = _float(rows[0], "lon")
 
-    geometry = DifferentialDriveGeometry()
+    geometry = ugv01_calibrated_geometry()
     uncertainty = TelemetryDrivenUncertaintyEstimator()
     stats = TelemetryStatisticsWindow()
     detector = InnovationDetector()
@@ -92,6 +96,7 @@ def replay_hardware_log(input_csv: str | Path, output_csv: str | Path) -> Path:
                 fallback_dt_s=arrival_dt_s,
             )
             Q = uncertainty.process_covariance(features, dt_s)
+            Q = add_turn_slip_uncertainty(Q, omega_est, dt_s)
             R = uncertainty.measurement_covariance(features)
             ekf.predict(v_est, omega_est, dt_s, Q)
             dead_reckoning_residual_m = float(np.linalg.norm(gps_xy - ekf.state.x[:2]))

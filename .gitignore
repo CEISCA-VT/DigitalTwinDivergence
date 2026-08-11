@@ -6,6 +6,8 @@ DigitalTwin/datasets/
 DigitalTwin/configs/locked_threshold.json
 DigitalTwin/configs/uncertainty_model.json
 DigitalTwin/configs/uncertainty_model.pkl
+DigitalTwin/configs/patchtsmixer_uncertainty_model.pkl
+DigitalTwin/configs/ibm_patchtsmixer_uncertainty_model.pkl
 results/
 pdf_extracted_text*.txt
 .tmp_*

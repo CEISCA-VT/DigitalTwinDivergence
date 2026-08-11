@@ -8,6 +8,9 @@ import math
 import numpy as np
 
 
+UGV01_APRILTAG_EFFECTIVE_TRACK_WIDTH_M = 0.192
+
+
 def wrap_angle(angle: float) -> float:
     return (angle + math.pi) % (2.0 * math.pi) - math.pi
 
@@ -21,10 +24,19 @@ class DifferentialDriveGeometry:
     ticks_per_rev: int = 1092
     left_tick_sign: float = -1.0
     right_tick_sign: float = -1.0
+    effective_track_width_m: float | None = None
 
     @property
     def meters_per_tick(self) -> float:
         return 2.0 * math.pi * self.wheel_radius_m / self.ticks_per_rev
+
+    @property
+    def turn_width_m(self) -> float:
+        return (
+            self.wheel_base_m
+            if self.effective_track_width_m is None
+            else self.effective_track_width_m
+        )
 
     def ticks_to_control(self, delta_left: int, delta_right: int, dt_s: float) -> tuple[float, float]:
         if dt_s <= 0:
@@ -32,16 +44,24 @@ class DifferentialDriveGeometry:
         dl = delta_left * self.meters_per_tick * self.left_tick_sign
         dr = delta_right * self.meters_per_tick * self.right_tick_sign
         v = (dr + dl) / (2.0 * dt_s)
-        omega = (dr - dl) / (self.wheel_base_m * dt_s)
+        omega = (dr - dl) / (self.turn_width_m * dt_s)
         return v, omega
 
     def control_to_ticks(self, v_mps: float, omega_radps: float, dt_s: float) -> tuple[int, int]:
-        dl = (v_mps - 0.5 * omega_radps * self.wheel_base_m) * dt_s
-        dr = (v_mps + 0.5 * omega_radps * self.wheel_base_m) * dt_s
+        dl = (v_mps - 0.5 * omega_radps * self.turn_width_m) * dt_s
+        dr = (v_mps + 0.5 * omega_radps * self.turn_width_m) * dt_s
         return (
             round(dl / (self.meters_per_tick * self.left_tick_sign)),
             round(dr / (self.meters_per_tick * self.right_tick_sign)),
         )
+
+
+def ugv01_calibrated_geometry() -> DifferentialDriveGeometry:
+    """Use vendor linear scale with the AprilTag-calibrated tracked-turn width."""
+
+    return DifferentialDriveGeometry(
+        effective_track_width_m=UGV01_APRILTAG_EFFECTIVE_TRACK_WIDTH_M
+    )
 
 
 def integrate_unicycle(state: np.ndarray, v_mps: float, omega_radps: float, dt_s: float) -> np.ndarray:

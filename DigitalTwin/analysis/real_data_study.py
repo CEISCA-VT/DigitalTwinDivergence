@@ -31,13 +31,24 @@ from DigitalTwin.detector import (
     nis_score_decomposition,
 )
 from DigitalTwin.ekf import RoverEKF
-from DigitalTwin.kinematics import DifferentialDriveGeometry, wrap_angle
+from DigitalTwin.kinematics import (
+    DifferentialDriveGeometry,
+    ugv01_calibrated_geometry,
+    wrap_angle,
+)
 from DigitalTwin.latency import LatencyQueue
+from DigitalTwin.motion import (
+    DEFAULT_MOTION_FUSION_POLICY,
+    MotionFusionPolicy,
+    MotionFusionResult,
+    estimate_aligned_initial_heading,
+    fuse_encoder_imu_motion,
+)
 from DigitalTwin.security import (
     BoundedCovarianceAdapter,
+    DEFAULT_COVARIANCE_CALIBRATION_POLICY,
     SecurityPredictor,
     TrustedInnovationGate,
-    initial_security_heading,
 )
 from DigitalTwin.telemetry import gps_to_local_xy
 from DigitalTwin.uncertainty import (
@@ -46,6 +57,7 @@ from DigitalTwin.uncertainty import (
     GPSIndependentUncertaintyEstimator,
     NaiveAdaptiveUncertaintyEstimator,
     TelemetryStatisticsWindow,
+    add_turn_slip_uncertainty,
 )
 
 from .common import parse_bool, parse_float, parse_int, parse_run_name, quantile, read_rows, write_rows
@@ -149,6 +161,13 @@ class PreparedRun:
     uncertainty_proxy: np.ndarray
     baseline_arrivals_s: np.ndarray
     mission_start_index: int
+    encoder_controls: np.ndarray
+    corrected_gyro_radps: np.ndarray
+    gyro_bias_radps: float
+    yaw_disagreement_radps: np.ndarray
+    slip_indicator: np.ndarray
+    initial_heading_rad: float
+    initialization_end_index: int
 
 
 MANIFEST_FIELDS = [
@@ -380,23 +399,38 @@ def _wilson_interval(successes: int, trials: int, z: float = 1.959963984540054) 
 
 
 def _precompute_motion(
-    rows: list[dict[str, str]], geometry: DifferentialDriveGeometry
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    rows: list[dict[str, str]],
+    geometry: DifferentialDriveGeometry,
+    motion_policy: MotionFusionPolicy = DEFAULT_MOTION_FUSION_POLICY,
+) -> tuple[np.ndarray, np.ndarray, MotionFusionResult]:
     times = np.asarray([_sample_time_s(row) for row in rows], dtype=float)
     elapsed = times - times[0]
     headings = np.zeros(len(rows), dtype=float)
-    controls = np.zeros((len(rows), 2), dtype=float)
+    encoder_controls = np.zeros((len(rows), 2), dtype=float)
     prev_left = _i(rows[0], "enc_left")
     prev_right = _i(rows[0], "enc_right")
     for index, row in enumerate(rows):
         dt_s = 0.1 if index == 0 else max(times[index] - times[index - 1], 1e-3)
         left = _i(row, "enc_left")
         right = _i(row, "enc_right")
-        controls[index] = geometry.ticks_to_control(left - prev_left, right - prev_right, dt_s)
+        encoder_controls[index] = geometry.ticks_to_control(
+            left - prev_left, right - prev_right, dt_s
+        )
         prev_left, prev_right = left, right
+    mission_start = motion_start_index(encoder_controls, ALARM_CONFIG)
+    raw_gyro = np.radians([_f(row, "gz") for row in rows])
+    fusion = fuse_encoder_imu_motion(
+        encoder_controls,
+        raw_gyro,
+        mission_start,
+        motion_policy,
+    )
+    controls = fusion.controls
+    for index in range(1, len(rows)):
+        dt_s = max(times[index] - times[index - 1], 1e-3)
         if index:
             headings[index] = wrap_angle(headings[index - 1] + controls[index, 1] * dt_s)
-    return elapsed, headings, controls
+    return elapsed, headings, fusion
 
 
 def _buffered_delivery_times(elapsed: np.ndarray, seed: int) -> np.ndarray:
@@ -458,12 +492,16 @@ def _attack_measurements(
     return attacked, active
 
 
-def _prepare_run(path: Path) -> PreparedRun:
+def _prepare_run(
+    path: Path,
+    motion_policy: MotionFusionPolicy = DEFAULT_MOTION_FUSION_POLICY,
+) -> PreparedRun:
     rows = _successful_gps_rows(path)
     if not rows:
         raise RuntimeError(f"{path} has no successful GPS-valid rows")
-    geometry = DifferentialDriveGeometry()
-    elapsed, headings, controls = _precompute_motion(rows, geometry)
+    geometry = ugv01_calibrated_geometry()
+    elapsed, headings, fusion = _precompute_motion(rows, geometry, motion_policy)
+    controls = fusion.controls
     origin_lat = _f(rows[0], "lat")
     origin_lon = _f(rows[0], "lon")
     clean_xy = np.asarray(
@@ -485,6 +523,14 @@ def _prepare_run(path: Path) -> PreparedRun:
         [_f(row, "edge_arrival_time_s", _f(row, "t_edge_rx_ns") / 1e9) for row in rows],
         dtype=float,
     )
+    mission_start = motion_start_index(fusion.encoder_controls, ALARM_CONFIG)
+    initial_heading, initialization_end = estimate_aligned_initial_heading(
+        clean_xy,
+        controls,
+        elapsed,
+        mission_start,
+        motion_policy,
+    )
     return PreparedRun(
         rows=rows,
         elapsed_s=elapsed,
@@ -493,7 +539,14 @@ def _prepare_run(path: Path) -> PreparedRun:
         clean_gps_xy=clean_xy,
         uncertainty_proxy=uncertainty_proxy,
         baseline_arrivals_s=baseline_arrivals,
-        mission_start_index=motion_start_index(controls, ALARM_CONFIG),
+        mission_start_index=mission_start,
+        encoder_controls=fusion.encoder_controls,
+        corrected_gyro_radps=fusion.corrected_gyro_radps,
+        gyro_bias_radps=fusion.gyro_bias_radps,
+        yaw_disagreement_radps=fusion.yaw_disagreement_radps,
+        slip_indicator=fusion.slip_indicator,
+        initial_heading_rad=initial_heading,
+        initialization_end_index=initialization_end,
     )
 
 
@@ -506,6 +559,7 @@ def replay(
     frozen_schedule: tuple[list[np.ndarray], list[np.ndarray]] | None = None,
     transport: str = "baseline",
     prepared: PreparedRun | None = None,
+    covariance_scale: float | None = None,
 ) -> ReplayResult:
     prepared = prepared or _prepare_run(path)
     rows = prepared.rows
@@ -527,12 +581,15 @@ def replay(
         uncertainty_proxy,
         earliest_index=mission_start,
     )
-    security_initialization_end = min(
-        mission_start + ALARM_CONFIG.initialization_gps_samples,
-        max(len(rows) - 1, 0),
-    )
+    security_initialization_end = prepared.initialization_end_index
     alarm_enabled = np.arange(len(rows)) >= security_initialization_end
     initial_state, initial_covariance = robust_initial_state(attacked_xy, mission_start, ALARM_CONFIG)
+    covariance_scale = (
+        DEFAULT_COVARIANCE_CALIBRATION_POLICY.scale
+        if covariance_scale is None
+        else float(covariance_scale)
+    )
+    initial_covariance = initial_covariance * covariance_scale
 
     estimator = _estimator(mode)
     stats = TelemetryStatisticsWindow()
@@ -625,9 +682,17 @@ def replay(
             scale = float(np.clip(innovation_matching_scale, *INNOVATION_MATCHING_SCALE_LIMITS))
             Q = Q * scale
             R = R * scale
+        if not (mode == "frozen_clean" and frozen_schedule is not None):
+            Q = Q * covariance_scale
+            R = R * covariance_scale
+            Q = add_turn_slip_uncertainty(
+                Q,
+                float(controls[index, 1]),
+                dt_s,
+            )
         if index == mission_start:
             initial_state = initial_state.copy()
-            initial_state[2] = initial_security_heading(attacked_xy, mission_start)
+            initial_state[2] = prepared.initial_heading_rad
             operational_ekf = RoverEKF(
                 initial_state=initial_state,
                 initial_covariance=initial_covariance,
@@ -756,6 +821,12 @@ def replay(
                 "covariance_updates_accepted": covariance_adapter.accepted_updates,
                 "residual_feedback_active": int(residual_feedback_active),
                 "rolling_residual_m": features.dead_reckoning_residual_m,
+                "gyro_bias_radps": prepared.gyro_bias_radps,
+                "encoder_yaw_rate_radps": prepared.encoder_controls[index, 1],
+                "imu_yaw_rate_radps": prepared.corrected_gyro_radps[index],
+                "fused_yaw_rate_radps": controls[index, 1],
+                "yaw_disagreement_radps": prepared.yaw_disagreement_radps[index],
+                "slip_indicator": prepared.slip_indicator[index],
                 "residual_gate_pass_fraction": stats.residual_gate_pass_fraction,
                 "residual_cover_bound_m": stats.residual_cover_bound_m,
                 "innovation_x_m": security_innovation[0],

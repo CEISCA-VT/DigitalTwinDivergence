@@ -3,6 +3,19 @@
 Security-aware UGV01 digital-twin implementation, hardware telemetry pipeline,
 and reproducible offline GPS-attack evaluation.
 
+## Start Here
+
+- Project overview for a new collaborator or LLM:
+  `docs/project_context_for_llm.md`
+- Repository map and cleanup conventions:
+  `docs/repo_structure.md`
+- Raw-log inclusion/exclusion audit:
+  `docs/log_quality_audit.md`
+- Hardware/firmware bring-up:
+  `docs/ugv01_esp32_bringup.md`
+- Running commands:
+  `docs/running.md`
+
 Run a quick synthetic experiment:
 
 ```powershell
@@ -93,6 +106,7 @@ Core modules:
 - `DigitalTwin/telemetry.py`: packet serializer/deserializer
 - `DigitalTwin/telemetry_receiver.py`: UDP hardware packet listener
 - `DigitalTwin/kinematics.py`: tracked-drive-compatible motion model
+- `DigitalTwin/motion.py`: gyro-bias correction, encoder/IMU yaw fusion, and slip indicators
 - `DigitalTwin/ekf.py`: prediction and GPS update
 - `DigitalTwin/security.py`: GPS-independent predictor, covariance bounds, and trusted evidence gate
 - `DigitalTwin/uncertainty.py`: `Q` and `R` estimator

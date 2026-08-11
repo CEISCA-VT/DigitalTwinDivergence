@@ -1,0 +1,20 @@
+{
+  "schema": "ugv01_motion_fusion_v1",
+  "status": "provisionally_calibrated_with_apriltag_ground_truth",
+  "nominal_geometry": "Waveshare UGV01 vendor model remains unchanged",
+  "nominal_track_width_m": 0.141,
+  "effective_track_width_m": 0.192,
+  "encoder_left_sign": -1.0,
+  "encoder_right_sign": -1.0,
+  "gyro_scale": 1.0,
+  "gyro_weight": 0.0,
+  "gyro_lowpass_alpha": 0.4,
+  "gyro_clip_radps": 3.0,
+  "stationary_speed_threshold_mps": 0.01,
+  "stationary_yaw_threshold_radps": 0.05,
+  "initialization_updates": 16,
+  "selection_rule": "effective track width and gyro weight selected from synchronized encoder/AprilTag heading; 0.192 m minimized yaw error and direct gyro blending was rejected because it worsened trajectory fidelity",
+  "calibration_source": "footage_trapezoid.mp4 paired with ugv_t147_interactive_20260805_192736.csv",
+  "held_out_interpretation": "the earlier 0.1818 m encoder-only estimate improved on the new camera run; 0.192 m is the refined same-run calibration and still requires confirmation on a separate run",
+  "important_limitation": "the 0.192 m value is a provisional tracked-surface effective width, not a replacement for the 0.141 m physical chassis geometry; IMU yaw remains available for bias, slip, uncertainty, and security evidence"
+}

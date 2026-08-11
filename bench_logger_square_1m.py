@@ -77,6 +77,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="override the selected surface profile's right turn command",
     )
+    parser.add_argument(
+        "--turn-counts-per-90",
+        type=float,
+        default=None,
+        help="override the selected surface profile's encoder-count target for a 90 degree turn",
+    )
     return parser.parse_args()
 
 
@@ -102,6 +108,8 @@ def main() -> None:
         turn_cmd=turn_cmd,
         turn_schedule=turn_schedule,
     )
+    if args.turn_counts_per_90 is not None:
+        bench_logger.SQUARE_TURN_COUNTS_PER_90 = args.turn_counts_per_90
     speed_profile = bench_logger.apply_square_speed_profile(args.speed)
     network_label = NETWORK_LABELS[args.network]
 
@@ -144,6 +152,7 @@ def main() -> None:
             if bench_logger.SQUARE_TURN_SECONDS_BY_CORNER is None
             else ";".join(str(value) for value in bench_logger.SQUARE_TURN_SECONDS_BY_CORNER)
         ),
+        square_turn_counts_per_90=bench_logger.SQUARE_TURN_COUNTS_PER_90,
         square_straight_left_cmd=bench_logger.SQUARE_STRAIGHT_FORWARD_CMD[0],
         square_straight_right_cmd=bench_logger.SQUARE_STRAIGHT_FORWARD_CMD[1],
     )

@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 
-from DigitalTwin.kinematics import DifferentialDriveGeometry, wrap_angle
+from DigitalTwin.kinematics import ugv01_calibrated_geometry, wrap_angle
 from DigitalTwin.telemetry import gps_to_local_xy
 from DigitalTwin.uncertainty import LEARNED_FEATURE_COLUMNS, TelemetryStatisticsWindow
 
@@ -75,7 +75,7 @@ def extract_run_examples(
     if len(rows) <= horizon_updates + 2:
         raise RuntimeError(f"{path} has too few successful GPS-valid rows")
 
-    geometry = DifferentialDriveGeometry()
+    geometry = ugv01_calibrated_geometry()
     times = np.asarray([_sample_time_s(row) for row in rows], dtype=float)
     elapsed = times - times[0]
     origin_lat = _f(rows[0], "lat")

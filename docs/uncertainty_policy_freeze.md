@@ -22,13 +22,19 @@ The revised evidence gate passes only when:
 
 - the packet is not stale and sequence continuity is intact
 - edge/source update-time mismatch is at most `0.20 s`
-- trusted NIS is at most `10.4806`
-- the exponentially weighted trusted-whitened bias score is at most `155.3048`
+- trusted NIS is at most `5.9915`
+- the exponentially weighted trusted-whitened bias score is at most `90.5497`
 
-These are the 95th per-update quantiles from 1,797 monitored updates in the 12
-complete benign development runs. The relatively high bias threshold records
-the existing encoder/GPS model mismatch rather than hiding it. Attack outcomes
-were not used.
+The initial, process, and measurement covariances are all multiplied by the
+development-only scalar `1.6481096867`. It is the unscaled development NIS
+95th percentile divided by the two-dimensional chi-square 95th percentile.
+Scaling `P`, `Q`, and `R` together leaves the Kalman gain and state trajectory
+unchanged while correcting normalization. The bias limit is the corresponding
+development 95th percentile after scaling. Attack outcomes were not used.
+
+Development NIS coverage is `94.9%`, while validation and test coverage are
+`83.3%` and `89.8%`. Thus, calibration improved but did not fully generalize;
+the paper must report this split rather than claiming universal 95% coverage.
 
 ## Learned Target
 

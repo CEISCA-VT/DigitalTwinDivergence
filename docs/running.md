@@ -284,6 +284,7 @@ loading. The interface provides:
 
 - synchronized BN220 GPS, GPS-fused operational EKF, and GPS-independent
   security-predictor trajectory trails
+- bias-corrected encoder/IMU yaw fusion and an encoder-IMU slip indicator
 - current position, heading direction, and encoder-derived velocity
 - GNSS satellite/HDOP, IMU, motor, voltage, and edge-transport state
 - operational EKF-to-GPS agreement and security-branch NIS histories

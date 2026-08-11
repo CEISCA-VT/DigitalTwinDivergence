@@ -1,6 +1,6 @@
 {
   "schema": "ugv01_alarm_policy_v1",
-  "status": "superseded_by_independent_security_branch_requires_regeneration",
+  "status": "frozen_offline",
   "threat_horizon": "after sustained tracked-drive motion begins",
   "gps_initialization_samples": 5,
   "motion_speed_threshold_mps": 0.02,
@@ -10,17 +10,17 @@
   "threshold_source": "all 20 checksum-identified benign runs",
   "validation_method": "leave-one-run-out at complete-run level",
   "thresholds": {
-    "fixed": 16.901478264342042,
-    "naive_adaptive": 28.071603978216903,
-    "frozen_clean": 28.071603978216903,
-    "gps_independent": 29.2839030410462,
-    "evidence_gated": 28.793355644699997,
-    "gps_jump": 5.026353128807547,
-    "raw_position_residual": 7.307818630897701,
-    "robust_innovation_gate": 25.323887744921485,
-    "huber_ekf": 6.499333484368664,
-    "cusum_whitened_innovation": 190.38061688246248,
-    "innovation_matching_adaptive": 10.277015860049046
+    "fixed": 23.120817509459176,
+    "naive_adaptive": 23.995438269729128,
+    "frozen_clean": 23.995438269729128,
+    "gps_independent": 32.3560701803308,
+    "evidence_gated": 31.495120014035518,
+    "gps_jump": 2.084035038854539,
+    "raw_position_residual": 11.802996951299486,
+    "robust_innovation_gate": 23.120817509459176,
+    "huber_ekf": 23.120817509459176,
+    "cusum_whitened_innovation": 232.36663426969017,
+    "innovation_matching_adaptive": 8.652721119453531
   },
   "variant_alarm_rules": {
     "fixed": {

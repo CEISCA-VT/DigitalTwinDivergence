@@ -16,7 +16,11 @@ from .latency import LatencyQueue
 from .logger import CSVExperimentLogger
 from .telemetry import TelemetryPacket, gps_to_local_xy, local_xy_to_gps
 from .timing import SessionClockCalibrator
-from .uncertainty import TelemetryDrivenUncertaintyEstimator, TelemetryStatisticsWindow
+from .uncertainty import (
+    TelemetryDrivenUncertaintyEstimator,
+    TelemetryStatisticsWindow,
+    add_turn_slip_uncertainty,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -130,6 +134,7 @@ def run_simulation(config: SimulationConfig, attack: AttackConfig, output_csv: s
                     fallback_dt_s=arrival_dt_s,
                 )
                 Q = uncertainty.process_covariance(features, sensor_dt_s)
+                Q = add_turn_slip_uncertainty(Q, omega_est, sensor_dt_s)
                 R = uncertainty.measurement_covariance(features)
                 ekf.predict(v_est, omega_est, sensor_dt_s, Q)
                 dead_reckoning_residual_m = float(np.linalg.norm(gps_xy - ekf.state.x[:2]))

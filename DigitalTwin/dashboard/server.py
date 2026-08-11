@@ -174,6 +174,11 @@ def build_replay_payload(run_id: str) -> dict[str, object]:
             "s_trace": float(result.s_trace[index]),
             "velocity": float(prepared.controls[index, 0]),
             "omega": float(prepared.controls[index, 1]),
+            "encoder_omega": float(prepared.encoder_controls[index, 1]),
+            "imu_omega": float(prepared.corrected_gyro_radps[index]),
+            "gyro_bias_deg_s": math.degrees(prepared.gyro_bias_radps),
+            "yaw_disagreement": float(prepared.yaw_disagreement_radps[index]),
+            "slip_indicator": float(prepared.slip_indicator[index]),
             "voltage": _number(raw, "v"),
             "motor_l": _number(raw, "L"),
             "motor_r": _number(raw, "R"),
@@ -253,6 +258,10 @@ def build_replay_payload(run_id: str) -> dict[str, object]:
         "satellite_max": max(satellites, default=0),
         "hdop_median": _quantile(hdops, 0.5),
         "max_nis": max((float(p["nis"]) for p in points), default=0.0),
+        "gyro_bias_deg_s": math.degrees(prepared.gyro_bias_radps),
+        "slip_indicator_p95": _quantile(
+            [float(p["slip_indicator"]) for p in points], 0.95
+        ),
         "threshold_status": "provisional_per_update_chi_square_pending_benign_refreeze",
     }
     payload: dict[str, object] = {
