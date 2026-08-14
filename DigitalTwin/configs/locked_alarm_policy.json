@@ -15,6 +15,8 @@
     "frozen_clean": 23.995438269729128,
     "gps_independent": 32.3560701803308,
     "evidence_gated": 31.495120014035518,
+    "gps_bias_fixed": 23.120817509459176,
+    "gps_bias_evidence_gated": 31.495120014035518,
     "gps_jump": 2.084035038854539,
     "raw_position_residual": 11.802996951299486,
     "robust_innovation_gate": 23.120817509459176,
@@ -49,6 +51,18 @@
     },
     "evidence_gated": {
       "display_name": "B9 evidence-gated adaptive",
+      "score_name": "normalized innovation squared",
+      "alarm_window_size": 5,
+      "required_exceedances": 3
+    },
+    "gps_bias_fixed": {
+      "display_name": "R1 GPS-bias fixed-Q EKF",
+      "score_name": "normalized innovation squared",
+      "alarm_window_size": 5,
+      "required_exceedances": 3
+    },
+    "gps_bias_evidence_gated": {
+      "display_name": "R2 GPS-bias evidence-gated EKF",
       "score_name": "normalized innovation squared",
       "alarm_window_size": 5,
       "required_exceedances": 3

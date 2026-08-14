@@ -16,7 +16,7 @@ from DigitalTwin.timing import SessionClockCalibrator
 # ============================================================================
 
 # Station-mode IP shown next to "ST" on the UGV01 OLED.
-ROVER_IP = "192.168.68.66"
+ROVER_IP = "192.168.4.1"
 BASE_URL = f"http://{ROVER_IP}/js"
 
 

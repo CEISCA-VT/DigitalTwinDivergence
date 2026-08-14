@@ -30,7 +30,7 @@ from DigitalTwin.detector import (
     lambda_max,
     nis_score_decomposition,
 )
-from DigitalTwin.ekf import RoverEKF
+from DigitalTwin.ekf import EKFState, RoverEKF
 from DigitalTwin.kinematics import (
     DifferentialDriveGeometry,
     ugv01_calibrated_geometry,
@@ -64,6 +64,7 @@ from .common import parse_bool, parse_float, parse_int, parse_run_name, quantile
 
 
 PRIMARY_VARIANTS = ("fixed", "naive_adaptive", "frozen_clean", "gps_independent", "evidence_gated")
+REVISED_MODEL_VARIANTS = ("gps_bias_fixed", "gps_bias_evidence_gated")
 EXTERNAL_BASELINE_VARIANTS = (
     "gps_jump",
     "raw_position_residual",
@@ -72,7 +73,12 @@ EXTERNAL_BASELINE_VARIANTS = (
     "cusum_whitened_innovation",
 )
 STANDARD_ADAPTIVE_VARIANTS = ("innovation_matching_adaptive",)
-VARIANTS = PRIMARY_VARIANTS + EXTERNAL_BASELINE_VARIANTS + STANDARD_ADAPTIVE_VARIANTS
+VARIANTS = (
+    PRIMARY_VARIANTS
+    + REVISED_MODEL_VARIANTS
+    + EXTERNAL_BASELINE_VARIANTS
+    + STANDARD_ADAPTIVE_VARIANTS
+)
 INSTANT_ALARM_CONFIG = AlarmConfig(window_size=1, required_exceedances=1)
 ROBUST_GATE_NIS = 9.21
 HUBER_WHITENED_NORM = 2.5
@@ -85,6 +91,8 @@ VARIANT_LABELS = {
     "frozen_clean": "frozen clean oracle",
     "gps_independent": "B8 GPS-independent adaptive",
     "evidence_gated": "B9 evidence-gated adaptive",
+    "gps_bias_fixed": "R1 GPS-bias fixed-Q EKF",
+    "gps_bias_evidence_gated": "R2 GPS-bias evidence-gated EKF",
     "gps_jump": "B1 GPS jump",
     "raw_position_residual": "B2 raw DT residual",
     "robust_innovation_gate": "B4 robust innovation gate",
@@ -355,6 +363,7 @@ def _expanded_attack_specs() -> list[AttackSpec]:
 def _estimator(mode: str):
     if mode in {
         "fixed",
+        "gps_bias_fixed",
         "gps_jump",
         "raw_position_residual",
         "robust_innovation_gate",
@@ -363,7 +372,7 @@ def _estimator(mode: str):
         "innovation_matching_adaptive",
     }:
         return FixedUncertaintyEstimator()
-    if mode == "gps_independent":
+    if mode in {"gps_independent", "gps_bias_evidence_gated"}:
         return GPSIndependentUncertaintyEstimator()
     return NaiveAdaptiveUncertaintyEstimator()
 
@@ -382,8 +391,119 @@ def _score_name(mode: str) -> str:
     return VARIANT_SCORE_NAMES.get(mode, "normalized innovation squared")
 
 
+def _uses_gps_bias_ekf(mode: str) -> bool:
+    return mode in REVISED_MODEL_VARIANTS
+
+
+def _is_evidence_gated(mode: str) -> bool:
+    return mode in {"evidence_gated", "gps_bias_evidence_gated"}
+
+
 def _pre_update_nis(innovation: np.ndarray, covariance: np.ndarray) -> float:
     return float(innovation.T @ np.linalg.inv(covariance) @ innovation)
+
+
+def _bias_initial_covariance(pose_covariance: np.ndarray) -> np.ndarray:
+    covariance = np.zeros((5, 5), dtype=float)
+    covariance[:3, :3] = np.asarray(pose_covariance, dtype=float)
+    covariance[3, 3] = 4.0
+    covariance[4, 4] = 4.0
+    return covariance
+
+
+class GPSBiasRoverEKF:
+    """EKF with state [east, north, heading, gps_bias_east, gps_bias_north]."""
+
+    def __init__(
+        self,
+        initial_state: np.ndarray | None = None,
+        initial_covariance: np.ndarray | None = None,
+        *,
+        bias_random_walk_sigma_mps: float = 0.01,
+    ) -> None:
+        if initial_state is None:
+            state = np.zeros(5, dtype=float)
+        else:
+            state = np.zeros(5, dtype=float)
+            state[: min(5, len(initial_state))] = np.asarray(initial_state, dtype=float)[:5]
+        covariance = (
+            _bias_initial_covariance(initial_covariance)
+            if initial_covariance is not None and np.asarray(initial_covariance).shape == (3, 3)
+            else np.array(
+                initial_covariance
+                if initial_covariance is not None
+                else np.diag([2.0, 2.0, 0.5, 4.0, 4.0]),
+                dtype=float,
+            )
+        )
+        self.state = EKFState(x=state, P=covariance)
+        self.bias_random_walk_sigma_mps = float(bias_random_walk_sigma_mps)
+        self.last_innovation = np.zeros(2)
+        self.last_S = np.eye(2)
+        self.last_K = np.zeros((5, 2))
+        self.last_mahalanobis = 0.0
+
+    def gps_innovation(self, z_xy: np.ndarray, R: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        H = np.array(
+            [
+                [1.0, 0.0, 0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0, 1.0],
+            ]
+        )
+        z_xy = np.array(z_xy, dtype=float)
+        innovation = z_xy - H @ self.state.x
+        S = H @ self.state.P @ H.T + R
+        return innovation, S
+
+    def predict(self, v_mps: float, omega_radps: float, dt_s: float, Q: np.ndarray):
+        x = self.state.x
+        theta = float(x[2])
+        theta_mid = theta + 0.5 * omega_radps * dt_s
+        F = np.eye(5)
+        F[0, 2] = -v_mps * math.sin(theta_mid) * dt_s
+        F[1, 2] = v_mps * math.cos(theta_mid) * dt_s
+
+        next_pose = np.array([x[0], x[1], x[2]], dtype=float)
+        next_pose = np.asarray(
+            [
+                next_pose[0] + v_mps * math.cos(theta_mid) * dt_s,
+                next_pose[1] + v_mps * math.sin(theta_mid) * dt_s,
+                wrap_angle(next_pose[2] + omega_radps * dt_s),
+            ],
+            dtype=float,
+        )
+        self.state.x[:3] = next_pose
+
+        Q5 = np.zeros((5, 5), dtype=float)
+        Q5[:3, :3] = np.asarray(Q, dtype=float)
+        bias_variance = (self.bias_random_walk_sigma_mps * dt_s) ** 2
+        Q5[3, 3] = bias_variance
+        Q5[4, 4] = bias_variance
+        self.state.P = F @ self.state.P @ F.T + Q5
+        self.state.P = 0.5 * (self.state.P + self.state.P.T)
+        return self.state
+
+    def update_gps(self, z_xy: np.ndarray, R: np.ndarray, *, measurement_weight: float = 1.0):
+        H = np.array(
+            [
+                [1.0, 0.0, 0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0, 1.0],
+            ]
+        )
+        weight = max(float(measurement_weight), 1e-6)
+        R = np.asarray(R, dtype=float) / (weight * weight)
+        innovation, S = self.gps_innovation(z_xy, R)
+        K = self.state.P @ H.T @ np.linalg.inv(S)
+        self.state.x = self.state.x + K @ innovation
+        self.state.x[2] = wrap_angle(float(self.state.x[2]))
+        I = np.eye(5)
+        self.state.P = (I - K @ H) @ self.state.P @ (I - K @ H).T + K @ R @ K.T
+        self.state.P = 0.5 * (self.state.P + self.state.P.T)
+        self.last_innovation = innovation
+        self.last_S = S
+        self.last_K = K
+        self.last_mahalanobis = float(innovation.T @ np.linalg.inv(S) @ innovation)
+        return self.state
 
 
 def _wilson_interval(successes: int, trials: int, z: float = 1.959963984540054) -> tuple[float, float]:
@@ -596,7 +716,7 @@ def replay(
     detector = InnovationDetector(threshold=threshold)
     alarm_config = _alarm_config(mode)
     alarm = PersistentAlarm(detector.threshold, alarm_config)
-    operational_ekf = RoverEKF()
+    operational_ekf = GPSBiasRoverEKF() if _uses_gps_bias_ekf(mode) else RoverEKF()
     security_predictor = SecurityPredictor(
         np.zeros(3, dtype=float),
         np.diag([2.0, 2.0, 0.5]),
@@ -668,7 +788,7 @@ def replay(
         else:
             proposal_Q = estimator.process_covariance(features, dt_s)
             R = estimator.measurement_covariance(features)
-            if mode == "evidence_gated":
+            if _is_evidence_gated(mode):
                 Q = (
                     covariance_adapter.update(proposal_Q)
                     if covariance_adapter.current is None
@@ -693,9 +813,16 @@ def replay(
         if index == mission_start:
             initial_state = initial_state.copy()
             initial_state[2] = prepared.initial_heading_rad
-            operational_ekf = RoverEKF(
-                initial_state=initial_state,
-                initial_covariance=initial_covariance,
+            operational_ekf = (
+                GPSBiasRoverEKF(
+                    initial_state=np.r_[initial_state, [0.0, 0.0]],
+                    initial_covariance=_bias_initial_covariance(initial_covariance),
+                )
+                if _uses_gps_bias_ekf(mode)
+                else RoverEKF(
+                    initial_state=initial_state,
+                    initial_covariance=initial_covariance,
+                )
             )
             security_predictor = SecurityPredictor(initial_state, initial_covariance)
             trusted_gate = TrustedInnovationGate()
@@ -717,7 +844,7 @@ def replay(
             security_covariance,
             edge_evidence_ok=edge_evidence_ok,
         )
-        if mode == "evidence_gated" and frozen_schedule is None:
+        if _is_evidence_gated(mode) and frozen_schedule is None:
             covariance_adapter.update(proposal_Q, allowed=gate_decision.allowed)
 
         operational_innovation, operational_covariance = operational_ekf.gps_innovation(
@@ -794,6 +921,13 @@ def replay(
                 "attacked_gps_y_m": attacked_xy[index, 1],
                 "ekf_x_m": operational_ekf.state.x[0],
                 "ekf_y_m": operational_ekf.state.x[1],
+                "ekf_heading_rad": operational_ekf.state.x[2],
+                "ekf_gps_bias_x_m": (
+                    operational_ekf.state.x[3] if _uses_gps_bias_ekf(mode) else ""
+                ),
+                "ekf_gps_bias_y_m": (
+                    operational_ekf.state.x[4] if _uses_gps_bias_ekf(mode) else ""
+                ),
                 "security_x_m": security_predictor.state.x[0],
                 "security_y_m": security_predictor.state.x[1],
                 "mahalanobis": pre_update_nis,
@@ -1125,6 +1259,20 @@ def _metrics(
         if attacked.rows
         else []
     )
+    attack_bias_norms = [
+        math.hypot(
+            float(attacked.rows[index].get("ekf_gps_bias_x_m") or 0.0),
+            float(attacked.rows[index].get("ekf_gps_bias_y_m") or 0.0),
+        )
+        for index in attack_window
+    ] if attacked.rows else []
+    clean_bias_norms = [
+        math.hypot(
+            float(clean.rows[index].get("ekf_gps_bias_x_m") or 0.0),
+            float(clean.rows[index].get("ekf_gps_bias_y_m") or 0.0),
+        )
+        for index in attack_window
+    ] if clean.rows else []
     math_metrics = _paired_math_metrics(attacked, clean, attack_window)
     return {
         **{field: manifest_row[field] for field in ("run_id", "speed", "surface", "trial", "split", "source_csv")},
@@ -1185,6 +1333,17 @@ def _metrics(
                     default=0.0,
                 )
             )
+        ),
+        "mean_attack_window_gps_bias_norm_m": (
+            float(np.mean(attack_bias_norms)) if _uses_gps_bias_ekf(mode) and attack_bias_norms else ""
+        ),
+        "mean_clean_window_gps_bias_norm_m": (
+            float(np.mean(clean_bias_norms)) if _uses_gps_bias_ekf(mode) and clean_bias_norms else ""
+        ),
+        "attack_window_gps_bias_norm_delta_m": (
+            float(np.mean(attack_bias_norms) - np.mean(clean_bias_norms))
+            if _uses_gps_bias_ekf(mode) and attack_bias_norms and clean_bias_norms
+            else ""
         ),
         **math_metrics,
         "max_attack_offset_m": float(attack_offset.max()),
@@ -1365,6 +1524,11 @@ def aggregate_campaign(
     aggregates: list[dict[str, object]] = []
     for key, group in sorted(grouped.items(), key=lambda item: tuple(map(str, item[0]))):
         numeric_delay = [float(row["detection_delay_s"]) for row in group if row["detection_delay_s"] != ""]
+        numeric_bias_delta = [
+            float(row["attack_window_gps_bias_norm_delta_m"])
+            for row in group
+            if row.get("attack_window_gps_bias_norm_delta_m", "") != ""
+        ]
         seed = _group_seed(key)
         pd_low, pd_high = _bootstrap_interval(
             group,
@@ -1452,6 +1616,11 @@ def aggregate_campaign(
                 ),
                 "mean_q_trace_ratio": sum(float(row["mean_q_trace_ratio"]) for row in group) / len(group),
                 "mean_s_trace_ratio": sum(float(row["mean_s_trace_ratio"]) for row in group) / len(group),
+                "mean_attack_window_gps_bias_norm_delta_m": (
+                    sum(numeric_bias_delta) / len(numeric_bias_delta)
+                    if numeric_bias_delta
+                    else ""
+                ),
             }
         )
     write_rows(out_dir / "campaign_aggregate.csv", aggregates, aggregates[0].keys())
@@ -1829,7 +1998,8 @@ def _render_report(
             "- Comparator suite: GPS jump, raw digital-twin residual, fixed NIS, "
             "robust innovation gate, Huber EKF, CUSUM, naive adaptive, "
             "innovation-matching adaptive, GPS-independent adaptive, and "
-            "evidence-gated adaptive."
+            "evidence-gated adaptive. Revised-model variants additionally "
+            "test a GPS-bias EKF with fixed and evidence-gated covariance policies."
         ),
         "",
         "## Benign-only threshold lock",

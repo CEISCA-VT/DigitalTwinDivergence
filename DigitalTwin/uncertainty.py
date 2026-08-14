@@ -316,6 +316,10 @@ class LearnedUncertaintyModel:
 
     def __init__(self) -> None:
         self.model = None
+        self.model_type = "raw"
+        self.target_low: np.ndarray | None = None
+        self.target_high: np.ndarray | None = None
+        self.target_floor = 0.0
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> None:
         try:
@@ -328,7 +332,16 @@ class LearnedUncertaintyModel:
     @classmethod
     def from_estimator(cls, estimator: object) -> "LearnedUncertaintyModel":
         instance = cls()
-        instance.model = estimator
+        if isinstance(estimator, dict) and "model" in estimator:
+            instance.model = estimator["model"]
+            instance.model_type = str(estimator.get("model_type", "raw"))
+            if estimator.get("target_low") is not None:
+                instance.target_low = np.asarray(estimator["target_low"], dtype=float)
+            if estimator.get("target_high") is not None:
+                instance.target_high = np.asarray(estimator["target_high"], dtype=float)
+            instance.target_floor = float(estimator.get("target_floor", 0.0))
+        else:
+            instance.model = estimator
         return instance
 
     def predict_q_diagonal(self, features: UncertaintyFeatures) -> np.ndarray:
@@ -337,6 +350,14 @@ class LearnedUncertaintyModel:
         prediction = np.asarray(
             self.model.predict(features.gps_independent_model_vector().reshape(1, -1))[0], dtype=float
         )
+        if self.model_type == "mlp":
+            prediction = np.exp(prediction)
+            if self.target_low is not None and self.target_high is not None:
+                prediction = np.clip(
+                    prediction,
+                    np.maximum(self.target_low, self.target_floor),
+                    np.maximum(self.target_high, self.target_floor),
+                )
         if prediction.shape[0] != 3:
             raise RuntimeError("learned uncertainty model must predict three Q diagonal values")
         return np.maximum(prediction, 0.0)

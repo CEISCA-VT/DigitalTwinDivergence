@@ -301,6 +301,70 @@ Generate the complete benign-log agreement and consistency report with:
 python -m DigitalTwin.analysis.digital_twin_accuracy
 ```
 
+## AprilTag Carpet Development Calibration
+
+The August 12 carpet recording uses a measured 2.0 m by 1.0 m reference
+rectangle: ID 1 bottom-left, ID 2 bottom-right, ID 3 top-right, and ID 4
+top-left. The video was recorded in the phone's 1x landscape mode, so use
+`camera_calibration_landscape`, not the 0.6x calibration.
+
+The dense tracking result covers 97.4% of the video. Apply the measured
+8.112 cm rover-tag elevation before model fitting. The nominal rectangle and
+camera model have a 6.919 px mean reference reprojection discrepancy, so the
+correction is retained as a development artifact with that limitation stated:
+
+```powershell
+$env:PYTHONPATH='C:\tmp\codex-opencv'
+python -m DigitalTwin.analysis.correct_apriltag_elevation `
+  --input "DigitalTwin\datasets\analysis\apriltag_carpet_2x1_full_1x_calibrated\apriltag_still_summary.json" `
+  --output-dir "DigitalTwin\datasets\analysis\apriltag_carpet_2x1_full_1x_elevation_corrected" `
+  --calibration "DigitalTwin\datasets\analysis\camera_calibration_landscape\camera_calibration_charuco.json" `
+  --tag-size-m 0.08 --tag-height-m 0.08112 `
+  --maximum-reprojection-error-px 8.0
+```
+
+Audit synchronized pivot-turn events using the activity-derived video-minus-
+telemetry offset of 9.75 s:
+
+```powershell
+$env:PYTHONPATH='C:\tmp\codex-opencv'
+python -m DigitalTwin.analysis.apriltag_turn_event_audit `
+  --tracking "DigitalTwin\datasets\analysis\apriltag_carpet_2x1_full_1x_elevation_corrected\apriltag_still_summary.json" `
+  --telemetry "raw_logs\telemetry\ugv_t147_interactive_20260812_130620.csv" `
+  --run-name carpet_2x1_development `
+  --video-minus-telemetry-offset-s 9.75 `
+  --output-dir "DigitalTwin\datasets\analysis\apriltag_carpet_2x1_turn_audit"
+```
+
+Fit distance scale, direction-specific effective track widths, and a bounded
+bias-corrected IMU contribution on the first 75% of the run. The remaining 25%
+is a temporal diagnostic and is not an independent final validation set:
+
+```powershell
+$env:PYTHONPATH='C:\tmp\codex-opencv'
+python -m DigitalTwin.analysis.apriltag_temporal_calibration `
+  --tracking "DigitalTwin\datasets\analysis\apriltag_carpet_2x1_full_1x_elevation_corrected\apriltag_still_summary.json" `
+  --telemetry "raw_logs\telemetry\ugv_t147_interactive_20260812_130620.csv" `
+  --dataset-name carpet_2x1_development `
+  --train-fraction 0.75 `
+  --include-imu-grid `
+  --output-dir "DigitalTwin\datasets\analysis\apriltag_carpet_2x1_temporal_calibration"
+```
+
+Do not replace the frozen global motion parameters from this command alone.
+Freeze a candidate only after inspecting the temporal holdout, then evaluate it
+once on a newly recorded untouched run with the same camera and tag geometry.
+
+The August 12 development fit selected distance scale `0.95`, clockwise width
+`0.18 m`, counterclockwise width `0.20 m`, and bias-corrected gyro weight
+`0.20`. On the temporal tail, heading MAE improved from `19.8 deg` to
+`11.1 deg`, position RMSE from `1.964 m` to `1.841 m`, and path-length
+agreement from `87.2%` to `92.9%`. These values are recorded as
+`UGV01_CARPET_DEVELOPMENT_CANDIDATE`; the global `0.192 m` default remains
+unchanged pending an untouched run. The event audit directly supports an
+approximately `0.18 m` turn width but contains only two clean positive-turn
+events, so the direction-specific split remains provisional.
+
 ## Hardware Receiver
 
 When the UGV01 is streaming packets over UDP:
@@ -329,3 +393,99 @@ python -m DigitalTwin.analysis.plot_detection "DigitalTwin/datasets/*.csv"
 ```
 
 If those pass, stop expanding scope until hardware arrives.
+
+## i2Nav-Robot Public Ground-Truth Study
+
+Place the downloaded `playground00` text files under
+`public_datasets/im2nav/playground00/`. Prepare the synchronized 10 Hz table:
+
+```powershell
+python -m DigitalTwin.analysis.prepare_i2nav_robot
+```
+
+Then train the GPS-independent random-forest and MLP covariance candidates and
+evaluate both on the untouched chronological test segment:
+
+```powershell
+python -m DigitalTwin.analysis.i2nav_uncertainty_study
+```
+
+The study writes its report, CSV metrics, saved MLP, and four figures to
+`DigitalTwin/datasets/analysis/i2nav_playground00/study/`. It selects global
+`Q`, GNSS `R`, initial `P`, and turn/slip process-noise gain on the validation
+split only, then reports both raw and calibrated consistency on the untouched
+test split. The calibrated search uses GPS-independent speed/yaw-rate evidence
+to inflate lateral and heading process noise during turns; GNSS residuals are
+not used to authorize this adaptation.
+The study also reports a GPS-bias EKF baseline for public data and skips GNSS
+updates whose reported horizontal sigma exceeds `10 m`, recording the skipped
+count as `gps_updates_skipped_quality`.
+The full validation search is saved as `ekf_consistency_calibration.csv`, and
+the raw/calibrated test comparison is in `ekf_test_metrics.csv`. Test metrics
+include NIS, full-state NEES, position-only NEES, and heading-only NEES so that
+position inconsistency can be separated from yaw inconsistency. The principal
+files are `study_report.md`, `covariance_model_metrics.csv`,
+`ekf_test_metrics.csv`, `trajectory_comparison.png`, and `ekf_consistency.png`.
+
+Interpret acceptance conservatively. The MLP should beat the training-median
+covariance predictor on all three held-out targets, move NIS and NEES coverage
+toward 95%, and avoid worsening EKF position error. This public sequence is an
+external feasibility check; it does not replace final UGV01 plus AprilTag
+validation or authorize direct deployment of the learned model.
+
+## UGV01 AprilTag Aligned Ground-Truth Export
+
+The current UGV01 AprilTag pilot can be packaged in the same `aligned_samples`
+style used by the i2Nav public-data preparation. This is useful for inspection,
+plotting, and future tooling that expects an aligned table with ground-truth
+pose fields.
+
+```powershell
+python -m DigitalTwin.analysis.prepare_ugv01_apriltag_ground_truth
+```
+
+The default export reads
+`DigitalTwin/datasets/analysis/validation_carpet_142023_candidate/aligned_fidelity_samples.csv`
+and writes:
+
+- `DigitalTwin/datasets/analysis/ugv01_apriltag_carpet_142023/aligned_samples.csv`
+- `DigitalTwin/datasets/analysis/ugv01_apriltag_carpet_142023/aligned_samples.npz`
+- `DigitalTwin/datasets/analysis/ugv01_apriltag_carpet_142023/preparation_summary.json`
+- `DigitalTwin/datasets/analysis/ugv01_apriltag_carpet_142023/README.md`
+
+Interpret this export conservatively. The AprilTag trajectory is the physical
+ground-truth reference for the pilot, but GPS is unavailable in this run and
+camera/telemetry synchronization is inherited from the fidelity analysis rather
+than a hardware sync pulse. The export is therefore i2Nav-like for tooling
+compatibility, not a final synchronized GPS plus AprilTag validation set.
+
+To compare stronger uncertainty models against the MLP, run the model bake-off:
+
+```powershell
+C:\Users\shrey\miniconda3\python.exe -m DigitalTwin.analysis.i2nav_model_bakeoff `
+  --input DigitalTwin\datasets\analysis\i2nav_playground00\aligned_samples.npz `
+  --output-dir DigitalTwin\datasets\analysis\i2nav_playground00\model_bakeoff `
+  --ekf-top 4
+```
+
+The bake-off trains MLP, deep-ensemble MLP, Random Forest, ExtraTrees, gradient
+boosting, histogram gradient boosting, and quantile gradient boosting. If
+XGBoost, LightGBM, CatBoost, or NGBoost are installed, add `--include-optional`
+to include them. Outputs are `model_bakeoff_report.md`,
+`model_bakeoff_metrics.csv`, `model_bakeoff_coverage.csv`, and
+`model_bakeoff_ekf_metrics.csv`.
+
+The full paper-facing regeneration script now runs this bake-off automatically
+for `i2nav_playground00`, `i2nav_parking00`, and `i2nav_street00` whenever
+their `aligned_samples.npz` files are present:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\regenerate_all_results.ps1
+```
+
+Use `-SkipI2NavBakeoff` to omit those longer model comparisons, or
+`-IncludeOptionalBakeoffModels` to include optional packages such as XGBoost,
+LightGBM, CatBoost, and NGBoost when installed. A custom GRU/RNN uncertainty
+model is the next natural upgrade because covariance is a temporal quantity;
+it should be added as a separate bake-off model family after a deep-learning
+dependency is selected and pinned.

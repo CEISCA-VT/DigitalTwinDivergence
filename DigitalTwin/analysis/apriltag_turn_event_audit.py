@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import math
@@ -142,6 +143,17 @@ def _audit_run(spec: RunSpec) -> list[dict[str, object]]:
             if math.isfinite(observed_degrees) and abs(observed_degrees) >= 5.0
             else math.nan
         )
+        if quality.startswith("valid") and math.isfinite(observed_degrees):
+            same_direction = encoder_degrees * observed_degrees > 0.0
+            magnitude_ratio = (
+                abs(encoder_degrees / observed_degrees)
+                if abs(observed_degrees) >= 5.0
+                else math.inf
+            )
+            if not same_direction:
+                quality = "invalid_direction_mismatch"
+            elif not 0.5 <= magnitude_ratio <= 1.5:
+                quality = "invalid_turn_ratio"
         results.append(
             {
                 "run": spec.name,
@@ -170,9 +182,39 @@ def _audit_run(spec: RunSpec) -> list[dict[str, object]]:
 
 
 def main() -> None:
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    rows = [row for spec in RUNS for row in _audit_run(spec)]
-    with (OUTPUT_DIR / "turn_events.csv").open(
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--tracking", type=Path)
+    parser.add_argument("--telemetry", type=Path)
+    parser.add_argument("--run-name", default="custom")
+    parser.add_argument("--video-minus-telemetry-offset-s", type=float)
+    parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    args = parser.parse_args()
+    supplied = (
+        args.tracking is not None,
+        args.telemetry is not None,
+        args.video_minus_telemetry_offset_s is not None,
+    )
+    if any(supplied) and not all(supplied):
+        parser.error(
+            "--tracking, --telemetry, and --video-minus-telemetry-offset-s "
+            "must be supplied together"
+        )
+    runs = RUNS
+    if all(supplied):
+        runs = (
+            RunSpec(
+                args.run_name,
+                args.tracking,
+                args.telemetry,
+                args.video_minus_telemetry_offset_s,
+            ),
+        )
+    output_dir = args.output_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
+    rows = [row for spec in runs for row in _audit_run(spec)]
+    if not rows:
+        raise RuntimeError("no opposing-track turn events were found")
+    with (output_dir / "turn_events.csv").open(
         "w", newline="", encoding="utf-8"
     ) as file:
         writer = csv.DictWriter(file, fieldnames=list(rows[0]))
@@ -201,7 +243,7 @@ def main() -> None:
             "interactive CSV records realized track motion, not the user's menu choice."
         ),
     }
-    (OUTPUT_DIR / "turn_event_summary.json").write_text(
+    (output_dir / "turn_event_summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"
     )
 
@@ -235,10 +277,10 @@ def main() -> None:
             "",
         ]
     )
-    (OUTPUT_DIR / "turn_event_report.md").write_text(
+    (output_dir / "turn_event_report.md").write_text(
         "\n".join(report), encoding="utf-8"
     )
-    print(OUTPUT_DIR / "turn_event_report.md")
+    print(output_dir / "turn_event_report.md")
 
 
 if __name__ == "__main__":

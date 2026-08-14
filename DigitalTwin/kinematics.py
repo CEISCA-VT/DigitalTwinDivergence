@@ -11,6 +11,28 @@ import numpy as np
 UGV01_APRILTAG_EFFECTIVE_TRACK_WIDTH_M = 0.192
 
 
+@dataclass(frozen=True, slots=True)
+class TrackedDriveCalibrationCandidate:
+    """Development-only parameters awaiting an independent physical run."""
+
+    surface: str
+    distance_scale: float
+    clockwise_effective_track_width_m: float
+    counterclockwise_effective_track_width_m: float
+    gyro_weight: float
+    gyro_scale: float
+
+
+UGV01_CARPET_DEVELOPMENT_CANDIDATE = TrackedDriveCalibrationCandidate(
+    surface="carpet",
+    distance_scale=0.95,
+    clockwise_effective_track_width_m=0.18,
+    counterclockwise_effective_track_width_m=0.20,
+    gyro_weight=0.20,
+    gyro_scale=1.0,
+)
+
+
 def wrap_angle(angle: float) -> float:
     return (angle + math.pi) % (2.0 * math.pi) - math.pi
 

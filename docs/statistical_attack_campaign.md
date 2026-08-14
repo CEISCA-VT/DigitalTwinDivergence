@@ -1,7 +1,7 @@
 # Statistical Attack Campaign
 
-Status: complete for the current 20-run offline replay corpus on July 21,
-2026. The frozen specification is
+Status: revised-model campaign implementation prepared for the current 20-run
+offline replay corpus. The frozen specification is
 `DigitalTwin/configs/attack_campaign.json`.
 
 ## Threat Boundary
@@ -14,16 +14,18 @@ same physical run.
 ## Campaign Matrix
 
 - 20 accepted benign physical runs
-- five frozen detector/uncertainty variants
+- thirteen detector/model variants after the revised-model update
 - injection at 25%, 50%, and 70% of each post-motion run horizon
 - along-track and cross-track step offsets of `0.5, 1, 2, 3, 5, 7.5, 10 m`
 - along-track and cross-track drift rates of `0.01, 0.03, 0.05 m/s`
 - along-track and cross-track strategic drift at `0.03 m/s`
 - coordinate freeze and five-second value replay
 
-This produces 24 attack profiles and 7,200 paired attacked scenarios. The
-generated `campaign_validation.json` confirms that all 120 detector/attack
-condition groups contain 20 physical runs and three starts.
+This produces 24 attack profiles and 1,440 unique attack-run-start
+combinations. With 13 detector/model variants, the baseline-transport campaign
+contains 18,720 detector-run evaluations. The generated
+`campaign_validation.json` confirms that every detector/attack condition group
+contains 20 physical runs and three starts.
 
 ## Statistical Evaluation
 
@@ -46,14 +48,13 @@ are explicitly marked as censored.
 
 ## Current Headline Results
 
-Directional `epsilon_50` is approximately `6.61-8.06 m`, depending on detector
-and direction. Most adaptive variants do not reach 90% or 95% detection within
-the `10 m` step grid. At `0.05 m/s` cross-track drift, detection probability is
-zero for the evaluated adaptive variants while harmful-but-stealthy probability
-ranges from `0.10` to `0.15`; the fixed variant is harmful-but-stealthy in
-approximately `0.017` of scenarios.
+After rerunning the campaign, quote results from
+`DigitalTwin/datasets/analysis/real_data_study/real_data_study_report.md`,
+`post_campaign_report.md`, and `epsilon_summary.csv`. Older headline numbers
+remain provenance only because the revised GPS-bias variants change the
+detector/model count and the comparison set.
 
-These are results for the existing design corpus, not an independent
+These results are for the existing design corpus, not an independent
 prospective test. They support analysis of this dataset but must not be framed
 as population-level deployment guarantees.
 
@@ -68,6 +69,12 @@ Run the full campaign:
 
 ```powershell
 python -m DigitalTwin.analysis.real_data_study
+```
+
+Run the full paper-facing regeneration pipeline:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\regenerate_all_results.ps1
 ```
 
 Regenerate the report and figures from completed CSV artifacts:

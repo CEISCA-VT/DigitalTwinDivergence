@@ -226,11 +226,20 @@ def main() -> None:
     )
     parser.add_argument("--out", default="DigitalTwin/configs/uncertainty_model.pkl")
     parser.add_argument("--metadata-out", default="DigitalTwin/configs/uncertainty_model.json")
+    parser.add_argument(
+        "--model",
+        choices=("mlp", "random_forest"),
+        default="mlp",
+        help="candidate model to fit on all rows after grouped validation",
+    )
     args = parser.parse_args()
 
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.metrics import mean_absolute_error
     from sklearn.model_selection import GroupKFold
+    from sklearn.neural_network import MLPRegressor
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
 
     paths = _expand_inputs(args.inputs) if args.inputs else _paths_from_manifest(Path(args.manifest))
     examples = build_training_examples(paths)
@@ -238,14 +247,66 @@ def main() -> None:
     if len(unique_groups) < 4:
         raise RuntimeError("need at least four complete benign runs for grouped validation")
 
-    fold_mae: list[np.ndarray] = []
+    def make_model(kind: str, *, seed: int) -> object:
+        if kind == "random_forest":
+            return RandomForestRegressor(n_estimators=200, random_state=seed, min_samples_leaf=5, n_jobs=-1)
+        if kind == "mlp":
+            return Pipeline(
+                [
+                    ("scale", StandardScaler()),
+                    (
+                        "mlp",
+                        MLPRegressor(
+                            hidden_layer_sizes=(16, 8),
+                            activation="relu",
+                            alpha=3e-3,
+                            learning_rate_init=1e-3,
+                            max_iter=350,
+                            early_stopping=True,
+                            validation_fraction=0.20,
+                            n_iter_no_change=25,
+                            random_state=seed,
+                        ),
+                    ),
+                ]
+            )
+        raise ValueError(f"unsupported model: {kind}")
+
+    def fit_candidate(kind: str, X: np.ndarray, y: np.ndarray, *, seed: int) -> object:
+        model = make_model(kind, seed=seed)
+        target = np.log(np.maximum(y, TARGET_FLOOR)) if kind == "mlp" else y
+        model.fit(X, target)
+        return model
+
+    def predict_candidate(
+        model: object,
+        kind: str,
+        X: np.ndarray,
+        target_low: np.ndarray,
+        target_high: np.ndarray,
+    ) -> np.ndarray:
+        raw_predictions = model.predict(X)
+        predictions = np.exp(raw_predictions) if kind == "mlp" else raw_predictions
+        return np.clip(
+            predictions,
+            np.maximum(target_low, TARGET_FLOOR),
+            np.maximum(target_high, TARGET_FLOOR),
+        )
+
+    target_low = np.quantile(examples.y, 0.01, axis=0)
+    target_high = np.quantile(examples.y, 0.99, axis=0)
+    fold_mae_by_model: dict[str, list[np.ndarray]] = {"random_forest": [], "mlp": []}
     fold_baseline_mae: list[np.ndarray] = []
     splitter = GroupKFold(n_splits=min(5, len(unique_groups)))
-    for train_indices, test_indices in splitter.split(examples.X, examples.y, examples.groups):
-        model = RandomForestRegressor(n_estimators=200, random_state=7, min_samples_leaf=5, n_jobs=-1)
-        model.fit(examples.X[train_indices], examples.y[train_indices])
-        predictions = np.maximum(model.predict(examples.X[test_indices]), TARGET_FLOOR)
-        fold_mae.append(mean_absolute_error(examples.y[test_indices], predictions, multioutput="raw_values"))
+    for fold_index, (train_indices, test_indices) in enumerate(
+        splitter.split(examples.X, examples.y, examples.groups)
+    ):
+        for kind in fold_mae_by_model:
+            model = fit_candidate(kind, examples.X[train_indices], examples.y[train_indices], seed=7 + fold_index)
+            predictions = predict_candidate(model, kind, examples.X[test_indices], target_low, target_high)
+            fold_mae_by_model[kind].append(
+                mean_absolute_error(examples.y[test_indices], predictions, multioutput="raw_values")
+            )
         baseline = np.repeat(
             np.median(examples.y[train_indices], axis=0, keepdims=True),
             len(test_indices),
@@ -255,20 +316,49 @@ def main() -> None:
             mean_absolute_error(examples.y[test_indices], baseline, multioutput="raw_values")
         )
 
-    model = RandomForestRegressor(n_estimators=200, random_state=7, min_samples_leaf=5, n_jobs=-1)
-    model.fit(examples.X, examples.y)
+    model = fit_candidate(args.model, examples.X, examples.y, seed=7)
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("wb") as file:
-        pickle.dump(model, file)
+        pickle.dump(
+            {
+                "model_type": args.model,
+                "model": model,
+                "target_low": target_low,
+                "target_high": target_high,
+                "target_floor": TARGET_FLOOR,
+                "feature_columns": list(LEARNED_FEATURE_COLUMNS),
+                "target_columns": list(TARGET_COLUMNS),
+            },
+            file,
+        )
 
-    mean_mae = np.mean(np.asarray(fold_mae), axis=0)
+    mean_mae_by_model = {
+        kind: np.mean(np.asarray(values), axis=0) for kind, values in fold_mae_by_model.items()
+    }
     mean_baseline_mae = np.mean(np.asarray(fold_baseline_mae), axis=0)
+    improvements_by_model = {
+        kind: 1.0 - mae / np.maximum(mean_baseline_mae, TARGET_FLOOR)
+        for kind, mae in mean_mae_by_model.items()
+    }
+    mean_mae = mean_mae_by_model[args.model]
     improvements = 1.0 - mean_mae / np.maximum(mean_baseline_mae, TARGET_FLOOR)
     accepted = bool(np.all(improvements > MODEL_ACCEPTANCE_MIN_IMPROVEMENT))
+    best_method_by_target = {
+        column: min(
+            [
+                ("median_baseline", float(mean_baseline_mae[index])),
+                ("random_forest", float(mean_mae_by_model["random_forest"][index])),
+                ("mlp", float(mean_mae_by_model["mlp"][index])),
+            ],
+            key=lambda item: item[1],
+        )[0]
+        for index, column in enumerate(TARGET_COLUMNS)
+    }
     metadata = {
         "schema": "ugv01_learned_uncertainty_v1",
-        "model": "RandomForestRegressor",
+        "model": "MLPRegressor" if args.model == "mlp" else "RandomForestRegressor",
+        "selected_model_key": args.model,
         "feature_columns": list(LEARNED_FEATURE_COLUMNS),
         "target_columns": list(TARGET_COLUMNS),
         "target_definition": "future-window benign process-error covariance surrogate",
@@ -283,12 +373,21 @@ def main() -> None:
         "rows": int(len(examples.X)),
         "source_files": examples.source_files,
         "cross_validated_mae": {column: float(value) for column, value in zip(TARGET_COLUMNS, mean_mae)},
+        "candidate_cross_validated_mae": {
+            kind: {column: float(value) for column, value in zip(TARGET_COLUMNS, mae)}
+            for kind, mae in mean_mae_by_model.items()
+        },
         "median_baseline_mae": {
             column: float(value) for column, value in zip(TARGET_COLUMNS, mean_baseline_mae)
         },
         "mae_improvement_over_median": {
             column: float(value) for column, value in zip(TARGET_COLUMNS, improvements)
         },
+        "candidate_mae_improvement_over_median": {
+            kind: {column: float(value) for column, value in zip(TARGET_COLUMNS, model_improvements)}
+            for kind, model_improvements in improvements_by_model.items()
+        },
+        "best_method_by_target": best_method_by_target,
         "target_median": {
             column: float(value) for column, value in zip(TARGET_COLUMNS, np.median(examples.y, axis=0))
         },
@@ -302,10 +401,14 @@ def main() -> None:
                 np.mean(examples.y <= TARGET_FLOOR * (1.0 + 1e-9), axis=0),
             )
         },
-        "feature_importance": {
-            column: float(value)
-            for column, value in zip(LEARNED_FEATURE_COLUMNS, model.feature_importances_)
-        },
+        "feature_importance": (
+            {
+                column: float(value)
+                for column, value in zip(LEARNED_FEATURE_COLUMNS, model.feature_importances_)
+            }
+            if args.model == "random_forest"
+            else {}
+        ),
         "limitations": [
             "position labels contain residual benign GPS noise after startup-noise subtraction",
             "the model is frozen from the current 20-run corpus and has no independent prospective test set",

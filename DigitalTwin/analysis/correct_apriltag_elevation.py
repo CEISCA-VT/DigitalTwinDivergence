@@ -53,13 +53,14 @@ def correct_summary(
     output_dir: Path,
     calibration_path: Path,
     *,
+    reference_video_path: Path | None,
     tag_size_m: float,
     tag_height_m: float,
     maximum_reprojection_error_px: float,
 ) -> dict[str, object]:
     payload = json.loads(input_path.read_text(encoding="utf-8"))
     calibration = json.loads(calibration_path.read_text(encoding="utf-8"))
-    video_path = Path(payload["video_path"])
+    video_path = reference_video_path or Path(payload["video_path"])
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise FileNotFoundError(f"could not open video: {video_path}")
@@ -73,7 +74,6 @@ def correct_summary(
     fixed_ids = sorted(int(tag_id) for tag_id in payload["world_tags_m"])
     image_points = None
     for frame_index in range(300):
-        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
         ok, frame = cap.read()
         if not ok:
             break
@@ -159,6 +159,7 @@ def correct_summary(
     payload["elevation_correction"] = {
         "schema": "ugv01_apriltag_elevation_correction_v1",
         "source_summary": str(input_path),
+        "camera_pose_reference_video": str(video_path),
         "tag_size_m": tag_size_m,
         "tag_center_height_m": tag_height_m,
         "tag_center_offset_from_rover_center_m": [0.0, 0.0],
@@ -201,6 +202,11 @@ def main() -> None:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--calibration", type=Path, default=DEFAULT_CALIBRATION)
+    parser.add_argument(
+        "--reference-video",
+        type=Path,
+        help="Video containing all fixed tags from the unchanged camera setup.",
+    )
     parser.add_argument("--tag-size-m", type=float, default=0.08)
     parser.add_argument("--tag-height-m", type=float, default=0.08112)
     parser.add_argument("--maximum-reprojection-error-px", type=float, default=5.0)
@@ -209,6 +215,7 @@ def main() -> None:
         args.input,
         args.output_dir,
         args.calibration,
+        reference_video_path=args.reference_video,
         tag_size_m=args.tag_size_m,
         tag_height_m=args.tag_height_m,
         maximum_reprojection_error_px=args.maximum_reprojection_error_px,

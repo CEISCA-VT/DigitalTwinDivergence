@@ -4,8 +4,11 @@ param(
     [int]$BootstrapIterations = 2000,
     [int]$ThresholdGridPoints = 80,
     [int]$RuntimeBenchmarkRuns = 4,
+    [int]$BakeoffEkfTop = 4,
     [switch]$RunTests,
-    [switch]$IncludeBufferedAttackCampaign
+    [switch]$IncludeBufferedAttackCampaign,
+    [switch]$IncludeOptionalBakeoffModels,
+    [switch]$SkipI2NavBakeoff
 )
 
 $ErrorActionPreference = "Stop"
@@ -89,6 +92,28 @@ try {
         "--max-runs", "$RuntimeBenchmarkRuns"
     )
 
+    if (-not $SkipI2NavBakeoff) {
+        $i2navDatasets = @("playground00", "parking00", "street00")
+        foreach ($sequence in $i2navDatasets) {
+            $alignedPath = Join-Path $analysisRoot "i2nav_$sequence\aligned_samples.npz"
+            if (-not (Test-Path -LiteralPath $alignedPath)) {
+                Write-Host ""
+                Write-Host "==> Skipping i2Nav $sequence model bake-off; aligned dataset not found: $alignedPath"
+                continue
+            }
+            $bakeoffArgs = @(
+                "-m", "DigitalTwin.analysis.i2nav_model_bakeoff",
+                "--input", "DigitalTwin/datasets/analysis/i2nav_$sequence/aligned_samples.npz",
+                "--output-dir", "DigitalTwin/datasets/analysis/i2nav_$sequence/model_bakeoff",
+                "--ekf-top", "$BakeoffEkfTop"
+            )
+            if ($IncludeOptionalBakeoffModels) {
+                $bakeoffArgs += "--include-optional"
+            }
+            Invoke-PythonStep -Label "i2Nav $sequence uncertainty-model bake-off" -Arguments $bakeoffArgs
+        }
+    }
+
     if ($IncludeBufferedAttackCampaign) {
         Invoke-PythonStep -Label "Optional combined GPS and buffered-transport campaign" -Arguments @(
             "-m", "DigitalTwin.analysis.real_data_study",
@@ -101,6 +126,18 @@ try {
     New-Item -ItemType Directory -Force -Path $paperResults | Out-Null
     Copy-Item -Path (Join-Path $analysisRoot "real_data_study\*") `
         -Destination $paperResults -Recurse -Force
+
+    if (-not $SkipI2NavBakeoff) {
+        foreach ($sequence in @("playground00", "parking00", "street00")) {
+            $sourceBakeoff = Join-Path $analysisRoot "i2nav_$sequence\model_bakeoff"
+            if (Test-Path -LiteralPath $sourceBakeoff) {
+                $targetBakeoff = Join-Path $paperResults "i2nav_$sequence\model_bakeoff"
+                New-Item -ItemType Directory -Force -Path $targetBakeoff | Out-Null
+                Copy-Item -Path (Join-Path $sourceBakeoff "*") `
+                    -Destination $targetBakeoff -Recurse -Force
+            }
+        }
+    }
 
     $covarianceResults = Join-Path $paperResults "covariance_poisoning"
     New-Item -ItemType Directory -Force -Path $covarianceResults | Out-Null

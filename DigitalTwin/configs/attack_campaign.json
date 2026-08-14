@@ -19,6 +19,8 @@
     "frozen_clean",
     "gps_independent",
     "evidence_gated",
+    "gps_bias_fixed",
+    "gps_bias_evidence_gated",
     "gps_jump",
     "raw_position_residual",
     "robust_innovation_gate",
@@ -33,6 +35,10 @@
     "huber_ekf",
     "cusum_whitened_innovation"
   ],
+  "revised_model_variants": [
+    "gps_bias_fixed",
+    "gps_bias_evidence_gated"
+  ],
   "confidence_interval": "stratified physical-run cluster bootstrap",
   "bootstrap_iterations": 2000,
   "bootstrap_seed": 20260721,
@@ -43,7 +49,7 @@
   ,"terminology": {
     "physical_runs": 20,
     "unique_attack_run_start_combinations": 1440,
-    "detector_run_evaluations": 15840,
+    "detector_run_evaluations": 18720,
     "note": "detector-run evaluations are clustered replay evaluations, not independent physical attack trials"
   },
   "optional_combined_content_delivery_replay": {

@@ -105,6 +105,9 @@ def _load_prediction(
     path: Path,
     *,
     effective_track_width_m: float = UGV01_APRILTAG_EFFECTIVE_TRACK_WIDTH_M,
+    distance_scale: float = 1.0,
+    clockwise_track_width_m: float | None = None,
+    counterclockwise_track_width_m: float | None = None,
     gyro_weight: float = DEFAULT_MOTION_FUSION_POLICY.gyro_weight,
     gyro_scale: float = 1.0,
 ) -> dict[str, np.ndarray | float]:
@@ -130,6 +133,20 @@ def _load_prediction(
         encoder_controls[index] = geometry.ticks_to_control(
             delta_left, delta_right, dt_s
         )
+    base_yaw = encoder_controls[:, 1].copy()
+    encoder_controls[:, 0] *= distance_scale
+    clockwise_width = clockwise_track_width_m or effective_track_width_m
+    counterclockwise_width = (
+        counterclockwise_track_width_m or effective_track_width_m
+    )
+    direction_widths = np.where(
+        base_yaw >= 0.0,
+        counterclockwise_width,
+        clockwise_width,
+    )
+    encoder_controls[:, 1] *= (
+        distance_scale * effective_track_width_m / direction_widths
+    )
 
     mission_candidates = np.flatnonzero(
         (np.abs(encoder_controls[:, 0]) > 0.02)
@@ -148,6 +165,7 @@ def _load_prediction(
         "elapsed_s": elapsed,
         "controls": fusion.controls,
         "encoder_controls": encoder_controls,
+        "corrected_gyro_radps": fusion.corrected_gyro_radps,
         "gyro_bias_radps": fusion.gyro_bias_radps,
         "mission_start": float(mission_start),
     }
@@ -296,6 +314,9 @@ def analyze(
     intervals: tuple[tuple[float, float], ...] = DEFAULT_INTERVALS,
     sync_mode: str = "onset",
     effective_track_width_m: float = UGV01_APRILTAG_EFFECTIVE_TRACK_WIDTH_M,
+    distance_scale: float = 1.0,
+    clockwise_track_width_m: float | None = None,
+    counterclockwise_track_width_m: float | None = None,
     gyro_weight: float = DEFAULT_MOTION_FUSION_POLICY.gyro_weight,
     gyro_scale: float = 1.0,
 ) -> dict[str, object]:
@@ -305,6 +326,9 @@ def analyze(
     prediction = _load_prediction(
         telemetry_path,
         effective_track_width_m=effective_track_width_m,
+        distance_scale=distance_scale,
+        clockwise_track_width_m=clockwise_track_width_m,
+        counterclockwise_track_width_m=counterclockwise_track_width_m,
         gyro_weight=gyro_weight,
         gyro_scale=gyro_scale,
     )
@@ -699,6 +723,9 @@ def main() -> None:
         type=float,
         default=UGV01_APRILTAG_EFFECTIVE_TRACK_WIDTH_M,
     )
+    parser.add_argument("--distance-scale", type=float, default=1.0)
+    parser.add_argument("--clockwise-track-width-m", type=float)
+    parser.add_argument("--counterclockwise-track-width-m", type=float)
     parser.add_argument(
         "--gyro-weight",
         type=float,
@@ -723,6 +750,9 @@ def main() -> None:
         intervals=intervals,
         sync_mode=args.sync_mode,
         effective_track_width_m=args.effective_track_width_m,
+        distance_scale=args.distance_scale,
+        clockwise_track_width_m=args.clockwise_track_width_m,
+        counterclockwise_track_width_m=args.counterclockwise_track_width_m,
         gyro_weight=args.gyro_weight,
         gyro_scale=args.gyro_scale,
     )

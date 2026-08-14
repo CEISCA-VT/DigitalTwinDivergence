@@ -33,6 +33,10 @@ PAIRWISE_COMPARISONS = (
     ("naive_adaptive", "huber_ekf"),
     ("naive_adaptive", "cusum_whitened_innovation"),
     ("evidence_gated", "gps_independent"),
+    ("gps_bias_evidence_gated", "gps_bias_fixed"),
+    ("gps_bias_evidence_gated", "evidence_gated"),
+    ("gps_bias_evidence_gated", "fixed"),
+    ("gps_bias_evidence_gated", "naive_adaptive"),
 )
 GROUP_FIELDS = (
     "transport",
@@ -48,6 +52,8 @@ VARIANT_LABELS = {
     "frozen_clean": "frozen clean oracle",
     "gps_independent": "B8 GPS-independent adaptive",
     "evidence_gated": "B9 evidence-gated adaptive",
+    "gps_bias_fixed": "R1 GPS-bias fixed-Q EKF",
+    "gps_bias_evidence_gated": "R2 GPS-bias evidence-gated EKF",
     "gps_jump": "B1 GPS jump",
     "raw_position_residual": "B2 raw DT residual",
     "robust_innovation_gate": "B4 robust innovation gate",
@@ -323,11 +329,32 @@ def write_provenance(out_dir: Path) -> dict[str, object]:
 
 def render_report(
     out_dir: Path,
+    rows: list[dict[str, str]],
     tolerances: list[dict[str, object]],
     paired: list[dict[str, object]],
     gate: list[dict[str, object]],
     provenance: dict[str, object],
 ) -> str:
+    baseline_attacks = [
+        row for row in rows if row.get("transport") == "baseline" and row.get("attack") != "none"
+    ]
+    physical_runs = len({row.get("run_id", "") for row in rows if row.get("run_id", "")})
+    detector_variants = len({row.get("detector_variant", "") for row in baseline_attacks})
+    unique_attack_run_start_combinations = len(
+        {
+            (
+                row.get("run_id", ""),
+                row.get("attack", ""),
+                row.get("direction", ""),
+                row.get("magnitude_m", ""),
+                row.get("rate_mps", ""),
+                row.get("replay_delay_s", ""),
+                row.get("attack_start_fraction", ""),
+            )
+            for row in baseline_attacks
+        }
+    )
+    detector_run_evaluations = len(baseline_attacks)
     lines = [
         "# Post-Campaign Paper Tables",
         "",
@@ -335,11 +362,11 @@ def render_report(
         "",
         "## Terminology",
         "",
-        "- Physical runs: 20.",
-        "- Unique attack-run-start combinations: 1,440.",
-        "- Detector variants: 11.",
-        "- Detector-run evaluations: 15,840.",
-        "- The 15,840 rows are not independent physical attacks; they are detector evaluations clustered within physical runs.",
+        f"- Physical runs: {physical_runs}.",
+        f"- Unique attack-run-start combinations: {unique_attack_run_start_combinations:,}.",
+        f"- Detector variants: {detector_variants}.",
+        f"- Detector-run evaluations: {detector_run_evaluations:,}.",
+        f"- The {detector_run_evaluations:,} rows are not independent physical attacks; they are detector evaluations clustered within physical runs.",
         "",
         "## Generated Tables",
         "",
@@ -388,7 +415,7 @@ def main() -> None:
     paired = write_paired_comparisons(rows, out_dir, iterations=args.bootstrap_iterations)
     gate = write_gate_behavior(rows, out_dir)
     provenance = write_provenance(out_dir)
-    render_report(out_dir, tolerances, paired, gate, provenance)
+    render_report(out_dir, rows, tolerances, paired, gate, provenance)
     print(out_dir / "post_campaign_report.md")
 
 

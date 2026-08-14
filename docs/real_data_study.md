@@ -85,9 +85,12 @@ The paired primary variants are fixed covariance, naive residual-coupled
 adaptation, frozen-clean covariance, GPS-independent adaptation, and
 evidence-gated adaptation. The expanded comparator suite adds GPS-jump, raw
 digital-twin residual, robust innovation gate, Huber EKF, CUSUM whitened
-innovation, and innovation-matching adaptive EKF baselines. In the revised
-architecture, the evidence gate controls only bounded GPS-independent
-covariance proposals; GPS residual feedback is never admitted.
+innovation, and innovation-matching adaptive EKF baselines. The revised-model
+variants add a GPS-bias EKF with fixed covariance and a GPS-bias EKF whose
+covariance adaptation is evidence-gated. In the revised architecture, the
+security score remains a GPS-vs-motion innovation check, so GPS bias modeling
+can improve the operational twin without letting GPS residuals authorize their
+own covariance growth.
 
 The policy definitions are recorded in
 `DigitalTwin/configs/uncertainty_policies.json`. Because the security-reference

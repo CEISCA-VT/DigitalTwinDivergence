@@ -66,19 +66,24 @@ HDOP and satellite count remain allowed as receiver-reported quality metadata.
 ## Current Model Decision
 
 The current corpus contains 20 benign runs and 3,043 training rows. Five-fold
-complete-run validation found that the Random Forest candidate was worse than
-the training-fold median baseline:
+complete-run validation now compares a median target baseline, Random Forest,
+and a small MLP trained on log-covariance targets. The MLP is the better learned
+candidate, but it still does not beat the training-fold median baseline:
 
-| Target | Random Forest MAE | Median baseline MAE | Relative improvement |
-|---|---:|---:|---:|
-| `q_xx` | 0.02205 | 0.01602 | -37.6% |
-| `q_yy` | 0.02217 | 0.01654 | -34.0% |
-| `q_tt` | 0.03142 | 0.02675 | -17.5% |
+| Target | Median baseline MAE | Random Forest MAE | MLP MAE | MLP improvement |
+|---|---:|---:|---:|---:|
+| `q_xx` | 0.01602 | 0.02216 | 0.01740 | -8.6% |
+| `q_yy` | 0.01654 | 0.02210 | 0.01914 | -15.7% |
+| `q_tt` | 0.01637 | 0.02012 | 0.01676 | -2.4% |
 
-The learned target is frozen, but this trained candidate is rejected and is
-not enabled in the primary attack campaign. This prevents a weak model from
-being presented as an improvement. The deterministic fixed, naive-adaptive,
-GPS-independent, and evidence-gated variants remain the primary comparison.
+The learned target is frozen, but the current trained candidate is rejected
+and is not enabled in the primary attack campaign. This prevents a weak model
+from being presented as an improvement. The deterministic fixed,
+naive-adaptive, GPS-independent, and evidence-gated variants remain the primary
+comparison. The result is still useful: it shows that a simple MLP is a more
+appropriate first neural baseline than the previous Random Forest, while the
+current GPS-derived labels and small corpus are not yet sufficient to justify a
+deployed learned covariance policy.
 
 Reproduce the training and decision with:
 

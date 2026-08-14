@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import math
@@ -46,6 +47,7 @@ class PreparedDataset:
     tracking_status: np.ndarray
     elapsed: np.ndarray
     base_controls: np.ndarray
+    corrected_gyro_radps: np.ndarray
     offset_s: float
     sync_correlation: float
     sync_uncertainty_s: float
@@ -97,6 +99,9 @@ def _prepare(spec: DatasetSpec) -> PreparedDataset:
     )
     elapsed = np.asarray(prediction["elapsed_s"], dtype=float)
     controls = np.asarray(prediction["controls"], dtype=float)
+    corrected_gyro_radps = np.asarray(
+        prediction["corrected_gyro_radps"], dtype=float
+    )
     train = gt_time <= train_end_s
     offset, correlation, uncertainty = _activity_sync_offset(
         gt_time[train], gt_xy[train], gt_heading[train], elapsed, controls
@@ -114,6 +119,7 @@ def _prepare(spec: DatasetSpec) -> PreparedDataset:
         tracking_status=tracking_status,
         elapsed=elapsed,
         base_controls=controls,
+        corrected_gyro_radps=corrected_gyro_radps,
         offset_s=offset,
         sync_correlation=correlation,
         sync_uncertainty_s=uncertainty,
@@ -123,9 +129,12 @@ def _prepare(spec: DatasetSpec) -> PreparedDataset:
 
 def _candidate_controls(
     base: np.ndarray,
+    corrected_gyro_radps: np.ndarray,
     distance_scale: float,
     clockwise_width_m: float,
     counterclockwise_width_m: float,
+    gyro_weight: float,
+    gyro_scale: float,
 ) -> np.ndarray:
     controls = np.asarray(base, dtype=float).copy()
     controls[:, 0] *= distance_scale
@@ -136,6 +145,10 @@ def _candidate_controls(
     )
     controls[:, 1] *= (
         distance_scale * UGV01_APRILTAG_EFFECTIVE_TRACK_WIDTH_M / widths
+    )
+    controls[:, 1] = (
+        (1.0 - gyro_weight) * controls[:, 1]
+        + gyro_weight * gyro_scale * corrected_gyro_radps
     )
     return controls
 
@@ -153,6 +166,8 @@ def _evaluate(
     distance_scale: float,
     clockwise_width_m: float,
     counterclockwise_width_m: float,
+    gyro_weight: float,
+    gyro_scale: float,
 ) -> dict[str, float | int | str]:
     if split == "train":
         selected = dataset.gt_time <= dataset.spec.train_end_s
@@ -176,9 +191,12 @@ def _evaluate(
 
     controls = _candidate_controls(
         dataset.base_controls,
+        dataset.corrected_gyro_radps,
         distance_scale,
         clockwise_width_m,
         counterclockwise_width_m,
+        gyro_weight,
+        gyro_scale,
     )
     anchor_index = int(np.argmin(np.abs(dataset.elapsed - query[0])))
     integration_elapsed = dataset.elapsed[anchor_index:]
@@ -262,37 +280,83 @@ def _loss(metrics: dict[str, float]) -> float:
 
 
 def main() -> None:
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    datasets = [_prepare(spec) for spec in DATASETS]
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--tracking", type=Path)
+    parser.add_argument("--telemetry", type=Path)
+    parser.add_argument("--dataset-name", default="custom")
+    parser.add_argument("--train-fraction", type=float, default=0.75)
+    parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    parser.add_argument(
+        "--include-imu-grid",
+        action="store_true",
+        help="Also fit a bounded bias-corrected gyro contribution and sign.",
+    )
+    args = parser.parse_args()
+    if (args.tracking is None) != (args.telemetry is None):
+        parser.error("--tracking and --telemetry must be supplied together")
+    if not 0.5 <= args.train_fraction < 1.0:
+        parser.error("--train-fraction must be in [0.5, 1.0)")
+
+    output_dir = args.output_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
+    specs = DATASETS
+    if args.tracking is not None:
+        payload = json.loads(args.tracking.read_text(encoding="utf-8"))
+        duration_s = float(payload["video"]["frame_count"]) / float(
+            payload["video"]["fps"]
+        )
+        specs = (
+            DatasetSpec(
+                name=args.dataset_name,
+                tracking=args.tracking,
+                telemetry=args.telemetry,
+                train_end_s=args.train_fraction * duration_s,
+            ),
+        )
+    datasets = [_prepare(spec) for spec in specs]
     candidates = []
-    for distance_scale in np.arange(0.90, 1.1001, 0.025):
-        for clockwise_width_m in np.arange(0.160, 0.2401, 0.004):
-            for counterclockwise_width_m in np.arange(0.160, 0.2401, 0.004):
-                train_rows = [
-                    _evaluate(
-                        dataset,
-                        "train",
-                        float(distance_scale),
-                        float(clockwise_width_m),
-                        float(counterclockwise_width_m),
+    distance_scales = np.arange(0.95, 1.0501, 0.025)
+    turn_widths = np.arange(0.150, 0.2801, 0.010)
+    gyro_candidates = (
+        ((0.0, 1.0), (0.10, -1.0), (0.10, 1.0), (0.20, -1.0), (0.20, 1.0))
+        if args.include_imu_grid
+        else ((0.0, 1.0),)
+    )
+    for distance_scale in distance_scales:
+        for clockwise_width_m in turn_widths:
+            for counterclockwise_width_m in turn_widths:
+                for gyro_weight, gyro_scale in gyro_candidates:
+                    train_rows = [
+                        _evaluate(
+                            dataset,
+                            "train",
+                            float(distance_scale),
+                            float(clockwise_width_m),
+                            float(counterclockwise_width_m),
+                            float(gyro_weight),
+                            float(gyro_scale),
+                        )
+                        for dataset in datasets
+                    ]
+                    metrics = _aggregate(train_rows)
+                    candidates.append(
+                        {
+                            "distance_scale": float(distance_scale),
+                            "clockwise_width_m": float(clockwise_width_m),
+                            "counterclockwise_width_m": float(counterclockwise_width_m),
+                            "gyro_weight": float(gyro_weight),
+                            "gyro_scale": float(gyro_scale),
+                            "training_loss": _loss(metrics),
+                            **{f"training_{key}": value for key, value in metrics.items()},
+                        }
                     )
-                    for dataset in datasets
-                ]
-                metrics = _aggregate(train_rows)
-                candidates.append(
-                    {
-                        "distance_scale": float(distance_scale),
-                        "clockwise_width_m": float(clockwise_width_m),
-                        "counterclockwise_width_m": float(counterclockwise_width_m),
-                        "training_loss": _loss(metrics),
-                        **{f"training_{key}": value for key, value in metrics.items()},
-                    }
-                )
     best = min(candidates, key=lambda row: row["training_loss"])
     baseline_parameters = {
         "distance_scale": 1.0,
         "clockwise_width_m": UGV01_APRILTAG_EFFECTIVE_TRACK_WIDTH_M,
         "counterclockwise_width_m": UGV01_APRILTAG_EFFECTIVE_TRACK_WIDTH_M,
+        "gyro_weight": 0.0,
+        "gyro_scale": 1.0,
     }
     fitted_parameters = {
         key: float(best[key]) for key in baseline_parameters
@@ -313,14 +377,14 @@ def main() -> None:
             aggregates[f"{model_name}_{split}"] = _aggregate(rows)
 
     candidate_fields = list(candidates[0])
-    with (OUTPUT_DIR / "calibration_grid.csv").open(
+    with (output_dir / "calibration_grid.csv").open(
         "w", newline="", encoding="utf-8"
     ) as file:
         writer = csv.DictWriter(file, fieldnames=candidate_fields)
         writer.writeheader()
         writer.writerows(candidates)
     result_fields = list(result_rows[0])
-    with (OUTPUT_DIR / "split_results.csv").open(
+    with (output_dir / "split_results.csv").open(
         "w", newline="", encoding="utf-8"
     ) as file:
         writer = csv.DictWriter(file, fieldnames=result_fields)
@@ -349,7 +413,7 @@ def main() -> None:
         "aggregates": aggregates,
         "per_dataset_results": result_rows,
     }
-    (OUTPUT_DIR / "temporal_calibration_summary.json").write_text(
+    (output_dir / "temporal_calibration_summary.json").write_text(
         json.dumps(payload, indent=2), encoding="utf-8"
     )
 
@@ -366,6 +430,8 @@ def main() -> None:
         f"- Distance scale: `{fitted_parameters['distance_scale']:.3f}`",
         f"- Effective clockwise width: `{fitted_parameters['clockwise_width_m']:.3f} m`",
         f"- Effective counterclockwise width: `{fitted_parameters['counterclockwise_width_m']:.3f} m`",
+        f"- Bias-corrected gyro weight: `{fitted_parameters['gyro_weight']:.2f}`",
+        f"- Gyro sign/scale: `{fitted_parameters['gyro_scale']:.1f}`",
         "",
         "## Equal-Run Mean Validation Results",
         "",
@@ -405,7 +471,7 @@ def main() -> None:
             "",
         ]
     )
-    (OUTPUT_DIR / "temporal_calibration_report.md").write_text(
+    (output_dir / "temporal_calibration_report.md").write_text(
         "\n".join(report), encoding="utf-8"
     )
 
@@ -429,10 +495,10 @@ def main() -> None:
     axis.grid(axis="y", alpha=0.25)
     axis.legend()
     figure.tight_layout()
-    figure.savefig(OUTPUT_DIR / "validation_comparison.png", dpi=180)
+    figure.savefig(output_dir / "validation_comparison.png", dpi=180)
     plt.close(figure)
 
-    print(OUTPUT_DIR / "temporal_calibration_report.md")
+    print(output_dir / "temporal_calibration_report.md")
     print(json.dumps({"fitted_parameters": fitted_parameters, "validation": after}, indent=2))
 
 

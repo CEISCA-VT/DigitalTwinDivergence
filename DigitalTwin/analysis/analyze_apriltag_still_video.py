@@ -22,11 +22,29 @@ RECTANGLE_WORLD_TAGS_M = {
     2: (1.5, 1.0),
     1: (0.0, 1.0),
 }
+RECTANGLE_2P0_BY_1P0_1234_WORLD_TAGS_M = {
+    1: (0.0, 0.0),
+    2: (2.0, 0.0),
+    3: (2.0, 1.0),
+    4: (0.0, 1.0),
+}
 SQUARE_1P5_WORLD_TAGS_M = {
     4: (0.0, 0.0),
     3: (1.5, 0.0),
     2: (1.5, 1.5),
     1: (0.0, 1.5),
+}
+SQUARE_2P0_WORLD_TAGS_M = {
+    4: (0.0, 0.0),
+    3: (2.0, 0.0),
+    2: (2.0, 2.0),
+    1: (0.0, 2.0),
+}
+SQUARE_2P0_1236_WORLD_TAGS_M = {
+    1: (0.0, 0.0),
+    2: (2.0, 0.0),
+    3: (2.0, 2.0),
+    6: (0.0, 2.0),
 }
 TRAPEZOID_WORLD_TAGS_M = {
     4: (0.0, 0.0),
@@ -36,7 +54,10 @@ TRAPEZOID_WORLD_TAGS_M = {
 }
 WORLD_LAYOUTS = {
     "rectangle": RECTANGLE_WORLD_TAGS_M,
+    "rectangle_2p0x1p0_1234": RECTANGLE_2P0_BY_1P0_1234_WORLD_TAGS_M,
     "square_1p5": SQUARE_1P5_WORLD_TAGS_M,
+    "square_2p0": SQUARE_2P0_WORLD_TAGS_M,
+    "square_2p0_1236": SQUARE_2P0_1236_WORLD_TAGS_M,
     "trapezoid": TRAPEZOID_WORLD_TAGS_M,
 }
 WORLD_TAGS_M = RECTANGLE_WORLD_TAGS_M
@@ -69,17 +90,33 @@ def _detect_frame(
     detector: cv2.aruco.ArucoDetector,
     camera_matrix: np.ndarray | None,
     dist_coeffs: np.ndarray | None,
-) -> tuple[np.ndarray, list[int], dict[int, np.ndarray], list[np.ndarray]]:
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    list[int],
+    dict[int, np.ndarray],
+    list[np.ndarray],
+]:
+    analysis_frame = frame
+    if camera_matrix is not None and dist_coeffs is not None:
+        analysis_frame = cv2.undistort(frame, camera_matrix, dist_coeffs)
+    gray = cv2.cvtColor(analysis_frame, cv2.COLOR_BGR2GRAY)
     corners, ids, rejected = detector.detectMarkers(gray)
     if ids is None:
-        return gray, [], {}, [np.asarray(x, dtype=np.float64).reshape(4, 2) for x in rejected]
+        return (
+            gray,
+            analysis_frame,
+            [],
+            {},
+            [np.asarray(x, dtype=np.float64).reshape(4, 2) for x in rejected],
+        )
     tag_corners = {
         int(tag_id): np.asarray(corner, dtype=np.float64).reshape(4, 2)
         for tag_id, corner in zip(ids.reshape(-1), corners)
     }
     return (
         gray,
+        analysis_frame,
         [int(x) for x in ids.reshape(-1)],
         tag_corners,
         [np.asarray(x, dtype=np.float64).reshape(4, 2) for x in rejected],
@@ -203,6 +240,44 @@ def _apply_homography(H: np.ndarray, image_xy: np.ndarray) -> np.ndarray:
     return mapped[:2]
 
 
+def _reference_homography_from_video(
+    video_path: Path,
+    detector: cv2.aruco.ArucoDetector,
+    camera_matrix: np.ndarray | None,
+    dist_coeffs: np.ndarray | None,
+    world_tags_m: dict[int, tuple[float, float]],
+    maximum_frames: int = 300,
+) -> np.ndarray:
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        raise FileNotFoundError(f"could not open reference video: {video_path}")
+    samples = {tag_id: [] for tag_id in world_tags_m}
+    for _ in range(maximum_frames):
+        ok, frame = cap.read()
+        if not ok:
+            break
+        _, _, _, tag_corners, _ = _detect_frame(
+            frame, detector, camera_matrix, dist_coeffs
+        )
+        if all(tag_id in tag_corners for tag_id in world_tags_m):
+            for tag_id in world_tags_m:
+                samples[tag_id].append(_marker_center(tag_corners[tag_id]))
+    cap.release()
+    if not all(samples.values()):
+        raise RuntimeError(
+            "reference video did not contain one frame with every world tag"
+        )
+    image_points = np.asarray(
+        [np.median(np.asarray(samples[tag_id]), axis=0) for tag_id in world_tags_m],
+        dtype=np.float64,
+    )
+    world_points = np.asarray(list(world_tags_m.values()), dtype=np.float64)
+    transform, _ = cv2.findHomography(image_points, world_points, method=0)
+    if transform is None:
+        raise RuntimeError("could not solve reference-video homography")
+    return transform
+
+
 def analyze_still_video(
     video_path: Path,
     output_dir: Path,
@@ -212,6 +287,7 @@ def analyze_still_video(
     max_frames: int,
     preview_count: int,
     world_tags_m: dict[int, tuple[float, float]] = RECTANGLE_WORLD_TAGS_M,
+    static_reference_video: Path | None = None,
 ) -> dict[str, object]:
     camera_matrix, dist_coeffs = _load_calibration(calibration_path)
     dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_APRILTAG_36h11)
@@ -258,7 +334,7 @@ def analyze_still_video(
         if image_size is None:
             image_size = [int(frame.shape[1]), int(frame.shape[0])]
 
-        gray, ids, tag_corners, rejected = _detect_frame(
+        gray, analysis_frame, ids, tag_corners, rejected = _detect_frame(
             frame,
             detector,
             camera_matrix,
@@ -347,7 +423,7 @@ def analyze_still_video(
             accepted += 1
 
         if accepted <= preview_count and ids:
-            annotated = frame.copy()
+            annotated = analysis_frame.copy()
             cv2.aruco.drawDetectedMarkers(
                 annotated,
                 [tag_corners[tag_id].reshape(1, 4, 2).astype(np.float32) for tag_id in ids],
@@ -374,12 +450,23 @@ def analyze_still_video(
         static_image_points.append(np.median(np.asarray(samples), axis=0))
         static_world_points.append(world_xy)
     static_H = None
-    if len(static_image_points) >= 4:
+    static_transform_source = None
+    if static_reference_video is not None:
+        static_H = _reference_homography_from_video(
+            static_reference_video,
+            detector,
+            camera_matrix,
+            dist_coeffs,
+            world_tags_m,
+        )
+        static_transform_source = f"reference_video:{static_reference_video}"
+    elif len(static_image_points) >= 4:
         static_H, _ = cv2.findHomography(
             np.asarray(static_image_points, dtype=np.float64),
             np.asarray(static_world_points, dtype=np.float64),
             method=0,
         )
+        static_transform_source = "same_video_median_fixed_tags"
     if static_H is not None:
         rover_positions.clear()
         for summary in frame_summaries:
@@ -425,6 +512,7 @@ def analyze_still_video(
         "video_path": str(video_path),
         "calibration_path": str(calibration_path) if calibration_path.exists() else None,
         "world_tags_m": {str(k): v for k, v in world_tags_m.items()},
+        "static_transform_source": static_transform_source,
         "video": {
             "image_size_px": image_size,
             "fps": fps,
@@ -486,13 +574,19 @@ def _format_report(payload: dict[str, object]) -> str:
         "| Tag ID | Frames Detected | Role |",
         "|---:|---:|---|",
     ]
-    roles = {
-        0: "rover",
-        1: "top-left world",
-        2: "top-right world",
-        3: "bottom-right world",
-        4: "bottom-left world",
+    roles = {0: "rover"}
+    world_tags = {
+        int(tag_id): tuple(map(float, xy))
+        for tag_id, xy in payload["world_tags_m"].items()
     }
+    if len(world_tags) == 4:
+        ordered_x = sorted(world_tags, key=lambda tag_id: world_tags[tag_id][0])
+        left_ids = ordered_x[:2]
+        right_ids = ordered_x[2:]
+        for side, tag_ids in (("left", left_ids), ("right", right_ids)):
+            bottom_id, top_id = sorted(tag_ids, key=lambda tag_id: world_tags[tag_id][1])
+            roles[bottom_id] = f"bottom-{side} world"
+            roles[top_id] = f"top-{side} world"
     for tag_id, count in counts.items():
         lines.append(f"| {tag_id} | {count} | {roles.get(int(tag_id), '')} |")
     lines.extend(["", "## Rover Still Position", ""])
@@ -524,6 +618,11 @@ def main() -> None:
     parser.add_argument(
         "--world-layout", choices=sorted(WORLD_LAYOUTS), default="rectangle"
     )
+    parser.add_argument(
+        "--static-reference-video",
+        type=Path,
+        help="Use fixed world-tag centers from another video of the unchanged setup.",
+    )
     args = parser.parse_args()
 
     payload = analyze_still_video(
@@ -534,6 +633,7 @@ def main() -> None:
         max_frames=args.max_frames,
         preview_count=args.preview_count,
         world_tags_m=WORLD_LAYOUTS[args.world_layout],
+        static_reference_video=args.static_reference_video,
     )
     print(args.output_dir / "apriltag_still_summary.json")
     print(args.output_dir / "apriltag_still_report.md")

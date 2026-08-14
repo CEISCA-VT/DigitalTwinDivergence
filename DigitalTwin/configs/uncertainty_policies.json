@@ -54,6 +54,15 @@
     "threshold_source": "95th per-update quantiles after scalar covariance calibration on 1665 monitored updates from the 12 complete benign development runs",
     "residual_adaptation_rule": "GPS residual is never a process-covariance feature; accept a bounded GPS-independent proposal only when protected edge evidence is healthy and both trusted-NIS and persistent-bias tests pass"
   },
+  "gps_bias_revised_model": {
+    "enabled_in_attack_campaign": true,
+    "variants": ["gps_bias_fixed", "gps_bias_evidence_gated"],
+    "state": ["east_m", "north_m", "heading_rad", "gps_bias_east_m", "gps_bias_north_m"],
+    "gps_measurement_model": "z_gps = [east_m + gps_bias_east_m, north_m + gps_bias_north_m] + noise",
+    "bias_random_walk_sigma_mps": 0.01,
+    "security_score_source": "independent GPS-vs-motion security predictor, not the bias-absorbing operational state",
+    "purpose": "test whether GPS-bias modeling improves the operational digital twin while the evidence gate prevents GPS residuals from authorizing process-covariance growth"
+  },
   "bounded_covariance_adaptation": {
     "smoothing_factor": 0.9,
     "minimum_diagonal": [1e-10, 1e-10, 1e-12],
