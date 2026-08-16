@@ -25,9 +25,9 @@ class TrackedDriveCalibrationCandidate:
 
 UGV01_CARPET_DEVELOPMENT_CANDIDATE = TrackedDriveCalibrationCandidate(
     surface="carpet",
-    distance_scale=0.95,
-    clockwise_effective_track_width_m=0.18,
-    counterclockwise_effective_track_width_m=0.20,
+    distance_scale=0.975,
+    clockwise_effective_track_width_m=0.20,
+    counterclockwise_effective_track_width_m=0.19,
     gyro_weight=0.20,
     gyro_scale=1.0,
 )

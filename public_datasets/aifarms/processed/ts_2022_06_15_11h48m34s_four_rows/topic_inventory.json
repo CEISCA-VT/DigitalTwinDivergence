@@ -1,0 +1,147 @@
+[
+  {
+    "topic": "/rosout",
+    "msgtype": "rosgraph_msgs/msg/Log",
+    "msgcount": 22
+  },
+  {
+    "topic": "/rosout",
+    "msgtype": "rosgraph_msgs/msg/Log",
+    "msgcount": 1
+  },
+  {
+    "topic": "/rosout",
+    "msgtype": "rosgraph_msgs/msg/Log",
+    "msgcount": 1287
+  },
+  {
+    "topic": "/rosout",
+    "msgtype": "rosgraph_msgs/msg/Log",
+    "msgcount": 6
+  },
+  {
+    "topic": "/rosout",
+    "msgtype": "rosgraph_msgs/msg/Log",
+    "msgcount": 6
+  },
+  {
+    "topic": "/rosout",
+    "msgtype": "rosgraph_msgs/msg/Log",
+    "msgcount": 1
+  },
+  {
+    "topic": "/rosout",
+    "msgtype": "rosgraph_msgs/msg/Log",
+    "msgcount": 2
+  },
+  {
+    "topic": "/rosout",
+    "msgtype": "rosgraph_msgs/msg/Log",
+    "msgcount": 4
+  },
+  {
+    "topic": "/rosout",
+    "msgtype": "rosgraph_msgs/msg/Log",
+    "msgcount": 21
+  },
+  {
+    "topic": "/terrasentia/ekf",
+    "msgtype": "nav_msgs/msg/Odometry",
+    "msgcount": 32764
+  },
+  {
+    "topic": "/terrasentia/full_gps",
+    "msgtype": "fpn_msgs/msg/FullGPS",
+    "msgcount": 1638
+  },
+  {
+    "topic": "/terrasentia/imu",
+    "msgtype": "sensor_msgs/msg/Imu",
+    "msgcount": 28533
+  },
+  {
+    "topic": "/terrasentia/mhe_output",
+    "msgtype": "fpn_msgs/msg/MHEOutput",
+    "msgcount": 1638
+  },
+  {
+    "topic": "/terrasentia/motion_command",
+    "msgtype": "geometry_msgs/msg/Twist",
+    "msgcount": 6481
+  },
+  {
+    "topic": "/terrasentia/motors",
+    "msgtype": "fpn_msgs/msg/FourWD",
+    "msgcount": 15929
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/depth/camera_info",
+    "msgtype": "sensor_msgs/msg/CameraInfo",
+    "msgcount": 9812
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/depth/depth_registered",
+    "msgtype": "sensor_msgs/msg/Image",
+    "msgcount": 9812
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/imu/data",
+    "msgtype": "sensor_msgs/msg/Imu",
+    "msgcount": 64597
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/left/camera_info",
+    "msgtype": "sensor_msgs/msg/CameraInfo",
+    "msgcount": 9807
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/left/image_rect_color/compressed",
+    "msgtype": "sensor_msgs/msg/CompressedImage",
+    "msgcount": 9807
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/left_cam_imu_transform",
+    "msgtype": "geometry_msgs/msg/Transform",
+    "msgcount": 1
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/odom",
+    "msgtype": "nav_msgs/msg/Odometry",
+    "msgcount": 9818
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/path_map",
+    "msgtype": "nav_msgs/msg/Path",
+    "msgcount": 657
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/path_odom",
+    "msgtype": "nav_msgs/msg/Path",
+    "msgcount": 657
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/pose_with_covariance",
+    "msgtype": "geometry_msgs/msg/PoseWithCovarianceStamped",
+    "msgcount": 9819
+  },
+  {
+    "topic": "/terrasentia/zed2/zed_node/right/image_rect_color/compressed",
+    "msgtype": "sensor_msgs/msg/CompressedImage",
+    "msgcount": 9807
+  },
+  {
+    "topic": "/tf",
+    "msgtype": "tf2_msgs/msg/TFMessage",
+    "msgcount": 32753
+  },
+  {
+    "topic": "/tf_static",
+    "msgtype": "tf2_msgs/msg/TFMessage",
+    "msgcount": 1
+  },
+  {
+    "topic": "/tf_static",
+    "msgtype": "tf2_msgs/msg/TFMessage",
+    "msgcount": 1
+  }
+]

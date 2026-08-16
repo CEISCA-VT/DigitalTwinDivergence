@@ -73,11 +73,13 @@ EXTERNAL_BASELINE_VARIANTS = (
     "cusum_whitened_innovation",
 )
 STANDARD_ADAPTIVE_VARIANTS = ("innovation_matching_adaptive",)
+COMPOSITE_POLICY_VARIANTS = ("composite_ours",)
 VARIANTS = (
     PRIMARY_VARIANTS
     + REVISED_MODEL_VARIANTS
     + EXTERNAL_BASELINE_VARIANTS
     + STANDARD_ADAPTIVE_VARIANTS
+    + COMPOSITE_POLICY_VARIANTS
 )
 INSTANT_ALARM_CONFIG = AlarmConfig(window_size=1, required_exceedances=1)
 ROBUST_GATE_NIS = 9.21
@@ -85,6 +87,9 @@ HUBER_WHITENED_NORM = 2.5
 CUSUM_ALLOWANCE_SIGMA = 0.25
 INNOVATION_MATCHING_ALPHA = 0.08
 INNOVATION_MATCHING_SCALE_LIMITS = (0.25, 16.0)
+COMPOSITE_JUMP_SCALE_M = 0.50
+COMPOSITE_RESIDUAL_SCALE_M = 1.00
+COMPOSITE_BIAS_SCALE_M = 1.00
 VARIANT_LABELS = {
     "fixed": "B3 fixed NIS",
     "naive_adaptive": "B7 naive adaptive",
@@ -99,11 +104,13 @@ VARIANT_LABELS = {
     "huber_ekf": "B5 Huber EKF",
     "cusum_whitened_innovation": "B6 CUSUM whitened innovation",
     "innovation_matching_adaptive": "standard innovation-matching adaptive",
+    "composite_ours": "Ours composite secure adaptive DT",
 }
 VARIANT_SCORE_NAMES = {
     "gps_jump": "consecutive GPS displacement (m)",
     "raw_position_residual": "raw GPS-to-prediction residual (m)",
     "cusum_whitened_innovation": "Page CUSUM of whitened innovation norm",
+    "composite_ours": "max normalized evidence: jump, residual, CUSUM, bias, NIS",
 }
 STEP_MAGNITUDES_M = (0.5, 1.0, 2.0, 3.0, 5.0, 7.5, 10.0)
 DRIFT_RATES_MPS = (0.01, 0.03, 0.05)
@@ -372,7 +379,7 @@ def _estimator(mode: str):
         "innovation_matching_adaptive",
     }:
         return FixedUncertaintyEstimator()
-    if mode in {"gps_independent", "gps_bias_evidence_gated"}:
+    if mode in {"gps_independent", "gps_bias_evidence_gated", "composite_ours"}:
         return GPSIndependentUncertaintyEstimator()
     return NaiveAdaptiveUncertaintyEstimator()
 
@@ -392,11 +399,11 @@ def _score_name(mode: str) -> str:
 
 
 def _uses_gps_bias_ekf(mode: str) -> bool:
-    return mode in REVISED_MODEL_VARIANTS
+    return mode in REVISED_MODEL_VARIANTS + COMPOSITE_POLICY_VARIANTS
 
 
 def _is_evidence_gated(mode: str) -> bool:
-    return mode in {"evidence_gated", "gps_bias_evidence_gated"}
+    return mode in {"evidence_gated", "gps_bias_evidence_gated", "composite_ours"}
 
 
 def _pre_update_nis(innovation: np.ndarray, covariance: np.ndarray) -> float:
@@ -872,21 +879,38 @@ def replay(
             operational_ekf.last_K = np.zeros((3, 2))
             operational_ekf.last_mahalanobis = operational_nis
 
-        if mode == "gps_jump":
-            score = (
-                0.0
-                if previous_gps_xy is None
-                else float(np.linalg.norm(attacked_xy[index] - previous_gps_xy))
-            )
-        elif mode == "raw_position_residual":
-            score = last_residual
-        elif mode == "cusum_whitened_innovation":
-            whitened_norm = math.sqrt(max(pre_update_nis, 0.0))
+        gps_step_m = (
+            0.0
+            if previous_gps_xy is None
+            else float(np.linalg.norm(attacked_xy[index] - previous_gps_xy))
+        )
+        whitened_norm = math.sqrt(max(pre_update_nis, 0.0))
+        if mode in {"cusum_whitened_innovation", "composite_ours"}:
             if not alarm_enabled[index]:
                 cusum_score = 0.0
             else:
-                cusum_score = max(0.0, cusum_score + whitened_norm - CUSUM_ALLOWANCE_SIGMA)
+                cusum_score = max(
+                    0.0, cusum_score + whitened_norm - CUSUM_ALLOWANCE_SIGMA
+                )
+
+        if mode == "gps_jump":
+            score = gps_step_m
+        elif mode == "raw_position_residual":
+            score = last_residual
+        elif mode == "cusum_whitened_innovation":
             score = cusum_score
+        elif mode == "composite_ours":
+            bias_norm_m = math.hypot(
+                float(operational_ekf.state.x[3]),
+                float(operational_ekf.state.x[4]),
+            )
+            score = max(
+                pre_update_nis,
+                (gps_step_m / COMPOSITE_JUMP_SCALE_M) ** 2,
+                (last_residual / COMPOSITE_RESIDUAL_SCALE_M) ** 2,
+                cusum_score,
+                (bias_norm_m / COMPOSITE_BIAS_SCALE_M) ** 2,
+            )
         else:
             detection = detector.evaluate(security_innovation, security_covariance)
             score = detection.mahalanobis
@@ -942,6 +966,24 @@ def replay(
                 "measurement_update_enabled": int(update_enabled),
                 "measurement_weight": measurement_weight,
                 "innovation_matching_scale": innovation_matching_scale,
+                "gps_step_m": gps_step_m,
+                "composite_jump_score": (
+                    (gps_step_m / COMPOSITE_JUMP_SCALE_M) ** 2
+                    if mode == "composite_ours"
+                    else ""
+                ),
+                "composite_residual_score": (
+                    (last_residual / COMPOSITE_RESIDUAL_SCALE_M) ** 2
+                    if mode == "composite_ours"
+                    else ""
+                ),
+                "composite_cusum_score": cusum_score if mode == "composite_ours" else "",
+                "composite_bias_score": (
+                    (math.hypot(float(operational_ekf.state.x[3]), float(operational_ekf.state.x[4])) / COMPOSITE_BIAS_SCALE_M) ** 2
+                    if mode == "composite_ours"
+                    else ""
+                ),
+                "composite_nis_score": pre_update_nis if mode == "composite_ours" else "",
                 "attack_active": int(active[index]),
                 "attack_label": attack.label,
                 "attack_start_fraction": attack.start_fraction if attack.kind != "none" else "",
@@ -1059,6 +1101,17 @@ def lock_thresholds(manifest: list[dict[str, object]], out_dir: Path) -> dict[st
                 "required_exceedances": _alarm_config(mode).required_exceedances,
             }
             for mode in VARIANTS
+        },
+        "composite_ours_definition": {
+            "state_estimator": "GPS-bias EKF with evidence-gated GPS-independent covariance adaptation",
+            "score": (
+                "maximum of normalized GPS jump evidence, raw prediction residual "
+                "evidence, CUSUM slow-drift memory, GPS-bias magnitude, and NIS"
+            ),
+            "gps_jump_scale_m": COMPOSITE_JUMP_SCALE_M,
+            "raw_residual_scale_m": COMPOSITE_RESIDUAL_SCALE_M,
+            "gps_bias_scale_m": COMPOSITE_BIAS_SCALE_M,
+            "threshold_source": "benign runs only; no attack labels used",
         },
     }
     policy_path = Path("DigitalTwin/configs/locked_alarm_policy.json")
@@ -1999,7 +2052,10 @@ def _render_report(
             "robust innovation gate, Huber EKF, CUSUM, naive adaptive, "
             "innovation-matching adaptive, GPS-independent adaptive, and "
             "evidence-gated adaptive. Revised-model variants additionally "
-            "test a GPS-bias EKF with fixed and evidence-gated covariance policies."
+            "test a GPS-bias EKF with fixed and evidence-gated covariance policies. "
+            "The final `ours` policy combines GPS jump evidence, CUSUM slow-drift "
+            "memory, residual/bias monitoring, and evidence-gated adaptive EKF "
+            "uncertainty under one benign-locked alarm rule."
         ),
         "",
         "## Benign-only threshold lock",

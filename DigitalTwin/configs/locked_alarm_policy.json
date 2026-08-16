@@ -22,7 +22,8 @@
     "robust_innovation_gate": 23.120817509459176,
     "huber_ekf": 23.120817509459176,
     "cusum_whitened_innovation": 232.36663426969017,
-    "innovation_matching_adaptive": 8.652721119453531
+    "innovation_matching_adaptive": 8.652721119453531,
+    "composite_ours": 271.8922753217244
   },
   "variant_alarm_rules": {
     "fixed": {
@@ -102,6 +103,20 @@
       "score_name": "normalized innovation squared",
       "alarm_window_size": 5,
       "required_exceedances": 3
+    },
+    "composite_ours": {
+      "display_name": "Ours composite secure adaptive DT",
+      "score_name": "max normalized evidence: jump, residual, CUSUM, bias, NIS",
+      "alarm_window_size": 5,
+      "required_exceedances": 3
     }
+  },
+  "composite_ours_definition": {
+    "state_estimator": "GPS-bias EKF with evidence-gated GPS-independent covariance adaptation",
+    "score": "maximum of normalized GPS jump evidence, raw prediction residual evidence, CUSUM slow-drift memory, GPS-bias magnitude, and NIS",
+    "gps_jump_scale_m": 0.5,
+    "raw_residual_scale_m": 1.0,
+    "gps_bias_scale_m": 1.0,
+    "threshold_source": "benign runs only; no attack labels used"
   }
 }

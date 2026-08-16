@@ -1,0 +1,20 @@
+{
+  "schema": "terrasentia_minimal_download_run_v1",
+  "root": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\aifarms",
+  "selected_sequences": [
+    "ts_2022_06_09_13h16m39s_one_row",
+    "ts_2022_06_15_11h48m34s_four_rows",
+    "ts_2022_09_01_11h20m00s_two_random",
+    "ts_2022_09_01_12h32m56s_double_loop_corridor",
+    "ts_2022_09_06_12h37m11s_four_rows"
+  ],
+  "successful_this_run": [
+    "ts_2022_06_09_13h16m39s_one_row",
+    "ts_2022_06_15_11h48m34s_four_rows",
+    "ts_2022_09_01_11h20m00s_two_random",
+    "ts_2022_09_01_12h32m56s_double_loop_corridor",
+    "ts_2022_09_06_12h37m11s_four_rows"
+  ],
+  "failures": [],
+  "keep_bags": false
+}
