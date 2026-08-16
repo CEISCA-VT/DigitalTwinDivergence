@@ -1,0 +1,172 @@
+[
+  {
+    "fold": 1,
+    "test": "building00",
+    "validation": [
+      "building01",
+      "building02"
+    ],
+    "train": [
+      "parking00",
+      "parking01",
+      "parking02",
+      "playground00",
+      "street00",
+      "street01",
+      "street02"
+    ]
+  },
+  {
+    "fold": 2,
+    "test": "building01",
+    "validation": [
+      "building02",
+      "parking00"
+    ],
+    "train": [
+      "building00",
+      "parking01",
+      "parking02",
+      "playground00",
+      "street00",
+      "street01",
+      "street02"
+    ]
+  },
+  {
+    "fold": 3,
+    "test": "building02",
+    "validation": [
+      "parking00",
+      "parking01"
+    ],
+    "train": [
+      "building00",
+      "building01",
+      "parking02",
+      "playground00",
+      "street00",
+      "street01",
+      "street02"
+    ]
+  },
+  {
+    "fold": 4,
+    "test": "parking00",
+    "validation": [
+      "parking01",
+      "parking02"
+    ],
+    "train": [
+      "building00",
+      "building01",
+      "building02",
+      "playground00",
+      "street00",
+      "street01",
+      "street02"
+    ]
+  },
+  {
+    "fold": 5,
+    "test": "parking01",
+    "validation": [
+      "parking02",
+      "playground00"
+    ],
+    "train": [
+      "building00",
+      "building01",
+      "building02",
+      "parking00",
+      "street00",
+      "street01",
+      "street02"
+    ]
+  },
+  {
+    "fold": 6,
+    "test": "parking02",
+    "validation": [
+      "playground00",
+      "street00"
+    ],
+    "train": [
+      "building00",
+      "building01",
+      "building02",
+      "parking00",
+      "parking01",
+      "street01",
+      "street02"
+    ]
+  },
+  {
+    "fold": 7,
+    "test": "playground00",
+    "validation": [
+      "street00",
+      "street01"
+    ],
+    "train": [
+      "building00",
+      "building01",
+      "building02",
+      "parking00",
+      "parking01",
+      "parking02",
+      "street02"
+    ]
+  },
+  {
+    "fold": 8,
+    "test": "street00",
+    "validation": [
+      "street01",
+      "street02"
+    ],
+    "train": [
+      "building00",
+      "building01",
+      "building02",
+      "parking00",
+      "parking01",
+      "parking02",
+      "playground00"
+    ]
+  },
+  {
+    "fold": 9,
+    "test": "street01",
+    "validation": [
+      "street02",
+      "building00"
+    ],
+    "train": [
+      "building01",
+      "building02",
+      "parking00",
+      "parking01",
+      "parking02",
+      "playground00",
+      "street00"
+    ]
+  },
+  {
+    "fold": 10,
+    "test": "street02",
+    "validation": [
+      "building00",
+      "building01"
+    ],
+    "train": [
+      "building02",
+      "parking00",
+      "parking01",
+      "parking02",
+      "playground00",
+      "street00",
+      "street01"
+    ]
+  }
+]

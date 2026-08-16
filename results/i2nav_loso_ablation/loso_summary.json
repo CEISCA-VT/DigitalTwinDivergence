@@ -1,0 +1,293 @@
+{
+  "schema": "i2nav_loso_ablation_v1",
+  "device": "cuda",
+  "outer_evaluation": "leave-one-sequence-out",
+  "validation_count_per_fold": 2,
+  "methods": [
+    "fixed_v5",
+    "heuristic_v6",
+    "gru_dynamics",
+    "gru_q",
+    "gru_dual"
+  ],
+  "method_summaries": {
+    "fixed_v5": {
+      "held_out_sequences": 10,
+      "ate_macro_mean_m": 5.099546625233903,
+      "ate_median_m": 1.7001462844162647,
+      "ate_std_m": 8.217128898103526,
+      "ate_sequence_rms_m": 9.315281121800766,
+      "ate_bootstrap_95ci_m": [
+        1.0952237786856343,
+        10.408840318101767
+      ],
+      "ate_se2_macro_mean_m": 2.9127443834914883,
+      "rpe_1s_macro_mean_m": 0.08951575762783284,
+      "rpe_5s_macro_mean_m": 0.23824720752990136,
+      "rpe_10s_macro_mean_m": 0.37785828413515865,
+      "heading_mae_macro_mean_deg": 6.446325134597151,
+      "gnss_free_ate_mean_m": 20.093480068791614,
+      "gnss_fused_ate_mean_m": 1.3510632643444755
+    },
+    "heuristic_v6": {
+      "held_out_sequences": 10,
+      "ate_macro_mean_m": 6.268437670661527,
+      "ate_median_m": 1.7417773414780886,
+      "ate_std_m": 8.874491946099674,
+      "ate_sequence_rms_m": 10.496392589943351,
+      "ate_bootstrap_95ci_m": [
+        1.1558646488231965,
+        11.777912353834042
+      ],
+      "ate_se2_macro_mean_m": 3.894543764794347,
+      "rpe_1s_macro_mean_m": 0.10190245027681497,
+      "rpe_5s_macro_mean_m": 0.2855722255293703,
+      "rpe_10s_macro_mean_m": 0.43703005063147177,
+      "heading_mae_macro_mean_deg": 6.6180588222952155,
+      "gnss_free_ate_mean_m": 20.093480068791614,
+      "gnss_fused_ate_mean_m": 2.812177071129004
+    },
+    "gru_dynamics": {
+      "held_out_sequences": 10,
+      "ate_macro_mean_m": 3.397625711486527,
+      "ate_median_m": 1.7386767636359752,
+      "ate_std_m": 4.99337473053047,
+      "ate_sequence_rms_m": 5.8296031215602095,
+      "ate_bootstrap_95ci_m": [
+        0.9593340160839259,
+        6.680681757897098
+      ],
+      "ate_se2_macro_mean_m": 1.8700183624247724,
+      "rpe_1s_macro_mean_m": 0.06845739269952682,
+      "rpe_5s_macro_mean_m": 0.18203859402293504,
+      "rpe_10s_macro_mean_m": 0.29004667983196675,
+      "heading_mae_macro_mean_deg": 4.0326008116705685,
+      "gnss_free_ate_mean_m": 12.28795650446519,
+      "gnss_fused_ate_mean_m": 1.1750430132418606
+    },
+    "gru_q": {
+      "held_out_sequences": 10,
+      "ate_macro_mean_m": 7.648955612604484,
+      "ate_median_m": 1.9790024599298004,
+      "ate_std_m": 10.7461540360327,
+      "ate_sequence_rms_m": 12.745131065356736,
+      "ate_bootstrap_95ci_m": [
+        1.5287766557468128,
+        14.343410792262517
+      ],
+      "ate_se2_macro_mean_m": 5.105198798690124,
+      "rpe_1s_macro_mean_m": 0.22526336856072277,
+      "rpe_5s_macro_mean_m": 0.5529509704438135,
+      "rpe_10s_macro_mean_m": 0.82394338712507,
+      "heading_mae_macro_mean_deg": 6.8612206899946555,
+      "gnss_free_ate_mean_m": 20.093480068791614,
+      "gnss_fused_ate_mean_m": 4.537824498557701
+    },
+    "gru_dual": {
+      "held_out_sequences": 10,
+      "ate_macro_mean_m": 1.9500611678861293,
+      "ate_median_m": 1.5625206624199504,
+      "ate_std_m": 2.0110241024955813,
+      "ate_sequence_rms_m": 2.728100933842763,
+      "ate_bootstrap_95ci_m": [
+        0.8714768340692216,
+        3.2134525098910713
+      ],
+      "ate_se2_macro_mean_m": 1.0416624994354677,
+      "rpe_1s_macro_mean_m": 0.05940615887795007,
+      "rpe_5s_macro_mean_m": 0.15972213006028246,
+      "rpe_10s_macro_mean_m": 0.25658322788139654,
+      "heading_mae_macro_mean_deg": 1.953484748808923,
+      "gnss_free_ate_mean_m": 5.522924778706633,
+      "gnss_fused_ate_mean_m": 1.0568452651810034
+    }
+  },
+  "fold_splits": [
+    {
+      "fold": 1,
+      "test": "building00",
+      "validation": [
+        "building01",
+        "building02"
+      ],
+      "train": [
+        "parking00",
+        "parking01",
+        "parking02",
+        "playground00",
+        "street00",
+        "street01",
+        "street02"
+      ]
+    },
+    {
+      "fold": 2,
+      "test": "building01",
+      "validation": [
+        "building02",
+        "parking00"
+      ],
+      "train": [
+        "building00",
+        "parking01",
+        "parking02",
+        "playground00",
+        "street00",
+        "street01",
+        "street02"
+      ]
+    },
+    {
+      "fold": 3,
+      "test": "building02",
+      "validation": [
+        "parking00",
+        "parking01"
+      ],
+      "train": [
+        "building00",
+        "building01",
+        "parking02",
+        "playground00",
+        "street00",
+        "street01",
+        "street02"
+      ]
+    },
+    {
+      "fold": 4,
+      "test": "parking00",
+      "validation": [
+        "parking01",
+        "parking02"
+      ],
+      "train": [
+        "building00",
+        "building01",
+        "building02",
+        "playground00",
+        "street00",
+        "street01",
+        "street02"
+      ]
+    },
+    {
+      "fold": 5,
+      "test": "parking01",
+      "validation": [
+        "parking02",
+        "playground00"
+      ],
+      "train": [
+        "building00",
+        "building01",
+        "building02",
+        "parking00",
+        "street00",
+        "street01",
+        "street02"
+      ]
+    },
+    {
+      "fold": 6,
+      "test": "parking02",
+      "validation": [
+        "playground00",
+        "street00"
+      ],
+      "train": [
+        "building00",
+        "building01",
+        "building02",
+        "parking00",
+        "parking01",
+        "street01",
+        "street02"
+      ]
+    },
+    {
+      "fold": 7,
+      "test": "playground00",
+      "validation": [
+        "street00",
+        "street01"
+      ],
+      "train": [
+        "building00",
+        "building01",
+        "building02",
+        "parking00",
+        "parking01",
+        "parking02",
+        "street02"
+      ]
+    },
+    {
+      "fold": 8,
+      "test": "street00",
+      "validation": [
+        "street01",
+        "street02"
+      ],
+      "train": [
+        "building00",
+        "building01",
+        "building02",
+        "parking00",
+        "parking01",
+        "parking02",
+        "playground00"
+      ]
+    },
+    {
+      "fold": 9,
+      "test": "street01",
+      "validation": [
+        "street02",
+        "building00"
+      ],
+      "train": [
+        "building01",
+        "building02",
+        "parking00",
+        "parking01",
+        "parking02",
+        "playground00",
+        "street00"
+      ]
+    },
+    {
+      "fold": 10,
+      "test": "street02",
+      "validation": [
+        "building00",
+        "building01"
+      ],
+      "train": [
+        "building02",
+        "parking00",
+        "parking01",
+        "parking02",
+        "playground00",
+        "street00",
+        "street01"
+      ]
+    }
+  ],
+  "model_configuration": {
+    "rate_hz": 10.0,
+    "window_samples": 20,
+    "window_seconds": 2.0,
+    "hidden_size": 64,
+    "num_layers": 2,
+    "dropout": 0.1,
+    "alpha_min": 1.0,
+    "alpha_max": 10.0,
+    "q_xy_sigma_mps": 0.05,
+    "q_heading_sigma_radps": 0.01,
+    "gnss_nis_gate": 9.21
+  },
+  "security_constraint": "No adaptive or neural model receives GNSS position, GNSS innovation, residual, NIS, GNSS covariance, reported GNSS uncertainty, or any GNSS-derived feature. Learned and heuristic adaptation uses trusted ODO/IMU motion information only.",
+  "reporting_rule": "Only the outer-fold test result for each sequence is used in LOSO aggregate performance. Training and validation trajectory performance are excluded from headline metrics.",
+  "ablation_note": "GRU dynamics-only, GRU Q-only, and GRU dual-head models are separately trained in each fold. This avoids the weaker practice of training only a dual-head model and disabling heads after training."
+}
