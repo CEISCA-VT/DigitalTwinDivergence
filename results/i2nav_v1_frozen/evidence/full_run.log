@@ -1,0 +1,1854 @@
+============================================================================================================
+ORIGINAL DUAL-GRU — 10-FOLD × 3-SEED DETERMINISTIC REPRODUCIBILITY STUDY
+============================================================================================================
+Device: cuda
+GPU: Tesla T4
+Git commit: 9bd1f06a415bcc47e416797226dade06094b8216
+Base seeds: [42, 1042, 2042]
+Sequences: building00, building01, building02, parking00, parking01, parking02, playground00, street00, street01, street02
+Strict deterministic algorithms: True
+No V2/V3/V3.1/V3.2 model is trained in this notebook.
+
+Preparing sequences using ORIGINAL LOSO pipeline...
+  building00     12009 samples
+  building01     13689 samples
+  building02     18714 samples
+  parking00      11409 samples
+  parking01      10599 samples
+  parking02      12569 samples
+  playground00   13263 samples
+  street00       13738 samples
+  street01       12483 samples
+  street02       13799 samples
+
+Existing completed runs: 0/30
+
+============================================================================================================
+RUN 1/30 | replicate=1/3 | test=building00 | base_seed=42 | method_seed=45
+VAL  : building01, building02
+TRAIN: parking00, parking01, parking02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.34058 val=0.20162
+      dual     epoch=002 train=0.21588 val=0.16757
+      dual     epoch=003 train=0.20151 val=0.15755
+      dual     epoch=004 train=0.19614 val=0.15219
+      dual     epoch=005 train=0.19360 val=0.14623
+      dual     epoch=006 train=0.06476 val=0.11084
+      dual     epoch=007 train=0.05341 val=0.11130
+      dual     epoch=008 train=0.05219 val=0.10989
+      dual     epoch=009 train=0.05060 val=0.11014
+      dual     epoch=010 train=0.05010 val=0.10928
+      dual     epoch=011 train=0.04906 val=0.11003
+      dual     epoch=012 train=0.04900 val=0.10936
+      dual     epoch=013 train=0.04886 val=0.10936
+      dual     epoch=014 train=0.04819 val=0.10877
+      dual     epoch=015 train=0.04776 val=0.10878
+      dual     epoch=016 train=0.04749 val=0.10856
+      dual     epoch=017 train=0.04708 val=0.10834
+      dual     epoch=018 train=0.04675 val=0.10850
+      dual     epoch=019 train=0.04652 val=0.10763
+      dual     epoch=020 train=0.04575 val=0.10707
+      dual     epoch=021 train=0.04535 val=0.10732
+      dual     epoch=022 train=0.04517 val=0.10691
+      dual     epoch=023 train=0.04445 val=0.10774
+      dual     epoch=024 train=0.04400 val=0.10614
+      dual     epoch=025 train=0.04345 val=0.10699
+      dual     epoch=026 train=0.04284 val=0.10530
+      dual     epoch=027 train=0.04259 val=0.10483
+      dual     epoch=028 train=0.04211 val=0.10406
+      dual     epoch=029 train=0.04147 val=0.10359
+      dual     epoch=030 train=0.04096 val=0.10294
+      dual     epoch=031 train=0.04044 val=0.10264
+      dual     epoch=032 train=0.04023 val=0.10242
+      dual     epoch=033 train=0.03967 val=0.10146
+      dual     epoch=034 train=0.03948 val=0.10136
+      dual     epoch=035 train=0.03880 val=0.10132
+      dual     epoch=036 train=0.03882 val=0.10150
+      dual     epoch=037 train=0.03897 val=0.10083
+      dual     epoch=038 train=0.03863 val=0.10064
+      dual     epoch=039 train=0.03809 val=0.10066
+      dual     epoch=040 train=0.03813 val=0.10075
+      dual     epoch=041 train=0.03756 val=0.10150
+      dual     epoch=042 train=0.03703 val=0.10072
+      dual     epoch=043 train=0.03754 val=0.10125
+      dual     epoch=044 train=0.03688 val=0.09978
+      dual     epoch=045 train=0.03660 val=0.10082
+      dual     epoch=046 train=0.03621 val=0.09974
+      dual     epoch=047 train=0.03615 val=0.10038
+      dual     epoch=048 train=0.03581 val=0.10066
+      dual     epoch=049 train=0.03546 val=0.10091
+      dual     epoch=050 train=0.03505 val=0.09994
+      dual     epoch=051 train=0.03424 val=0.09969
+      dual     epoch=052 train=0.03410 val=0.09960
+      dual     epoch=053 train=0.03303 val=0.10101
+      dual     epoch=054 train=0.03302 val=0.09980
+      dual     epoch=055 train=0.03235 val=0.09979
+      dual     epoch=056 train=0.03200 val=0.09950
+      dual     epoch=057 train=0.03110 val=0.09985
+      dual     epoch=058 train=0.03082 val=0.09855
+      dual     epoch=059 train=0.03025 val=0.09878
+      dual     epoch=060 train=0.03004 val=0.10052
+RESULT building00 seed#1: ATE=1.919 m | RPE5=0.341 m | RPE10=0.525 m | heading=0.73°
+
+============================================================================================================
+RUN 2/30 | replicate=1/3 | test=building01 | base_seed=42 | method_seed=145
+VAL  : building02, parking00
+TRAIN: building00, parking01, parking02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.36642 val=0.23680
+      dual     epoch=002 train=0.23160 val=0.16323
+      dual     epoch=003 train=0.21216 val=0.15029
+      dual     epoch=004 train=0.20632 val=0.14354
+      dual     epoch=005 train=0.20374 val=0.13920
+      dual     epoch=006 train=0.07329 val=0.10963
+      dual     epoch=007 train=0.06386 val=0.10791
+      dual     epoch=008 train=0.06244 val=0.10681
+      dual     epoch=009 train=0.06177 val=0.10754
+      dual     epoch=010 train=0.06077 val=0.10628
+      dual     epoch=011 train=0.06033 val=0.10739
+      dual     epoch=012 train=0.05962 val=0.10738
+      dual     epoch=013 train=0.05904 val=0.10643
+      dual     epoch=014 train=0.05880 val=0.10677
+      dual     epoch=015 train=0.05854 val=0.10558
+      dual     epoch=016 train=0.05821 val=0.10544
+      dual     epoch=017 train=0.05778 val=0.10535
+      dual     epoch=018 train=0.05759 val=0.10572
+      dual     epoch=019 train=0.05733 val=0.10568
+      dual     epoch=020 train=0.05680 val=0.10636
+      dual     epoch=021 train=0.05662 val=0.10497
+      dual     epoch=022 train=0.05655 val=0.10528
+      dual     epoch=023 train=0.05607 val=0.10421
+      dual     epoch=024 train=0.05529 val=0.10461
+      dual     epoch=025 train=0.05527 val=0.10427
+      dual     epoch=026 train=0.05510 val=0.10320
+      dual     epoch=027 train=0.05424 val=0.10185
+      dual     epoch=028 train=0.05344 val=0.10112
+      dual     epoch=029 train=0.05368 val=0.10093
+      dual     epoch=030 train=0.05310 val=0.09953
+      dual     epoch=031 train=0.05268 val=0.09939
+      dual     epoch=032 train=0.05212 val=0.09831
+      dual     epoch=033 train=0.05204 val=0.09793
+      dual     epoch=034 train=0.05173 val=0.09965
+      dual     epoch=035 train=0.05119 val=0.09869
+      dual     epoch=036 train=0.05096 val=0.09829
+      dual     epoch=037 train=0.05061 val=0.09685
+      dual     epoch=038 train=0.05056 val=0.09585
+      dual     epoch=039 train=0.05028 val=0.09798
+      dual     epoch=040 train=0.04972 val=0.09722
+      dual     epoch=041 train=0.04938 val=0.09594
+      dual     epoch=042 train=0.04936 val=0.09663
+      dual     epoch=043 train=0.04937 val=0.09616
+      dual     epoch=044 train=0.04929 val=0.09739
+      dual     epoch=045 train=0.04917 val=0.09698
+      dual     epoch=046 train=0.04850 val=0.09652
+      dual     epoch=047 train=0.04847 val=0.09671
+      dual     epoch=048 train=0.04815 val=0.09605
+      dual: early stop at epoch 48; best=0.095852
+RESULT building01 seed#1: ATE=1.727 m | RPE5=0.305 m | RPE10=0.500 m | heading=1.62°
+
+============================================================================================================
+RUN 3/30 | replicate=1/3 | test=building02 | base_seed=42 | method_seed=245
+VAL  : parking00, parking01
+TRAIN: building00, building01, parking02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.38958 val=0.26064
+      dual     epoch=002 train=0.25167 val=0.15146
+      dual     epoch=003 train=0.21934 val=0.13969
+      dual     epoch=004 train=0.21325 val=0.13154
+      dual     epoch=005 train=0.21032 val=0.12353
+      dual     epoch=006 train=0.07835 val=0.09407
+      dual     epoch=007 train=0.06986 val=0.09393
+      dual     epoch=008 train=0.06910 val=0.09437
+      dual     epoch=009 train=0.06728 val=0.09294
+      dual     epoch=010 train=0.06647 val=0.09321
+      dual     epoch=011 train=0.06618 val=0.09378
+      dual     epoch=012 train=0.06548 val=0.09188
+      dual     epoch=013 train=0.06536 val=0.09247
+      dual     epoch=014 train=0.06495 val=0.09182
+      dual     epoch=015 train=0.06432 val=0.09237
+      dual     epoch=016 train=0.06449 val=0.09242
+      dual     epoch=017 train=0.06408 val=0.09161
+      dual     epoch=018 train=0.06390 val=0.09104
+      dual     epoch=019 train=0.06356 val=0.09332
+      dual     epoch=020 train=0.06365 val=0.09102
+      dual     epoch=021 train=0.06342 val=0.09088
+      dual     epoch=022 train=0.06278 val=0.09048
+      dual     epoch=023 train=0.06254 val=0.09019
+      dual     epoch=024 train=0.06227 val=0.08855
+      dual     epoch=025 train=0.06192 val=0.08958
+      dual     epoch=026 train=0.06142 val=0.08942
+      dual     epoch=027 train=0.06122 val=0.08815
+      dual     epoch=028 train=0.06085 val=0.08834
+      dual     epoch=029 train=0.05997 val=0.08484
+      dual     epoch=030 train=0.05977 val=0.08677
+      dual     epoch=031 train=0.05938 val=0.08732
+      dual     epoch=032 train=0.05939 val=0.08272
+      dual     epoch=033 train=0.05868 val=0.08252
+      dual     epoch=034 train=0.05840 val=0.08329
+      dual     epoch=035 train=0.05820 val=0.08250
+      dual     epoch=036 train=0.05768 val=0.08378
+      dual     epoch=037 train=0.05751 val=0.08185
+      dual     epoch=038 train=0.05726 val=0.08269
+      dual     epoch=039 train=0.05686 val=0.08157
+      dual     epoch=040 train=0.05681 val=0.07979
+      dual     epoch=041 train=0.05661 val=0.07966
+      dual     epoch=042 train=0.05630 val=0.08155
+      dual     epoch=043 train=0.05629 val=0.08024
+      dual     epoch=044 train=0.05549 val=0.08045
+      dual     epoch=045 train=0.05584 val=0.07928
+      dual     epoch=046 train=0.05533 val=0.07957
+      dual     epoch=047 train=0.05504 val=0.07988
+      dual     epoch=048 train=0.05485 val=0.07999
+      dual     epoch=049 train=0.05445 val=0.07965
+      dual     epoch=050 train=0.05448 val=0.07837
+      dual     epoch=051 train=0.05416 val=0.08268
+      dual     epoch=052 train=0.05405 val=0.08100
+      dual     epoch=053 train=0.05340 val=0.07934
+      dual     epoch=054 train=0.05321 val=0.07779
+      dual     epoch=055 train=0.05273 val=0.07926
+      dual     epoch=056 train=0.05236 val=0.07960
+      dual     epoch=057 train=0.05232 val=0.07924
+      dual     epoch=058 train=0.05185 val=0.07917
+      dual     epoch=059 train=0.05161 val=0.07794
+      dual     epoch=060 train=0.05099 val=0.08000
+RESULT building02 seed#1: ATE=1.728 m | RPE5=0.326 m | RPE10=0.514 m | heading=0.89°
+
+============================================================================================================
+RUN 4/30 | replicate=1/3 | test=parking00 | base_seed=42 | method_seed=345
+VAL  : parking01, parking02
+TRAIN: building00, building01, building02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.37263 val=0.13319
+      dual     epoch=002 train=0.23939 val=0.11229
+      dual     epoch=003 train=0.22968 val=0.10238
+      dual     epoch=004 train=0.22552 val=0.09342
+      dual     epoch=005 train=0.22278 val=0.08519
+      dual     epoch=006 train=0.08991 val=0.05530
+      dual     epoch=007 train=0.08288 val=0.05544
+      dual     epoch=008 train=0.08168 val=0.05522
+      dual     epoch=009 train=0.08087 val=0.05643
+      dual     epoch=010 train=0.07990 val=0.05748
+      dual     epoch=011 train=0.07970 val=0.05530
+      dual     epoch=012 train=0.07880 val=0.05681
+      dual     epoch=013 train=0.07840 val=0.05651
+      dual     epoch=014 train=0.07832 val=0.05676
+      dual     epoch=015 train=0.07791 val=0.05801
+      dual     epoch=016 train=0.07737 val=0.05309
+      dual     epoch=017 train=0.07735 val=0.05385
+      dual     epoch=018 train=0.07732 val=0.05360
+      dual     epoch=019 train=0.07698 val=0.05620
+      dual     epoch=020 train=0.07688 val=0.05486
+      dual     epoch=021 train=0.07649 val=0.05285
+      dual     epoch=022 train=0.07649 val=0.05387
+      dual     epoch=023 train=0.07633 val=0.05413
+      dual     epoch=024 train=0.07594 val=0.05253
+      dual     epoch=025 train=0.07601 val=0.05163
+      dual     epoch=026 train=0.07596 val=0.05300
+      dual     epoch=027 train=0.07580 val=0.05190
+      dual     epoch=028 train=0.07553 val=0.05287
+      dual     epoch=029 train=0.07533 val=0.05074
+      dual     epoch=030 train=0.07536 val=0.05167
+      dual     epoch=031 train=0.07474 val=0.05100
+      dual     epoch=032 train=0.07451 val=0.05113
+      dual     epoch=033 train=0.07430 val=0.05125
+      dual     epoch=034 train=0.07414 val=0.04871
+      dual     epoch=035 train=0.07370 val=0.04865
+      dual     epoch=036 train=0.07293 val=0.04766
+      dual     epoch=037 train=0.07260 val=0.04926
+      dual     epoch=038 train=0.07229 val=0.04837
+      dual     epoch=039 train=0.07224 val=0.04669
+      dual     epoch=040 train=0.07165 val=0.04800
+      dual     epoch=041 train=0.07171 val=0.04540
+      dual     epoch=042 train=0.07132 val=0.04700
+      dual     epoch=043 train=0.07140 val=0.04701
+      dual     epoch=044 train=0.07112 val=0.04649
+      dual     epoch=045 train=0.07097 val=0.04488
+      dual     epoch=046 train=0.07083 val=0.04710
+      dual     epoch=047 train=0.07028 val=0.04473
+      dual     epoch=048 train=0.07033 val=0.04601
+      dual     epoch=049 train=0.07006 val=0.04545
+      dual     epoch=050 train=0.06991 val=0.04419
+      dual     epoch=051 train=0.06934 val=0.04556
+      dual     epoch=052 train=0.06969 val=0.04351
+      dual     epoch=053 train=0.06931 val=0.04404
+      dual     epoch=054 train=0.06886 val=0.04450
+      dual     epoch=055 train=0.06952 val=0.04290
+      dual     epoch=056 train=0.06895 val=0.04357
+      dual     epoch=057 train=0.06882 val=0.04431
+      dual     epoch=058 train=0.06843 val=0.04404
+      dual     epoch=059 train=0.06836 val=0.04437
+      dual     epoch=060 train=0.06825 val=0.04289
+RESULT parking00 seed#1: ATE=2.030 m | RPE5=0.226 m | RPE10=0.369 m | heading=0.84°
+
+============================================================================================================
+RUN 5/30 | replicate=1/3 | test=parking01 | base_seed=42 | method_seed=445
+VAL  : parking02, playground00
+TRAIN: building00, building01, building02, parking00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.35485 val=0.12929
+      dual     epoch=002 train=0.22783 val=0.11228
+      dual     epoch=003 train=0.21812 val=0.10219
+      dual     epoch=004 train=0.21441 val=0.09192
+      dual     epoch=005 train=0.21204 val=0.09047
+      dual     epoch=006 train=0.08392 val=0.05566
+      dual     epoch=007 train=0.07342 val=0.05378
+      dual     epoch=008 train=0.07214 val=0.05425
+      dual     epoch=009 train=0.07125 val=0.05458
+      dual     epoch=010 train=0.07017 val=0.05295
+      dual     epoch=011 train=0.06986 val=0.05187
+      dual     epoch=012 train=0.06925 val=0.05173
+      dual     epoch=013 train=0.06911 val=0.05343
+      dual     epoch=014 train=0.06862 val=0.05198
+      dual     epoch=015 train=0.06838 val=0.05389
+      dual     epoch=016 train=0.06775 val=0.05171
+      dual     epoch=017 train=0.06796 val=0.05085
+      dual     epoch=018 train=0.06743 val=0.05111
+      dual     epoch=019 train=0.06700 val=0.05187
+      dual     epoch=020 train=0.06670 val=0.05311
+      dual     epoch=021 train=0.06612 val=0.05009
+      dual     epoch=022 train=0.06583 val=0.05195
+      dual     epoch=023 train=0.06575 val=0.04971
+      dual     epoch=024 train=0.06489 val=0.04931
+      dual     epoch=025 train=0.06463 val=0.05103
+      dual     epoch=026 train=0.06418 val=0.04837
+      dual     epoch=027 train=0.06438 val=0.05128
+      dual     epoch=028 train=0.06368 val=0.04782
+      dual     epoch=029 train=0.06347 val=0.05044
+      dual     epoch=030 train=0.06302 val=0.04740
+      dual     epoch=031 train=0.06274 val=0.04796
+      dual     epoch=032 train=0.06238 val=0.04680
+      dual     epoch=033 train=0.06182 val=0.04565
+      dual     epoch=034 train=0.06121 val=0.04512
+      dual     epoch=035 train=0.06121 val=0.04737
+      dual     epoch=036 train=0.06110 val=0.04654
+      dual     epoch=037 train=0.06050 val=0.04418
+      dual     epoch=038 train=0.06053 val=0.04425
+      dual     epoch=039 train=0.06003 val=0.04554
+      dual     epoch=040 train=0.05994 val=0.04499
+      dual     epoch=041 train=0.05969 val=0.04481
+      dual     epoch=042 train=0.05937 val=0.04603
+      dual     epoch=043 train=0.05958 val=0.04528
+      dual     epoch=044 train=0.05907 val=0.04516
+      dual     epoch=045 train=0.05880 val=0.04440
+      dual     epoch=046 train=0.05875 val=0.04549
+      dual     epoch=047 train=0.05840 val=0.04450
+      dual: early stop at epoch 47; best=0.044180
+RESULT parking01 seed#1: ATE=5.347 m | RPE5=0.084 m | RPE10=0.154 m | heading=7.27°
+
+============================================================================================================
+RUN 6/30 | replicate=1/3 | test=parking02 | base_seed=42 | method_seed=545
+VAL  : playground00, street00
+TRAIN: building00, building01, building02, parking00, parking01, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.40317 val=0.14629
+      dual     epoch=002 train=0.24484 val=0.06383
+      dual     epoch=003 train=0.21549 val=0.05510
+      dual     epoch=004 train=0.21016 val=0.05310
+      dual     epoch=005 train=0.20616 val=0.04864
+      dual     epoch=006 train=0.07946 val=0.00856
+      dual     epoch=007 train=0.06814 val=0.00874
+      dual     epoch=008 train=0.06573 val=0.00884
+      dual     epoch=009 train=0.06436 val=0.00702
+      dual     epoch=010 train=0.06361 val=0.00686
+      dual     epoch=011 train=0.06312 val=0.00583
+      dual     epoch=012 train=0.06265 val=0.00782
+      dual     epoch=013 train=0.06224 val=0.00764
+      dual     epoch=014 train=0.06153 val=0.00687
+      dual     epoch=015 train=0.06129 val=0.00653
+      dual     epoch=016 train=0.06116 val=0.00650
+      dual     epoch=017 train=0.06062 val=0.00604
+      dual     epoch=018 train=0.06072 val=0.00656
+      dual     epoch=019 train=0.06056 val=0.00552
+      dual     epoch=020 train=0.05996 val=0.00573
+      dual     epoch=021 train=0.05993 val=0.00584
+      dual     epoch=022 train=0.05987 val=0.00735
+      dual     epoch=023 train=0.05948 val=0.00726
+      dual     epoch=024 train=0.05904 val=0.00539
+      dual     epoch=025 train=0.05922 val=0.00524
+      dual     epoch=026 train=0.05892 val=0.00813
+      dual     epoch=027 train=0.05867 val=0.01135
+      dual     epoch=028 train=0.05778 val=0.00677
+      dual     epoch=029 train=0.05714 val=0.00815
+      dual     epoch=030 train=0.05642 val=0.00550
+      dual     epoch=031 train=0.05576 val=0.00769
+      dual     epoch=032 train=0.05550 val=0.00627
+      dual     epoch=033 train=0.05519 val=0.00474
+      dual     epoch=034 train=0.05492 val=0.00501
+      dual     epoch=035 train=0.05468 val=0.00510
+      dual     epoch=036 train=0.05437 val=0.00403
+      dual     epoch=037 train=0.05429 val=0.00514
+      dual     epoch=038 train=0.05374 val=0.00469
+      dual     epoch=039 train=0.05361 val=0.00559
+      dual     epoch=040 train=0.05333 val=0.00431
+      dual     epoch=041 train=0.05290 val=0.00414
+      dual     epoch=042 train=0.05262 val=0.00558
+      dual     epoch=043 train=0.05229 val=0.00357
+      dual     epoch=044 train=0.05223 val=0.00379
+      dual     epoch=045 train=0.05197 val=0.00497
+      dual     epoch=046 train=0.05190 val=0.00458
+      dual     epoch=047 train=0.05158 val=0.00425
+      dual     epoch=048 train=0.05156 val=0.00471
+      dual     epoch=049 train=0.05089 val=0.00432
+      dual     epoch=050 train=0.05129 val=0.00691
+      dual     epoch=051 train=0.05088 val=0.00424
+      dual     epoch=052 train=0.05074 val=0.00379
+      dual     epoch=053 train=0.05051 val=0.00655
+      dual: early stop at epoch 53; best=0.003568
+RESULT parking02 seed#1: ATE=5.463 m | RPE5=0.060 m | RPE10=0.111 m | heading=7.89°
+
+============================================================================================================
+RUN 7/30 | replicate=1/3 | test=playground00 | base_seed=42 | method_seed=645
+VAL  : street00, street01
+TRAIN: building00, building01, building02, parking00, parking01, parking02, street02
+============================================================================================================
+      dual     epoch=001 train=0.37558 val=0.09013
+      dual     epoch=002 train=0.22646 val=0.03320
+      dual     epoch=003 train=0.20588 val=0.02515
+      dual     epoch=004 train=0.20036 val=0.02008
+      dual     epoch=005 train=0.19786 val=0.01447
+      dual     epoch=006 train=0.06911 val=-0.02138
+      dual     epoch=007 train=0.06050 val=-0.02412
+      dual     epoch=008 train=0.05916 val=-0.02453
+      dual     epoch=009 train=0.05820 val=-0.02487
+      dual     epoch=010 train=0.05708 val=-0.02525
+      dual     epoch=011 train=0.05639 val=-0.02630
+      dual     epoch=012 train=0.05596 val=-0.02614
+      dual     epoch=013 train=0.05553 val=-0.02624
+      dual     epoch=014 train=0.05519 val=-0.02548
+      dual     epoch=015 train=0.05454 val=-0.02604
+      dual     epoch=016 train=0.05424 val=-0.02706
+      dual     epoch=017 train=0.05396 val=-0.02745
+      dual     epoch=018 train=0.05343 val=-0.02738
+      dual     epoch=019 train=0.05292 val=-0.02626
+      dual     epoch=020 train=0.05243 val=-0.02760
+      dual     epoch=021 train=0.05215 val=-0.02736
+      dual     epoch=022 train=0.05170 val=-0.02663
+      dual     epoch=023 train=0.05137 val=-0.02723
+      dual     epoch=024 train=0.05086 val=-0.02859
+      dual     epoch=025 train=0.05040 val=-0.02786
+      dual     epoch=026 train=0.05031 val=-0.02897
+      dual     epoch=027 train=0.04967 val=-0.02759
+      dual     epoch=028 train=0.04900 val=-0.02836
+      dual     epoch=029 train=0.04865 val=-0.02939
+      dual     epoch=030 train=0.04808 val=-0.03031
+      dual     epoch=031 train=0.04743 val=-0.03052
+      dual     epoch=032 train=0.04676 val=-0.03017
+      dual     epoch=033 train=0.04652 val=-0.02995
+      dual     epoch=034 train=0.04600 val=-0.03087
+      dual     epoch=035 train=0.04556 val=-0.03074
+      dual     epoch=036 train=0.04536 val=-0.03060
+      dual     epoch=037 train=0.04463 val=-0.03021
+      dual     epoch=038 train=0.04464 val=-0.03098
+      dual     epoch=039 train=0.04395 val=-0.03134
+      dual     epoch=040 train=0.04343 val=-0.03034
+      dual     epoch=041 train=0.04306 val=-0.03127
+      dual     epoch=042 train=0.04220 val=-0.03013
+      dual     epoch=043 train=0.04172 val=-0.03105
+      dual     epoch=044 train=0.04082 val=-0.02966
+      dual     epoch=045 train=0.04093 val=-0.03100
+      dual     epoch=046 train=0.04013 val=-0.03007
+      dual     epoch=047 train=0.03959 val=-0.03048
+      dual     epoch=048 train=0.03897 val=-0.03086
+      dual     epoch=049 train=0.03828 val=-0.03058
+      dual: early stop at epoch 49; best=-0.031345
+RESULT playground00 seed#1: ATE=0.241 m | RPE5=0.061 m | RPE10=0.116 m | heading=0.41°
+
+============================================================================================================
+RUN 8/30 | replicate=1/3 | test=street00 | base_seed=42 | method_seed=745
+VAL  : street01, street02
+TRAIN: building00, building01, building02, parking00, parking01, parking02, playground00
+============================================================================================================
+      dual     epoch=001 train=0.38921 val=0.15562
+      dual     epoch=002 train=0.22978 val=0.08035
+      dual     epoch=003 train=0.21275 val=0.07347
+      dual     epoch=004 train=0.20650 val=0.06577
+      dual     epoch=005 train=0.20457 val=0.06239
+      dual     epoch=006 train=0.07918 val=0.02261
+      dual     epoch=007 train=0.06745 val=0.02025
+      dual     epoch=008 train=0.06610 val=0.01749
+      dual     epoch=009 train=0.06469 val=0.01632
+      dual     epoch=010 train=0.06387 val=0.01644
+      dual     epoch=011 train=0.06307 val=0.01303
+      dual     epoch=012 train=0.06246 val=0.01199
+      dual     epoch=013 train=0.06188 val=0.01056
+      dual     epoch=014 train=0.06140 val=0.01037
+      dual     epoch=015 train=0.06101 val=0.01080
+      dual     epoch=016 train=0.06047 val=0.01076
+      dual     epoch=017 train=0.05972 val=0.00937
+      dual     epoch=018 train=0.05916 val=0.00961
+      dual     epoch=019 train=0.05853 val=0.00928
+      dual     epoch=020 train=0.05805 val=0.00718
+      dual     epoch=021 train=0.05762 val=0.00877
+      dual     epoch=022 train=0.05738 val=0.00846
+      dual     epoch=023 train=0.05645 val=0.00795
+      dual     epoch=024 train=0.05607 val=0.00760
+      dual     epoch=025 train=0.05504 val=0.00652
+      dual     epoch=026 train=0.05507 val=0.00636
+      dual     epoch=027 train=0.05453 val=0.00592
+      dual     epoch=028 train=0.05373 val=0.00788
+      dual     epoch=029 train=0.05301 val=0.00520
+      dual     epoch=030 train=0.05245 val=0.00594
+      dual     epoch=031 train=0.05181 val=0.00587
+      dual     epoch=032 train=0.05119 val=0.00688
+      dual     epoch=033 train=0.05032 val=0.00692
+      dual     epoch=034 train=0.04960 val=0.00525
+      dual     epoch=035 train=0.04897 val=0.00467
+      dual     epoch=036 train=0.04855 val=0.00582
+      dual     epoch=037 train=0.04822 val=0.00415
+      dual     epoch=038 train=0.04707 val=0.00442
+      dual     epoch=039 train=0.04643 val=0.00460
+      dual     epoch=040 train=0.04628 val=0.00399
+      dual     epoch=041 train=0.04613 val=0.00384
+      dual     epoch=042 train=0.04540 val=0.00554
+      dual     epoch=043 train=0.04457 val=0.00395
+      dual     epoch=044 train=0.04441 val=0.00562
+      dual     epoch=045 train=0.04420 val=0.00535
+      dual     epoch=046 train=0.04365 val=0.00576
+      dual     epoch=047 train=0.04347 val=0.00484
+      dual     epoch=048 train=0.04313 val=0.00645
+      dual     epoch=049 train=0.04265 val=0.00568
+      dual     epoch=050 train=0.04236 val=0.00521
+      dual     epoch=051 train=0.04240 val=0.00529
+      dual: early stop at epoch 51; best=0.003837
+RESULT street00 seed#1: ATE=0.297 m | RPE5=0.066 m | RPE10=0.117 m | heading=0.32°
+
+============================================================================================================
+RUN 9/30 | replicate=1/3 | test=street01 | base_seed=42 | method_seed=845
+VAL  : street02, building00
+TRAIN: building01, building02, parking00, parking01, parking02, playground00, street00
+============================================================================================================
+      dual     epoch=001 train=0.36087 val=0.17768
+      dual     epoch=002 train=0.21818 val=0.13814
+      dual     epoch=003 train=0.20482 val=0.12816
+      dual     epoch=004 train=0.19946 val=0.12075
+      dual     epoch=005 train=0.19709 val=0.11179
+      dual     epoch=006 train=0.06391 val=0.08241
+      dual     epoch=007 train=0.05911 val=0.07987
+      dual     epoch=008 train=0.05751 val=0.08011
+      dual     epoch=009 train=0.05704 val=0.07887
+      dual     epoch=010 train=0.05662 val=0.07947
+      dual     epoch=011 train=0.05617 val=0.07802
+      dual     epoch=012 train=0.05590 val=0.07731
+      dual     epoch=013 train=0.05516 val=0.07745
+      dual     epoch=014 train=0.05485 val=0.07682
+      dual     epoch=015 train=0.05444 val=0.07893
+      dual     epoch=016 train=0.05375 val=0.07576
+      dual     epoch=017 train=0.05293 val=0.07603
+      dual     epoch=018 train=0.05204 val=0.07513
+      dual     epoch=019 train=0.05187 val=0.07531
+      dual     epoch=020 train=0.05122 val=0.07552
+      dual     epoch=021 train=0.05111 val=0.07492
+      dual     epoch=022 train=0.05030 val=0.07368
+      dual     epoch=023 train=0.05030 val=0.07298
+      dual     epoch=024 train=0.04967 val=0.07396
+      dual     epoch=025 train=0.04934 val=0.07402
+      dual     epoch=026 train=0.04889 val=0.07338
+      dual     epoch=027 train=0.04835 val=0.07170
+      dual     epoch=028 train=0.04770 val=0.07247
+      dual     epoch=029 train=0.04738 val=0.07064
+      dual     epoch=030 train=0.04735 val=0.07199
+      dual     epoch=031 train=0.04643 val=0.07095
+      dual     epoch=032 train=0.04604 val=0.07176
+      dual     epoch=033 train=0.04593 val=0.07091
+      dual     epoch=034 train=0.04526 val=0.07088
+      dual     epoch=035 train=0.04468 val=0.07033
+      dual     epoch=036 train=0.04480 val=0.07146
+      dual     epoch=037 train=0.04434 val=0.07018
+      dual     epoch=038 train=0.04472 val=0.07045
+      dual     epoch=039 train=0.04325 val=0.07189
+      dual     epoch=040 train=0.04344 val=0.07287
+      dual     epoch=041 train=0.04291 val=0.07137
+      dual     epoch=042 train=0.04223 val=0.07343
+      dual     epoch=043 train=0.04104 val=0.07425
+      dual     epoch=044 train=0.04027 val=0.07071
+      dual     epoch=045 train=0.04006 val=0.07080
+      dual     epoch=046 train=0.03934 val=0.07346
+      dual     epoch=047 train=0.03919 val=0.07159
+      dual: early stop at epoch 47; best=0.070184
+RESULT street01 seed#1: ATE=0.404 m | RPE5=0.128 m | RPE10=0.215 m | heading=0.45°
+
+============================================================================================================
+RUN 10/30 | replicate=1/3 | test=street02 | base_seed=42 | method_seed=945
+VAL  : building00, building01
+TRAIN: building02, parking00, parking01, parking02, playground00, street00, street01
+============================================================================================================
+      dual     epoch=001 train=0.33055 val=0.20701
+      dual     epoch=002 train=0.21606 val=0.18709
+      dual     epoch=003 train=0.20459 val=0.17887
+      dual     epoch=004 train=0.20017 val=0.17295
+      dual     epoch=005 train=0.19839 val=0.16715
+      dual     epoch=006 train=0.06745 val=0.14032
+      dual     epoch=007 train=0.05905 val=0.13995
+      dual     epoch=008 train=0.05771 val=0.14137
+      dual     epoch=009 train=0.05709 val=0.13940
+      dual     epoch=010 train=0.05648 val=0.13989
+      dual     epoch=011 train=0.05604 val=0.13909
+      dual     epoch=012 train=0.05570 val=0.13907
+      dual     epoch=013 train=0.05535 val=0.13960
+      dual     epoch=014 train=0.05542 val=0.13840
+      dual     epoch=015 train=0.05452 val=0.13826
+      dual     epoch=016 train=0.05406 val=0.13810
+      dual     epoch=017 train=0.05366 val=0.13873
+      dual     epoch=018 train=0.05342 val=0.13852
+      dual     epoch=019 train=0.05324 val=0.13789
+      dual     epoch=020 train=0.05297 val=0.13802
+      dual     epoch=021 train=0.05277 val=0.13788
+      dual     epoch=022 train=0.05260 val=0.13734
+      dual     epoch=023 train=0.05185 val=0.13690
+      dual     epoch=024 train=0.05137 val=0.13618
+      dual     epoch=025 train=0.05089 val=0.13584
+      dual     epoch=026 train=0.05025 val=0.13575
+      dual     epoch=027 train=0.04976 val=0.13505
+      dual     epoch=028 train=0.04912 val=0.13371
+      dual     epoch=029 train=0.04873 val=0.13419
+      dual     epoch=030 train=0.04817 val=0.13334
+      dual     epoch=031 train=0.04736 val=0.13279
+      dual     epoch=032 train=0.04716 val=0.13242
+      dual     epoch=033 train=0.04669 val=0.13290
+      dual     epoch=034 train=0.04639 val=0.13360
+      dual     epoch=035 train=0.04605 val=0.13205
+      dual     epoch=036 train=0.04575 val=0.13224
+      dual     epoch=037 train=0.04572 val=0.13233
+      dual     epoch=038 train=0.04516 val=0.13157
+      dual     epoch=039 train=0.04520 val=0.13249
+      dual     epoch=040 train=0.04489 val=0.13150
+      dual     epoch=041 train=0.04459 val=0.13166
+      dual     epoch=042 train=0.04425 val=0.13132
+      dual     epoch=043 train=0.04432 val=0.13127
+      dual     epoch=044 train=0.04403 val=0.13199
+      dual     epoch=045 train=0.04366 val=0.13083
+      dual     epoch=046 train=0.04347 val=0.13160
+      dual     epoch=047 train=0.04311 val=0.13139
+      dual     epoch=048 train=0.04266 val=0.13107
+      dual     epoch=049 train=0.04222 val=0.13217
+      dual     epoch=050 train=0.04212 val=0.13111
+      dual     epoch=051 train=0.04144 val=0.13227
+      dual     epoch=052 train=0.04116 val=0.13126
+      dual     epoch=053 train=0.04103 val=0.13028
+      dual     epoch=054 train=0.04022 val=0.13137
+      dual     epoch=055 train=0.03960 val=0.13027
+      dual     epoch=056 train=0.03921 val=0.13113
+      dual     epoch=057 train=0.03881 val=0.13041
+      dual     epoch=058 train=0.03785 val=0.13066
+      dual     epoch=059 train=0.03738 val=0.13087
+      dual     epoch=060 train=0.03713 val=0.13085
+RESULT street02 seed#1: ATE=0.463 m | RPE5=0.102 m | RPE10=0.178 m | heading=0.49°
+
+============================================================================================================
+RUN 11/30 | replicate=2/3 | test=building00 | base_seed=1042 | method_seed=1045
+VAL  : building01, building02
+TRAIN: parking00, parking01, parking02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.33871 val=0.21068
+      dual     epoch=002 train=0.21744 val=0.16563
+      dual     epoch=003 train=0.20074 val=0.15700
+      dual     epoch=004 train=0.19555 val=0.15152
+      dual     epoch=005 train=0.19321 val=0.14765
+      dual     epoch=006 train=0.06928 val=0.11115
+      dual     epoch=007 train=0.05335 val=0.11100
+      dual     epoch=008 train=0.05190 val=0.10986
+      dual     epoch=009 train=0.05087 val=0.10932
+      dual     epoch=010 train=0.04969 val=0.10880
+      dual     epoch=011 train=0.04878 val=0.10922
+      dual     epoch=012 train=0.04848 val=0.10930
+      dual     epoch=013 train=0.04813 val=0.10910
+      dual     epoch=014 train=0.04772 val=0.10819
+      dual     epoch=015 train=0.04749 val=0.10913
+      dual     epoch=016 train=0.04743 val=0.10886
+      dual     epoch=017 train=0.04701 val=0.10747
+      dual     epoch=018 train=0.04615 val=0.10801
+      dual     epoch=019 train=0.04626 val=0.10810
+      dual     epoch=020 train=0.04548 val=0.10752
+      dual     epoch=021 train=0.04524 val=0.10722
+      dual     epoch=022 train=0.04481 val=0.10674
+      dual     epoch=023 train=0.04426 val=0.10708
+      dual     epoch=024 train=0.04375 val=0.10582
+      dual     epoch=025 train=0.04291 val=0.10465
+      dual     epoch=026 train=0.04238 val=0.10514
+      dual     epoch=027 train=0.04232 val=0.10412
+      dual     epoch=028 train=0.04152 val=0.10460
+      dual     epoch=029 train=0.04124 val=0.10324
+      dual     epoch=030 train=0.04058 val=0.10329
+      dual     epoch=031 train=0.04038 val=0.10243
+      dual     epoch=032 train=0.04008 val=0.10193
+      dual     epoch=033 train=0.04020 val=0.10219
+      dual     epoch=034 train=0.03936 val=0.10217
+      dual     epoch=035 train=0.03900 val=0.10214
+      dual     epoch=036 train=0.03863 val=0.10126
+      dual     epoch=037 train=0.03868 val=0.10143
+      dual     epoch=038 train=0.03855 val=0.10165
+      dual     epoch=039 train=0.03792 val=0.10124
+      dual     epoch=040 train=0.03773 val=0.10224
+      dual     epoch=041 train=0.03704 val=0.10083
+      dual     epoch=042 train=0.03675 val=0.10131
+      dual     epoch=043 train=0.03595 val=0.10036
+      dual     epoch=044 train=0.03556 val=0.10116
+      dual     epoch=045 train=0.03499 val=0.10136
+      dual     epoch=046 train=0.03469 val=0.10077
+      dual     epoch=047 train=0.03396 val=0.10095
+      dual     epoch=048 train=0.03408 val=0.09992
+      dual     epoch=049 train=0.03313 val=0.10076
+      dual     epoch=050 train=0.03237 val=0.10131
+      dual     epoch=051 train=0.03218 val=0.10031
+      dual     epoch=052 train=0.03187 val=0.10116
+      dual     epoch=053 train=0.03144 val=0.10140
+      dual     epoch=054 train=0.03069 val=0.10064
+      dual     epoch=055 train=0.03062 val=0.10137
+      dual     epoch=056 train=0.03034 val=0.10078
+      dual     epoch=057 train=0.03009 val=0.10121
+      dual     epoch=058 train=0.02911 val=0.10128
+      dual: early stop at epoch 58; best=0.099917
+RESULT building00 seed#2: ATE=1.790 m | RPE5=0.354 m | RPE10=0.537 m | heading=0.84°
+
+============================================================================================================
+RUN 12/30 | replicate=2/3 | test=building01 | base_seed=1042 | method_seed=1145
+VAL  : building02, parking00
+TRAIN: building00, parking01, parking02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.35964 val=0.23641
+      dual     epoch=002 train=0.23043 val=0.16375
+      dual     epoch=003 train=0.21139 val=0.15168
+      dual     epoch=004 train=0.20589 val=0.14649
+      dual     epoch=005 train=0.20363 val=0.14167
+      dual     epoch=006 train=0.07520 val=0.10908
+      dual     epoch=007 train=0.06401 val=0.11227
+      dual     epoch=008 train=0.06180 val=0.10841
+      dual     epoch=009 train=0.06110 val=0.10720
+      dual     epoch=010 train=0.06064 val=0.10599
+      dual     epoch=011 train=0.05991 val=0.10667
+      dual     epoch=012 train=0.05939 val=0.10711
+      dual     epoch=013 train=0.05908 val=0.10723
+      dual     epoch=014 train=0.05908 val=0.10632
+      dual     epoch=015 train=0.05838 val=0.10583
+      dual     epoch=016 train=0.05859 val=0.10716
+      dual     epoch=017 train=0.05808 val=0.10544
+      dual     epoch=018 train=0.05767 val=0.10560
+      dual     epoch=019 train=0.05711 val=0.10643
+      dual     epoch=020 train=0.05747 val=0.10555
+      dual     epoch=021 train=0.05662 val=0.10566
+      dual     epoch=022 train=0.05667 val=0.10633
+      dual     epoch=023 train=0.05582 val=0.10489
+      dual     epoch=024 train=0.05586 val=0.10554
+      dual     epoch=025 train=0.05576 val=0.10474
+      dual     epoch=026 train=0.05507 val=0.10469
+      dual     epoch=027 train=0.05490 val=0.10342
+      dual     epoch=028 train=0.05445 val=0.10337
+      dual     epoch=029 train=0.05404 val=0.10311
+      dual     epoch=030 train=0.05399 val=0.10428
+      dual     epoch=031 train=0.05362 val=0.10260
+      dual     epoch=032 train=0.05367 val=0.10253
+      dual     epoch=033 train=0.05313 val=0.10296
+      dual     epoch=034 train=0.05288 val=0.10280
+      dual     epoch=035 train=0.05222 val=0.10373
+      dual     epoch=036 train=0.05221 val=0.10279
+      dual     epoch=037 train=0.05171 val=0.10061
+      dual     epoch=038 train=0.05120 val=0.10133
+      dual     epoch=039 train=0.05100 val=0.10012
+      dual     epoch=040 train=0.05108 val=0.09949
+      dual     epoch=041 train=0.05082 val=0.09993
+      dual     epoch=042 train=0.05034 val=0.10067
+      dual     epoch=043 train=0.04954 val=0.09824
+      dual     epoch=044 train=0.04960 val=0.09938
+      dual     epoch=045 train=0.04909 val=0.09806
+      dual     epoch=046 train=0.04913 val=0.09729
+      dual     epoch=047 train=0.04875 val=0.09836
+      dual     epoch=048 train=0.04822 val=0.09843
+      dual     epoch=049 train=0.04782 val=0.09942
+      dual     epoch=050 train=0.04759 val=0.09842
+      dual     epoch=051 train=0.04754 val=0.09885
+      dual     epoch=052 train=0.04717 val=0.09776
+      dual     epoch=053 train=0.04674 val=0.09907
+      dual     epoch=054 train=0.04620 val=0.09740
+      dual     epoch=055 train=0.04620 val=0.09792
+      dual     epoch=056 train=0.04534 val=0.09827
+      dual: early stop at epoch 56; best=0.097294
+RESULT building01 seed#2: ATE=1.563 m | RPE5=0.256 m | RPE10=0.414 m | heading=1.01°
+
+============================================================================================================
+RUN 13/30 | replicate=2/3 | test=building02 | base_seed=1042 | method_seed=1245
+VAL  : parking00, parking01
+TRAIN: building00, building01, parking02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.35754 val=0.17801
+      dual     epoch=002 train=0.22952 val=0.15079
+      dual     epoch=003 train=0.21633 val=0.14009
+      dual     epoch=004 train=0.21118 val=0.13077
+      dual     epoch=005 train=0.20845 val=0.12493
+      dual     epoch=006 train=0.07745 val=0.09590
+      dual     epoch=007 train=0.06887 val=0.09292
+      dual     epoch=008 train=0.06698 val=0.09281
+      dual     epoch=009 train=0.06670 val=0.09332
+      dual     epoch=010 train=0.06612 val=0.09439
+      dual     epoch=011 train=0.06556 val=0.09586
+      dual     epoch=012 train=0.06488 val=0.09321
+      dual     epoch=013 train=0.06484 val=0.09270
+      dual     epoch=014 train=0.06397 val=0.09128
+      dual     epoch=015 train=0.06399 val=0.09069
+      dual     epoch=016 train=0.06381 val=0.09177
+      dual     epoch=017 train=0.06341 val=0.09125
+      dual     epoch=018 train=0.06288 val=0.09123
+      dual     epoch=019 train=0.06322 val=0.09151
+      dual     epoch=020 train=0.06297 val=0.08928
+      dual     epoch=021 train=0.06271 val=0.08950
+      dual     epoch=022 train=0.06230 val=0.08973
+      dual     epoch=023 train=0.06195 val=0.09007
+      dual     epoch=024 train=0.06140 val=0.08704
+      dual     epoch=025 train=0.06095 val=0.08769
+      dual     epoch=026 train=0.06097 val=0.08768
+      dual     epoch=027 train=0.06030 val=0.08484
+      dual     epoch=028 train=0.06001 val=0.08425
+      dual     epoch=029 train=0.05956 val=0.08382
+      dual     epoch=030 train=0.05954 val=0.08563
+      dual     epoch=031 train=0.05903 val=0.08329
+      dual     epoch=032 train=0.05824 val=0.08247
+      dual     epoch=033 train=0.05851 val=0.08282
+      dual     epoch=034 train=0.05803 val=0.08212
+      dual     epoch=035 train=0.05767 val=0.08154
+      dual     epoch=036 train=0.05726 val=0.08214
+      dual     epoch=037 train=0.05705 val=0.08287
+      dual     epoch=038 train=0.05687 val=0.08071
+      dual     epoch=039 train=0.05682 val=0.08058
+      dual     epoch=040 train=0.05628 val=0.08129
+      dual     epoch=041 train=0.05615 val=0.07994
+      dual     epoch=042 train=0.05620 val=0.07934
+      dual     epoch=043 train=0.05584 val=0.07912
+      dual     epoch=044 train=0.05558 val=0.07863
+      dual     epoch=045 train=0.05541 val=0.07977
+      dual     epoch=046 train=0.05550 val=0.07998
+      dual     epoch=047 train=0.05503 val=0.07964
+      dual     epoch=048 train=0.05500 val=0.08030
+      dual     epoch=049 train=0.05488 val=0.07946
+      dual     epoch=050 train=0.05444 val=0.07700
+      dual     epoch=051 train=0.05426 val=0.08036
+      dual     epoch=052 train=0.05428 val=0.07881
+      dual     epoch=053 train=0.05404 val=0.07964
+      dual     epoch=054 train=0.05354 val=0.08085
+      dual     epoch=055 train=0.05364 val=0.08167
+      dual     epoch=056 train=0.05338 val=0.08020
+      dual     epoch=057 train=0.05337 val=0.07872
+      dual     epoch=058 train=0.05310 val=0.07785
+      dual     epoch=059 train=0.05243 val=0.07793
+      dual     epoch=060 train=0.05262 val=0.07826
+      dual: early stop at epoch 60; best=0.077000
+RESULT building02 seed#2: ATE=1.727 m | RPE5=0.311 m | RPE10=0.482 m | heading=0.77°
+
+============================================================================================================
+RUN 14/30 | replicate=2/3 | test=parking00 | base_seed=1042 | method_seed=1345
+VAL  : parking01, parking02
+TRAIN: building00, building01, building02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.39304 val=0.14299
+      dual     epoch=002 train=0.24536 val=0.11091
+      dual     epoch=003 train=0.22964 val=0.09794
+      dual     epoch=004 train=0.22597 val=0.08780
+      dual     epoch=005 train=0.22323 val=0.08314
+      dual     epoch=006 train=0.08991 val=0.05575
+      dual     epoch=007 train=0.08299 val=0.05484
+      dual     epoch=008 train=0.08257 val=0.05467
+      dual     epoch=009 train=0.08138 val=0.05551
+      dual     epoch=010 train=0.08094 val=0.05890
+      dual     epoch=011 train=0.08056 val=0.05403
+      dual     epoch=012 train=0.07964 val=0.05668
+      dual     epoch=013 train=0.07960 val=0.05641
+      dual     epoch=014 train=0.07922 val=0.05554
+      dual     epoch=015 train=0.07875 val=0.05593
+      dual     epoch=016 train=0.07877 val=0.05389
+      dual     epoch=017 train=0.07837 val=0.05523
+      dual     epoch=018 train=0.07813 val=0.05479
+      dual     epoch=019 train=0.07806 val=0.05615
+      dual     epoch=020 train=0.07734 val=0.05513
+      dual     epoch=021 train=0.07733 val=0.05325
+      dual     epoch=022 train=0.07699 val=0.05453
+      dual     epoch=023 train=0.07655 val=0.05318
+      dual     epoch=024 train=0.07614 val=0.05299
+      dual     epoch=025 train=0.07541 val=0.05039
+      dual     epoch=026 train=0.07457 val=0.05038
+      dual     epoch=027 train=0.07470 val=0.05095
+      dual     epoch=028 train=0.07407 val=0.05155
+      dual     epoch=029 train=0.07416 val=0.05047
+      dual     epoch=030 train=0.07350 val=0.04977
+      dual     epoch=031 train=0.07352 val=0.05005
+      dual     epoch=032 train=0.07340 val=0.05071
+      dual     epoch=033 train=0.07277 val=0.04912
+      dual     epoch=034 train=0.07257 val=0.04736
+      dual     epoch=035 train=0.07249 val=0.04719
+      dual     epoch=036 train=0.07253 val=0.04871
+      dual     epoch=037 train=0.07200 val=0.04773
+      dual     epoch=038 train=0.07209 val=0.04848
+      dual     epoch=039 train=0.07150 val=0.04602
+      dual     epoch=040 train=0.07134 val=0.04538
+      dual     epoch=041 train=0.07128 val=0.04403
+      dual     epoch=042 train=0.07127 val=0.04540
+      dual     epoch=043 train=0.07097 val=0.04422
+      dual     epoch=044 train=0.07086 val=0.04297
+      dual     epoch=045 train=0.07045 val=0.04361
+      dual     epoch=046 train=0.07047 val=0.04307
+      dual     epoch=047 train=0.06983 val=0.04158
+      dual     epoch=048 train=0.06996 val=0.04333
+      dual     epoch=049 train=0.06957 val=0.04364
+      dual     epoch=050 train=0.06934 val=0.04107
+      dual     epoch=051 train=0.06928 val=0.04368
+      dual     epoch=052 train=0.06919 val=0.04005
+      dual     epoch=053 train=0.06892 val=0.04247
+      dual     epoch=054 train=0.06873 val=0.04247
+      dual     epoch=055 train=0.06869 val=0.04241
+      dual     epoch=056 train=0.06889 val=0.04275
+      dual     epoch=057 train=0.06817 val=0.04201
+      dual     epoch=058 train=0.06852 val=0.04357
+      dual     epoch=059 train=0.06803 val=0.04082
+      dual     epoch=060 train=0.06772 val=0.04057
+RESULT parking00 seed#2: ATE=2.188 m | RPE5=0.361 m | RPE10=0.517 m | heading=0.68°
+
+============================================================================================================
+RUN 15/30 | replicate=2/3 | test=parking01 | base_seed=1042 | method_seed=1445
+VAL  : parking02, playground00
+TRAIN: building00, building01, building02, parking00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.39567 val=0.17953
+      dual     epoch=002 train=0.23959 val=0.11280
+      dual     epoch=003 train=0.22134 val=0.10147
+      dual     epoch=004 train=0.21690 val=0.09188
+      dual     epoch=005 train=0.21434 val=0.08200
+      dual     epoch=006 train=0.08184 val=0.05433
+      dual     epoch=007 train=0.07469 val=0.05576
+      dual     epoch=008 train=0.07275 val=0.05618
+      dual     epoch=009 train=0.07172 val=0.05373
+      dual     epoch=010 train=0.07080 val=0.05400
+      dual     epoch=011 train=0.07048 val=0.05267
+      dual     epoch=012 train=0.06966 val=0.05534
+      dual     epoch=013 train=0.06928 val=0.05193
+      dual     epoch=014 train=0.06915 val=0.05327
+      dual     epoch=015 train=0.06839 val=0.05258
+      dual     epoch=016 train=0.06809 val=0.05269
+      dual     epoch=017 train=0.06728 val=0.05215
+      dual     epoch=018 train=0.06760 val=0.05434
+      dual     epoch=019 train=0.06689 val=0.05098
+      dual     epoch=020 train=0.06674 val=0.05195
+      dual     epoch=021 train=0.06614 val=0.05073
+      dual     epoch=022 train=0.06632 val=0.05152
+      dual     epoch=023 train=0.06547 val=0.05095
+      dual     epoch=024 train=0.06488 val=0.05151
+      dual     epoch=025 train=0.06435 val=0.04932
+      dual     epoch=026 train=0.06389 val=0.04967
+      dual     epoch=027 train=0.06353 val=0.04945
+      dual     epoch=028 train=0.06329 val=0.04911
+      dual     epoch=029 train=0.06299 val=0.04852
+      dual     epoch=030 train=0.06275 val=0.04791
+      dual     epoch=031 train=0.06234 val=0.04823
+      dual     epoch=032 train=0.06211 val=0.04784
+      dual     epoch=033 train=0.06196 val=0.04729
+      dual     epoch=034 train=0.06174 val=0.04698
+      dual     epoch=035 train=0.06161 val=0.04735
+      dual     epoch=036 train=0.06119 val=0.04495
+      dual     epoch=037 train=0.06089 val=0.04681
+      dual     epoch=038 train=0.06032 val=0.04608
+      dual     epoch=039 train=0.06023 val=0.04545
+      dual     epoch=040 train=0.05992 val=0.04620
+      dual     epoch=041 train=0.05974 val=0.04424
+      dual     epoch=042 train=0.05939 val=0.04542
+      dual     epoch=043 train=0.05896 val=0.04515
+      dual     epoch=044 train=0.05913 val=0.04527
+      dual     epoch=045 train=0.05916 val=0.04476
+      dual     epoch=046 train=0.05866 val=0.04451
+      dual     epoch=047 train=0.05852 val=0.04554
+      dual     epoch=048 train=0.05820 val=0.04435
+      dual     epoch=049 train=0.05778 val=0.04651
+      dual     epoch=050 train=0.05774 val=0.04459
+      dual     epoch=051 train=0.05763 val=0.04468
+      dual: early stop at epoch 51; best=0.044245
+RESULT parking01 seed#2: ATE=5.953 m | RPE5=0.083 m | RPE10=0.154 m | heading=8.22°
+
+============================================================================================================
+RUN 16/30 | replicate=2/3 | test=parking02 | base_seed=1042 | method_seed=1545
+VAL  : playground00, street00
+TRAIN: building00, building01, building02, parking00, parking01, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.38453 val=0.11325
+      dual     epoch=002 train=0.23317 val=0.06328
+      dual     epoch=003 train=0.21341 val=0.05718
+      dual     epoch=004 train=0.20824 val=0.05297
+      dual     epoch=005 train=0.20519 val=0.05049
+      dual     epoch=006 train=0.08086 val=0.01149
+      dual     epoch=007 train=0.06735 val=0.00702
+      dual     epoch=008 train=0.06569 val=0.00817
+      dual     epoch=009 train=0.06458 val=0.00723
+      dual     epoch=010 train=0.06314 val=0.00686
+      dual     epoch=011 train=0.06286 val=0.00793
+      dual     epoch=012 train=0.06224 val=0.00740
+      dual     epoch=013 train=0.06181 val=0.00837
+      dual     epoch=014 train=0.06109 val=0.00659
+      dual     epoch=015 train=0.06118 val=0.00688
+      dual     epoch=016 train=0.06078 val=0.00587
+      dual     epoch=017 train=0.06026 val=0.00716
+      dual     epoch=018 train=0.05972 val=0.00616
+      dual     epoch=019 train=0.05959 val=0.00848
+      dual     epoch=020 train=0.05945 val=0.00671
+      dual     epoch=021 train=0.05926 val=0.00604
+      dual     epoch=022 train=0.05881 val=0.00558
+      dual     epoch=023 train=0.05862 val=0.00759
+      dual     epoch=024 train=0.05811 val=0.00756
+      dual     epoch=025 train=0.05782 val=0.00579
+      dual     epoch=026 train=0.05711 val=0.00588
+      dual     epoch=027 train=0.05698 val=0.00751
+      dual     epoch=028 train=0.05651 val=0.00574
+      dual     epoch=029 train=0.05567 val=0.00443
+      dual     epoch=030 train=0.05522 val=0.00596
+      dual     epoch=031 train=0.05467 val=0.00428
+      dual     epoch=032 train=0.05433 val=0.00403
+      dual     epoch=033 train=0.05351 val=0.00454
+      dual     epoch=034 train=0.05307 val=0.00443
+      dual     epoch=035 train=0.05317 val=0.00413
+      dual     epoch=036 train=0.05237 val=0.00404
+      dual     epoch=037 train=0.05215 val=0.00484
+      dual     epoch=038 train=0.05191 val=0.00433
+      dual     epoch=039 train=0.05147 val=0.00477
+      dual     epoch=040 train=0.05131 val=0.00515
+      dual     epoch=041 train=0.05113 val=0.00576
+      dual     epoch=042 train=0.05097 val=0.00416
+      dual: early stop at epoch 42; best=0.004027
+RESULT parking02 seed#2: ATE=15.383 m | RPE5=0.059 m | RPE10=0.110 m | heading=22.37°
+
+============================================================================================================
+RUN 17/30 | replicate=2/3 | test=playground00 | base_seed=1042 | method_seed=1645
+VAL  : street00, street01
+TRAIN: building00, building01, building02, parking00, parking01, parking02, street02
+============================================================================================================
+      dual     epoch=001 train=0.35276 val=0.06343
+      dual     epoch=002 train=0.21378 val=0.03688
+      dual     epoch=003 train=0.20114 val=0.02878
+      dual     epoch=004 train=0.19663 val=0.02420
+      dual     epoch=005 train=0.19473 val=0.01898
+      dual     epoch=006 train=0.06615 val=-0.02101
+      dual     epoch=007 train=0.05860 val=-0.02440
+      dual     epoch=008 train=0.05704 val=-0.02541
+      dual     epoch=009 train=0.05709 val=-0.02442
+      dual     epoch=010 train=0.05588 val=-0.02594
+      dual     epoch=011 train=0.05538 val=-0.02570
+      dual     epoch=012 train=0.05478 val=-0.02541
+      dual     epoch=013 train=0.05469 val=-0.02494
+      dual     epoch=014 train=0.05356 val=-0.02582
+      dual     epoch=015 train=0.05328 val=-0.02637
+      dual     epoch=016 train=0.05257 val=-0.02681
+      dual     epoch=017 train=0.05176 val=-0.02703
+      dual     epoch=018 train=0.05154 val=-0.02690
+      dual     epoch=019 train=0.05085 val=-0.02714
+      dual     epoch=020 train=0.05056 val=-0.02867
+      dual     epoch=021 train=0.05010 val=-0.02880
+      dual     epoch=022 train=0.04918 val=-0.02921
+      dual     epoch=023 train=0.04855 val=-0.03055
+      dual     epoch=024 train=0.04773 val=-0.03053
+      dual     epoch=025 train=0.04709 val=-0.03017
+      dual     epoch=026 train=0.04709 val=-0.03013
+      dual     epoch=027 train=0.04628 val=-0.03048
+      dual     epoch=028 train=0.04585 val=-0.03045
+      dual     epoch=029 train=0.04518 val=-0.03112
+      dual     epoch=030 train=0.04501 val=-0.03074
+      dual     epoch=031 train=0.04480 val=-0.03029
+      dual     epoch=032 train=0.04470 val=-0.03075
+      dual     epoch=033 train=0.04394 val=-0.03112
+      dual     epoch=034 train=0.04336 val=-0.03134
+      dual     epoch=035 train=0.04286 val=-0.03087
+      dual     epoch=036 train=0.04242 val=-0.03113
+      dual     epoch=037 train=0.04154 val=-0.03092
+      dual     epoch=038 train=0.04100 val=-0.03141
+      dual     epoch=039 train=0.04075 val=-0.03194
+      dual     epoch=040 train=0.03977 val=-0.03185
+      dual     epoch=041 train=0.03916 val=-0.03204
+      dual     epoch=042 train=0.03885 val=-0.03103
+      dual     epoch=043 train=0.03859 val=-0.03159
+      dual     epoch=044 train=0.03782 val=-0.03174
+      dual     epoch=045 train=0.03741 val=-0.03161
+      dual     epoch=046 train=0.03714 val=-0.03169
+      dual     epoch=047 train=0.03624 val=-0.03176
+      dual     epoch=048 train=0.03671 val=-0.03242
+      dual     epoch=049 train=0.03584 val=-0.03160
+      dual     epoch=050 train=0.03546 val=-0.03173
+      dual     epoch=051 train=0.03466 val=-0.03146
+      dual     epoch=052 train=0.03500 val=-0.03232
+      dual     epoch=053 train=0.03420 val=-0.03223
+      dual     epoch=054 train=0.03414 val=-0.03163
+      dual     epoch=055 train=0.03364 val=-0.03204
+      dual     epoch=056 train=0.03340 val=-0.03167
+      dual     epoch=057 train=0.03355 val=-0.03183
+      dual     epoch=058 train=0.03277 val=-0.03163
+      dual: early stop at epoch 58; best=-0.032416
+RESULT playground00 seed#2: ATE=0.241 m | RPE5=0.049 m | RPE10=0.091 m | heading=0.24°
+
+============================================================================================================
+RUN 18/30 | replicate=2/3 | test=street00 | base_seed=1042 | method_seed=1745
+VAL  : street01, street02
+TRAIN: building00, building01, building02, parking00, parking01, parking02, playground00
+============================================================================================================
+      dual     epoch=001 train=0.36270 val=0.12312
+      dual     epoch=002 train=0.22441 val=0.07765
+      dual     epoch=003 train=0.21164 val=0.06793
+      dual     epoch=004 train=0.20667 val=0.06250
+      dual     epoch=005 train=0.20436 val=0.05538
+      dual     epoch=006 train=0.07535 val=0.02219
+      dual     epoch=007 train=0.06735 val=0.01833
+      dual     epoch=008 train=0.06629 val=0.01839
+      dual     epoch=009 train=0.06551 val=0.01552
+      dual     epoch=010 train=0.06476 val=0.01885
+      dual     epoch=011 train=0.06419 val=0.01579
+      dual     epoch=012 train=0.06310 val=0.01488
+      dual     epoch=013 train=0.06246 val=0.01556
+      dual     epoch=014 train=0.06203 val=0.01517
+      dual     epoch=015 train=0.06155 val=0.01369
+      dual     epoch=016 train=0.06081 val=0.01358
+      dual     epoch=017 train=0.05987 val=0.01016
+      dual     epoch=018 train=0.05910 val=0.00875
+      dual     epoch=019 train=0.05870 val=0.00925
+      dual     epoch=020 train=0.05790 val=0.00727
+      dual     epoch=021 train=0.05745 val=0.00770
+      dual     epoch=022 train=0.05643 val=0.00661
+      dual     epoch=023 train=0.05606 val=0.00727
+      dual     epoch=024 train=0.05552 val=0.00764
+      dual     epoch=025 train=0.05515 val=0.00695
+      dual     epoch=026 train=0.05470 val=0.00563
+      dual     epoch=027 train=0.05411 val=0.00667
+      dual     epoch=028 train=0.05373 val=0.00535
+      dual     epoch=029 train=0.05328 val=0.00709
+      dual     epoch=030 train=0.05288 val=0.00675
+      dual     epoch=031 train=0.05252 val=0.00521
+      dual     epoch=032 train=0.05223 val=0.00474
+      dual     epoch=033 train=0.05164 val=0.00488
+      dual     epoch=034 train=0.05143 val=0.00563
+      dual     epoch=035 train=0.05064 val=0.00579
+      dual     epoch=036 train=0.04940 val=0.00479
+      dual     epoch=037 train=0.04886 val=0.00533
+      dual     epoch=038 train=0.04845 val=0.00545
+      dual     epoch=039 train=0.04774 val=0.00653
+      dual     epoch=040 train=0.04702 val=0.00511
+      dual     epoch=041 train=0.04626 val=0.00649
+      dual     epoch=042 train=0.04612 val=0.00500
+      dual: early stop at epoch 42; best=0.004743
+RESULT street00 seed#2: ATE=0.298 m | RPE5=0.063 m | RPE10=0.111 m | heading=0.25°
+
+============================================================================================================
+RUN 19/30 | replicate=2/3 | test=street01 | base_seed=1042 | method_seed=1845
+VAL  : street02, building00
+TRAIN: building01, building02, parking00, parking01, parking02, playground00, street00
+============================================================================================================
+      dual     epoch=001 train=0.39270 val=0.23710
+      dual     epoch=002 train=0.22699 val=0.13283
+      dual     epoch=003 train=0.20693 val=0.12556
+      dual     epoch=004 train=0.20213 val=0.11809
+      dual     epoch=005 train=0.19963 val=0.11449
+      dual     epoch=006 train=0.07158 val=0.08543
+      dual     epoch=007 train=0.06085 val=0.08247
+      dual     epoch=008 train=0.05960 val=0.08365
+      dual     epoch=009 train=0.05829 val=0.08010
+      dual     epoch=010 train=0.05790 val=0.07877
+      dual     epoch=011 train=0.05690 val=0.08080
+      dual     epoch=012 train=0.05644 val=0.07975
+      dual     epoch=013 train=0.05573 val=0.07849
+      dual     epoch=014 train=0.05471 val=0.07764
+      dual     epoch=015 train=0.05417 val=0.07760
+      dual     epoch=016 train=0.05369 val=0.07732
+      dual     epoch=017 train=0.05335 val=0.07767
+      dual     epoch=018 train=0.05284 val=0.07781
+      dual     epoch=019 train=0.05278 val=0.07825
+      dual     epoch=020 train=0.05212 val=0.07699
+      dual     epoch=021 train=0.05175 val=0.07656
+      dual     epoch=022 train=0.05141 val=0.07623
+      dual     epoch=023 train=0.05082 val=0.07564
+      dual     epoch=024 train=0.05046 val=0.07403
+      dual     epoch=025 train=0.04977 val=0.07479
+      dual     epoch=026 train=0.04924 val=0.07265
+      dual     epoch=027 train=0.04869 val=0.07314
+      dual     epoch=028 train=0.04771 val=0.07253
+      dual     epoch=029 train=0.04723 val=0.07003
+      dual     epoch=030 train=0.04689 val=0.07223
+      dual     epoch=031 train=0.04601 val=0.06775
+      dual     epoch=032 train=0.04547 val=0.07005
+      dual     epoch=033 train=0.04430 val=0.06984
+      dual     epoch=034 train=0.04381 val=0.06814
+      dual     epoch=035 train=0.04275 val=0.06819
+      dual     epoch=036 train=0.04191 val=0.06893
+      dual     epoch=037 train=0.04199 val=0.06821
+      dual     epoch=038 train=0.04107 val=0.06911
+      dual     epoch=039 train=0.04072 val=0.06892
+      dual     epoch=040 train=0.04034 val=0.06865
+      dual     epoch=041 train=0.03950 val=0.06856
+      dual: early stop at epoch 41; best=0.067752
+RESULT street01 seed#2: ATE=0.401 m | RPE5=0.120 m | RPE10=0.205 m | heading=0.39°
+
+============================================================================================================
+RUN 20/30 | replicate=2/3 | test=street02 | base_seed=1042 | method_seed=1945
+VAL  : building00, building01
+TRAIN: building02, parking00, parking01, parking02, playground00, street00, street01
+============================================================================================================
+      dual     epoch=001 train=0.33848 val=0.20985
+      dual     epoch=002 train=0.21747 val=0.18781
+      dual     epoch=003 train=0.20500 val=0.17943
+      dual     epoch=004 train=0.20038 val=0.17444
+      dual     epoch=005 train=0.19905 val=0.16852
+      dual     epoch=006 train=0.06818 val=0.14028
+      dual     epoch=007 train=0.06020 val=0.14002
+      dual     epoch=008 train=0.05881 val=0.14019
+      dual     epoch=009 train=0.05818 val=0.14002
+      dual     epoch=010 train=0.05766 val=0.13901
+      dual     epoch=011 train=0.05718 val=0.13904
+      dual     epoch=012 train=0.05684 val=0.13944
+      dual     epoch=013 train=0.05627 val=0.13986
+      dual     epoch=014 train=0.05566 val=0.13898
+      dual     epoch=015 train=0.05526 val=0.13840
+      dual     epoch=016 train=0.05513 val=0.13861
+      dual     epoch=017 train=0.05481 val=0.13873
+      dual     epoch=018 train=0.05383 val=0.13794
+      dual     epoch=019 train=0.05331 val=0.13785
+      dual     epoch=020 train=0.05310 val=0.13637
+      dual     epoch=021 train=0.05222 val=0.13668
+      dual     epoch=022 train=0.05139 val=0.13455
+      dual     epoch=023 train=0.05084 val=0.13462
+      dual     epoch=024 train=0.04978 val=0.13437
+      dual     epoch=025 train=0.04951 val=0.13484
+      dual     epoch=026 train=0.04919 val=0.13369
+      dual     epoch=027 train=0.04854 val=0.13374
+      dual     epoch=028 train=0.04813 val=0.13315
+      dual     epoch=029 train=0.04743 val=0.13257
+      dual     epoch=030 train=0.04744 val=0.13241
+      dual     epoch=031 train=0.04690 val=0.13277
+      dual     epoch=032 train=0.04651 val=0.13134
+      dual     epoch=033 train=0.04643 val=0.13197
+      dual     epoch=034 train=0.04587 val=0.13231
+      dual     epoch=035 train=0.04579 val=0.13321
+      dual     epoch=036 train=0.04566 val=0.13185
+      dual     epoch=037 train=0.04518 val=0.13123
+      dual     epoch=038 train=0.04491 val=0.13119
+      dual     epoch=039 train=0.04449 val=0.13226
+      dual     epoch=040 train=0.04457 val=0.13197
+      dual     epoch=041 train=0.04408 val=0.13131
+      dual     epoch=042 train=0.04389 val=0.13204
+      dual     epoch=043 train=0.04330 val=0.13039
+      dual     epoch=044 train=0.04275 val=0.13086
+      dual     epoch=045 train=0.04217 val=0.13070
+      dual     epoch=046 train=0.04189 val=0.13052
+      dual     epoch=047 train=0.04191 val=0.13005
+      dual     epoch=048 train=0.04145 val=0.12979
+      dual     epoch=049 train=0.04088 val=0.13071
+      dual     epoch=050 train=0.04037 val=0.12946
+      dual     epoch=051 train=0.03966 val=0.13033
+      dual     epoch=052 train=0.03974 val=0.13039
+      dual     epoch=053 train=0.03909 val=0.12998
+      dual     epoch=054 train=0.03842 val=0.12920
+      dual     epoch=055 train=0.03829 val=0.12999
+      dual     epoch=056 train=0.03759 val=0.12934
+      dual     epoch=057 train=0.03772 val=0.12962
+      dual     epoch=058 train=0.03709 val=0.12958
+      dual     epoch=059 train=0.03629 val=0.12979
+      dual     epoch=060 train=0.03628 val=0.12898
+RESULT street02 seed#2: ATE=0.459 m | RPE5=0.108 m | RPE10=0.184 m | heading=0.48°
+
+============================================================================================================
+RUN 21/30 | replicate=3/3 | test=building00 | base_seed=2042 | method_seed=2045
+VAL  : building01, building02
+TRAIN: parking00, parking01, parking02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.36194 val=0.27958
+      dual     epoch=002 train=0.22834 val=0.16712
+      dual     epoch=003 train=0.20404 val=0.15847
+      dual     epoch=004 train=0.19860 val=0.14988
+      dual     epoch=005 train=0.19466 val=0.14368
+      dual     epoch=006 train=0.06435 val=0.11222
+      dual     epoch=007 train=0.05355 val=0.11030
+      dual     epoch=008 train=0.05171 val=0.11094
+      dual     epoch=009 train=0.05087 val=0.10964
+      dual     epoch=010 train=0.04987 val=0.10946
+      dual     epoch=011 train=0.04911 val=0.10963
+      dual     epoch=012 train=0.04882 val=0.11048
+      dual     epoch=013 train=0.04838 val=0.10946
+      dual     epoch=014 train=0.04805 val=0.10933
+      dual     epoch=015 train=0.04832 val=0.10850
+      dual     epoch=016 train=0.04715 val=0.10846
+      dual     epoch=017 train=0.04694 val=0.10886
+      dual     epoch=018 train=0.04712 val=0.10941
+      dual     epoch=019 train=0.04646 val=0.10808
+      dual     epoch=020 train=0.04583 val=0.10780
+      dual     epoch=021 train=0.04549 val=0.10721
+      dual     epoch=022 train=0.04529 val=0.10751
+      dual     epoch=023 train=0.04462 val=0.10672
+      dual     epoch=024 train=0.04459 val=0.10626
+      dual     epoch=025 train=0.04360 val=0.10656
+      dual     epoch=026 train=0.04332 val=0.10458
+      dual     epoch=027 train=0.04226 val=0.10486
+      dual     epoch=028 train=0.04231 val=0.10384
+      dual     epoch=029 train=0.04142 val=0.10371
+      dual     epoch=030 train=0.04105 val=0.10265
+      dual     epoch=031 train=0.04075 val=0.10262
+      dual     epoch=032 train=0.04089 val=0.10318
+      dual     epoch=033 train=0.04008 val=0.10147
+      dual     epoch=034 train=0.04008 val=0.10221
+      dual     epoch=035 train=0.03991 val=0.10220
+      dual     epoch=036 train=0.03918 val=0.10218
+      dual     epoch=037 train=0.03943 val=0.10166
+      dual     epoch=038 train=0.03913 val=0.10170
+      dual     epoch=039 train=0.03888 val=0.10335
+      dual     epoch=040 train=0.03897 val=0.10226
+      dual     epoch=041 train=0.03833 val=0.10131
+      dual     epoch=042 train=0.03810 val=0.10190
+      dual     epoch=043 train=0.03757 val=0.10129
+      dual     epoch=044 train=0.03747 val=0.10083
+      dual     epoch=045 train=0.03708 val=0.10203
+      dual     epoch=046 train=0.03697 val=0.10167
+      dual     epoch=047 train=0.03670 val=0.10077
+      dual     epoch=048 train=0.03615 val=0.10109
+      dual     epoch=049 train=0.03574 val=0.10047
+      dual     epoch=050 train=0.03504 val=0.10043
+      dual     epoch=051 train=0.03472 val=0.10097
+      dual     epoch=052 train=0.03424 val=0.10092
+      dual     epoch=053 train=0.03335 val=0.10053
+      dual     epoch=054 train=0.03347 val=0.10101
+      dual     epoch=055 train=0.03270 val=0.10093
+      dual     epoch=056 train=0.03229 val=0.10056
+      dual     epoch=057 train=0.03194 val=0.10012
+      dual     epoch=058 train=0.03130 val=0.10181
+      dual     epoch=059 train=0.03125 val=0.10158
+      dual     epoch=060 train=0.03044 val=0.10009
+RESULT building00 seed#3: ATE=1.933 m | RPE5=0.287 m | RPE10=0.459 m | heading=0.73°
+
+============================================================================================================
+RUN 22/30 | replicate=3/3 | test=building01 | base_seed=2042 | method_seed=2145
+VAL  : building02, parking00
+TRAIN: building00, parking01, parking02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.36732 val=0.26096
+      dual     epoch=002 train=0.23275 val=0.16319
+      dual     epoch=003 train=0.21014 val=0.15212
+      dual     epoch=004 train=0.20560 val=0.14397
+      dual     epoch=005 train=0.20337 val=0.13844
+      dual     epoch=006 train=0.07258 val=0.11051
+      dual     epoch=007 train=0.06315 val=0.10891
+      dual     epoch=008 train=0.06192 val=0.10734
+      dual     epoch=009 train=0.06112 val=0.10675
+      dual     epoch=010 train=0.05997 val=0.10670
+      dual     epoch=011 train=0.05989 val=0.10618
+      dual     epoch=012 train=0.05933 val=0.10636
+      dual     epoch=013 train=0.05880 val=0.10570
+      dual     epoch=014 train=0.05829 val=0.10675
+      dual     epoch=015 train=0.05815 val=0.10520
+      dual     epoch=016 train=0.05804 val=0.10641
+      dual     epoch=017 train=0.05776 val=0.10635
+      dual     epoch=018 train=0.05746 val=0.10657
+      dual     epoch=019 train=0.05694 val=0.10553
+      dual     epoch=020 train=0.05674 val=0.10485
+      dual     epoch=021 train=0.05630 val=0.10439
+      dual     epoch=022 train=0.05590 val=0.10413
+      dual     epoch=023 train=0.05541 val=0.10423
+      dual     epoch=024 train=0.05535 val=0.10262
+      dual     epoch=025 train=0.05457 val=0.10228
+      dual     epoch=026 train=0.05409 val=0.10208
+      dual     epoch=027 train=0.05366 val=0.10087
+      dual     epoch=028 train=0.05295 val=0.10135
+      dual     epoch=029 train=0.05279 val=0.10149
+      dual     epoch=030 train=0.05269 val=0.09944
+      dual     epoch=031 train=0.05162 val=0.09843
+      dual     epoch=032 train=0.05162 val=0.10093
+      dual     epoch=033 train=0.05134 val=0.10025
+      dual     epoch=034 train=0.05080 val=0.09846
+      dual     epoch=035 train=0.05099 val=0.09993
+      dual     epoch=036 train=0.05047 val=0.09883
+      dual     epoch=037 train=0.05036 val=0.10038
+      dual     epoch=038 train=0.05050 val=0.09979
+      dual     epoch=039 train=0.04982 val=0.09868
+      dual     epoch=040 train=0.04981 val=0.09700
+      dual     epoch=041 train=0.04975 val=0.09761
+      dual     epoch=042 train=0.04898 val=0.09797
+      dual     epoch=043 train=0.04896 val=0.09728
+      dual     epoch=044 train=0.04859 val=0.09766
+      dual     epoch=045 train=0.04816 val=0.09776
+      dual     epoch=046 train=0.04760 val=0.09783
+      dual     epoch=047 train=0.04765 val=0.09884
+      dual     epoch=048 train=0.04703 val=0.09674
+      dual     epoch=049 train=0.04636 val=0.09774
+      dual     epoch=050 train=0.04590 val=0.09861
+      dual     epoch=051 train=0.04534 val=0.09881
+      dual     epoch=052 train=0.04468 val=0.09802
+      dual     epoch=053 train=0.04468 val=0.09647
+      dual     epoch=054 train=0.04417 val=0.09786
+      dual     epoch=055 train=0.04376 val=0.09734
+      dual     epoch=056 train=0.04318 val=0.09806
+      dual     epoch=057 train=0.04247 val=0.09675
+      dual     epoch=058 train=0.04272 val=0.09699
+      dual     epoch=059 train=0.04253 val=0.09591
+      dual     epoch=060 train=0.04210 val=0.09699
+RESULT building01 seed#3: ATE=1.517 m | RPE5=0.244 m | RPE10=0.388 m | heading=0.83°
+
+============================================================================================================
+RUN 23/30 | replicate=3/3 | test=building02 | base_seed=2042 | method_seed=2245
+VAL  : parking00, parking01
+TRAIN: building00, building01, parking02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.37528 val=0.19806
+      dual     epoch=002 train=0.23481 val=0.14818
+      dual     epoch=003 train=0.21760 val=0.13822
+      dual     epoch=004 train=0.21291 val=0.12901
+      dual     epoch=005 train=0.21032 val=0.12400
+      dual     epoch=006 train=0.08144 val=0.09465
+      dual     epoch=007 train=0.07044 val=0.10404
+      dual     epoch=008 train=0.06922 val=0.09522
+      dual     epoch=009 train=0.06811 val=0.09297
+      dual     epoch=010 train=0.06709 val=0.09339
+      dual     epoch=011 train=0.06645 val=0.09323
+      dual     epoch=012 train=0.06621 val=0.09251
+      dual     epoch=013 train=0.06569 val=0.09185
+      dual     epoch=014 train=0.06551 val=0.09296
+      dual     epoch=015 train=0.06505 val=0.09213
+      dual     epoch=016 train=0.06461 val=0.09320
+      dual     epoch=017 train=0.06445 val=0.09134
+      dual     epoch=018 train=0.06411 val=0.09120
+      dual     epoch=019 train=0.06386 val=0.09040
+      dual     epoch=020 train=0.06381 val=0.09138
+      dual     epoch=021 train=0.06358 val=0.09051
+      dual     epoch=022 train=0.06297 val=0.08956
+      dual     epoch=023 train=0.06317 val=0.08994
+      dual     epoch=024 train=0.06200 val=0.08812
+      dual     epoch=025 train=0.06245 val=0.08880
+      dual     epoch=026 train=0.06171 val=0.08778
+      dual     epoch=027 train=0.06135 val=0.08822
+      dual     epoch=028 train=0.06081 val=0.08744
+      dual     epoch=029 train=0.06087 val=0.08707
+      dual     epoch=030 train=0.06030 val=0.08528
+      dual     epoch=031 train=0.06005 val=0.08602
+      dual     epoch=032 train=0.05987 val=0.08515
+      dual     epoch=033 train=0.05956 val=0.08352
+      dual     epoch=034 train=0.05926 val=0.08355
+      dual     epoch=035 train=0.05878 val=0.08474
+      dual     epoch=036 train=0.05854 val=0.08364
+      dual     epoch=037 train=0.05800 val=0.08237
+      dual     epoch=038 train=0.05783 val=0.08147
+      dual     epoch=039 train=0.05721 val=0.08483
+      dual     epoch=040 train=0.05739 val=0.08258
+      dual     epoch=041 train=0.05713 val=0.08066
+      dual     epoch=042 train=0.05671 val=0.07978
+      dual     epoch=043 train=0.05635 val=0.07987
+      dual     epoch=044 train=0.05673 val=0.08338
+      dual     epoch=045 train=0.05632 val=0.08133
+      dual     epoch=046 train=0.05609 val=0.08120
+      dual     epoch=047 train=0.05580 val=0.08022
+      dual     epoch=048 train=0.05537 val=0.08117
+      dual     epoch=049 train=0.05546 val=0.08112
+      dual     epoch=050 train=0.05538 val=0.08086
+      dual     epoch=051 train=0.05480 val=0.07946
+      dual     epoch=052 train=0.05441 val=0.08083
+      dual     epoch=053 train=0.05418 val=0.07952
+      dual     epoch=054 train=0.05426 val=0.08001
+      dual     epoch=055 train=0.05393 val=0.08043
+      dual     epoch=056 train=0.05401 val=0.08075
+      dual     epoch=057 train=0.05343 val=0.07958
+      dual     epoch=058 train=0.05332 val=0.08109
+      dual     epoch=059 train=0.05293 val=0.07878
+      dual     epoch=060 train=0.05290 val=0.07794
+RESULT building02 seed#3: ATE=1.530 m | RPE5=0.271 m | RPE10=0.419 m | heading=0.54°
+
+============================================================================================================
+RUN 24/30 | replicate=3/3 | test=parking00 | base_seed=2042 | method_seed=2345
+VAL  : parking01, parking02
+TRAIN: building00, building01, building02, playground00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.36842 val=0.13522
+      dual     epoch=002 train=0.23997 val=0.11625
+      dual     epoch=003 train=0.22841 val=0.10322
+      dual     epoch=004 train=0.22381 val=0.09221
+      dual     epoch=005 train=0.22167 val=0.08400
+      dual     epoch=006 train=0.08791 val=0.05444
+      dual     epoch=007 train=0.08186 val=0.05632
+      dual     epoch=008 train=0.08039 val=0.05543
+      dual     epoch=009 train=0.07958 val=0.05330
+      dual     epoch=010 train=0.07915 val=0.05617
+      dual     epoch=011 train=0.07859 val=0.05485
+      dual     epoch=012 train=0.07866 val=0.05530
+      dual     epoch=013 train=0.07843 val=0.05668
+      dual     epoch=014 train=0.07769 val=0.05583
+      dual     epoch=015 train=0.07764 val=0.05506
+      dual     epoch=016 train=0.07774 val=0.05394
+      dual     epoch=017 train=0.07697 val=0.05553
+      dual     epoch=018 train=0.07733 val=0.05409
+      dual     epoch=019 train=0.07673 val=0.05319
+      dual     epoch=020 train=0.07645 val=0.05447
+      dual     epoch=021 train=0.07638 val=0.05301
+      dual     epoch=022 train=0.07636 val=0.05495
+      dual     epoch=023 train=0.07612 val=0.05377
+      dual     epoch=024 train=0.07594 val=0.05182
+      dual     epoch=025 train=0.07569 val=0.05317
+      dual     epoch=026 train=0.07550 val=0.05389
+      dual     epoch=027 train=0.07518 val=0.05317
+      dual     epoch=028 train=0.07458 val=0.05122
+      dual     epoch=029 train=0.07414 val=0.05058
+      dual     epoch=030 train=0.07348 val=0.05065
+      dual     epoch=031 train=0.07321 val=0.04810
+      dual     epoch=032 train=0.07309 val=0.04950
+      dual     epoch=033 train=0.07250 val=0.04887
+      dual     epoch=034 train=0.07206 val=0.04796
+      dual     epoch=035 train=0.07227 val=0.05064
+      dual     epoch=036 train=0.07167 val=0.04861
+      dual     epoch=037 train=0.07179 val=0.04687
+      dual     epoch=038 train=0.07144 val=0.04676
+      dual     epoch=039 train=0.07132 val=0.04621
+      dual     epoch=040 train=0.07108 val=0.04658
+      dual     epoch=041 train=0.07102 val=0.04627
+      dual     epoch=042 train=0.07063 val=0.04465
+      dual     epoch=043 train=0.07056 val=0.04386
+      dual     epoch=044 train=0.07029 val=0.04482
+      dual     epoch=045 train=0.07005 val=0.04534
+      dual     epoch=046 train=0.06983 val=0.04439
+      dual     epoch=047 train=0.06982 val=0.04550
+      dual     epoch=048 train=0.06946 val=0.04504
+      dual     epoch=049 train=0.06918 val=0.04452
+      dual     epoch=050 train=0.06925 val=0.04441
+      dual     epoch=051 train=0.06892 val=0.04558
+      dual     epoch=052 train=0.06887 val=0.04637
+      dual     epoch=053 train=0.06824 val=0.04410
+      dual: early stop at epoch 53; best=0.043858
+RESULT parking00 seed#3: ATE=2.018 m | RPE5=0.255 m | RPE10=0.415 m | heading=0.90°
+
+============================================================================================================
+RUN 25/30 | replicate=3/3 | test=parking01 | base_seed=2042 | method_seed=2445
+VAL  : parking02, playground00
+TRAIN: building00, building01, building02, parking00, street00, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.35108 val=0.13556
+      dual     epoch=002 train=0.22803 val=0.11981
+      dual     epoch=003 train=0.21833 val=0.10851
+      dual     epoch=004 train=0.21422 val=0.09666
+      dual     epoch=005 train=0.21123 val=0.09048
+      dual     epoch=006 train=0.08151 val=0.05448
+      dual     epoch=007 train=0.07210 val=0.05493
+      dual     epoch=008 train=0.07057 val=0.05445
+      dual     epoch=009 train=0.07031 val=0.05263
+      dual     epoch=010 train=0.06945 val=0.05384
+      dual     epoch=011 train=0.06906 val=0.05226
+      dual     epoch=012 train=0.06889 val=0.05257
+      dual     epoch=013 train=0.06873 val=0.05180
+      dual     epoch=014 train=0.06804 val=0.05318
+      dual     epoch=015 train=0.06826 val=0.05503
+      dual     epoch=016 train=0.06786 val=0.05092
+      dual     epoch=017 train=0.06790 val=0.05345
+      dual     epoch=018 train=0.06736 val=0.05186
+      dual     epoch=019 train=0.06716 val=0.05170
+      dual     epoch=020 train=0.06669 val=0.05065
+      dual     epoch=021 train=0.06671 val=0.05098
+      dual     epoch=022 train=0.06642 val=0.05186
+      dual     epoch=023 train=0.06573 val=0.04986
+      dual     epoch=024 train=0.06495 val=0.05242
+      dual     epoch=025 train=0.06459 val=0.05036
+      dual     epoch=026 train=0.06419 val=0.05041
+      dual     epoch=027 train=0.06373 val=0.05129
+      dual     epoch=028 train=0.06375 val=0.04817
+      dual     epoch=029 train=0.06364 val=0.05253
+      dual     epoch=030 train=0.06289 val=0.04916
+      dual     epoch=031 train=0.06288 val=0.04761
+      dual     epoch=032 train=0.06230 val=0.04758
+      dual     epoch=033 train=0.06178 val=0.04794
+      dual     epoch=034 train=0.06163 val=0.04807
+      dual     epoch=035 train=0.06116 val=0.04610
+      dual     epoch=036 train=0.06077 val=0.04750
+      dual     epoch=037 train=0.06063 val=0.04607
+      dual     epoch=038 train=0.05992 val=0.04473
+      dual     epoch=039 train=0.06019 val=0.04568
+      dual     epoch=040 train=0.05979 val=0.04602
+      dual     epoch=041 train=0.05940 val=0.04412
+      dual     epoch=042 train=0.05929 val=0.04473
+      dual     epoch=043 train=0.05874 val=0.04459
+      dual     epoch=044 train=0.05877 val=0.04459
+      dual     epoch=045 train=0.05854 val=0.04446
+      dual     epoch=046 train=0.05848 val=0.04456
+      dual     epoch=047 train=0.05811 val=0.04453
+      dual     epoch=048 train=0.05806 val=0.04407
+      dual     epoch=049 train=0.05783 val=0.04337
+      dual     epoch=050 train=0.05783 val=0.04529
+      dual     epoch=051 train=0.05747 val=0.04617
+      dual     epoch=052 train=0.05725 val=0.04522
+      dual     epoch=053 train=0.05717 val=0.04523
+      dual     epoch=054 train=0.05705 val=0.04417
+      dual     epoch=055 train=0.05687 val=0.04513
+      dual     epoch=056 train=0.05676 val=0.04510
+      dual     epoch=057 train=0.05649 val=0.04449
+      dual     epoch=058 train=0.05599 val=0.04435
+      dual     epoch=059 train=0.05594 val=0.04376
+      dual: early stop at epoch 59; best=0.043370
+RESULT parking01 seed#3: ATE=5.783 m | RPE5=0.083 m | RPE10=0.152 m | heading=7.92°
+
+============================================================================================================
+RUN 26/30 | replicate=3/3 | test=parking02 | base_seed=2042 | method_seed=2545
+VAL  : playground00, street00
+TRAIN: building00, building01, building02, parking00, parking01, street01, street02
+============================================================================================================
+      dual     epoch=001 train=0.35931 val=0.08293
+      dual     epoch=002 train=0.22570 val=0.06293
+      dual     epoch=003 train=0.21215 val=0.05401
+      dual     epoch=004 train=0.20715 val=0.04690
+      dual     epoch=005 train=0.20471 val=0.04329
+      dual     epoch=006 train=0.07388 val=0.00954
+      dual     epoch=007 train=0.06679 val=0.00880
+      dual     epoch=008 train=0.06525 val=0.01232
+      dual     epoch=009 train=0.06432 val=0.00705
+      dual     epoch=010 train=0.06360 val=0.00794
+      dual     epoch=011 train=0.06301 val=0.00611
+      dual     epoch=012 train=0.06312 val=0.00595
+      dual     epoch=013 train=0.06243 val=0.00670
+      dual     epoch=014 train=0.06193 val=0.00602
+      dual     epoch=015 train=0.06152 val=0.00588
+      dual     epoch=016 train=0.06135 val=0.00680
+      dual     epoch=017 train=0.06107 val=0.00589
+      dual     epoch=018 train=0.06095 val=0.00564
+      dual     epoch=019 train=0.06087 val=0.00563
+      dual     epoch=020 train=0.06024 val=0.00548
+      dual     epoch=021 train=0.05971 val=0.00571
+      dual     epoch=022 train=0.05898 val=0.00532
+      dual     epoch=023 train=0.05850 val=0.00720
+      dual     epoch=024 train=0.05757 val=0.00501
+      dual     epoch=025 train=0.05695 val=0.00536
+      dual     epoch=026 train=0.05620 val=0.00470
+      dual     epoch=027 train=0.05575 val=0.00462
+      dual     epoch=028 train=0.05560 val=0.00689
+      dual     epoch=029 train=0.05471 val=0.00501
+      dual     epoch=030 train=0.05381 val=0.00411
+      dual     epoch=031 train=0.05372 val=0.00472
+      dual     epoch=032 train=0.05341 val=0.00496
+      dual     epoch=033 train=0.05303 val=0.00396
+      dual     epoch=034 train=0.05275 val=0.00363
+      dual     epoch=035 train=0.05244 val=0.00463
+      dual     epoch=036 train=0.05158 val=0.00594
+      dual     epoch=037 train=0.05149 val=0.00370
+      dual     epoch=038 train=0.05152 val=0.00400
+      dual     epoch=039 train=0.05131 val=0.00455
+      dual     epoch=040 train=0.05134 val=0.00534
+      dual     epoch=041 train=0.05052 val=0.00312
+      dual     epoch=042 train=0.05044 val=0.00367
+      dual     epoch=043 train=0.05034 val=0.00342
+      dual     epoch=044 train=0.05000 val=0.00642
+      dual     epoch=045 train=0.04959 val=0.00354
+      dual     epoch=046 train=0.04949 val=0.00502
+      dual     epoch=047 train=0.04943 val=0.00454
+      dual     epoch=048 train=0.04940 val=0.00333
+      dual     epoch=049 train=0.04913 val=0.00642
+      dual     epoch=050 train=0.04867 val=0.00345
+      dual     epoch=051 train=0.04821 val=0.00631
+      dual: early stop at epoch 51; best=0.003124
+RESULT parking02 seed#3: ATE=21.172 m | RPE5=0.060 m | RPE10=0.113 m | heading=31.61°
+
+============================================================================================================
+RUN 27/30 | replicate=3/3 | test=playground00 | base_seed=2042 | method_seed=2645
+VAL  : street00, street01
+TRAIN: building00, building01, building02, parking00, parking01, parking02, street02
+============================================================================================================
+      dual     epoch=001 train=0.35119 val=0.06236
+      dual     epoch=002 train=0.21462 val=0.03394
+      dual     epoch=003 train=0.20268 val=0.02728
+      dual     epoch=004 train=0.19783 val=0.02114
+      dual     epoch=005 train=0.19568 val=0.01674
+      dual     epoch=006 train=0.06698 val=-0.02278
+      dual     epoch=007 train=0.05845 val=-0.02392
+      dual     epoch=008 train=0.05733 val=-0.02547
+      dual     epoch=009 train=0.05650 val=-0.02572
+      dual     epoch=010 train=0.05575 val=-0.02702
+      dual     epoch=011 train=0.05527 val=-0.02703
+      dual     epoch=012 train=0.05504 val=-0.02717
+      dual     epoch=013 train=0.05481 val=-0.02741
+      dual     epoch=014 train=0.05411 val=-0.02733
+      dual     epoch=015 train=0.05407 val=-0.02728
+      dual     epoch=016 train=0.05317 val=-0.02769
+      dual     epoch=017 train=0.05258 val=-0.02799
+      dual     epoch=018 train=0.05237 val=-0.02832
+      dual     epoch=019 train=0.05184 val=-0.02865
+      dual     epoch=020 train=0.05153 val=-0.02747
+      dual     epoch=021 train=0.05053 val=-0.02883
+      dual     epoch=022 train=0.04985 val=-0.02846
+      dual     epoch=023 train=0.04871 val=-0.02979
+      dual     epoch=024 train=0.04838 val=-0.03030
+      dual     epoch=025 train=0.04767 val=-0.03040
+      dual     epoch=026 train=0.04719 val=-0.03015
+      dual     epoch=027 train=0.04672 val=-0.03007
+      dual     epoch=028 train=0.04624 val=-0.03142
+      dual     epoch=029 train=0.04589 val=-0.03041
+      dual     epoch=030 train=0.04535 val=-0.03120
+      dual     epoch=031 train=0.04503 val=-0.03130
+      dual     epoch=032 train=0.04406 val=-0.03144
+      dual     epoch=033 train=0.04312 val=-0.03019
+      dual     epoch=034 train=0.04256 val=-0.03144
+      dual     epoch=035 train=0.04156 val=-0.03025
+      dual     epoch=036 train=0.04093 val=-0.03087
+      dual     epoch=037 train=0.04054 val=-0.03057
+      dual     epoch=038 train=0.03983 val=-0.03130
+      dual: early stop at epoch 38; best=-0.031425
+RESULT playground00 seed#3: ATE=0.240 m | RPE5=0.047 m | RPE10=0.087 m | heading=0.21°
+
+============================================================================================================
+RUN 28/30 | replicate=3/3 | test=street00 | base_seed=2042 | method_seed=2745
+VAL  : street01, street02
+TRAIN: building00, building01, building02, parking00, parking01, parking02, playground00
+============================================================================================================
+      dual     epoch=001 train=0.33635 val=0.10534
+      dual     epoch=002 train=0.21701 val=0.07810
+      dual     epoch=003 train=0.20799 val=0.06529
+      dual     epoch=004 train=0.20389 val=0.05564
+      dual     epoch=005 train=0.20226 val=0.04745
+      dual     epoch=006 train=0.07229 val=0.01970
+      dual     epoch=007 train=0.06697 val=0.01663
+      dual     epoch=008 train=0.06567 val=0.01597
+      dual     epoch=009 train=0.06489 val=0.01517
+      dual     epoch=010 train=0.06459 val=0.01674
+      dual     epoch=011 train=0.06356 val=0.01471
+      dual     epoch=012 train=0.06304 val=0.01340
+      dual     epoch=013 train=0.06241 val=0.00991
+      dual     epoch=014 train=0.06217 val=0.00907
+      dual     epoch=015 train=0.06160 val=0.00761
+      dual     epoch=016 train=0.06145 val=0.00777
+      dual     epoch=017 train=0.06082 val=0.00829
+      dual     epoch=018 train=0.05991 val=0.00782
+      dual     epoch=019 train=0.05965 val=0.00610
+      dual     epoch=020 train=0.05906 val=0.00583
+      dual     epoch=021 train=0.05847 val=0.00449
+      dual     epoch=022 train=0.05803 val=0.00401
+      dual     epoch=023 train=0.05661 val=0.00401
+      dual     epoch=024 train=0.05622 val=0.00410
+      dual     epoch=025 train=0.05555 val=0.00505
+      dual     epoch=026 train=0.05482 val=0.00402
+      dual     epoch=027 train=0.05445 val=0.00288
+      dual     epoch=028 train=0.05436 val=0.00286
+      dual     epoch=029 train=0.05397 val=0.00373
+      dual     epoch=030 train=0.05377 val=0.00447
+      dual     epoch=031 train=0.05321 val=0.00207
+      dual     epoch=032 train=0.05263 val=0.00304
+      dual     epoch=033 train=0.05241 val=0.00409
+      dual     epoch=034 train=0.05263 val=0.00359
+      dual     epoch=035 train=0.05189 val=0.00284
+      dual     epoch=036 train=0.05154 val=0.00368
+      dual     epoch=037 train=0.05124 val=0.00214
+      dual     epoch=038 train=0.05070 val=0.00382
+      dual     epoch=039 train=0.05038 val=0.00246
+      dual     epoch=040 train=0.04961 val=0.00279
+      dual     epoch=041 train=0.04857 val=0.00223
+      dual: early stop at epoch 41; best=0.002068
+RESULT street00 seed#3: ATE=0.298 m | RPE5=0.065 m | RPE10=0.114 m | heading=0.30°
+
+============================================================================================================
+RUN 29/30 | replicate=3/3 | test=street01 | base_seed=2042 | method_seed=2845
+VAL  : street02, building00
+TRAIN: building01, building02, parking00, parking01, parking02, playground00, street00
+============================================================================================================
+      dual     epoch=001 train=0.35941 val=0.18476
+      dual     epoch=002 train=0.21786 val=0.13661
+      dual     epoch=003 train=0.20401 val=0.12841
+      dual     epoch=004 train=0.19928 val=0.12134
+      dual     epoch=005 train=0.19707 val=0.11505
+      dual     epoch=006 train=0.06571 val=0.08180
+      dual     epoch=007 train=0.05857 val=0.08127
+      dual     epoch=008 train=0.05765 val=0.08113
+      dual     epoch=009 train=0.05687 val=0.07849
+      dual     epoch=010 train=0.05662 val=0.07815
+      dual     epoch=011 train=0.05576 val=0.07940
+      dual     epoch=012 train=0.05565 val=0.07999
+      dual     epoch=013 train=0.05524 val=0.07755
+      dual     epoch=014 train=0.05472 val=0.07798
+      dual     epoch=015 train=0.05411 val=0.07725
+      dual     epoch=016 train=0.05378 val=0.07773
+      dual     epoch=017 train=0.05327 val=0.07642
+      dual     epoch=018 train=0.05271 val=0.07495
+      dual     epoch=019 train=0.05193 val=0.07410
+      dual     epoch=020 train=0.05172 val=0.07313
+      dual     epoch=021 train=0.05104 val=0.07397
+      dual     epoch=022 train=0.05052 val=0.07487
+      dual     epoch=023 train=0.04964 val=0.07243
+      dual     epoch=024 train=0.04888 val=0.07223
+      dual     epoch=025 train=0.04837 val=0.07108
+      dual     epoch=026 train=0.04767 val=0.07257
+      dual     epoch=027 train=0.04715 val=0.07103
+      dual     epoch=028 train=0.04653 val=0.07129
+      dual     epoch=029 train=0.04643 val=0.06970
+      dual     epoch=030 train=0.04558 val=0.06938
+      dual     epoch=031 train=0.04552 val=0.07324
+      dual     epoch=032 train=0.04539 val=0.07275
+      dual     epoch=033 train=0.04483 val=0.07312
+      dual     epoch=034 train=0.04428 val=0.07074
+      dual     epoch=035 train=0.04423 val=0.07040
+      dual     epoch=036 train=0.04349 val=0.07125
+      dual     epoch=037 train=0.04349 val=0.07269
+      dual     epoch=038 train=0.04236 val=0.07165
+      dual     epoch=039 train=0.04159 val=0.07406
+      dual     epoch=040 train=0.04133 val=0.07140
+      dual: early stop at epoch 40; best=0.069380
+RESULT street01 seed#3: ATE=0.402 m | RPE5=0.120 m | RPE10=0.203 m | heading=0.44°
+
+============================================================================================================
+RUN 30/30 | replicate=3/3 | test=street02 | base_seed=2042 | method_seed=2945
+VAL  : building00, building01
+TRAIN: building02, parking00, parking01, parking02, playground00, street00, street01
+============================================================================================================
+      dual     epoch=001 train=0.34920 val=0.21925
+      dual     epoch=002 train=0.21925 val=0.18843
+      dual     epoch=003 train=0.20547 val=0.18060
+      dual     epoch=004 train=0.20106 val=0.17461
+      dual     epoch=005 train=0.19882 val=0.16875
+      dual     epoch=006 train=0.06900 val=0.14039
+      dual     epoch=007 train=0.05960 val=0.14034
+      dual     epoch=008 train=0.05864 val=0.13898
+      dual     epoch=009 train=0.05766 val=0.13939
+      dual     epoch=010 train=0.05677 val=0.13926
+      dual     epoch=011 train=0.05643 val=0.13897
+      dual     epoch=012 train=0.05583 val=0.13910
+      dual     epoch=013 train=0.05584 val=0.13824
+      dual     epoch=014 train=0.05538 val=0.13937
+      dual     epoch=015 train=0.05564 val=0.13964
+      dual     epoch=016 train=0.05487 val=0.13879
+      dual     epoch=017 train=0.05443 val=0.13916
+      dual     epoch=018 train=0.05450 val=0.13905
+      dual     epoch=019 train=0.05438 val=0.13815
+      dual     epoch=020 train=0.05418 val=0.13858
+      dual     epoch=021 train=0.05410 val=0.13870
+      dual     epoch=022 train=0.05348 val=0.13847
+      dual     epoch=023 train=0.05336 val=0.13769
+      dual     epoch=024 train=0.05319 val=0.13851
+      dual     epoch=025 train=0.05277 val=0.13812
+      dual     epoch=026 train=0.05287 val=0.13822
+      dual     epoch=027 train=0.05293 val=0.13793
+      dual     epoch=028 train=0.05239 val=0.13739
+      dual     epoch=029 train=0.05174 val=0.13710
+      dual     epoch=030 train=0.05138 val=0.13655
+      dual     epoch=031 train=0.05057 val=0.13592
+      dual     epoch=032 train=0.05007 val=0.13570
+      dual     epoch=033 train=0.04984 val=0.13591
+      dual     epoch=034 train=0.04920 val=0.13509
+      dual     epoch=035 train=0.04882 val=0.13458
+      dual     epoch=036 train=0.04875 val=0.13457
+      dual     epoch=037 train=0.04848 val=0.13417
+      dual     epoch=038 train=0.04748 val=0.13324
+      dual     epoch=039 train=0.04756 val=0.13262
+      dual     epoch=040 train=0.04646 val=0.13273
+      dual     epoch=041 train=0.04641 val=0.13234
+      dual     epoch=042 train=0.04562 val=0.13275
+      dual     epoch=043 train=0.04559 val=0.13183
+      dual     epoch=044 train=0.04494 val=0.13219
+      dual     epoch=045 train=0.04460 val=0.13154
+      dual     epoch=046 train=0.04449 val=0.13137
+      dual     epoch=047 train=0.04414 val=0.13177
+      dual     epoch=048 train=0.04364 val=0.13090
+      dual     epoch=049 train=0.04371 val=0.13134
+      dual     epoch=050 train=0.04295 val=0.13039
+      dual     epoch=051 train=0.04285 val=0.13119
+      dual     epoch=052 train=0.04280 val=0.13036
+      dual     epoch=053 train=0.04226 val=0.13063
+      dual     epoch=054 train=0.04224 val=0.13024
+      dual     epoch=055 train=0.04149 val=0.13078
+      dual     epoch=056 train=0.04087 val=0.13022
+      dual     epoch=057 train=0.04047 val=0.13041
+      dual     epoch=058 train=0.04010 val=0.13091
+      dual     epoch=059 train=0.03871 val=0.13009
+      dual     epoch=060 train=0.03841 val=0.13058
+RESULT street02 seed#3: ATE=0.472 m | RPE5=0.114 m | RPE10=0.190 m | heading=0.39°
+
+============================================================================================================
+STUDY COMPLETE
+============================================================================================================
+Completed: 30/30
+Primary outputs:
+  /kaggle/working/DigitalTwinDivergence/results/i2nav_dual_10fold_3seed/all_seed_fold_results.csv
+  /kaggle/working/DigitalTwinDivergence/results/i2nav_dual_10fold_3seed/per_fold_seed_summary.csv
+  /kaggle/working/DigitalTwinDivergence/results/i2nav_dual_10fold_3seed/per_fold_summary.csv
+  /kaggle/working/DigitalTwinDivergence/results/i2nav_dual_10fold_3seed/aggregate_summary.csv
+  /kaggle/working/DigitalTwinDivergence/results/i2nav_dual_10fold_3seed/historical_reproducibility.csv
+  /kaggle/working/DigitalTwinDivergence/results/i2nav_dual_10fold_3seed/baseline_comparison.csv
+  /kaggle/working/DigitalTwinDivergence/results/i2nav_dual_10fold_3seed/statistical_tests.json
+  /kaggle/working/DigitalTwinDivergence/results/i2nav_dual_10fold_3seed/environment_manifest.json
+  /kaggle/working/DigitalTwinDivergence/results/i2nav_dual_10fold_3seed/final_summary.json

@@ -1,0 +1,596 @@
+[
+  {
+    "source_relative_path": "aggregate_summary.csv",
+    "frozen_relative_path": "evidence\\aggregate_summary.csv",
+    "sha256": "9d646a003c1b9b3f5e14101b77f938f60d74c744a4e71dd523c9a0288f451cbe",
+    "size_bytes": 774
+  },
+  {
+    "source_relative_path": "all_seed_fold_results.csv",
+    "frozen_relative_path": "evidence\\all_seed_fold_results.csv",
+    "sha256": "a5c974671292be95ca871747b644f6b67f774e44c9e694da3420c5956fa9c211",
+    "size_bytes": 24629
+  },
+  {
+    "source_relative_path": "baseline_comparison.csv",
+    "frozen_relative_path": "evidence\\baseline_comparison.csv",
+    "sha256": "7dbed33e68f924f1d136b5b82ae4af29876a9805b8a0b522657d6621cf631d42",
+    "size_bytes": 961
+  },
+  {
+    "source_relative_path": "environment_manifest.json",
+    "frozen_relative_path": "evidence\\environment_manifest.json",
+    "sha256": "01bc96696f796ef24f4fd2c6a08fa24106e048ca36c1e6227ec01004f0aef441",
+    "size_bytes": 1714
+  },
+  {
+    "source_relative_path": "final_summary.json",
+    "frozen_relative_path": "evidence\\final_summary.json",
+    "sha256": "ffe9e5c0c0e517f5274edcfcb88b3a2c778f75c23d3bf6a80909ccc289566f27",
+    "size_bytes": 2640
+  },
+  {
+    "source_relative_path": "full_run.log",
+    "frozen_relative_path": "evidence\\full_run.log",
+    "sha256": "49654791709120fecf430c20ee43fc0790062733cf7db7c4b62e09c21c0c21f3",
+    "size_bytes": 98997
+  },
+  {
+    "source_relative_path": "historical_reproducibility.csv",
+    "frozen_relative_path": "evidence\\historical_reproducibility.csv",
+    "sha256": "8f4b72d0d1a89fc8d8370a998396b5bc1e86d91a38cbaafa6d8593b9bb932d59",
+    "size_bytes": 1217
+  },
+  {
+    "source_relative_path": "per_fold_seed_summary.csv",
+    "frozen_relative_path": "evidence\\per_fold_seed_summary.csv",
+    "sha256": "e0e0c2f6c544de7bd0222a586cea3fc748bd8e407593c91c1d1c5b8d07d30df5",
+    "size_bytes": 4133
+  },
+  {
+    "source_relative_path": "per_fold_summary.csv",
+    "frozen_relative_path": "evidence\\per_fold_summary.csv",
+    "sha256": "27092ded22666a17cdac3ce8100fa5df39bdf208f34910e094ee33385359e670",
+    "size_bytes": 5404
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_01_building00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_01_building00\\gru_dual.pt",
+    "sha256": "be181def8a2bb4c9c6c0e3a4008524f11e02da6457bce0801731ba09c3ead9fc",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_01_building00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_01_building00\\gru_dual_checkpoint.pt",
+    "sha256": "f1aa1a938108fa1ba3b052b8e827014960b7429c3a2f869530efc4c88252d19b",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_01_building00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_01_building00\\gru_dual_history.csv",
+    "sha256": "035d09ee7e5142972fa1821b492cd10df933fb63e76bbdb0d01bad5eeaeb8919",
+    "size_bytes": 7365
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_02_building01\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_02_building01\\gru_dual.pt",
+    "sha256": "0b5ce0117f42c8596e4bf8cdef8f6f4098748a47755f124d53911b817fdcd04c",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_02_building01\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_02_building01\\gru_dual_checkpoint.pt",
+    "sha256": "d24212ac2624d77fd6207f9dfbd9443e48cff5f37806d35f154e61089d3e8b22",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_02_building01\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_02_building01\\gru_dual_history.csv",
+    "sha256": "97db48d0f00a23fae7931b49c271c2a8d109db21c82d6a2aa9272cafd7de93f3",
+    "size_bytes": 5908
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_03_building02\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_03_building02\\gru_dual.pt",
+    "sha256": "d18d160a06a994b60fe9bd4187733dd8621c7cf284586fe75913997f6d43f463",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_03_building02\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_03_building02\\gru_dual_checkpoint.pt",
+    "sha256": "2727ec5cc37814648e3b80722cf8a71ade65b5085e70c3edac0fe5802a716a5d",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_03_building02\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_03_building02\\gru_dual_history.csv",
+    "sha256": "50864ba15d2e18009bc8da349f34c72000ab28bc4f1ce0eaade549b74e1aaea1",
+    "size_bytes": 7347
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_04_parking00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_04_parking00\\gru_dual.pt",
+    "sha256": "4f9213efacb0ffb869873e2d26ac29da50db5e473fac369885119f2eea158845",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_04_parking00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_04_parking00\\gru_dual_checkpoint.pt",
+    "sha256": "02d47550133cb1e6c611e467cb32064f950d2288595717887e606c16f21d34ad",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_04_parking00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_04_parking00\\gru_dual_history.csv",
+    "sha256": "f3a003af0929ba6735c7caa9d70577223ba67684a7288e8b43eff1e1dcd7e6d1",
+    "size_bytes": 7369
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_05_parking01\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_05_parking01\\gru_dual.pt",
+    "sha256": "8bcdfefeeffb2f0271b81456636c8e9d2ae57c37ca54d5704a8c52ba6a0dd15d",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_05_parking01\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_05_parking01\\gru_dual_checkpoint.pt",
+    "sha256": "9553cc853923e9c991027430a2a6e8aff75d72a677143f1c0075621d9978f374",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_05_parking01\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_05_parking01\\gru_dual_history.csv",
+    "sha256": "810f3944600f5102265884136a64d1aad15667e47a3d3c4d79f81b27a511cfe5",
+    "size_bytes": 5797
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_06_parking02\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_06_parking02\\gru_dual.pt",
+    "sha256": "32bff218f740b8d3f9590f27de26d60a4238f49634e5ae659cbcf5894983e209",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_06_parking02\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_06_parking02\\gru_dual_checkpoint.pt",
+    "sha256": "930e9ad4e3b533eac1997627eee8faef43e85ef28ee34eeac026017f72733d01",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_06_parking02\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_06_parking02\\gru_dual_history.csv",
+    "sha256": "607adf5854746fedf7088df4136755c84d9fe96305a44e7f348e2b8f0127441f",
+    "size_bytes": 6568
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_07_playground00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_07_playground00\\gru_dual.pt",
+    "sha256": "4a6bc8c10a08ad4cc29cfdfab990c8caf288462adcdfc0733e62882aa429cf02",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_07_playground00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_07_playground00\\gru_dual_checkpoint.pt",
+    "sha256": "2f9165ab1348d0c2d186444d663e08dc11bbb8c66d9bfa77b746e24d029f2abc",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_07_playground00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_07_playground00\\gru_dual_history.csv",
+    "sha256": "ff64007af803f7674388a2dc8fe54eeb2160591fba4e133e8a8433372ca75749",
+    "size_bytes": 6126
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_08_street00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_08_street00\\gru_dual.pt",
+    "sha256": "594dd796ff05e26fdee161db0075022dcc39afed7b915e1583ff0937e9052ecb",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_08_street00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_08_street00\\gru_dual_checkpoint.pt",
+    "sha256": "f8213e209dde0d8bfeebbb958c1fb5b2b344d5c44b432a99b2230d0970ef9df2",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_08_street00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_08_street00\\gru_dual_history.csv",
+    "sha256": "12a860099282c3fe37467cf766855f80cf70ca84cf0712d30df42e5fa8fd2e14",
+    "size_bytes": 6296
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_09_street01\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_09_street01\\gru_dual.pt",
+    "sha256": "18de4407947b5934077abea64e3ad2739864a88cb80f840714866d0ddb602f9c",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_09_street01\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_09_street01\\gru_dual_checkpoint.pt",
+    "sha256": "72533388a3f8d6b353813e69296e8695c9b8ae279e55a65b608edf582a42763a",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_09_street01\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_09_street01\\gru_dual_history.csv",
+    "sha256": "bdbddf9aa48f6ad9a80bb460daff0593c79537f72f3b048213fecc7278473893",
+    "size_bytes": 5793
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_10_street02\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_10_street02\\gru_dual.pt",
+    "sha256": "ae442f749660cfad44ebf58f042ce05d779b8d3fc330371db729763c1fff52d7",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_10_street02\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_10_street02\\gru_dual_checkpoint.pt",
+    "sha256": "19f8c45c8394a4f1589869dad119d4bf097d4660170b52d860f15a3b9ed8e2fc",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_01_base42\\fold_10_street02\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_01_base42\\fold_10_street02\\gru_dual_history.csv",
+    "sha256": "93e7f0734b4c998f16106ba4a883adc0ac998e33f190580d57aab2676d847721",
+    "size_bytes": 7341
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_01_building00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_01_building00\\gru_dual.pt",
+    "sha256": "ff530c32baeb1e2b1575fdb5693dcf806aac46d551f9b8687152c635ef296849",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_01_building00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_01_building00\\gru_dual_checkpoint.pt",
+    "sha256": "8b35252547c4c1474242161561be99ea6b11d6e1c40bca79462d99e3d535ab82",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_01_building00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_01_building00\\gru_dual_history.csv",
+    "sha256": "7fb50eb2c6c5bd94029169de6cb397c315e9e09ae9361745b21da6719e2f315a",
+    "size_bytes": 7112
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_02_building01\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_02_building01\\gru_dual.pt",
+    "sha256": "cb0d1ae7d29ee36b4a8e8c00151c1151b68ed9b7390236cbbdb06906e10e5725",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_02_building01\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_02_building01\\gru_dual_checkpoint.pt",
+    "sha256": "bf76d1ec153ecf17f39b4637ad70a7360ccc4ef97b7bf9a2ab2d468434ae65a3",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_02_building01\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_02_building01\\gru_dual_history.csv",
+    "sha256": "4e5395499bcc5cdcc8873b083c1d260f1db26c7b3b9af2175627a3cd8638140b",
+    "size_bytes": 6883
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_03_building02\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_03_building02\\gru_dual.pt",
+    "sha256": "56677c2cc94b1e9692ce1f5a27ba1c8835cdd9bbeae52bb9784f71de6b0efc86",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_03_building02\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_03_building02\\gru_dual_checkpoint.pt",
+    "sha256": "39ba202b8ec31a05d03c63b325af7471ea3c55177359bbc27ae7fdd48ba6c4dd",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_03_building02\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_03_building02\\gru_dual_history.csv",
+    "sha256": "420ef87dcf67e7bd935ba194e78a2ecf845e5dcb73528eda965eda1af7bbd56f",
+    "size_bytes": 7364
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_04_parking00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_04_parking00\\gru_dual.pt",
+    "sha256": "19ec300bfcabc63b01f7d12429c4268e03d8653f752bece370db6bad99a39971",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_04_parking00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_04_parking00\\gru_dual_checkpoint.pt",
+    "sha256": "a14eae673e08cc4aa25edf502a9f382697a20f657cd1d65c064a62eaf1b9f173",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_04_parking00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_04_parking00\\gru_dual_history.csv",
+    "sha256": "5c57ab1d3e02601b24376fe89a3d28515549e18ea339f735749fdd5e03ec0913",
+    "size_bytes": 7374
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_05_parking01\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_05_parking01\\gru_dual.pt",
+    "sha256": "d56e67cea0675475b86fea4680517592f2a7a984c4b04210f10462d2ac8f9719",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_05_parking01\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_05_parking01\\gru_dual_checkpoint.pt",
+    "sha256": "c52e094562505aec6bb39278e8fdf80b009f926fd8a9dc340dc25181d0078057",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_05_parking01\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_05_parking01\\gru_dual_history.csv",
+    "sha256": "175f53221a8d26cb030d62eb001c1d36557864c86e95b9f06f6ea309998a6c90",
+    "size_bytes": 6297
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_06_parking02\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_06_parking02\\gru_dual.pt",
+    "sha256": "aa420d1ad4eee2e3b92aa2e9f929c87e14f041442385ec54d81a2b1b2648ab0a",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_06_parking02\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_06_parking02\\gru_dual_checkpoint.pt",
+    "sha256": "a0ddf65ae23f608c2f7f14f8128ebafac867b7f9c2ae0ca8127e31bcfda7db8b",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_06_parking02\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_06_parking02\\gru_dual_history.csv",
+    "sha256": "fc7b3b8c85cea4e9551283992d6c94eb0009cf7ccee8c63648b19a71372a7e67",
+    "size_bytes": 5222
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_07_playground00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_07_playground00\\gru_dual.pt",
+    "sha256": "3cbd1deee6e3700bcdd4925616ffaa7a64d6ce13819ee7284a612a3dc1f67af3",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_07_playground00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_07_playground00\\gru_dual_checkpoint.pt",
+    "sha256": "3f32ec554d74e79434b975951af4e16f322dca1fc24777ad23a4e25f5cbb34eb",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_07_playground00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_07_playground00\\gru_dual_history.csv",
+    "sha256": "3f21d013e10a488d715401276fdb7a513f7c5eef13d702bd472f002edc806eda",
+    "size_bytes": 7233
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_08_street00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_08_street00\\gru_dual.pt",
+    "sha256": "949162a1750d5630abaccde980dbe5a896b0ce39b9c19a861811b6cf327c87e3",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_08_street00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_08_street00\\gru_dual_checkpoint.pt",
+    "sha256": "fa10203af9c0c50890d75085458102a4644a2f57c7850fa2ec65bb1285270555",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_08_street00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_08_street00\\gru_dual_history.csv",
+    "sha256": "b2b3b029c691d74833bc81150049fbb86b8dd93c3fac3da028f31028b767512b",
+    "size_bytes": 5201
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_09_street01\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_09_street01\\gru_dual.pt",
+    "sha256": "2ad83401ab305dadff61b5a4c992c1bbd54926e5dcb04f928c8b79004d3bb572",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_09_street01\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_09_street01\\gru_dual_checkpoint.pt",
+    "sha256": "c2eb9cbd233b8653821726b37670dd91b673b2630114ff109d5d9ef97c3d5ec7",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_09_street01\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_09_street01\\gru_dual_history.csv",
+    "sha256": "95e35deb86189ad6c6ed3a3df1106911429ca81860a7924eb5616116ca5ae292",
+    "size_bytes": 5068
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_10_street02\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_10_street02\\gru_dual.pt",
+    "sha256": "4299cd34f14b21fb0bcf00c5835f17d467ef1bd7ae40482580f2185933240d39",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_10_street02\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_10_street02\\gru_dual_checkpoint.pt",
+    "sha256": "3a7901a1ec83382b254782863f3bd62e4dfe8b6c60de3d2f4ec4e8f9e18a6ccb",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_02_base1042\\fold_10_street02\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_02_base1042\\fold_10_street02\\gru_dual_history.csv",
+    "sha256": "dcc5159355f28b11fc364d4dff9a8f59b4ba4fefe12566d40b8a4b1cc58c2370",
+    "size_bytes": 7348
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_01_building00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_01_building00\\gru_dual.pt",
+    "sha256": "115de19000df716e1a58d5784c536c38fc504a594b51e68d6d6a56b2077e0669",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_01_building00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_01_building00\\gru_dual_checkpoint.pt",
+    "sha256": "d90eb802c57d03be1f6d31ef183a8e7e5f5d3f8e35029434d15e4672fe36c8dd",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_01_building00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_01_building00\\gru_dual_history.csv",
+    "sha256": "6a86e3af15f02005fbf63d1f15661a35f103e29cdbbe6747536a8e5e549535b6",
+    "size_bytes": 7382
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_02_building01\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_02_building01\\gru_dual.pt",
+    "sha256": "0eabc695a1c404c97aba8e25c275d12191e22e83472f8bd8ac9a9593e4fa0f87",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_02_building01\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_02_building01\\gru_dual_checkpoint.pt",
+    "sha256": "7f0d33af577c22fdc4d61a6560ec2d078bc80cf67ea33de37d79e92be2d658fd",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_02_building01\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_02_building01\\gru_dual_history.csv",
+    "sha256": "f39787c0eda0900c6f7b24489162d2db188ab19b8663d5bd62789e317a893112",
+    "size_bytes": 7383
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_03_building02\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_03_building02\\gru_dual.pt",
+    "sha256": "8e3c7834181be86f259a38a94a94d236b3b7b14c2ca3bce7566b67e0fccfbf33",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_03_building02\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_03_building02\\gru_dual_checkpoint.pt",
+    "sha256": "ce72b6a111d90bd03712ddf7584f50d1705382264b174a023038aef38eb9a8c4",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_03_building02\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_03_building02\\gru_dual_history.csv",
+    "sha256": "3d84ceeb1b393d2fc3f9122be395ecd5503a10117a90c68cd8d8eb3d4fcd3fc6",
+    "size_bytes": 7369
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_04_parking00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_04_parking00\\gru_dual.pt",
+    "sha256": "f46ec2338f27285ea458e51497a1ef4838b15b8920d9cd6a3884f74bd97840e0",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_04_parking00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_04_parking00\\gru_dual_checkpoint.pt",
+    "sha256": "c02e1917019a2b21a1a406cff18b7d8dc7c75fd0d89e429850442dc32f77a0e5",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_04_parking00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_04_parking00\\gru_dual_history.csv",
+    "sha256": "140e880f7a072e4bf02d725619793bf3e0adfa4d35c967ee2c235144a62b6c8b",
+    "size_bytes": 6519
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_05_parking01\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_05_parking01\\gru_dual.pt",
+    "sha256": "3ab724fea8785e3bf17098cdd9146485aeb9b88cd45c759601039473b55152cd",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_05_parking01\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_05_parking01\\gru_dual_checkpoint.pt",
+    "sha256": "98c6140347b4420034420029d1d58e04594e0e36f3d47c908adaf8f055ec634c",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_05_parking01\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_05_parking01\\gru_dual_history.csv",
+    "sha256": "3b9319f05072deca21ccafeeccd9ad0445f2fe4f1cb3691e0d94d520819449f1",
+    "size_bytes": 7260
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_06_parking02\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_06_parking02\\gru_dual.pt",
+    "sha256": "73e92636ca1d0d865717094924252eba397f71941bdbdcbb37091e959e587aa4",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_06_parking02\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_06_parking02\\gru_dual_checkpoint.pt",
+    "sha256": "788d0e5428b27f1307aefec26eeccdd8946b5431cac251e3a38fb2b6f4ad5375",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_06_parking02\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_06_parking02\\gru_dual_history.csv",
+    "sha256": "29d374953720bdc92bcff2e986987cc69e289bf0280483146ae019f28a6db14f",
+    "size_bytes": 6341
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_07_playground00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_07_playground00\\gru_dual.pt",
+    "sha256": "6ea220b7d21a7ba0f2c874f20bcb19995d17ade5cf0229ffda04a18f90c4ffa1",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_07_playground00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_07_playground00\\gru_dual_checkpoint.pt",
+    "sha256": "a2fdd4a7fa9370fdcbf0c1a1f28163fe5fec7e0005223e38997eacf7bc52bb26",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_07_playground00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_07_playground00\\gru_dual_history.csv",
+    "sha256": "80fa15a477f26339026c1935d974f0d15b90e9d6545fec5cfe57887da90ddc0c",
+    "size_bytes": 4768
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_08_street00\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_08_street00\\gru_dual.pt",
+    "sha256": "04976059d28486a5da61b2e8959367811be807693f3996c149451674821c51bc",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_08_street00\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_08_street00\\gru_dual_checkpoint.pt",
+    "sha256": "e6afe21dd2f0ea707e0b9720a7c70c5477a20e958d49251d38e8c7143dfe0e51",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_08_street00\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_08_street00\\gru_dual_history.csv",
+    "sha256": "7a67295e4e6acf4b593510a4a58452bfee4001c33364c524a0e58cceb8e9d295",
+    "size_bytes": 5101
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_09_street01\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_09_street01\\gru_dual.pt",
+    "sha256": "d2ddb39a97dc71a0f484425df4c7074b9aab04b1ca9e3e4485a6dd1d44d6cf97",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_09_street01\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_09_street01\\gru_dual_checkpoint.pt",
+    "sha256": "5d5a3d2b515e9f95431073bce09fcaf75565722c1629653ee291e71cec2e2f05",
+    "size_bytes": 177709
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_09_street01\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_09_street01\\gru_dual_history.csv",
+    "sha256": "7a6c71b79bf0e4e2fadb1967887eb4d38afcf997b655a7387d5eadb44bad113f",
+    "size_bytes": 4924
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_10_street02\\gru_dual.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_10_street02\\gru_dual.pt",
+    "sha256": "520cb4c7026dfbd5067ffcd15e714eb5b8d737ffe3fb7cd586a64883a7637c38",
+    "size_bytes": 177502
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_10_street02\\gru_dual_checkpoint.pt",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_10_street02\\gru_dual_checkpoint.pt",
+    "sha256": "b3470e175382006aa61ace98908686c5dc284c6e310dddebeb31b349d579d125",
+    "size_bytes": 177645
+  },
+  {
+    "source_relative_path": "replicate_03_base2042\\fold_10_street02\\gru_dual_history.csv",
+    "frozen_relative_path": "evidence\\replicate_03_base2042\\fold_10_street02\\gru_dual_history.csv",
+    "sha256": "cebac65928da8846297a1cd0702c64d99ae5747918290c1c364f62518f372d7e",
+    "size_bytes": 7355
+  }
+]

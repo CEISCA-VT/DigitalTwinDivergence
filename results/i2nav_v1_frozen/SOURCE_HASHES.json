@@ -1,0 +1,22 @@
+[
+  {
+    "path": "DigitalTwin/analysis/i2nav_loso_ablation.py",
+    "sha256": "314d90027fb24f1daf139c2ebc1cbcd998f893822dbb8fd3e4e9fc567d6a3aab",
+    "frozen_copy": "source_snapshot\\DigitalTwin\\analysis\\i2nav_loso_ablation.py"
+  },
+  {
+    "path": "DigitalTwin/analysis/i2nav_gru_dualhead.py",
+    "sha256": "6de2990833cb5a2d9e4bc4f0e6ce3dff60294cdfa657a28425899d99a585891e",
+    "frozen_copy": "source_snapshot\\DigitalTwin\\analysis\\i2nav_gru_dualhead.py"
+  },
+  {
+    "path": "DigitalTwin/analysis/i2nav_adaptive_q_baseline.py",
+    "sha256": "0b92e17d43bebcf896fca241aac17b59e5d534a1821d8e639e6a9610d64b5582",
+    "frozen_copy": "source_snapshot\\DigitalTwin\\analysis\\i2nav_adaptive_q_baseline.py"
+  },
+  {
+    "path": "DigitalTwin/ekf.py",
+    "sha256": "51551ef389a69328ac1a46e8f8403e4164f6c4c7e87d18ff2df1a44a6fe2d674",
+    "frozen_copy": "source_snapshot\\DigitalTwin\\ekf.py"
+  }
+]

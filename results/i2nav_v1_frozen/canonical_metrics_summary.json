@@ -1,0 +1,11 @@
+{
+  "schema": "i2nav_twin_v1_canonical_summary_v1",
+  "n_runs": 30,
+  "n_folds": 10,
+  "aggregation": "mean across seeds within each held-out fold, then macro mean across the 10 held-out folds",
+  "ate_rmse_m": 2.8339329328876137,
+  "heading_mae_deg": 3.3358076829826366,
+  "rpe_1s_trans_rmse_m": 0.060622196022187866,
+  "rpe_5s_trans_rmse_m": 0.16696559980066075,
+  "rpe_10s_trans_rmse_m": 0.271446627678864
+}

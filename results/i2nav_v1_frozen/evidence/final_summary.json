@@ -1,0 +1,74 @@
+{
+  "schema": "i2nav_original_dual_10fold_3seed_deterministic_v1",
+  "study": "Original dual-GRU reproducibility; no V2/V3 architecture changes",
+  "completed_runs": 30,
+  "expected_runs": 30,
+  "complete": true,
+  "headline": {
+    "ate_rmse_m": {
+      "metric": "ate_rmse_m",
+      "n_folds": 10,
+      "macro_mean": 2.832843665094024,
+      "macro_median": 1.631920959596648,
+      "fold_std": 4.243308444699249,
+      "bootstrap95_low": 0.9109490371385156,
+      "bootstrap95_high": 5.680176874892638,
+      "sequence_rms": 4.922408265476738
+    },
+    "rpe_1s_trans_rmse_m": {
+      "metric": "rpe_1s_trans_rmse_m",
+      "n_folds": 10,
+      "macro_mean": 0.06062291762326063,
+      "macro_median": 0.0401113112591949,
+      "fold_std": 0.04608927103728264,
+      "bootstrap95_low": 0.03418493343442176,
+      "bootstrap95_high": 0.08823295037503445,
+      "sequence_rms": 0.07474581563826792
+    },
+    "rpe_5s_trans_rmse_m": {
+      "metric": "rpe_5s_trans_rmse_m",
+      "n_folds": 10,
+      "macro_mean": 0.166967892007741,
+      "macro_median": 0.11548260455235687,
+      "fold_std": 0.11300328305607275,
+      "bootstrap95_low": 0.10233574052485696,
+      "bootstrap95_high": 0.23469285716902116,
+      "sequence_rms": 0.19842138177327182
+    },
+    "rpe_10s_trans_rmse_m": {
+      "metric": "rpe_10s_trans_rmse_m",
+      "n_folds": 10,
+      "macro_mean": 0.2714505674348705,
+      "macro_median": 0.1957934100002397,
+      "fold_std": 0.16829964545794027,
+      "bootstrap95_low": 0.17525024551105806,
+      "bootstrap95_high": 0.37250285428415,
+      "sequence_rms": 0.3149249182834771
+    },
+    "heading_mae_deg": {
+      "metric": "heading_mae_deg",
+      "n_folds": 10,
+      "macro_mean": 3.3341200571161287,
+      "macro_median": 0.7486802215637113,
+      "fold_std": 6.486570360579315,
+      "bootstrap95_low": 0.5476760965430918,
+      "bootstrap95_high": 7.473587613366219,
+      "sequence_rms": 6.998885060760429
+    }
+  },
+  "statistics": {
+    "primary_unit": "held-out LOSO sequence/fold after averaging the three deterministic seeds",
+    "n_seed_replicates": 3,
+    "bootstrap_samples": 20000,
+    "fixed_baseline_method": "fixed_v5",
+    "ate_vs_fixed": {
+      "n_folds": 10,
+      "mean_difference_m_dual_minus_fixed": -2.266702960139879,
+      "mean_improvement_pct": 21.964634815492097,
+      "median_improvement_pct": 3.513635816060233,
+      "paired_sign_flip_p_two_sided": 0.09619451902740486,
+      "cohen_dz": -0.5348841586892222
+    }
+  },
+  "interpretation_rule": "Use the 3-seed fold means as the primary fold-level result. Do not treat 30 seed\u00d7fold rows as 30 independent test sequences."
+}
