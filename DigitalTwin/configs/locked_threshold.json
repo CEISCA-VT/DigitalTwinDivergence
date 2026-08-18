@@ -1,0 +1,11 @@
+{
+  "threshold": 2.4090708256802387,
+  "alpha": 0.05,
+  "samples": 236,
+  "false_alarm_count": 11,
+  "false_alarm_rate": 0.046610169491525424,
+  "source_files": [
+    "DigitalTwin\\datasets\\smoke2\\speed-0.20_terrain-0.0_latency-10_attack-none_trial-0.csv",
+    "DigitalTwin\\datasets\\smoke2\\speed-0.20_terrain-0.0_latency-200_attack-none_trial-0.csv"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "available": true,
+  "n_sequences": 10,
+  "warning": "Only 10 held-out sequences exist. These sequence-level correlations are exploratory diagnostics, not inferential evidence.",
+  "correlation_with_frozen_v1_fold_mean_ate": {
+    "abs_mean_velocity_residual": -0.46312971109139667,
+    "velocity_residual_rmse": 0.4265522536971459,
+    "abs_mean_yaw_residual": 0.852480194635694,
+    "yaw_residual_rmse": -0.3510049093968632,
+    "integrated_yaw_max_abs": 0.8027301230041355,
+    "rolling_30s_yaw_bias_max_abs": -0.05816682059589169,
+    "lateral_velocity_rmse": 0.3334369994739988,
+    "slip_angle_mean_abs": 0.06395266406825671
+  }
+}

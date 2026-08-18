@@ -1,0 +1,15 @@
+name: digitaltwin-a30
+
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+
+dependencies:
+  - python=3.11
+  - pytorch=2.5.1
+  - pytorch-cuda=11.8
+  - numpy
+  - pandas
+  - pytest
+  - pip

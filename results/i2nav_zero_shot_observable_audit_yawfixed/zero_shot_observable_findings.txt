@@ -1,0 +1,44 @@
+Zero-shot physical-observable audit
+========================================================================
+
+Goal: add only canonical encoder+IMU quantities that can be reconstructed on other robots, rather than Ranger-specific raw channels.
+
+Ranger steering angle sign used: +1
+
+Wheel-kinematic sanity checks
+  building00: wheel vx vs V1 odo corr=+1.000, RMSE=0.0012 m/s, wheel yaw vs IMU corr=+0.947
+  building01: wheel vx vs V1 odo corr=+1.000, RMSE=0.0012 m/s, wheel yaw vs IMU corr=+0.938
+  building02: wheel vx vs V1 odo corr=+1.000, RMSE=0.0012 m/s, wheel yaw vs IMU corr=+0.919
+  parking00: wheel vx vs V1 odo corr=+1.000, RMSE=0.0021 m/s, wheel yaw vs IMU corr=+0.893
+  parking01: wheel vx vs V1 odo corr=+1.000, RMSE=0.0015 m/s, wheel yaw vs IMU corr=+0.929
+  parking02: wheel vx vs V1 odo corr=+1.000, RMSE=0.0012 m/s, wheel yaw vs IMU corr=+0.938
+  playground00: wheel vx vs V1 odo corr=+1.000, RMSE=0.0009 m/s, wheel yaw vs IMU corr=+0.931
+  street00: wheel vx vs V1 odo corr=+1.000, RMSE=0.0004 m/s, wheel yaw vs IMU corr=+0.982
+  street01: wheel vx vs V1 odo corr=+1.000, RMSE=0.0018 m/s, wheel yaw vs IMU corr=+0.944
+  street02: wheel vx vs V1 odo corr=+1.000, RMSE=0.0027 m/s, wheel yaw vs IMU corr=+0.976
+
+Candidate correlation with true persistent yaw target
+  building00: wheel_yaw_vs_true_30s_corr=+0.498 yaw_disagreement_vs_true_30s_corr=-0.027 yaw_disagreement_normalized_vs_true_30s_corr=+0.014 wheel_lateral_ratio_vs_true_30s_corr=+0.014
+  building01: wheel_yaw_vs_true_30s_corr=+0.510 yaw_disagreement_vs_true_30s_corr=-0.033 yaw_disagreement_normalized_vs_true_30s_corr=+0.007 wheel_lateral_ratio_vs_true_30s_corr=+0.008
+  building02: wheel_yaw_vs_true_30s_corr=+0.340 yaw_disagreement_vs_true_30s_corr=-0.019 yaw_disagreement_normalized_vs_true_30s_corr=+0.010 wheel_lateral_ratio_vs_true_30s_corr=-0.003
+  parking00: wheel_yaw_vs_true_30s_corr=+0.427 yaw_disagreement_vs_true_30s_corr=-0.028 yaw_disagreement_normalized_vs_true_30s_corr=+0.000 wheel_lateral_ratio_vs_true_30s_corr=+0.006
+  parking01: wheel_yaw_vs_true_30s_corr=+0.552 yaw_disagreement_vs_true_30s_corr=-0.035 yaw_disagreement_normalized_vs_true_30s_corr=+0.036 wheel_lateral_ratio_vs_true_30s_corr=+0.009
+  parking02: wheel_yaw_vs_true_30s_corr=+0.580 yaw_disagreement_vs_true_30s_corr=-0.052 yaw_disagreement_normalized_vs_true_30s_corr=-0.002 wheel_lateral_ratio_vs_true_30s_corr=+0.011
+  playground00: wheel_yaw_vs_true_30s_corr=+0.393 yaw_disagreement_vs_true_30s_corr=-0.050 yaw_disagreement_normalized_vs_true_30s_corr=-0.015 wheel_lateral_ratio_vs_true_30s_corr=+0.002
+  street00: wheel_yaw_vs_true_30s_corr=+0.551 yaw_disagreement_vs_true_30s_corr=+0.139 yaw_disagreement_normalized_vs_true_30s_corr=+0.027 wheel_lateral_ratio_vs_true_30s_corr=+0.008
+  street01: wheel_yaw_vs_true_30s_corr=+0.289 yaw_disagreement_vs_true_30s_corr=-0.008 yaw_disagreement_normalized_vs_true_30s_corr=+0.016 wheel_lateral_ratio_vs_true_30s_corr=+0.001
+  street02: wheel_yaw_vs_true_30s_corr=+0.374 yaw_disagreement_vs_true_30s_corr=+0.338 yaw_disagreement_normalized_vs_true_30s_corr=+0.079 wheel_lateral_ratio_vs_true_30s_corr=+0.002
+
+Cross-sequence ambiguity (mean of both directions)
+  2s baseline_plus_wheel_consistency_pack: close50 >1deg/min=49.2%, close50 median gap=0.991 deg/min
+  2s baseline_plus_wheel_yaw: close50 >1deg/min=47.2%, close50 median gap=0.957 deg/min
+  2s baseline_plus_yaw_disagreement: close50 >1deg/min=48.1%, close50 median gap=0.961 deg/min
+  2s v1_baseline_6: close50 >1deg/min=46.8%, close50 median gap=0.948 deg/min
+  30s baseline_plus_wheel_consistency_pack: close50 >1deg/min=36.5%, close50 median gap=0.791 deg/min
+  30s baseline_plus_wheel_yaw: close50 >1deg/min=40.5%, close50 median gap=0.855 deg/min
+  30s baseline_plus_yaw_disagreement: close50 >1deg/min=37.7%, close50 median gap=0.832 deg/min
+  30s v1_baseline_6: close50 >1deg/min=38.8%, close50 median gap=0.835 deg/min
+
+Decision rule
+  Prefer a candidate only if it lowers cross-sequence ambiguity materially while remaining computable from encoder+IMU telemetry on i2Nav, TerraSentia, and UGV01. Do not select a feature merely because it improves i2Nav training performance.
+  Raw Ranger wheel IDs/steering angles should remain inside the deterministic platform adapter; the learned Twin core should receive canonical quantities such as wheel yaw and wheel-vs-IMU disagreement.

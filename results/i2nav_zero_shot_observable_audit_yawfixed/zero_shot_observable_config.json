@@ -1,0 +1,12 @@
+{
+  "wheelbase_m": 0.494,
+  "track_m": 0.37,
+  "angle_sign": 1.0,
+  "contexts_s": [
+    2.0,
+    30.0
+  ],
+  "target_s": 30.0,
+  "step_s": 1.0,
+  "learned_inputs_policy": "canonical encoder+IMU features only; no Ranger-specific raw wheel identity/steering-angle channels in learned Twin core"
+}

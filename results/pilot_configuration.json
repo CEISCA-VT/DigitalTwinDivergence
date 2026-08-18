@@ -1,0 +1,37 @@
+{
+  "schema": "i2nav_twin_v2_fast_mean_neutral",
+  "pilot_folds": [
+    "parking02",
+    "parking01",
+    "street00"
+  ],
+  "base_seeds": [
+    42,
+    1042,
+    2042
+  ],
+  "rate_hz": 10.0,
+  "window": 20,
+  "chunk_seconds": 30.0,
+  "epochs": 25,
+  "patience": 5,
+  "model": {
+    "hidden_size": 64,
+    "num_layers": 2,
+    "dropout": 0.1,
+    "dv_limit": 0.15,
+    "dw_dynamic_limit": 0.02,
+    "yaw_bias_limit": 0.005
+  },
+  "loss": {
+    "point_weight": 1.0,
+    "trajectory_weight": 0.5,
+    "bias_weight": 1.0,
+    "bias_smooth_weight": 0.05,
+    "dynamic_residual_weight": 0.01,
+    "fast_mean_weight": 0.25
+  },
+  "fast_mean_neutrality": "Mean fast yaw residual is penalized toward zero over 5 s, 10 s, and 30 s horizons.",
+  "checkpoint_selection": "Lowest ordinary validation chunk loss. No test information and no heuristic bias guard.",
+  "frozen_v1": "Frozen V1 checkpoints and uncertainty predictions are read-only and never modified."
+}

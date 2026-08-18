@@ -1,0 +1,115 @@
+{
+  "schema": "ugv01_learned_uncertainty_v1",
+  "model": "MLPRegressor",
+  "selected_model_key": "mlp",
+  "feature_columns": [
+    "imu_vertical_std",
+    "imu_yaw_std",
+    "velocity_variance",
+    "packet_dt_s",
+    "gps_hdop",
+    "gps_satellites"
+  ],
+  "target_columns": [
+    "q_xx",
+    "q_yy",
+    "q_tt"
+  ],
+  "target_definition": "future-window benign process-error covariance surrogate",
+  "target_horizon_updates": 5,
+  "coordinate_residual_feature_allowed": false,
+  "attack_rows_allowed": false,
+  "validation": "complete-run GroupKFold",
+  "acceptance_rule": "MAE improvement over the training-fold median must be positive for all Q targets",
+  "accepted_for_primary_campaign": false,
+  "model_status": "candidate_rejected_grouped_cv",
+  "runs": 20,
+  "rows": 3043,
+  "source_files": [
+    "raw_logs\\telemetry\\speed-low_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-1_20260720_111623.csv",
+    "raw_logs\\telemetry\\speed-low_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-2_20260720_111921.csv",
+    "raw_logs\\telemetry\\speed-low_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-3_20260720_112722.csv",
+    "raw_logs\\telemetry\\speed-low_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-4_20260720_110854.csv",
+    "raw_logs\\telemetry\\speed-low_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-5_20260720_113452.csv",
+    "raw_logs\\telemetry\\speed-low_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-1_20260721_113240.csv",
+    "raw_logs\\telemetry\\speed-low_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-2_20260715_185044.csv",
+    "raw_logs\\telemetry\\speed-low_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-3_20260715_185341.csv",
+    "raw_logs\\telemetry\\speed-low_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-4_20260715_190007.csv",
+    "raw_logs\\telemetry\\speed-low_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-5_20260715_190320.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-1_20260720_113804.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-2_20260720_114143.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-3_20260720_114429.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-4_20260720_114711.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-rough_permeable_concrete_latency-wifi_baseline_route-square0p5x3_attack-none_trial-5_20260720_115507.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-1_20260721_113640.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-2_20260721_114955.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-3_20260721_115218.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-4_20260721_115444.csv",
+    "raw_logs\\telemetry\\speed-medium_surface-smooth_kitchen_floor_latency-wifi_baseline_route-square0p5x3_attack-none_trial-5_20260721_115709.csv"
+  ],
+  "cross_validated_mae": {
+    "q_xx": 0.017395693898473005,
+    "q_yy": 0.019135818346026283,
+    "q_tt": 0.016755322774366362
+  },
+  "candidate_cross_validated_mae": {
+    "random_forest": {
+      "q_xx": 0.022157142136802525,
+      "q_yy": 0.022101639831210728,
+      "q_tt": 0.020122887777463554
+    },
+    "mlp": {
+      "q_xx": 0.017395693898473005,
+      "q_yy": 0.019135818346026283,
+      "q_tt": 0.016755322774366362
+    }
+  },
+  "median_baseline_mae": {
+    "q_xx": 0.016021890777574866,
+    "q_yy": 0.01654240449939956,
+    "q_tt": 0.01636663040177077
+  },
+  "mae_improvement_over_median": {
+    "q_xx": -0.0857453804903594,
+    "q_yy": -0.15677369313033407,
+    "q_tt": -0.023749077424852105
+  },
+  "candidate_mae_improvement_over_median": {
+    "random_forest": {
+      "q_xx": -0.38292929619860483,
+      "q_yy": -0.3360596902350532,
+      "q_tt": -0.22950706916961838
+    },
+    "mlp": {
+      "q_xx": -0.0857453804903594,
+      "q_yy": -0.15677369313033407,
+      "q_tt": -0.023749077424852105
+    }
+  },
+  "best_method_by_target": {
+    "q_xx": "median_baseline",
+    "q_yy": "median_baseline",
+    "q_tt": "median_baseline"
+  },
+  "target_median": {
+    "q_xx": 0.0010730375366868462,
+    "q_yy": 0.002760324453128022,
+    "q_tt": 0.007407464017510754
+  },
+  "target_p90": {
+    "q_xx": 0.04844723353125269,
+    "q_yy": 0.050130272326334525,
+    "q_tt": 0.05018498240304039
+  },
+  "target_floor_fraction": {
+    "q_xx": 0.4354255668747946,
+    "q_yy": 0.3013473545842918,
+    "q_tt": 0.0
+  },
+  "feature_importance": {},
+  "limitations": [
+    "position labels contain residual benign GPS noise after startup-noise subtraction",
+    "the model is frozen from the current 20-run corpus and has no independent prospective test set",
+    "a rejected candidate is retained as an artifact but must not be activated in the primary campaign"
+  ]
+}

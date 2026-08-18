@@ -1,0 +1,14 @@
+{
+  "primary_unit": "held-out LOSO sequence/fold after averaging the three deterministic seeds",
+  "n_seed_replicates": 3,
+  "bootstrap_samples": 20000,
+  "fixed_baseline_method": "fixed_v5",
+  "ate_vs_fixed": {
+    "n_folds": 10,
+    "mean_difference_m_dual_minus_fixed": -2.266702960139879,
+    "mean_improvement_pct": 21.964634815492097,
+    "median_improvement_pct": 3.513635816060233,
+    "paired_sign_flip_p_two_sided": 0.09619451902740486,
+    "cohen_dz": -0.5348841586892222
+  }
+}
