@@ -1,0 +1,16 @@
+method,wheel_odo,imu,camera,lidar,radar,gnss,proprioceptive_only,official_ape_translation_rmse_m,official_ape_rotation_rmse_deg,official_ape_translation_macro_mean_m,official_ape_rotation_macro_mean_deg,official_rpe_50m_translation_rmse_m,official_rpe_100m_translation_rmse_m,official_rpe_300m_translation_rmse_m,comparability_status,source,note
+Twin V2,yes,yes,no,no,no,no,yes,2.186774019807987,3.7064598374464115,1.634951586325073,3.0113289294229943,1.3098507447717376,2.2174917794987303,3.634980995780345,DIRECTLY_COMPARABLE,results/i2nav_official_benchmark/ + results/final_audit/,Twin V2 uses wheel/odometry and IMU at runtime only; ground truth is used for training supervision and held-out evaluation. README-compatible RMS is sequence-RMS; macro mean is preserved separately.
+Fixed Physics,yes,yes,no,no,no,no,yes,5.1374566863475195,179.13351319488996,3.2990018136214587,179.1328072021402,46.15391616020069,97.8180902691899,173.9487165213514,DIRECTLY_COMPARABLE,results/i2nav_official_benchmark/ + results/final_audit/,Fixed Physics is included as the local nonlearned baseline; rotation/RPE comparisons have a body-frame caveat.
+VINS-Mono,no,yes,yes,no,no,no,no,5.38,1.71,,,NR,NR,NR,DIRECTLY_COMPARABLE,i2Nav-Robot README benchmark table,Official i2Nav-Robot README odometry benchmark table.
+DM-VIO,no,yes,yes,no,no,no,no,,,,,NR,NR,NR,NOT_COMPARABLE,i2Nav-Robot README benchmark table,i2Nav README aggregate row is Invalid.
+OpenVINS (Stereo),no,yes,yes,no,no,no,no,1.93,1.01,,,NR,NR,NR,DIRECTLY_COMPARABLE,i2Nav-Robot README benchmark table,Official i2Nav-Robot README odometry benchmark table.
+DLIO,no,yes,no,yes,no,no,no,3.5,4.74,,,NR,NR,NR,DIRECTLY_COMPARABLE,i2Nav-Robot README benchmark table,Official i2Nav-Robot README odometry benchmark table.
+FF-LINS,no,yes,no,yes,no,no,no,3.23,2.0,,,NR,NR,NR,DIRECTLY_COMPARABLE,i2Nav-Robot README benchmark table,Official i2Nav-Robot README odometry benchmark table.
+FAST-LIO2,no,yes,no,yes,no,no,no,1.12,1.11,,,NR,NR,NR,DIRECTLY_COMPARABLE,i2Nav-Robot README benchmark table,Official i2Nav-Robot README odometry benchmark table.
+FAST-LIVO2,no,yes,yes,yes,no,no,no,1.42,0.83,,,NR,NR,NR,DIRECTLY_COMPARABLE,i2Nav-Robot README benchmark table,Official i2Nav-Robot README odometry benchmark table.
+LE-VINS,no,yes,yes,yes,no,no,no,1.43,0.55,,,NR,NR,NR,DIRECTLY_COMPARABLE,i2Nav-Robot README benchmark table,Official i2Nav-Robot README odometry benchmark table.
+R3LIVE,no,yes,yes,yes,no,no,no,,,,,NR,NR,NR,NOT_COMPARABLE,i2Nav-Robot README benchmark table,i2Nav README aggregate row is Invalid.
+KF-GINS,no,yes,no,no,no,yes,no,10.43,26.53,,,NR,NR,NR,PARTIALLY_COMPARABLE,i2Nav-Robot README benchmark table,GNSS-based README table uses the subset where GNSS methods are listed.
+OB-GINS,no,yes,no,no,no,yes,no,9.98,9.55,,,NR,NR,NR,PARTIALLY_COMPARABLE,i2Nav-Robot README benchmark table,GNSS-based README table uses the subset where GNSS methods are listed.
+VINS-Fusion (Mono),no,yes,yes,no,no,yes,no,10.39,16.53,,,NR,NR,NR,PARTIALLY_COMPARABLE,i2Nav-Robot README benchmark table,GNSS-based README table uses the subset where GNSS methods are listed.
+IC-GVINS,no,yes,yes,no,no,yes,no,0.41,0.32,,,NR,NR,NR,PARTIALLY_COMPARABLE,i2Nav-Robot README benchmark table,GNSS-based README table uses the subset where GNSS methods are listed.

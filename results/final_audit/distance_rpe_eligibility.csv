@@ -1,0 +1,13 @@
+method,distance_m,n_sequences,n_runs,eligible_sequences,excluded_sequences,excluded_runs,exclusion_reason,statistical_unit,status
+Fixed Physics,50,10,10,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Fixed Physics,100,10,10,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Fixed Physics,150,10,10,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Fixed Physics,200,10,10,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Fixed Physics,250,10,10,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Fixed Physics,300,10,10,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Twin V2,50,10,30,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Twin V2,100,10,30,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Twin V2,150,10,30,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Twin V2,200,10,30,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Twin V2,250,10,30,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS
+Twin V2,300,10,30,building00;building01;building02;parking00;parking01;parking02;playground00;street00;street01;street02,,0,,physical sequence; seeds are algorithmic replicates,PASS

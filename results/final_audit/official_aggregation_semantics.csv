@@ -1,0 +1,6 @@
+metric,arithmetic_sequence_macro_mean,official_table_sequence_RMS_if_needed,n_sequences,note
+official_ape_translation_rmse_m,1.634951586325073,2.186774019807987,10,"evaluate_odometry computes per-run metrics; i2Nav-Robot README table labels aggregate RMS values, so retain both arithmetic macro mean and sequence-RMS for later table matching."
+official_ape_rotation_rmse_deg,3.011328929422994,3.7064598374464115,10,"evaluate_odometry computes per-run metrics; i2Nav-Robot README table labels aggregate RMS values, so retain both arithmetic macro mean and sequence-RMS for later table matching."
+official_rpe_50m_translation_rmse_m,1.3098507447717376,1.364631339145701,10,"evaluate_odometry computes per-run metrics; i2Nav-Robot README table labels aggregate RMS values, so retain both arithmetic macro mean and sequence-RMS for later table matching."
+official_rpe_100m_translation_rmse_m,2.2174917794987303,2.2715007476357236,10,"evaluate_odometry computes per-run metrics; i2Nav-Robot README table labels aggregate RMS values, so retain both arithmetic macro mean and sequence-RMS for later table matching."
+official_rpe_300m_translation_rmse_m,3.6349809957803445,3.817315184722383,10,"evaluate_odometry computes per-run metrics; i2Nav-Robot README table labels aggregate RMS values, so retain both arithmetic macro mean and sequence-RMS for later table matching."

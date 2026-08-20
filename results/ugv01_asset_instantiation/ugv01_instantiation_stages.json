@@ -1,0 +1,129 @@
+{
+  "schema": "ugv01_instantiation_stages_v1",
+  "stages": [
+    {
+      "stage_id": "S0",
+      "stage_name": "generic_nominal_vendor_template",
+      "status": "supplemental_only",
+      "source_artifact": "docs/apriltag_turn_calibration.md",
+      "changes_from_previous": "None; uses vendor/nominal tracked geometry before asset binding.",
+      "parameters": {
+        "nominal_physical_width_m": 0.141,
+        "distance_scale": 1.0,
+        "direct_gyro_fusion_weight": 0.0
+      },
+      "evaluation_note": "Only available on supplemental turn-calibration evidence, not on the strict 142023 headline run."
+    },
+    {
+      "stage_id": "S1",
+      "stage_name": "ugv01_frame_sensor_adapter_current",
+      "status": "accepted_comparator",
+      "source_artifact": "DigitalTwin/datasets/analysis/ugv01_apriltag_old_current_142023",
+      "changes_from_previous": "Binds telemetry conventions, encoder signs, AprilTag frame, video/telemetry timing, and current UGV01 effective turn width.",
+      "parameters": {
+        "schema": "ugv01_apriltag_fidelity_v1",
+        "tracking_source": "DigitalTwin\\datasets\\analysis\\validation_carpet_142023_four_tag_elevation\\apriltag_still_summary.json",
+        "telemetry_source": "raw_logs\\telemetry\\ugv_t147_interactive_20260812_142023.csv",
+        "selected_intervals_s": [
+          [
+            0.0,
+            162.66
+          ],
+          [
+            188.66,
+            239.3
+          ]
+        ],
+        "effective_track_width_m": 0.192,
+        "gyro_weight": 0.2,
+        "gyro_scale": 1.0,
+        "evaluation_samples_approximately_10hz": 1893,
+        "directly_decoded_evaluation_samples": 610,
+        "recovered_evaluation_samples": 1283,
+        "directly_decoded_evaluation_fraction": 0.32223983095615427,
+        "estimated_video_minus_telemetry_offset_s": 20.00000000000057,
+        "synchronization_method": "full_motion_activity_correlation",
+        "synchronization_correlation": 0.9647941090231279,
+        "synchronization_event_video_s": null,
+        "synchronization_event_telemetry_s": null,
+        "synchronization_uncertainty_s": 0.02499999999999858,
+        "position_ate_rmse_m": 0.13066022502665492,
+        "position_error_median_m": 0.08007183434158853,
+        "position_error_p95_m": 0.24292452312466062,
+        "position_error_max_m": 0.4205697021578793,
+        "within_0p05_fraction": 0.2150026413100898,
+        "within_0p10_fraction": 0.6376122556788167,
+        "within_0p25_fraction": 0.9524564183835182,
+        "rpe_1s_rmse_m": 0.03546385914600249,
+        "rpe_1s_median_m": 0.007075213914831718,
+        "heading_mae_deg": 13.29038804211949,
+        "heading_p95_deg": 30.630801030080825,
+        "encoder_only_ate_rmse_m": 0.26300850057651176,
+        "gyro_bias_deg_s": 0.665,
+        "camera_stationary_jitter_rmse_m": 0.0013799071408167418,
+        "camera_stationary_jitter_p95_m": 0.003886727522987364,
+        "per_interval": [
+          {
+            "interval": 1,
+            "video_start_s": 0.0,
+            "video_end_s": 162.66,
+            "samples": 1427,
+            "position_rmse_m": 0.1175279397485029,
+            "position_median_m": 0.07759969802350482,
+            "position_p95_m": 0.19726587019587402,
+            "truth_path_length_m": 6.1607086753930025,
+            "estimated_path_length_m": 6.344443962491741,
+            "path_length_ratio": 1.029823725934747
+          },
+          {
+            "interval": 2,
+            "video_start_s": 188.66,
+            "video_end_s": 239.3,
+            "samples": 466,
+            "position_rmse_m": 0.16447722743010748,
+            "position_median_m": 0.14538040501910152,
+            "position_p95_m": 0.27297378178239007,
+            "truth_path_length_m": 2.573897090218442,
+            "estimated_path_length_m": 2.5523256065070354,
+            "path_length_ratio": 0.9916191351265035
+          }
+        ],
+        "interpretation": "Preliminary prediction-only fidelity. The run has no GPS updates and no hardware camera/telemetry synchronization pulse; the scalar time offset was estimated from the recorded motion sequence.",
+        "distance_scale": 1.0,
+        "clockwise_width_m": 0.192,
+        "counterclockwise_width_m": 0.192
+      },
+      "evaluation_note": "Valid paired comparator on the same physical run and strict usable windows."
+    },
+    {
+      "stage_id": "S2",
+      "stage_name": "ugv01_carpet_asset_specific_fitted",
+      "status": "accepted_development_instantiation",
+      "source_artifact": "DigitalTwin/datasets/analysis/ugv01_apriltag_finetuned_full_142023",
+      "changes_from_previous": "Adds UGV01 carpet-specific distance scale, asymmetric effective track widths, and bounded gyro contribution selected on training portion.",
+      "parameters": {
+        "distance_scale": 0.975,
+        "clockwise_width_m": 0.20000000000000004,
+        "counterclockwise_width_m": 0.19000000000000003,
+        "gyro_weight": 0.2,
+        "gyro_scale": 1.0
+      },
+      "evaluation_note": "Evaluated on same strict usable windows and temporal holdout; not an independent final run."
+    },
+    {
+      "stage_id": "S3",
+      "stage_name": "ugv01_carpet_asset_specific_full_repaired",
+      "status": "current_headline_low_speed_carpet",
+      "source_artifact": "DigitalTwin/datasets/analysis/ugv01_apriltag_finetuned_full_142023_continuity_repaired",
+      "changes_from_previous": "Applies the asset-specific candidate to the repaired full 142023 window.",
+      "parameters": {
+        "distance_scale": 0.975,
+        "clockwise_width_m": 0.20000000000000004,
+        "counterclockwise_width_m": 0.19000000000000003,
+        "gyro_weight": 0.2,
+        "gyro_scale": 1.0
+      },
+      "evaluation_note": "Current headline UGV01 fidelity result for low-speed carpet development validation."
+    }
+  ]
+}

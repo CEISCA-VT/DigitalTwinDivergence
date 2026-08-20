@@ -1,0 +1,303 @@
+{
+  "schema": "digital_twin_fidelity_frozen_results_manifest_v1",
+  "date": "2026-08-20",
+  "freeze_status": "READY_TO_FREEZE",
+  "frozen_v2_root": "results/i2nav_v2_full_loso/i2nav_v2_full_loso",
+  "base_seeds": [
+    42,
+    1042,
+    2042
+  ],
+  "held_out_physical_sequences": [
+    "building00",
+    "building01",
+    "building02",
+    "parking00",
+    "parking01",
+    "parking02",
+    "playground00",
+    "street00",
+    "street01",
+    "street02"
+  ],
+  "statistical_unit": "physical sequence; timestamps nested in seed runs nested in physical sequences",
+  "official_protocol": {
+    "source": "i2Nav-WHU/evaluate_odometry",
+    "association_tolerance_s": 0.005,
+    "alignment": "SE3_no_scale",
+    "scale_correction": false,
+    "rpe_deltas_m": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300
+    ],
+    "rpe_all_pairs": true,
+    "rpe_relative_delta_tolerance": 0.002
+  },
+  "headline_values": [
+    {
+      "metric": "Official V2 APE translation macro mean",
+      "expected_value": 1.635,
+      "recomputed_value": 1.634951586325073,
+      "source_file": "results/i2nav_official_benchmark/official_macro_summary.csv",
+      "formula": "Twin V2 sequence macro mean",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Official V2 APE rotation macro mean",
+      "expected_value": 3.011,
+      "recomputed_value": 3.0113289294229943,
+      "source_file": "results/i2nav_official_benchmark/official_macro_summary.csv",
+      "formula": "Twin V2 sequence macro mean",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Official V2 RPE50 translation macro mean",
+      "expected_value": 1.31,
+      "recomputed_value": 1.3098507447717376,
+      "source_file": "results/i2nav_official_benchmark/official_macro_summary.csv",
+      "formula": "Twin V2 sequence macro mean",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Official V2 RPE50 percent macro mean",
+      "expected_value": 2.62,
+      "recomputed_value": 2.619701489543475,
+      "source_file": "results/i2nav_official_benchmark/official_macro_summary.csv",
+      "formula": "Twin V2 sequence macro mean",
+      "tolerance": 0.005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Official V2 RPE100 translation macro mean",
+      "expected_value": 2.217,
+      "recomputed_value": 2.2174917794987303,
+      "source_file": "results/i2nav_official_benchmark/official_macro_summary.csv",
+      "formula": "Twin V2 sequence macro mean",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Official V2 RPE100 percent macro mean",
+      "expected_value": 2.22,
+      "recomputed_value": 2.2174917794987303,
+      "source_file": "results/i2nav_official_benchmark/official_macro_summary.csv",
+      "formula": "Twin V2 sequence macro mean",
+      "tolerance": 0.005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Official V2 RPE300 translation macro mean",
+      "expected_value": 3.635,
+      "recomputed_value": 3.634980995780345,
+      "source_file": "results/i2nav_official_benchmark/official_macro_summary.csv",
+      "formula": "Twin V2 sequence macro mean",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Official V2 RPE300 percent macro mean",
+      "expected_value": 1.21,
+      "recomputed_value": 1.2116603319267814,
+      "source_file": "results/i2nav_official_benchmark/official_macro_summary.csv",
+      "formula": "Twin V2 sequence macro mean",
+      "tolerance": 0.005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Fixed Physics APE translation macro mean",
+      "expected_value": 3.299,
+      "recomputed_value": 3.2990018136214587,
+      "source_file": "results/i2nav_official_benchmark/official_macro_summary.csv",
+      "formula": "Fixed sequence macro mean",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Fixed->V2 APE absolute macro difference",
+      "expected_value": -1.664,
+      "recomputed_value": -1.6640502272963855,
+      "source_file": "results/i2nav_official_benchmark/official_method_comparison.csv",
+      "formula": "V2 macro mean - Fixed macro mean",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Fixed->V2 APE macro mean reduction percent",
+      "expected_value": -50.44,
+      "recomputed_value": -50.44102190018759,
+      "source_file": "results/i2nav_official_benchmark/official_method_comparison.csv",
+      "formula": "100*(V2-Fixed)/Fixed",
+      "tolerance": 0.005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Fixed->V2 APE mean sequence-wise relative reduction percent",
+      "expected_value": -34.89,
+      "recomputed_value": -34.8942018758626,
+      "source_file": "results/i2nav_official_benchmark/official_method_comparison.csv",
+      "formula": "mean over sequences of 100*(V2_s-Fixed_s)/Fixed_s",
+      "tolerance": 0.005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Fixed->V2 APE sequence wins",
+      "expected_value": 9,
+      "recomputed_value": 9.0,
+      "source_file": "results/i2nav_official_benchmark/official_method_comparison.csv",
+      "formula": "count V2_s < Fixed_s",
+      "tolerance": 0.0,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "Fixed->V2 RPE50 sequence wins",
+      "expected_value": 10,
+      "recomputed_value": 10.0,
+      "source_file": "results/i2nav_official_benchmark/official_method_comparison.csv",
+      "formula": "count V2_s < Fixed_s",
+      "tolerance": 0.0,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "parking02 official aligned APE translation",
+      "expected_value": 5.747,
+      "recomputed_value": 5.747199631918071,
+      "source_file": "results/i2nav_official_benchmark/official_internal_comparison.csv",
+      "formula": "seed-mean official APE",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "parking02 internal ATE",
+      "expected_value": 11.35,
+      "recomputed_value": 11.350360762519498,
+      "source_file": "results/i2nav_official_benchmark/official_internal_comparison.csv",
+      "formula": "seed-mean internal ATE",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "parking02 internal Dp p95",
+      "expected_value": 22.345,
+      "recomputed_value": 22.344767075273904,
+      "source_file": "results/i2nav_official_benchmark/official_internal_comparison.csv",
+      "formula": "seed-mean internal Dp p95",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "parking02 internal Dtheta p95",
+      "expected_value": 30.415,
+      "recomputed_value": 30.41531733182064,
+      "source_file": "results/i2nav_official_benchmark/official_internal_comparison.csv",
+      "formula": "seed-mean internal Dtheta p95",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "parking02 internal RPE10",
+      "expected_value": 0.097,
+      "recomputed_value": 0.0971390761221561,
+      "source_file": "results/i2nav_official_benchmark/official_internal_comparison.csv",
+      "formula": "seed-mean internal RPE10",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "parking01 official aligned APE translation",
+      "expected_value": 1.92,
+      "recomputed_value": 1.9196212887231707,
+      "source_file": "results/i2nav_official_benchmark/official_internal_comparison.csv",
+      "formula": "seed-mean official APE",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "parking01 internal ATE",
+      "expected_value": 4.071,
+      "recomputed_value": 4.071047086397852,
+      "source_file": "results/i2nav_official_benchmark/official_internal_comparison.csv",
+      "formula": "seed-mean internal ATE",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    },
+    {
+      "metric": "parking01 internal Dp p95",
+      "expected_value": 7.763,
+      "recomputed_value": 7.762674126810559,
+      "source_file": "results/i2nav_official_benchmark/official_internal_comparison.csv",
+      "formula": "seed-mean internal Dp p95",
+      "tolerance": 0.0005,
+      "status": "PASS",
+      "rounding_convention": "manuscript values rounded to 3 decimals unless percent is reported to 2 decimals"
+    }
+  ],
+  "known_limitations": [
+    "Fixed Physics official orientation/RPE values likely reflect a legacy body-frame/orientation-convention mismatch.",
+    "Exact frozen V1 trajectories are unavailable for official benchmark evaluation.",
+    "Benign p95 envelopes are descriptive, not detection thresholds.",
+    "Official benchmark and internal DT-fidelity answer different questions."
+  ],
+  "post_freeze_rule": "No result-changing training, tuning, checkpoint selection, normalization changes, protocol changes, or post-hoc optimization should occur unless a genuine correctness error is discovered and documented.",
+  "checksums": [
+    {
+      "path": "results\\i2nav_official_benchmark\\official_macro_summary.csv",
+      "sha256": "ad8b9f39873ed962c35dcdd44391a647fe40cb58a8a03239c76d7656bde22048"
+    },
+    {
+      "path": "results\\i2nav_official_benchmark\\official_per_sequence_results.csv",
+      "sha256": "02f47df941cfcd6b6f0f61611af234c2696dcc19a032038fbf9e3d033cdc5ad9"
+    },
+    {
+      "path": "results\\i2nav_official_benchmark\\official_method_comparison.csv",
+      "sha256": "2d63596875e7caa858dccd033c1ba456ee85c44540570e11981ec0d08282310f"
+    },
+    {
+      "path": "results\\i2nav_v2_post_loso_analysis\\all_sequence_mechanism\\mechanism_summary.md",
+      "sha256": "de756cbb20ef8eb89fe97bd81825a401f076cee0d4aca96887aff49801f9855e"
+    },
+    {
+      "path": "results\\i2nav_v2_post_loso_analysis\\condition_fidelity\\condition_fidelity_summary.md",
+      "sha256": "3507da641a5ab0998b4495445f1d2e5fc6f81ea96d1ea0643e092603d9e38616"
+    },
+    {
+      "path": "results\\i2nav_v2_post_loso_analysis\\benign_fidelity_characterization\\benign_fidelity_framework_summary.md",
+      "sha256": "c73a74e2859c0c1f4f764a7d9fff495b1a641b33d8a6ae346001b2f95889f9fe"
+    },
+    {
+      "path": "results\\i2nav_v2_post_loso_analysis\\loso_envelope_validation\\loso_benign_envelope_validation_summary.md",
+      "sha256": "6ff34050c87e154483fc09153d17a81074db55ab994d5dc1f58ac381435d0f8d"
+    },
+    {
+      "path": "results\\ugv01_asset_instantiation\\ugv01_asset_instantiation_summary.md",
+      "sha256": "a59f134df3eb58e4ea4aba19216b88bea1032e9e8023fa90c6a4b13ed6844067"
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "status": "V1 official comparison unavailable - no equivalent frozen trajectories.",
+  "searched_root": "results",
+  "candidate_count": 31,
+  "accepted": [],
+  "rejected": [
+    {
+      "path": "results\\i2nav_v1_frozen\\source_snapshot\\DigitalTwin\\analysis\\i2nav_loso_ablation.py",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_01_building00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_02_building01_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_03_building02_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_04_parking00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_05_parking01_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_06_parking02_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_07_playground00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_08_street00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_09_street01_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_10_street02_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_01_building00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_02_building01_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_03_building02_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_04_parking00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_05_parking01_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_06_parking02_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_07_playground00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_08_street00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_09_street01_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_02_base1042\\fold_10_street02_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_01_building00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_02_building01_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_03_building02_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_04_parking00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_05_parking01_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_06_parking02_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_07_playground00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_08_street00_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_09_street01_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_03_base2042\\fold_10_street02_gru_dual_trajectory.csv",
+      "reason": "does not establish exact frozen V1 trajectory correspondence for all 10 sequences and 3 seeds"
+    }
+  ],
+  "search_terms": "i2nav + v1 + trajectory/estimate_traj/prediction_trace/run_summary/loso"
+}

@@ -1,0 +1,6 @@
+claim,status,evidence
+Twin V2 provides competitive trajectory fidelity using only wheel/odometry and IMU sensing.,SUPPORTED_WITH_QUALIFICATION,Twin V2 has README-compatible ATE sequence-RMS 2.187 m and uses no camera/LiDAR/radar/GNSS at runtime; stronger exteroceptive methods remain better.
+Twin V2 achieves a favorable sensing-fidelity tradeoff relative to heavier i2Nav navigation systems.,SUPPORTED_WITH_QUALIFICATION,It sits between weak VI/LI rows and strong LIO/LVIO rows while using fewer runtime sensing modalities.
+Twin V2 is Pareto-optimal in sensing burden versus trajectory fidelity.,NOT_SUPPORTED,"No defensible scalar sensing burden is defined, and the audited external table is not exhaustive."
+"Removing camera, LiDAR, radar, and GNSS necessarily produces only a modest fidelity penalty.",NOT_SUPPORTED,"FAST-LIO2, FAST-LIVO2, LE-VINS, OpenVINS, and IC-GVINS report lower ATE under their respective protocol rows."
+The results support describing the proposed twin as sensor-lightweight.,SUPPORTED,"Twin V2 runtime inference uses wheel/odometry and IMU only, with camera/LiDAR/radar/GNSS absent."

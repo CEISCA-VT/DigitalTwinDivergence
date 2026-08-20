@@ -1,0 +1,209 @@
+{
+  "schema": "i2nav_v2_benign_fidelity_characterization_manifest_v1",
+  "script_version": "2026-08-20-benign-fidelity-envelope-v1",
+  "frozen_full_loso_commit": "6540c01f90f3c1074de0d8dae9964a5276fbbc91",
+  "analysis_git_commit": "6540c01f90f3c1074de0d8dae9964a5276fbbc91",
+  "source_artifacts": {
+    "full_loso_results_root": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\results\\i2nav_v2_full_loso",
+    "condition_definitions": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\results\\i2nav_v2_post_loso_analysis\\condition_fidelity\\condition_definitions.json",
+    "all_sequence_mechanism_per_run": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\results\\i2nav_v2_post_loso_analysis\\all_sequence_mechanism\\per_run_mechanism.csv",
+    "condition_fidelity_outputs": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\results\\i2nav_v2_post_loso_analysis\\condition_fidelity",
+    "architecture_independent_evaluator": "DigitalTwin/analysis/i2nav_fidelity_evaluator.py"
+  },
+  "frozen_condition_variables_used": [
+    "speed",
+    "acceleration",
+    "turning",
+    "curvature",
+    "wheel_imu_disagreement",
+    "elapsed_time"
+  ],
+  "excluded_variables": {
+    "lateral_slip_proxy": "unavailable in frozen canonical i2Nav context",
+    "persistent_yaw_mismatch": "retained in profile/stability context but not used as a supported operating-context envelope variable"
+  },
+  "aggregation_hierarchy": [
+    "within-run timestamp distributions are descriptive",
+    "condition metrics are computed within each seed run",
+    "three seeds are aggregated within each physical sequence",
+    "physical sequence is the primary dataset-level unit"
+  ],
+  "percentile_definition": "benign_envelope_p95 is the empirical 95th percentile across sequence-level seed-aggregated within-condition p95 values for each component",
+  "limitations": [
+    "Only 10 physical sequences are available for dataset-level inference.",
+    "p95 envelope values are descriptive benign percentiles, not detection thresholds.",
+    "parking01/parking02 can strongly influence long-horizon position and heading dimensions.",
+    "The lateral/slip proxy is unavailable in the current frozen canonical context.",
+    "Exceeding a p95 envelope only means uncommon relative to characterized benign data."
+  ],
+  "profile_rows": 30,
+  "condition_definitions_digest": {
+    "schema": "i2nav_v2_condition_definitions_v1",
+    "script_version": "2026-08-20-condition-fidelity-v1",
+    "mechanism_script_version_reused": "2026-08-20-all-sequence-mechanism-v1",
+    "frozen_full_loso_commit": "6540c01f90f3c1074de0d8dae9964a5276fbbc91",
+    "bin_policy": "Numeric stress variables use global 1/3 and 2/3 quantiles of condition variables only. Outcome variables are not used to choose thresholds.",
+    "statistical_hierarchy": "timestamps within seed runs within physical sequences within dataset",
+    "variables": {
+      "speed": {
+        "type": "numeric_tertile",
+        "source_column": "condition_speed_abs_mps",
+        "description": "translational speed magnitude from canonical ODO",
+        "units": "m/s",
+        "finite_sample_count": 132272,
+        "thresholds": {
+          "low_upper": 1.2593880812740503,
+          "medium_upper": 1.4378397274068409
+        },
+        "bins": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "nominal_bin": "low",
+        "degradation_supported": true
+      },
+      "acceleration": {
+        "type": "numeric_tertile",
+        "source_column": "condition_accel_abs_mps2",
+        "description": "absolute longitudinal acceleration from ODO speed gradient",
+        "units": "m/s^2",
+        "finite_sample_count": 132272,
+        "thresholds": {
+          "low_upper": 0.1372894559464223,
+          "medium_upper": 0.3484036352922583
+        },
+        "bins": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "nominal_bin": "low",
+        "degradation_supported": true
+      },
+      "turning": {
+        "type": "numeric_tertile",
+        "source_column": "condition_yaw_abs_radps",
+        "description": "absolute IMU yaw rate / turning intensity",
+        "units": "rad/s",
+        "finite_sample_count": 132272,
+        "thresholds": {
+          "low_upper": 0.0065087747108200965,
+          "medium_upper": 0.02312433784901431
+        },
+        "bins": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "nominal_bin": "low",
+        "degradation_supported": true
+      },
+      "curvature": {
+        "type": "numeric_tertile",
+        "source_column": "condition_curvature_abs_radpm",
+        "description": "absolute curvature proxy |yaw rate| / max(|speed|, 0.10)",
+        "units": "rad/m",
+        "finite_sample_count": 128561,
+        "thresholds": {
+          "low_upper": 0.005202367506612036,
+          "medium_upper": 0.018105164631123768
+        },
+        "bins": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "nominal_bin": "low",
+        "degradation_supported": true
+      },
+      "wheel_imu_disagreement": {
+        "type": "numeric_tertile",
+        "source_column": "condition_wheel_imu_disagreement_abs_radps",
+        "description": "absolute canonical wheel-IMU yaw disagreement",
+        "units": "rad/s",
+        "finite_sample_count": 132272,
+        "thresholds": {
+          "low_upper": 0.009923896247294709,
+          "medium_upper": 0.026304054708298812
+        },
+        "bins": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "nominal_bin": "low",
+        "degradation_supported": true
+      },
+      "persistent_yaw_mismatch": {
+        "type": "numeric_tertile",
+        "source_column": "condition_persistent_yaw_mismatch_deg_per_min",
+        "description": "run-level absolute mean V2 yaw residual",
+        "units": "deg/min",
+        "finite_sample_count": 132272,
+        "thresholds": {
+          "low_upper": 0.4657882836041377,
+          "medium_upper": 0.877093002071983
+        },
+        "bins": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "nominal_bin": "low",
+        "degradation_supported": false
+      },
+      "lateral_slip_proxy": {
+        "type": "unavailable",
+        "source_column": "condition_lateral_proxy_abs_mps",
+        "description": "absolute canonical lateral wheel-motion proxy when available",
+        "units": "m/s",
+        "finite_sample_count": 0,
+        "bins": [],
+        "nominal_bin": null,
+        "degradation_supported": false,
+        "note": "No finite values were present in the frozen canonical context."
+      },
+      "elapsed_time": {
+        "type": "fixed_fraction",
+        "source_column": "condition_elapsed_fraction",
+        "description": "elapsed fraction within each run",
+        "units": "fraction of run duration",
+        "thresholds": {
+          "early_upper": 0.3333333333333333,
+          "middle_upper": 0.6666666666666666
+        },
+        "bins": [
+          "early",
+          "middle",
+          "late"
+        ],
+        "nominal_bin": "early",
+        "degradation_supported": true
+      },
+      "environment": {
+        "type": "metadata_category",
+        "source_column": "condition_environment_category",
+        "description": "sequence prefix category supported by i2Nav sequence names",
+        "categories": [
+          "building",
+          "parking",
+          "playground",
+          "street"
+        ],
+        "bins": [
+          "building",
+          "parking",
+          "playground",
+          "street"
+        ],
+        "nominal_bin": null,
+        "degradation_supported": false,
+        "note": "Used for descriptive stratification only; not an ordered stress variable."
+      }
+    },
+    "analysis_git_commit": "6540c01f90f3c1074de0d8dae9964a5276fbbc91",
+    "input_results_root": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\results\\i2nav_v2_full_loso",
+    "input_data_root": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\im2nav"
+  }
+}

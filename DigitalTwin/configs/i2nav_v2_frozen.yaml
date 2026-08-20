@@ -1,0 +1,35 @@
+experiment:
+  name: i2nav_v2_full_loso
+  status: frozen_after_three_fold_pilot
+
+data:
+  rate_hz: 10.0
+  fast_context_s: 2.0
+  slow_context_s: 30.0
+
+model:
+  architecture: slow_additive_sensor_consistency
+  hidden_size: 64
+  num_layers: 2
+  dv_limit: 0.15
+  dw_fast_limit: 0.020
+  slow_bias_limit: 0.005
+
+evaluation:
+  rpe_horizons_s: [1, 5, 10]
+  fidelity_percentile: 0.95
+
+seeds:
+  base_seeds: [42, 1042, 2042]
+
+folds:
+  - building00
+  - building01
+  - building02
+  - parking00
+  - parking01
+  - parking02
+  - playground00
+  - street00
+  - street01
+  - street02

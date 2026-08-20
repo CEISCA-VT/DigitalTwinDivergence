@@ -1,0 +1,8 @@
+association,x,y,n_sequences,pearson_r_sequence_level,spearman_r_sequence_level,note
+persistent yaw mismatch -> accumulated yaw residual,persistent_abs_yaw_residual_deg_per_min,Iomega_max_abs_deg,10,0.9741957287038716,0.9515151515151514,sequence-level after aggregating the three seeds
+Iomega -> heading divergence,Iomega_max_abs_deg,Dtheta_p95_deg,10,0.3806209511667704,-0.0303030303030303,sequence-level after aggregating the three seeds
+heading divergence -> position divergence,Dtheta_p95_deg,Dp_p95_m,10,0.9879839070179625,0.9515151515151514,sequence-level after aggregating the three seeds
+wheel-IMU yaw disagreement -> persistent yaw mismatch,wheel_imu_yaw_disagreement_abs_mean_radps,persistent_abs_yaw_residual_deg_per_min,10,-0.4614878587682833,-0.22424242424242422,sequence-level after aggregating the three seeds
+short-horizon local fidelity vs global divergence,RPE10_m,Dp_p95_m,10,-0.1871407673943347,0.28484848484848485,sequence-level after aggregating the three seeds
+1s local fidelity vs global divergence,RPE1_m,Dp_p95_m,10,-0.1780814262996413,0.34545454545454546,sequence-level after aggregating the three seeds
+turning intensity vs global divergence,curvature_abs_mean_radpm,Dp_p95_m,10,0.43760545478072554,0.709090909090909,sequence-level after aggregating the three seeds

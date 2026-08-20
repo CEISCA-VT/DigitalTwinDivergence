@@ -1,0 +1,16 @@
+method,class,wheel_odo,imu,camera,lidar,radar,gnss,proprioceptive_only,sensor_count_reported,sensor_model_reported,compute_hardware_reported,runtime_latency_reported,power_reported,source
+Twin V2,wheel/odo+IMU,yes,yes,no,no,no,no,yes,NR,NR,NR,NR,NR,local frozen official i2Nav benchmark outputs
+Fixed Physics,wheel/odo+IMU,yes,yes,no,no,no,no,yes,NR,NR,NR,NR,NR,local frozen official i2Nav benchmark outputs
+VINS-Mono,VI,no,yes,yes,no,no,no,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+DM-VIO,VI,no,yes,yes,no,no,no,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+OpenVINS (Stereo),VI,no,yes,yes,no,no,no,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+DLIO,LI,no,yes,no,yes,no,no,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+FF-LINS,LI,no,yes,no,yes,no,no,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+FAST-LIO2,LI,no,yes,no,yes,no,no,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+FAST-LIVO2,LVI,no,yes,yes,yes,no,no,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+LE-VINS,LVI,no,yes,yes,yes,no,no,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+R3LIVE,LVI,no,yes,yes,yes,no,no,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+KF-GINS,GI,no,yes,no,no,no,yes,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+OB-GINS,GI,no,yes,no,no,no,yes,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+VINS-Fusion (Mono),GVI,no,yes,yes,no,no,yes,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table
+IC-GVINS,GVI,no,yes,yes,no,no,yes,no,NR,NR,NR,NR,NR,i2Nav-Robot README benchmark table

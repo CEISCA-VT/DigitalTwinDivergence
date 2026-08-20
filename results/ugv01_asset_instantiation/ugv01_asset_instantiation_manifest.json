@@ -1,0 +1,28 @@
+{
+  "schema": "ugv01_asset_instantiation_audit_v1",
+  "no_training_or_tuning_performed": true,
+  "source_artifacts": {
+    "strict_tracking": "DigitalTwin/datasets/analysis/validation_carpet_142023_four_tag_continuity_repaired/apriltag_still_summary.json",
+    "strict_telemetry": "raw_logs/telemetry/ugv_t147_interactive_20260812_142023.csv",
+    "old_current": "DigitalTwin/datasets/analysis/ugv01_apriltag_old_current_142023",
+    "fitted_strict": "DigitalTwin/datasets/analysis/ugv01_apriltag_finetuned_full_142023",
+    "fitted_full": "DigitalTwin/datasets/analysis/ugv01_apriltag_finetuned_full_142023_continuity_repaired",
+    "temporal_calibration": "DigitalTwin/datasets/analysis/ugv01_apriltag_finetune_142023/temporal_calibration_summary.json",
+    "split_doc": "docs/apriltag_validation_split.md",
+    "finetune_doc": "docs/ugv01_apriltag_finetune_results.md",
+    "turn_doc": "docs/apriltag_turn_calibration.md"
+  },
+  "outputs": [
+    "inventory.md",
+    "ugv01_asset_inventory.csv",
+    "ugv01_instantiation_stages.json",
+    "ugv01_fidelity_by_stage.csv",
+    "ugv01_instantiation_comparison.png",
+    "ugv01_reference_uncertainty.md",
+    "ugv01_claim_evidence_matrix.csv",
+    "ugv01_asset_instantiation_summary.md",
+    "ugv01_existing_apriltag_condition_comparison.csv",
+    "ugv01_existing_apriltag_condition_comparison.md",
+    "ugv01_existing_apriltag_condition_comparison.png"
+  ]
+}

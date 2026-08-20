@@ -1,0 +1,29 @@
+{
+  "schema": "i2nav_v2_loso_benign_envelope_validation_manifest_v1",
+  "script_version": "2026-08-20-loso-envelope-validation-v1",
+  "frozen_full_loso_commit": "6540c01f90f3c1074de0d8dae9964a5276fbbc91",
+  "no_training_tuning_or_v2_modification": true,
+  "condition_definitions": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\results\\i2nav_v2_post_loso_analysis\\condition_fidelity\\condition_definitions.json",
+  "contexts": [
+    "speed",
+    "acceleration",
+    "turning",
+    "curvature",
+    "wheel_imu_disagreement",
+    "elapsed_time"
+  ],
+  "components": [
+    "Dp_m",
+    "Dtheta_deg",
+    "Dv_mps",
+    "Domega_radps",
+    "Iomega_abs_deg"
+  ],
+  "statistical_hierarchy": [
+    "timestamp observations describe within-run coverage",
+    "coverage is summarized inside seed runs",
+    "seed-run variability is reported separately",
+    "physical sequence is the held-out validation unit"
+  ],
+  "interpretation": "p95 exceedance is a descriptive benign-envelope exceedance only; it is not an attack, anomaly, failure, or untrustworthiness label"
+}

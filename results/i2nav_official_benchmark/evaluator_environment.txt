@@ -1,0 +1,36 @@
+Python executable:
+C:\Python313\python.exe
+
+Python version:
+Python 3.13.3
+
+Python package manager:
+pip 25.0.1 from C:\Python313\Lib\site-packages\pip (python 3.13)
+
+Installed evaluator dependencies:
+evo v1.37.0
+numpy-quaternion 2024.0.13
+
+Install command used:
+C:\Python313\python.exe -m pip install evo numpy-quaternion
+
+Install note:
+Packages were installed in the Python 3.13 user site because normal site-packages was not writeable.
+
+Import/version test:
+python C:\Python313\python.exe
+evo v1.37.0
+numpy-quaternion ok
+evo core ok
+
+Synthetic TUM sanity test:
+Source evaluator: results/i2nav_official_benchmark/sources/evaluate_odometry/evaluate.py
+Input: non-collinear synthetic TUM trajectory and offset copy
+associated poses: 401
+ape_t: 0.0
+ape_r: 0.0
+rpe50_t: 0.0
+rpe50_r: 0.0
+
+Important:
+No frozen V2 trajectory was exported or scored during this setup task.

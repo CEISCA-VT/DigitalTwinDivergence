@@ -1,0 +1,12 @@
+{
+  "schema": "ugv01_i2nav_fidelity_protocol_v1",
+  "evaluator": "DigitalTwin.analysis.i2nav_fidelity_evaluator.evaluate_fidelity_frames",
+  "conditions": [
+    "carpet_low_speed",
+    "smooth_floor_trapezoid",
+    "smooth_floor_square_1p5"
+  ],
+  "core_metrics": "exact i2Nav evaluator; horizons 1/5/10 s",
+  "rate_metrics": "derived from aligned physical/twin poses; not raw prediction-trace residuals",
+  "no_training_or_tuning": true
+}

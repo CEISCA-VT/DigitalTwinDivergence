@@ -1,0 +1,145 @@
+{
+  "schema": "i2nav_official_protocol_verification_v1",
+  "date": "2026-08-20",
+  "status": "READY_FOR_FROZEN_V2_OFFICIAL_EVALUATION",
+  "no_benchmark_numbers_generated": true,
+  "authoritative_sources": [
+    {
+      "name": "i2Nav-Robot",
+      "url": "https://github.com/i2Nav-WHU/i2Nav-Robot.git",
+      "commit": "2ffdca6d56e6432d4daf27c070e570171548f32d",
+      "evidence_paths": [
+        "README.md",
+        "LICENSE"
+      ],
+      "license": "GPLv3; academic use stated in README"
+    },
+    {
+      "name": "evaluate_odometry",
+      "url": "https://github.com/i2Nav-WHU/evaluate_odometry.git",
+      "commit": "6553b1a1d1de79ea50686664ceaacfa02d4f2fe1",
+      "evidence_paths": [
+        "README.md",
+        "evaluate.py"
+      ],
+      "license": "No LICENSE file present in cloned repository"
+    },
+    {
+      "name": "LE-VINS",
+      "url": "https://github.com/i2Nav-WHU/LE-VINS.git",
+      "commit": "ad0b395f5675d17a35ed1a6386f411fd1d61ee19",
+      "evidence_paths": [
+        "README.md",
+        "LICENSE"
+      ],
+      "license": "GPLv3"
+    }
+  ],
+  "verified_protocol": {
+    "trajectory_format": {
+      "value": "TUM-style rows: timestamp tx ty tz qx qy qz qw",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "i2Nav-Robot README raw text table; evaluate_odometry/evaluate.py numpy_to_trajectory"
+    },
+    "position_frame": {
+      "value": "local NED for i2Nav-Robot ground truth trajectory",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "i2Nav-Robot README raw text table"
+    },
+    "body_frame_practice": {
+      "value": "front-right-down is required by i2Nav group navigation systems such as LE-VINS",
+      "classification": "SUPPORTED_BY_I2NAV_GROUP_PRACTICE",
+      "source": "LE-VINS README"
+    },
+    "timestamp_convention": {
+      "value": "raw text timestamps are GNSS seconds of week; trajectory files use seconds",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "i2Nav-Robot README; evaluate_odometry/gpstime.py"
+    },
+    "timestamp_association_tolerance_s": {
+      "value": 0.005,
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py MAX_TIME_SYNC_DIFF"
+    },
+    "alignment": {
+      "value": "SE3 alignment",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py trajectory_align"
+    },
+    "scale_correction": {
+      "value": "disabled: correct_scale=False, correct_only_scale=False",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py trajectory_align"
+    },
+    "ape_translation": {
+      "value": "evo APE PoseRelation.translation_part RMSE",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py evaluate_ape"
+    },
+    "ape_rotation": {
+      "value": "evo APE PoseRelation.rotation_angle_deg RMSE",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py evaluate_ape"
+    },
+    "rpe_translation": {
+      "value": "evo RPE PoseRelation.translation_part",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py evaluate_rpe"
+    },
+    "rpe_rotation": {
+      "value": "evo RPE PoseRelation.rotation_angle_deg",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py evaluate_rpe"
+    },
+    "rpe_unit": {
+      "value": "meters",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py metrics.Unit.meters"
+    },
+    "rpe_distances_m": {
+      "value": [
+        50,
+        100,
+        150,
+        200,
+        250,
+        300
+      ],
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py RPE_DELTA"
+    },
+    "rpe_pair_selection": {
+      "value": "all pairs",
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py IS_RPE_ALL_PAIRS"
+    },
+    "rpe_relative_delta_tolerance": {
+      "value": 0.002,
+      "classification": "VERIFIED_OFFICIAL",
+      "source": "evaluate_odometry/evaluate.py evaluate_rpe"
+    }
+  },
+  "repo_local_assessment": {
+    "DigitalTwin/analysis/i2nav_final_model_study.py": "protocol-equivalent for metric mechanics; project-specific ENU/FLU to NED/FRD export is locally derived",
+    "DigitalTwin/analysis/i2nav_final_model_study_v2.py": "protocol-equivalent for metric mechanics; project-specific ENU/FLU to NED/FRD export is locally derived",
+    "existing_official_protocol_manifest_json": "consistent with authoritative evaluate_odometry protocol"
+  },
+  "evaluator_environment": {
+    "python_executable": "C:\\Python313\\python.exe",
+    "python_version": "3.13.3",
+    "evo_version": "v1.37.0",
+    "numpy_quaternion": "installed",
+    "sanity_test": {
+      "description": "non-collinear synthetic TUM trajectory with offset copy evaluated through evaluate_odometry/evaluate.py",
+      "associated_poses": 401,
+      "ape_translation_rmse_m": 0.0,
+      "ape_rotation_rmse_deg": 0.0,
+      "rpe50_translation_rmse_m": 0.0,
+      "rpe50_rotation_rmse_deg": 0.0
+    }
+  },
+  "unresolved_fields": [
+    "evaluate_odometry repository has no LICENSE file in the cloned source; cite source provenance separately from licensing.",
+    "The official sources verify i2Nav trajectory frame and evaluator mechanics, while our internal ENU/FLU to NED/FRD export remains a project-specific conversion that must be documented during export."
+  ]
+}
