@@ -1,0 +1,111 @@
+% ============================================================================
+% Publication-hardening additions (pre-GPS)
+% Suggested placement:
+%   - Related-work paragraph: Digital-Twin Fidelity subsection.
+%   - Conceptual table: end of Related Work or before cross-evaluator results.
+%   - Cross-evaluator subsection: after Official Benchmark/Sensor-Fidelity.
+%   - Domain-general subsection: Discussion.
+% ============================================================================
+
+% --- Related-work paragraph ---
+A particularly relevant comparator is the trace-alignment fidelity framework
+of Mu\~noz \emph{et al.}~\cite{munoz2024}. Their method compares physical and
+digital behavioral traces through snapshot-level similarity and sequence
+alignment. This supports a broad class of cyber--physical systems and is
+intentionally tolerant of temporal displacement when two traces exhibit
+behaviorally equivalent state sequences. Our objective is complementary. For
+a continuously synchronized mobile asset, temporal displacement can itself be
+operationally meaningful; we therefore preserve physical--virtual time
+correspondence and decompose disagreement by component, temporal horizon,
+persistence, tail severity, and operating condition. We compare the two
+approaches empirically rather than treating either as a universal replacement
+for the other.
+
+% --- Conceptual comparison table ---
+\begin{table*}[t]
+\caption{Conceptual comparison of synchronized TFP and Mu\~noz-style trace alignment.}
+\label{tab:tfp_munoz_concept}
+\centering
+\footnotesize
+\begin{tabular}{p{0.24\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
+\toprule
+Property & Twin Fidelity Profile & Mu\~noz-style trace alignment \\
+\midrule
+Primary objective & Operational physical--virtual synchronization & Behavioral trace equivalence \\
+Timestamp correspondence & Preserved & Alignment may absorb temporal displacement \\
+Local/global separation & Explicit & Not a primary decomposition \\
+Persistent/accumulated mismatch & Explicit residual diagnostics & Indirect through aligned trace structure \\
+Tail behavior & Explicit p95/max summaries & Not a primary output \\
+Condition dependence & Explicit conditional benign profile & Not central to the base formulation \\
+Physical units & Preserved componentwise & Depends on snapshot-distance definition \\
+General CPS applicability & Domain-general structure; robot validation here & Broad trace/state representations \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+% --- Cross-evaluator methods/results paragraph ---
+\subsection{Cross-Evaluator Fidelity Validation}
+\label{sec:cross_evaluator}
+To test whether the proposed profile merely reproduces conventional trajectory
+rankings, the same frozen trajectories are evaluated using synchronized TFP,
+Mu\~noz-style behavioral trace alignment~\cite{munoz2024}, and a time-agnostic
+path-geometry comparison motivated by physical--virtual robot evaluation such
+as~\cite{bergs2025}. All 30 frozen V1/V2 sequence--replicate pairs were first
+verified to have identical sample counts, timestamps, and physical
+ground-truth position and heading. Consequently, differences in matched
+operational fidelity are not attributable to different evaluation windows or
+reference trajectories.
+
+For trace alignment, position and heading are evaluated separately. A fixed
+sensitivity grid is retained rather than selecting a favorable tolerance
+post hoc: position MAD values are $\{0.25,0.5,1.0\}$~m per coordinate and
+heading MAD values are $\{2^\circ,5^\circ,10^\circ\}$. Gap opening and
+extension scores are $-1.0$ and $-0.1$, respectively. Correlations between
+evaluators are computed across physical sequences rather than timestamps,
+and uncertainty is estimated by resampling sequences with replacement.
+These correlations are therefore interpreted as exploratory at $n=10$.
+
+The evaluators are expected to agree most strongly on global fidelity and to
+differ more on the interpretation of local motion. The parking02 sequence is
+the central example: both aligned-trace and synchronized evaluators identify
+poor overall fidelity, while TFP additionally exposes the specific
+low-local/high-global failure structure. The intended claim is therefore
+additional diagnostic resolution for continuously synchronized mobile-robot
+DTs, not universal superiority over trace alignment.
+
+% --- Domain-general structure ---
+\subsection{Domain-General Structure and Empirical Scope}
+The experiments in this paper validate TFP on mobile-robot digital twins, but
+the organizing principle is not intrinsically tied to planar pose. Let the
+physical asset expose application-relevant quantities
+\begin{equation}
+\mathbf{z}_p(t)=[z_{p,1}(t),\ldots,z_{p,M}(t)]^\top
+\end{equation}
+and let the twin expose corresponding quantities $\mathbf{z}_T(t)$. For each
+component, an application-appropriate discrepancy operator defines
+\begin{equation}
+D_i(t)=d_i\!\left(z_{p,i}(t),z_{T,i}(t)\right).
+\end{equation}
+The mobile-robot instantiation uses position, heading, forward velocity, and
+yaw rate with Euclidean, wrapped-angular, and rate discrepancies. The
+transferable structure is the analysis applied to $D_i$: instantaneous
+disagreement, finite-horizon behavior where meaningful, global or accumulated
+disagreement, persistent signed residuals, tail statistics, sequence-aware
+uncertainty, and condition-dependent benign envelopes. Other DT domains
+require their own physically meaningful variables, discrepancy operators,
+reference measurements, and operating conditions.
+
+We distinguish mathematical portability from empirical validation. The
+evidence in this paper establishes the framework on mobile robotic assets.
+Application to thermal, electrical, structural, manufacturing, or other
+cyber--physical twins requires independent domain-specific validation.
+Accordingly, we claim a domain-general \emph{structure} with a mobile-robot
+empirical instantiation, not experimentally demonstrated universality across
+all DT domains.
+
+% --- Bibliography item ---
+\bibitem{munoz2024}
+P. Mu\~noz, M. Wimmer, J. Troya, and A. Vallecillo,
+``Measuring the Fidelity of a Physical and a Digital Twin Using Trace
+Alignments,'' \emph{IEEE Transactions on Software Engineering}, vol. 50,
+no. 12, pp. 3122--3145, 2024, doi: 10.1109/TSE.2024.3462978.
