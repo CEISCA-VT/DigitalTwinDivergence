@@ -80,3 +80,7 @@ Inspect `results/PUBLICATION_HARDENING_SUMMARY.md` first. The headline manuscrip
 ### Muñoz on MAGNET
 
 The package deliberately does **not** approximate the Muñoz trace-alignment baseline. The published Muñoz method uses an application-specific maximum admissible distance (MAD), normally related to measurement accuracy. A clean comparison should use the authors' official implementation and a defensible MAGNET measurement-accuracy/MAD choice. Unless that information is established, retain the Muñoz comparison in the primary mobile-robot experiments and use MAGNET for cross-domain transfer validation.
+
+
+## V3 final publication checks
+The runner now adds a strict same-RMSE counterexample audit within the 23-window non-overlapping subset, an explicit metric-redundancy claim boundary, a compact main-paper evidence table, and a publication-ready counterexample figure with separate units. Inspect `MAGNET_FINAL_PUBLICATION_DECISION.md` after each run.

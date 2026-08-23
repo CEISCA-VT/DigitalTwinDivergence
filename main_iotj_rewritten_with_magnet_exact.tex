@@ -1,0 +1,631 @@
+\documentclass[journal]{IEEEtran}
+
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{balance}
+\usepackage[hidelinks]{hyperref}
+
+% Compile-safe figure helper. The final submission should contain every file
+% referenced under the root figure directory. Missing files render as labeled placeholders.
+\newcommand{\safegraphic}[2][\linewidth]{%
+  \IfFileExists{#2}{\includegraphics[width=#1]{#2}}{%
+    \fbox{\parbox[c][1.15in][c]{0.92\linewidth}{\centering\scriptsize
+      Missing figure:\\[-1mm]\detokenize{#2}}}%
+  }%
+}
+
+\title{Operational Physical--Virtual Fidelity in Sensor-Lightweight Mobile-Robot Digital Twins Under Changing Conditions}
+
+\author{Shreyas Udaya%
+\thanks{S. Udaya is with the Bradley Department of Electrical and Computer Engineering, Virginia Tech, Blacksburg, VA, USA.}%
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Digital twins (DTs) of mobile robots are increasingly used as computational references for monitoring, prediction, control, and cyber--physical decision making, but localization accuracy alone does not establish whether a virtual counterpart remains faithful to a particular physical asset. This paper formulates operational DT fidelity as a multidimensional physical--virtual property and instantiates it for sensor-lightweight mobile robots using position, heading, velocity, and yaw-rate disagreement. The Twin Fidelity Profile (TFP) separates instantaneous, finite-horizon, global, persistent, accumulated, tail, timing, and operating-condition-dependent behavior without collapsing heterogeneous physical quantities into one score. On a frozen 10-sequence $\times$ 3-seed i2Nav study, Twin V2 reduces macro-mean ATE from 2.834 to 2.398~m, heading MAE from $3.336^{\circ}$ to $2.569^{\circ}$, 10-s RPE from 0.271 to 0.253~m, and maximum accumulated yaw residual from $9.273^{\circ}$ to $6.892^{\circ}$. The accumulated-yaw metric improves on all 10 physical sequences, while 1-s RPE is essentially preserved. Sequence-bootstrap analysis shows strong convergent validity between TFP global errors and Mu\~noz-style trace-alignment fidelity, but weak association between trace matching and RPE10, supporting a distinct local/global decomposition. Controlled replay shows that 50-ms timing jitter can increase RPE1 by 66.2\% while changing ATE by only 0.085\%, and 200-ms delay increases RPE10 by 82.1\%. Conditioned benign envelopes, five-sequence TerraSentia transfer, and AprilTag-referenced UGV01 experiments further show that fidelity is context dependent, asset specific, and separable from maintenance-model portability. A fourth validation layer applies the same structure to the public Idaho National Laboratory MAGNET single-heat-pipe DT. Among 23 dependence-reduced non-overlapping forecast windows, median RMSE rises from 0.0876~$^{\circ}$C at 0--60~s to 6.618~$^{\circ}$C at 301--599~s; the median paired increase is 6.042~$^{\circ}$C (95\% bootstrap CI 2.283--6.695~$^{\circ}$C), with long-horizon error larger in 95.7\% of windows. Matched-RMSE counterexamples further show that similar aggregate RMSE can conceal substantially different tail, persistence, and temporal-fidelity behavior. This non-robot case supports cross-domain structural transfer without implying universal validation across all DT domains.
+\end{abstract}
+
+\begin{IEEEkeywords}
+digital twin, Internet of Things, mobile robot, cyber--physical systems, fidelity, physical--virtual synchronization, wheel--inertial sensing, edge sensing, condition-dependent validation
+\end{IEEEkeywords}
+
+\section{Introduction}
+\IEEEPARstart{D}{igital} twins link physical assets with computational counterparts that are updated from sensing and used for monitoring, prediction, control, verification, maintenance, and decision support. A DT is therefore more than a simulation or a model of a system class: its usefulness depends on whether the virtual representation remains associated with, synchronized to, and empirically credible for a particular physical asset and use case \cite{dtc,jones2020,shao2023,nist8620}. Fidelity is consequently a property that must be measured rather than assumed.
+
+Mobile robots make this requirement difficult. Their physical--virtual relationship changes with wheel slip, surface properties, turning dynamics, actuator response, geometry, encoder behavior, inertial bias, timing error, and trajectory history. Cameras, LiDAR, radar, and GNSS can constrain some of these errors, but they add sensing, bandwidth, calibration, computation, and power burden. This motivates an IoT/edge setting in which a robot exposes low-bandwidth proprioceptive measurements---for example wheel/odometry and IMU streams---to a computational counterpart. The relevant question is then not simply whether an estimator produces a low trajectory error. It is whether the virtual asset remains a sufficiently faithful operational surrogate, how that fidelity degrades, and whether its benign limits are known.
+
+This paper therefore treats the \emph{digital twin itself} as the object of study. Established trajectory metrics are used as measurements inside a broader physical--virtual fidelity protocol rather than as an odometry leaderboard. The central observation is that a twin may reproduce short segments of relative motion accurately while becoming globally displaced from the physical asset. Conversely, a globally aligned benchmark score can suppress operational displacement that matters to a continuously synchronized DT. Fidelity must therefore be evaluated across state components, temporal scales, persistent residuals, tails, operating conditions, and synchronization quality.
+
+The paper makes five contributions.
+\begin{enumerate}
+    \item \textbf{A domain-general fidelity structure with a mobile-robot instantiation.} We define componentwise physical--virtual discrepancy operators and instantiate them as position, heading, forward-speed, and yaw-rate disagreement. The framework preserves physical units and avoids an arbitrary universal scalar.
+    \item \textbf{A multiscale Twin Fidelity Profile and sequence-aware inference.} TFP combines instantaneous disagreement, RPE at 1/5/10~s, global ATE/heading error, persistent signed residuals, accumulated yaw mismatch, p95/max tails, and operating-condition summaries. Dataset-level claims use the held-out physical sequence, not timestamps, as the statistical unit.
+    \item \textbf{Mechanism and condition analysis for sensor-lightweight twin maintenance.} A frozen 10-sequence $\times$ 3-seed evaluation shows that the V2 maintenance mechanism primarily improves rotational, persistent, and longer-horizon fidelity while preserving short-horizon behavior; operating conditions affect different fidelity components differently.
+    \item \textbf{Cross-evaluator and IoT-system validation.} We compare synchronized TFP with Mu\~noz-style behavioral trace alignment \cite{munoz2024} and time-agnostic path geometry motivated by robot-DT validation \cite{bergs2025}. We additionally quantify controlled timing sensitivity and the model-side state/data footprint relevant to edge deployment.
+    \item \textbf{Cross-platform, cross-domain, and physical evidence.} Five TerraSentia sequences separate evaluator portability from maintenance-model portability, AprilTag-referenced UGV01 experiments demonstrate asset-specific physical instantiation, and the public MAGNET heat-pipe DT provides a non-robot test of whether the same horizon/residual/tail fidelity structure can be instantiated with different physical variables and time scales.
+\end{enumerate}
+
+The scope is deliberately narrower than state-of-the-art localization or universal DT certification. We do not claim that fewer sensors are universally better or that TFP universally dominates other DT-fidelity methods. The mobile-robot experiments provide the primary validation; MAGNET provides one deliberately different thermal-domain instantiation showing that the organizing structure is not restricted to trajectory metrics. Broader universality across DT domains remains an open validation question.
+
+\section{Related Work}
+\subsection{Digital-Twin Fidelity, Credibility, and Validation}
+The DT literature contains multiple definitions of fidelity and credibility. Jones \emph{et al.} identify twinning, metrology, synchronization, and levels of fidelity as recurring concepts and open concerns \cite{jones2020}. Kober \emph{et al.} formulate objective-dependent optimum fidelity for manufacturing DTs \cite{kober2023}, while Zhang \emph{et al.} propose multidimensional fidelity evaluation for aero-engine assembly \cite{zhang2025}. NIST credibility work emphasizes verification, validation, and uncertainty quantification as prerequisites for trustworthy DT use \cite{shao2023,nist8620}. These works establish fidelity as a first-class DT property, but they do not directly address a mobile asset whose physical--virtual disagreement evolves continuously with dynamics, sensing, and operating context.
+
+Mu\~noz \emph{et al.} provide the closest direct evaluator baseline: physical and digital behavioral traces are compared through snapshot similarity and sequence alignment, yielding percentage matched and aligned-distance measures \cite{munoz2024}. That formulation is intentionally broad and can regard temporally displaced but behaviorally equivalent traces as similar. Our objective is complementary. For a continuously synchronized mobile twin, temporal displacement can itself be operationally important; TFP therefore preserves physical--virtual time correspondence and explicitly decomposes local/global, componentwise, persistent, tail, and condition-dependent behavior.
+
+
+\subsection{Cross-Domain Thermal Digital Twins}
+A useful non-robot reference is the Idaho National Laboratory (INL) MAGNET single-heat-pipe digital twin. Wilsdon \emph{et al.} demonstrated a DT running alongside a physical heat pipe in the Microreactor AGile Non-nuclear Experimental Testbed, using LASSO-based variable selection followed by vector-autoregressive forecasting to predict future heat-pipe behavior and support anticipatory self-adjustment \cite{wilsdon2023magnet}. INL subsequently released the corresponding physical experiment and machine-learning forecast data \cite{inlmagnetdata}. The published study establishes a genuine physical/virtual thermal DT with predictive operation; our use is different. We do not redesign its controller or forecasting model. Instead, we use the released measured/forecast traces as a cross-domain test of whether the proposed fidelity structure can be instantiated outside mobile-robot pose and motion variables.
+
+\subsection{Robot Digital Twins and Physical--Virtual Synchronization}
+Robot DTs have been used for navigation, control, virtual--physical testbeds, and runtime verification. Robopheus couples a physical and virtual mobile-robot environment \cite{ding2021}; Yang \emph{et al.} study DT-based navigation and control with physical--virtual synchronization \cite{yang2025}; and Betzer \emph{et al.} use a TurtleBot DT as a cloud-based watchdog under uncertainty \cite{betzer2024}. Bergs \emph{et al.} evaluate real and simulated mobile-manipulator navigation using localization, path, goal, and uncertainty measures, including path-geometry comparison \cite{bergs2025}. These studies show the utility of synchronized virtual representations. Our focus is the preceding question: when is the DT itself sufficiently faithful, in which dimensions, and under which operating conditions?
+
+\subsection{Wheel--Inertial Localization as an Enabling Technology}
+Wheel--inertial localization is the closest enabling robotics literature. Brossard and Bonnabel learn wheel-odometry and IMU error corrections for localization \cite{brossard2019}; WING combines wheel and inertial sensing with learned correction, uncertainty modeling, filtering, and ground-manifold constraints \cite{jiang2025}; and YNet learns yaw velocity from IMU and wheel-encoder measurements for invariant-filter-based inertial-wheel odometry \cite{zhou2025ynet}. These methods demonstrate that low-burden proprioceptive sensing can support strong localization. Their primary objective is state estimation. In the present work, wheel--inertial modeling is one mechanism used to maintain a DT, while the primary evaluation object is the physical--virtual relationship itself.
+
+i2Nav-Robot provides ten long indoor/outdoor sequences with synchronized odometry, inertial sensing, cameras, LiDAR, radar, GNSS, and high-accuracy reference trajectories \cite{tang2025}. It is used as the primary frozen benchmark. TerraSentia provides a substantially different skid-steer agricultural platform with IMU, GPS/RTK, wheel/motor measurements, and rough under-canopy operation \cite{cuaran2024}, allowing us to separate framework portability from model portability.
+
+\subsection{Why Benign Fidelity Matters for IoT Monitoring}
+DTs increasingly support anomaly diagnosis and cyber--physical monitoring \cite{ma2024,alcaraz2024,wu2023}. Such systems implicitly assume that benign physical--virtual disagreement is characterized. If ordinary turning, slip, accumulated bias, domain shift, or timing error can produce large divergence, a detector that alarms on raw disagreement can confuse model inadequacy with a fault or attack. This paper intentionally stops before attack detection and characterizes benign fidelity first.
+
+\begin{table*}[t]
+\caption{Conceptual comparison of synchronized TFP and Mu\~noz-style trace alignment. The methods are complementary rather than universally ordered.}
+\label{tab:tfpmunozconcept}
+\centering
+\footnotesize
+\begin{tabular}{p{0.22\textwidth}p{0.35\textwidth}p{0.35\textwidth}}
+\toprule
+Property & Twin Fidelity Profile & Mu\~noz-style trace alignment \\
+\midrule
+Primary objective & Operational physical--virtual synchronization & Behavioral trace equivalence \\
+Timestamp correspondence & Preserved; timing error can be fidelity loss & Alignment may absorb temporal displacement \\
+Local/global separation & Explicit & Not a primary decomposition \\
+Persistent/accumulated mismatch & Explicit signed and integrated diagnostics & Indirect through aligned trace structure \\
+Tail behavior & Explicit p95/max summaries & Not a primary output \\
+Condition dependence & Explicit conditional benign profile & Not central to the base formulation \\
+Physical units & Preserved componentwise & Depends on snapshot-distance definition \\
+General applicability & Domain-general structure; robot validation here & Broad CPS/state representations \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Physical--Virtual Fidelity Framework}
+\subsection{Domain-General Fidelity Structure}
+Let a physical asset expose $M$ application-relevant quantities
+\begin{equation}
+\mathbf{z}_p(t)=[z_{p,1}(t),\ldots,z_{p,M}(t)]^{\top},
+\end{equation}
+with corresponding twin quantities $\mathbf{z}_T(t)$. For each component, an application-appropriate discrepancy operator $d_i(\cdot,\cdot)$ defines
+\begin{equation}
+D_i(t)=d_i\!\left(z_{p,i}(t),z_{T,i}(t)\right).
+\end{equation}
+The transferable object is not a specific choice of meters or radians, but the structure applied to $D_i(t)$: instantaneous disagreement, finite-horizon behavior where meaningful, global/accumulated disagreement, persistent signed residuals, tail statistics, statistical variability, and condition-dependent benign distributions. Different physical quantities therefore retain their native semantics rather than being forced into a universal weighted score.
+
+The primary empirical validation in this paper is mobile-robot specific, but Sec.~\ref{sec:magnet} adds a deliberately different thermal-domain instantiation using the public MAGNET heat-pipe DT. That experiment replaces pose/motion quantities with measured and forecast heater temperature and replaces second-scale relative-motion horizons with minute-scale forecast horizons. It therefore provides empirical evidence for \emph{cross-domain structural transfer}: the same component, horizon, signed-residual, and tail concepts can be re-instantiated without importing robot-specific ATE or RPE semantics. One thermal case does not establish universality; structural, electrical, manufacturing, and other DT domains still require their own variables, discrepancy operators, references, conditions, and validation.
+
+\subsection{Mobile-Robot Instantiation}
+For planar motion,
+\begin{align}
+\mathbf{x}_p(t)&=[x_p(t),y_p(t),\theta_p(t)]^{\top},\\
+\mathbf{x}_T(t)&=[x_T(t),y_T(t),\theta_T(t)]^{\top},
+\end{align}
+with forward velocities $v_p,v_T$ and yaw rates $\omega_p,\omega_T$. Operational fidelity is evaluated in a common initialized physical--virtual frame. Post-hoc alignment used by an external localization benchmark is reported separately and is not used to hide operational drift.
+
+The mobile-robot divergence process is
+\begin{equation}
+\mathbf{D}(t)=[D_p(t),D_\theta(t),D_v(t),D_\omega(t)]^{\top},
+\end{equation}
+where
+\begin{align}
+D_p(t)&=\sqrt{(x_p-x_T)^2+(y_p-y_T)^2},\\
+D_\theta(t)&=\left|\operatorname{wrap}(\theta_p-\theta_T)\right|,\\
+D_v(t)&=|v_p-v_T|,\\
+D_\omega(t)&=|\omega_p-\omega_T|.
+\end{align}
+
+\subsection{Instantaneous, Finite-Horizon, and Global Fidelity}
+Let $T_p(t),T_T(t)\in SE(2)$ denote physical and virtual poses. Relative motion over horizon $h$ is
+\begin{align}
+\Delta T_p(t,h)&=T_p(t)^{-1}T_p(t+h),\\
+\Delta T_T(t,h)&=T_T(t)^{-1}T_T(t+h),\\
+E_R(t,h)&=\Delta T_p(t,h)^{-1}\Delta T_T(t,h).
+\end{align}
+The translational finite-horizon error is
+\begin{equation}
+\mathrm{RPE}_p(h)=\sqrt{\frac{1}{N_h}\sum_{k=1}^{N_h}\left\|\operatorname{trans}(E_R(t_k,h))\right\|_2^2},
+\end{equation}
+with $h\in\{1,5,10\}$~s. Global operational synchronization is summarized by
+\begin{align}
+\mathrm{ATE}&=\sqrt{\frac{1}{N}\sum_{k=1}^{N}D_p(t_k)^2},\\
+\mathrm{MAE}_\theta&=\frac{1}{N}\sum_{k=1}^{N}D_\theta(t_k).
+\end{align}
+ATE and heading MAE are thus components of fidelity, not standalone definitions of a faithful twin.
+
+\subsection{Persistent, Accumulated, and Tail Disagreement}
+Signed residuals retain directional information lost by absolute errors:
+\begin{equation}
+r_v(t)=v_p(t)-v_T(t),\qquad r_\omega(t)=\omega_p(t)-\omega_T(t).
+\end{equation}
+Persistent rotational mismatch over interval $\mathcal{T}$ is
+\begin{equation}
+\bar r_\omega(\mathcal{T})=\frac{1}{|\mathcal{T}|}\int_{\mathcal{T}}r_\omega(t)\,dt,
+\end{equation}
+and the accumulated diagnostic is
+\begin{equation}
+I_\omega(t)=\int_0^t r_\omega(\tau)\,d\tau.
+\end{equation}
+$I_\omega$ is not assumed to equal $D_\theta$; wrapping, geometry, correction, and propagation prevent a universal one-to-one mapping.
+
+For each component $D_j$,
+\begin{equation}
+D_{j,q}=Q_q\!\left(\{D_j(t_k)\}_{k=1}^{N}\right),\qquad
+D_{j,\max}=\max_k D_j(t_k).
+\end{equation}
+We use $q=0.95$ as the principal descriptive upper-range statistic and report maxima separately.
+
+\subsection{Twin Fidelity Profile and Statistical Hierarchy}
+A run from model $m$, physical sequence $s$, and training seed $r$ is summarized by
+\begin{equation}
+\begin{split}
+\Phi_{s,r,m}=[&\mathrm{ATE},\mathrm{MAE}_\theta,\mathrm{RPE}_p(1),\mathrm{RPE}_p(5),\mathrm{RPE}_p(10),\\
+&|\bar r_\omega|,D_{p,95},D_{\theta,95},D_{p,\max},D_{\theta,\max},I_{\omega,\max}]^{\top}.
+\end{split}
+\end{equation}
+Rate-domain diagnostics are retained when valid reference/prediction traces are available.
+
+The data hierarchy is
+\begin{equation}
+\text{timestamp}\subset\text{seed run}\subset\text{physical sequence}\subset\text{dataset}.
+\end{equation}
+Timestamps within a run are correlated and are not treated as independent experimental replicates. Seeds quantify algorithmic variability on the same physical sequence. We first average seed-level metrics within a held-out sequence, then use the physical sequence as the primary dataset-level statistical unit. V1--V2 comparisons use paired sequence differences. We report mean and median behavior, 50,000-replicate sequence-bootstrap confidence intervals for paired changes, two-sided Wilcoxon signed-rank tests, matched-pairs rank-biserial effect sizes, and counts of improved sequences. Because the fidelity dimensions are prespecified and physically distinct, raw $p$-values are reported descriptively rather than treated as a multiplicity-adjusted binary proof of superiority.
+
+Cross-evaluator correlations likewise use one value per physical sequence. Their uncertainty is estimated with 20,000 sequence-bootstrap replicates and is interpreted as exploratory at $n=10$.
+
+\subsection{Conditioned Benign Fidelity Envelope}
+Let $c$ denote a benign operating context such as speed, acceleration, turning intensity, curvature, wheel--IMU disagreement, or elapsed-time regime. We characterize
+\begin{equation}
+\mathbf{D}(t)\mid H_0,c\sim P_{\mathrm{benign}}(\mathbf{D}\mid c),
+\end{equation}
+where $H_0$ denotes validated benign operation. A componentwise $q$-level envelope is
+\begin{equation}
+\mathcal{E}^{(q)}_{\mathrm{benign}}(c)=\{\mathbf{D}:D_j\le Q_q[D_j\mid H_0,c],\ \forall j\}.
+\end{equation}
+The envelope is descriptive. Exceeding a p95 bound means an observation is uncommon relative to the characterized benign distribution; it does not by itself imply an attack, fault, or universal loss of trust.
+
+\section{Sensor-Lightweight Twin and Experimental Protocol}
+\subsection{Twin Template and Asset-Specific Instantiation}
+The computational structure is first treated as a \emph{twin template}. A physical platform instantiates the template through deterministic information that establishes a common physical--virtual representation: sensor conventions, timing/synchronization, body-frame definitions, geometry where needed, and conversion of native proprioceptive measurements into canonical body-motion quantities. The learned core does not consume platform-specific wheel identities or steering labels directly.
+
+The virtual state is propagated using corrected forward speed and yaw rate,
+\begin{align}
+\theta_{T,k+1}&=\operatorname{wrap}(\theta_{T,k}+\omega_{T,k}\Delta t),\\
+x_{T,k+1}&=x_{T,k}+v_{T,k}\Delta t\cos\!\left(\theta_{T,k}+\frac{\omega_{T,k}\Delta t}{2}\right),\\
+y_{T,k+1}&=y_{T,k}+v_{T,k}\Delta t\sin\!\left(\theta_{T,k}+\frac{\omega_{T,k}\Delta t}{2}\right).
+\end{align}
+The learned variants correct body-motion quantities rather than regressing global pose directly.
+
+\subsection{Frozen Twin V1 and Twin V2}
+Twin V1 augments wheel/odometry and IMU motion with a two-layer GRU residual corrector. At 10~Hz, a 20-sample history contains odometry speed, IMU yaw rate, corresponding accelerations, and absolute rate/acceleration magnitudes. Bounded corrections are applied as
+\begin{equation}
+v_T=v_{\mathrm{odo}}+\Delta v_{V1},\qquad
+\omega_T=\omega_{\mathrm{IMU}}+\Delta\omega_{V1}.
+\end{equation}
+
+Twin V2 was motivated by measured failure modes rather than unconstrained architecture search. It separates transient correction from persistent rotational correction,
+\begin{equation}
+v_T=v_{\mathrm{odo}}+\Delta v_{\mathrm{fast}},\qquad
+\omega_T=\omega_{\mathrm{IMU}}+b_{\mathrm{slow}}+\Delta\omega_{\mathrm{fast}}.
+\end{equation}
+The fast branch uses the recent 2-s motion history; the bounded slow correction uses a 30-s causal context of wheel/IMU/odometry consistency features. Cameras, LiDAR, radar, and GNSS are excluded from the learned runtime maintenance mechanism. Ground truth is used for training supervision and held-out evaluation only. Training includes pointwise residual terms, differentiable 1/5/10-s rollout objectives, persistent signed-yaw terms, long-window mean-neutrality for the fast branch, slow-correction supervision, and smoothness regularization. The training objective itself is not used as a fidelity claim.
+
+\subsection{Evaluation Layers}
+Table~\ref{tab:datasets} summarizes the validation hierarchy. i2Nav is the primary frozen study. TerraSentia tests cross-platform portability on a different skid-steer agricultural robot. UGV01 provides a physical asset-specific instantiation with an independent AprilTag reference. MAGNET is intentionally different: it is a non-robot thermal DT used only to test cross-domain transfer of the fidelity evaluation structure.
+
+\begin{table*}[t]
+\caption{Evaluation layers and their roles.}
+\label{tab:datasets}
+\centering
+\footnotesize
+\begin{tabular}{p{0.10\textwidth}p{0.32\textwidth}p{0.20\textwidth}p{0.28\textwidth}}
+\toprule
+Layer & Role & Runtime twin sensing & Reference used for claims \\
+\midrule
+i2Nav & Main frozen 10-sequence LOSO $\times$ 3-seed study & wheel/odometry + IMU & dataset high-accuracy trajectory \\
+TerraSentia & External framework/model portability; 5 sequences, 150 frozen-V2 evaluations & four motor speeds + IMU & RTK/GPS position; fused EKF secondary \\
+UGV01 & Physical asset-specific instantiation under indoor conditions & onboard wheel/IMU & AprilTag-referenced pose \\
+MAGNET & Non-robot cross-domain fidelity-structure transfer & published thermal sensor/forecast pipeline & measured Heater Temp versus published DT forecast \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+For i2Nav, no model, checkpoint, sequence, condition bin, or prediction is modified after freeze. Frozen V1 and V2 archives contain 30 trajectories each. A protocol-equivalence audit verified all 30 sequence--replicate pairs: corresponding files have identical sample counts, timestamps, and physical ground-truth position/heading. Operational metrics therefore compare matched physical evidence.
+
+For TerraSentia, five processed RTK-reliable sequences totaling approximately 22~min are converted to the same canonical interface. All 30 frozen V2 fold/seed checkpoints are evaluated independently on every sequence without target-domain retraining, normalization refit, checkpoint selection, or prediction ensembling. RTK position is the primary external reference; the dataset-provided fused EKF is used only as a secondary yaw/heading diagnostic because it is not independent ground truth.
+
+For UGV01, AprilTag-referenced experiments bind the template to a tracked physical robot through encoder conventions, geometry, timing alignment, and low-speed calibration. Supplemental smooth-floor runs are retained as descriptive physical evidence; their motion-correlated synchronization and absence of prospective repetitions are stated as limitations.
+
+
+For MAGNET, we evaluate the official INL physical experiment and machine-learning forecast files directly rather than retraining or reconstructing the published DT. The response variable is \emph{Heater Temp}; the released ML files forecast up to the next 10 minutes of operation \cite{inlmagnetdata}. The cross-domain audit identified 111 candidate forecast windows, of which 97 satisfy the frozen strict timestamp/forecast-coverage eligibility rules. A 23-window non-overlapping subset is retained as a dependence-reduced sensitivity check because adjacent multi-minute forecast windows share substantial physical data. The counts are audit/provenance quantities, not independent-sample claims.
+
+\subsection{Evaluator Baselines, Audit Boundaries, and Reproducibility}
+TFP is evaluated against two framework-level comparators. The Mu\~noz-style analysis evaluates position and heading traces separately at 1~Hz using position MAD values $\{0.25,0.5,1.0\}$~m per coordinate, heading MAD values $\{2^\circ,5^\circ,10^\circ\}$, gap-open $-1.0$, gap-extension $-0.1$, and no low-complexity-area weighting. These tolerances form a sensitivity grid rather than a post-hoc optimized operating point. Time-agnostic path geometry includes symmetric Hausdorff distance, mean bidirectional nearest-path distance, and terminal error, following the type of physical--virtual path comparison used in robot-DT validation \cite{bergs2025}.
+
+Development also included classical and reduced-input maintenance baselines. Results that could not be shown to reproduce the source method/protocol were not relabeled as exact published-method reproductions. In particular, simplified classical reconstructions are excluded from headline claims, and any LWOI/YNet-inspired reduced-input adaptations are treated only as adaptations rather than exact reproductions of \cite{brossard2019,zhou2025ynet}. This fail-closed policy prevents an unfair ``baseline'' from strengthening the paper merely because it performs poorly.
+
+Operational fidelity and benchmark accuracy are kept distinct throughout. A provenance audit of previously frozen aligned-APE summaries and a later exact-evaluator reaggregation did not reproduce the same aggregate headline, although individual cases such as parking02 matched closely. Consequently, no central conclusion in this manuscript depends on the disputed aggregate aligned-APE number or on a reconstructed Fixed-Physics trajectory. Published i2Nav benchmark results are used only as context for the fact that richer sensor configurations can achieve lower localization error \cite{tang2025}.
+
+Analysis scripts record the physical-sequence statistical unit, seed structure, evaluator parameters, and frozen-trajectory counts. The final archival commit and processed result tables will be fixed with the submission; code is maintained at \url{https://github.com/CEISCA-VT/DigitalTwinDivergence}.
+
+\section{Primary i2Nav Results}
+\subsection{Sequence-Level V1--V2 Fidelity}
+Table~\ref{tab:pairedstats} reports the primary sequence-level comparison. V2 reduces macro-mean ATE by 15.4\%, heading MAE by 23.0\%, RPE5 by 4.0\%, RPE10 by 6.7\%, $D_{\theta,95}$ by 26.6\%, and maximum accumulated yaw residual by 25.7\%, while RPE1 changes by only $+0.9\%$.
+
+\begin{table*}[t]
+\caption{Sequence-level paired statistics for frozen Twin V1 versus Twin V2 ($n=10$ physical sequences). The CI is a 50,000-replicate bootstrap interval for the \emph{mean} paired difference V2$-$V1. Raw Wilcoxon $p$-values are descriptive and are not multiplicity-adjusted. Lower is better for every row.}
+\label{tab:pairedstats}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4.0pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Metric & V1 mean & V2 mean & 95\% CI, mean $\Delta$ & Wilcoxon $p$ & V2 improved \\
+\midrule
+ATE RMSE (m) & 2.834 & 2.398 & $[-1.059,-0.0007]$ & 0.2754 & 6/10 \\
+Heading MAE ($^\circ$) & 3.336 & 2.569 & $[-1.691,-0.0745]$ & 0.0098 & 8/10 \\
+RPE1 (m) & 0.0606 & 0.0611 & $[-0.0040,0.0067]$ & 0.4922 & 7/10 \\
+RPE5 (m) & 0.1670 & 0.1603 & $[-0.0152,0.0049]$ & 0.0840 & 9/10 \\
+RPE10 (m) & 0.2714 & 0.2532 & $[-0.0306,-0.0060]$ & 0.0371 & 8/10 \\
+$D_{\theta,95}$ ($^\circ$) & 6.989 & 5.132 & $[-4.116,-0.246]$ & 0.0059 & 9/10 \\
+$|I_\omega|_{\max}$ ($^\circ$) & 9.273 & 6.892 & $[-4.580,-0.777]$ & 0.0020 & 10/10 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The different inferential summaries reveal an important nuance. ATE has a negative bootstrap interval for the \emph{mean} paired difference but a non-significant signed-rank result and improves on only 6/10 sequences. Its per-sequence median changes only from 1.632 to 1.588~m. The global ATE gain is therefore concentrated in difficult sequences rather than uniformly distributed. In contrast, the rotational/persistent results are more consistent: heading MAE improves on 8/10 sequences, $D_{\theta,95}$ on 9/10, and $|I_\omega|_{\max}$ on all 10. For accumulated yaw residual the matched-pairs rank-biserial effect size is $-1.0$, the maximum possible effect in the direction favoring V2. RPE1 remains statistically and practically similar, supporting preservation of short-horizon behavior.
+
+\subsection{Local Agreement Does Not Guarantee Global Synchronization}
+The clearest failure mode is parking02. V2 has $\mathrm{RPE}_{10}=0.097$~m while ATE is 11.350~m, $D_{p,95}=22.345$~m, and $D_{\theta,95}=30.415^{\circ}$. parking01 provides a less extreme corroborating case with ATE 4.071~m and RPE10 0.154~m. Thus a twin can reproduce local relative motion while its global physical--virtual state becomes severely displaced.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/v1_v2_local_vs_global_clean.png}
+\caption{Frozen V1/V2 local-versus-global fidelity across i2Nav physical sequences. parking02 is the clearest case in which low 10-s relative error coexists with large unaligned global ATE.}
+\label{fig:localglobalclean}
+\end{figure}
+
+Mechanism analysis supports, but does not universalize, a rotational pathway. Across the ten sequences, persistent signed yaw mismatch is strongly associated with accumulated yaw residual (Pearson $r=0.974$), and heading divergence is strongly associated with position divergence ($r=0.988$). The intermediate accumulated-yaw-to-heading relationship is weaker and non-monotonic ($r=0.381$). We therefore interpret persistent rotational mismatch as a measured pathway whose effect depends on propagation, geometry, correction, and operating regime.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/persistent_yaw_mechanism.png}
+\caption{Sequence-level mechanism analysis linking persistent yaw mismatch, accumulated yaw residual, and global physical--virtual divergence. The relationship motivates the V2 slow correction without asserting a universal one-to-one causal law.}
+\label{fig:yawmechanism}
+\end{figure}
+
+\subsection{Operating-Condition Dependence}
+Different contexts degrade different fidelity dimensions. High wheel--IMU disagreement increases RPE1 in all 10 sequences; high turning increases RPE5/RPE10 in 9/10; high acceleration increases $D_{p,95}$ in 9/10; and high curvature increases $D_{\theta,95}$ in all 10. Elapsed time is particularly important for accumulated position divergence: $D_{p,95}$ increases from 5.828~m in the early-run bin to 17.118~m in the late-run bin. These results support a componentwise condition profile rather than a single scalar fidelity score.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/condition_dependent_fidelity.png}
+\caption{Condition-dependent i2Nav fidelity. Turning, curvature, acceleration, wheel--IMU disagreement, and elapsed time affect different dimensions of the physical--virtual profile.}
+\label{fig:conditiondependence}
+\end{figure}
+
+\subsection{Conditioned Benign Envelopes}
+Conditioned and unconditional p95 envelopes were evaluated on identical leave-one-physical-sequence-out folds using coverage, width (sharpness), and quantile loss. Table~\ref{tab:envelope} shows that conditioning does not uniformly improve aggregate coverage. Instead, it increases contextual specificity: $D_\omega$ is 10.9\% sharper with 9.3\% lower quantile loss; $D_p$ and $D_\theta$ obtain 4--5\% improvements in sharpness and quantile loss; $D_v$ is 4.6\% wider with essentially unchanged quantile loss. The appropriate claim is therefore not ``better calibration everywhere,'' but comparable aggregate coverage with more informative context-dependent width for several dimensions.
+
+\begin{table}[t]
+\caption{Held-out conditioned versus unconditional benign envelopes at $q=0.95$. Positive sharpness gain means a narrower conditioned envelope.}
+\label{tab:envelope}
+\centering
+\footnotesize
+\begin{tabular}{lrrrr}
+\toprule
+Component & Uncond. cov. & Cond. cov. & Sharpness & Q-loss red. \\
+\midrule
+$D_\omega$ & 0.981 & 0.976 & $+10.9\%$ & $+9.3\%$ \\
+$D_p$      & 0.948 & 0.944 & $+4.5\%$  & $+4.2\%$ \\
+$D_\theta$ & 0.914 & 0.913 & $+5.2\%$  & $+5.1\%$ \\
+$D_v$      & 0.971 & 0.972 & $-4.6\%$  & $+0.2\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/coverage_vs_sharpness.png}
+\caption{Held-out coverage versus sharpness for conditioned and unconditional benign envelopes. Conditioning preserves similar aggregate coverage while tightening several context-specific fidelity dimensions.}
+\label{fig:coveragesharpness}
+\end{figure}
+
+\subsection{Cross-Evaluator Validation}
+The same matched V1/V2 trajectories are evaluated with TFP, Mu\~noz-style trace alignment, and time-agnostic path geometry. Table~\ref{tab:crossevaluator} shows broad agreement on global quality: V2 improves the major synchronized, geometric, and matched-trace summaries relative to V1. This is convergent validity, not evidence that the metrics are interchangeable.
+
+\begin{table}[t]
+\caption{Cross-evaluator comparison on matched frozen V1/V2 trajectories. Lower is better except Mu\~noz percentage matched (\%MS).}
+\label{tab:crossevaluator}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\begin{tabular}{lrr}
+\toprule
+Metric & V1 & V2 \\
+\midrule
+TFP ATE (m) & 2.834 & \textbf{2.398} \\
+TFP heading MAE ($^\circ$) & 3.336 & \textbf{2.569} \\
+TFP $D_{\theta,95}$ ($^\circ$) & 6.989 & \textbf{5.132} \\
+$|I_\omega|_{\max}$ ($^\circ$) & 9.273 & \textbf{6.892} \\
+Hausdorff path distance (m) & 4.441 & \textbf{3.921} \\
+Mean bidirectional nearest (m) & 0.726 & \textbf{0.688} \\
+Terminal position error (m) & 3.944 & \textbf{2.805} \\
+Mu\~noz position \%MS, MAD=0.5 m & 51.41 & \textbf{52.47} \\
+Mu\~noz heading \%MS, MAD=$5^\circ$ & 86.34 & \textbf{88.63} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For V2 at position MAD $=0.5$~m, sequence-level Spearman correlation between TFP ATE and Mu\~noz \%MS is $\rho=-0.976$ with a 20,000-bootstrap 95\% interval $[-1.000,-0.810]$. $D_{p,95}$ and \%MS are similarly associated ($\rho=-0.879$, CI $[-1.000,-0.420]$). Heading provides additional convergent validity: heading MAE versus heading \%MS at MAD $=5^\circ$ gives $\rho=-0.899$ (CI $[-0.997,-0.555]$), and $D_{\theta,95}$ versus heading \%MS gives $\rho=-0.937$ (CI $[-1.000,-0.714]$).
+
+The relationship changes for local fidelity. RPE10 versus position \%MS is only $\rho=-0.285$ with CI $[-0.926,0.568]$. Thus global synchronized error and trace-alignment fidelity largely agree on which sequences are problematic, while short-horizon motion fidelity is not recoverable as the same ranking. TFP therefore contributes diagnostic decomposition rather than a universally superior scalar.
+
+parking02 illustrates this complementarity. At representative tolerances, Mu\~noz-style evaluation matches only 3.90\% of position snapshots and 22.33\% of heading snapshots, correctly indicating poor overall fidelity. TFP explains the structure of that failure: RPE10 remains only 0.097~m while global and tail errors are large.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/parking02_tfp_global_tail.png}
+\caption{parking02 TFP case study for V1 and V2. Large global/tail position and heading divergence coexists with the low 10-s relative-motion error reported in the text. Trace alignment independently classifies this sequence as low-fidelity, while TFP exposes the low-local/high-global structure.}
+\label{fig:parking02case}
+\end{figure}
+
+\subsection{Controlled Timing Sensitivity and Lightweight Runtime Footprint}
+A DT deployed across an embedded/edge boundary depends on the temporal consistency of physical and virtual streams. We therefore perturb the frozen V2 physical--virtual timing relationship during replay while leaving trajectory values unchanged. This is a controlled synchronization-sensitivity experiment, not a packet-level wireless-network experiment.
+
+Table~\ref{tab:timing} shows strongly metric-dependent sensitivity. A 50-ms zero-mean jitter condition changes global ATE by only 0.085\%, but increases RPE1 by 66.2\%, RPE5 by 15.9\%, and RPE10 by 9.7\%. A sustained 200-ms delay increases RPE10 by 82.1\%, heading MAE by 19.2\%, and ATE by 3.88\%. Physical--virtual timing degradation can therefore be severe locally before it becomes obvious in global ATE.
+
+\begin{table}[t]
+\caption{Controlled replay-based timing sensitivity of frozen V2. Entries are relative changes from synchronized replay.}
+\label{tab:timing}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.4pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Perturbation & $\Delta$ATE & $\Delta$Head. & $\Delta$RPE1 & $\Delta$RPE5 & $\Delta$RPE10 \\
+ & (\%) & (\%) & (\%) & (\%) & (\%) \\
+\midrule
+50-ms jitter & +0.085 & +1.35 & +66.2 & +15.9 & +9.7 \\
+100-ms delay & +1.40 & +7.53 & +6.66 & +19.7 & +28.7 \\
+200-ms delay & +3.88 & +19.2 & +25.6 & +58.0 & +82.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The frozen V2 model is also compact. The checkpoint state contains approximately 40,675 parameter/state-like elements, corresponding to about 0.155~MiB of tensor storage and 0.162~MiB for the serialized inference state dictionary. The fast branch consumes six single-precision model features at 10~Hz, or 240~B/s (0.234~KiB/s) of \emph{model-side feature data}, and its 20-sample history occupies about 480~B (0.469~KiB). These are not measurements of network bandwidth: protocol framing, timestamps, retransmission, and transport overhead are deployment dependent. Likewise, model size is not used as a surrogate for measured energy or end-to-end latency.
+
+\section{Cross-Domain, External, and Physical Validation}
+
+\subsection{MAGNET Heat Pipe: Non-Robot Cross-Domain Fidelity Transfer}
+\label{sec:magnet}
+The MAGNET experiment tests whether the proposed fidelity \emph{structure} remains informative when the physical variables, prediction horizon, and application domain change completely. The public INL dataset was produced during the March~30,~2022 MAGNET single-heat-pipe demonstration, in which a digital twin ran alongside the physical test article and forecast future thermal behavior \cite{wilsdon2023magnet,inlmagnetdata}. We analyze the released physical experiment and released machine-learning forecasts directly; no MAGNET model is retrained, reconstructed, or tuned in this work.
+
+Let $T_{p,i}(t)$ denote the measured temperature of thermowell $i$ and let $\widehat{T}_{T,i}(t+h\mid t)$ denote the DT forecast issued at time $t$ for horizon $h$. The component discrepancy and signed residual are
+\begin{align}
+D_{T,i}(t,h) &= \left|T_{p,i}(t+h)-\widehat{T}_{T,i}(t+h\mid t)\right|,\\
+r_{T,i}(t,h) &= T_{p,i}(t+h)-\widehat{T}_{T,i}(t+h\mid t).
+\end{align}
+Thus the mobile-robot notions of component error, horizon dependence, signed persistence, and tails transfer without inventing robot-specific ATE or RPE semantics for a thermal system.
+
+The released forecast file reconstructs 111 candidate windows; 97 satisfy the strict 10-thermowell eligibility rule. Because adjacent multi-minute forecasts overlap heavily, inferential summaries use a greedy non-overlapping subset of 23 windows. On this dependence-reduced set, median short-horizon (0--60~s) RMSE is 0.0876~$^{\circ}$C and median long-horizon (301--599~s) RMSE is 6.618~$^{\circ}$C. The median paired increase is 6.042~$^{\circ}$C with a sequence/window bootstrap 95\% CI of [2.283, 6.695]~$^{\circ}$C; long-horizon error exceeds short-horizon error in 95.7\% of the non-overlapping windows (one-sided Wilcoxon $p=2.38\times10^{-7}$, paired rank-biserial effect $=0.993$). The median paired long/short ratio is 43.04$\times$ (95\% CI 32.13--80.69$\times$). The effect is not driven solely by the largest numerical failures: after trimming the worst 20\% of strict windows by maximum absolute error, the long/short median-RMSE ratio remains 60.80$\times$ and long-horizon error remains larger in 98.7\% of retained windows.
+
+\begin{table}[t]
+\caption{MAGNET cross-domain evidence from the hardened audit. Inferential horizon statistics use 23 non-overlapping windows.}
+\label{tab:magnet}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{p{0.37\linewidth}p{0.55\linewidth}}
+\toprule
+Evidence & Result \\
+\midrule
+Horizon degradation & median $\Delta$RMSE $=6.042^{\circ}$C; 95\% CI [2.283, 6.695]; $p=2.38\times10^{-7}$; rank-biserial $=0.993$ \\
+Outlier robustness & after 20\% max-error trim: long/short median-RMSE ratio $=60.80\times$; long$>$short fraction $=0.987$ \\
+Component localization & all 10 thermowells have median long/short ratio $>7.99\times$; minimum long$>$short fraction $=0.918$ \\
+Matched-RMSE diagnostics & 7 independent pairs within 5\% aggregate RMSE; 3 have $\ge2\times$ p99 difference and 3 have $\ge0.25$ persistence difference \\
+Operating-regime test & null on non-overlapping windows: Kruskal--Wallis $p=0.426$, $\epsilon^2=0.000$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The componentwise result shows that the horizon effect is not confined to a single sensor. Every thermowell has a median long/short RMSE ratio above 7.99$\times$, and long-horizon error exceeds short-horizon error in at least 91.8\% of strict windows for every thermowell. Heat Pipe TC-06 has the largest median long-horizon component RMSE, 7.669~$^{\circ}$C, with a median long/short ratio of 45.48$\times$.
+
+Aggregate RMSE nevertheless remains strongly related to some decomposed quantities: across strict windows, long-horizon RMSE has Spearman $\rho=0.997$ with aggregate RMSE and p99 has $\rho=0.966$; persistence is less redundant ($\rho=0.784$). We therefore do not claim that every TFP dimension is statistically independent of RMSE. The stronger diagnostic claim is that the decomposition preserves failure structure that an aggregate score can compress away. Within the 23 independent windows, seven window pairs have aggregate RMSE within 5\%. Three of these pairs differ by at least 2$\times$ in p99 tail error and three differ by at least 0.25 in persistence fraction. The strongest example compares windows 57 and 99: aggregate RMSE is 13.325 versus 13.131~$^{\circ}$C (1.47\% relative difference), yet p99 error is 21.10 versus 73.25~$^{\circ}$C (3.47$\times$), persistence is 0.680 versus 0.146, and short-horizon RMSE is 13.353 versus 0.162~$^{\circ}$C. Two forecasts that appear nearly equivalent under aggregate RMSE therefore exhibit qualitatively different temporal, tail, and persistence behavior.
+
+The MAGNET operating-regime analysis is intentionally not used as evidence for condition dependence: the non-overlapping heating/cooling/steady comparison is null (Kruskal--Wallis $p=0.426$, $\epsilon^2=0$), and the regime labels are derived from thermal slope rather than randomized operating conditions. Likewise, persistence-threshold sweeps are sensitivity analyses rather than physics-certified safety tolerances. These negative/limited results sharpen the claim boundary rather than weakening the cross-domain finding.
+
+\begin{figure*}[t]
+\centering
+\safegraphic[0.98\textwidth]{figures/magnet_horizon_component_counterexample.png}
+\caption{MAGNET cross-domain fidelity evidence. Left: forecast error grows strongly with horizon. Center: the degradation is localized across all ten thermowells rather than one channel. Right: an independent matched-RMSE counterexample shows that nearly equal aggregate RMSE can mask substantially different tail, persistence, and short-horizon behavior. The figure uses the released physical/forecast traces without retraining the MAGNET model.}
+\label{fig:magnettransfer}
+\end{figure*}
+
+Taken together, the MAGNET result is stronger than a purely conceptual portability argument: the same fidelity decomposition detects horizon-scale degradation, component-localized failure, and diagnostically different traces with similar aggregate error in a non-robot thermal DT. The appropriate conclusion remains \emph{cross-domain structural transfer}, not universal validity or transfer of numerical thresholds between robotics and thermal systems.
+
+\subsection{TerraSentia: Framework Portability Versus Model Portability}
+TerraSentia changes the robot, drivetrain, environment, and sensing distribution. All five selected sequences pass predetermined synchronization and RTK quality gates. The nominal physics twin and all 30 frozen V2 checkpoints are run independently on every sequence, producing 150 zero-shot V2 evaluations without target-domain tuning or normalization refit.
+
+Table~\ref{tab:terrasentia} reports the main position result. V2 median ATE improves slightly over physics on four of five sequences but does not restore high global fidelity. The double-loop corridor is retained even though median V2 is slightly worse than physics. The conclusion is therefore not that V2 generalizes successfully; it is that the architecture-independent fidelity framework remains informative when the maintenance model has weak zero-shot portability.
+
+\begin{table}[t]
+\caption{TerraSentia zero-shot portability (30 frozen V2 checkpoints per sequence).}
+\label{tab:terrasentia}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.7pt}
+\begin{tabular}{lrrr}
+\toprule
+Sequence & Physics ATE & V2 median ATE & Better ckpts. \\
+ & (m) & (m) & (\%) \\
+\midrule
+one-row & 32.71 & 32.53 & 80.0 \\
+four-rows (Jun.) & 43.49 & 42.53 & 100.0 \\
+two-random & 48.84 & 48.30 & 93.3 \\
+double-loop & 49.90 & 50.15 & 26.7 \\
+four-rows (Sep.) & 60.69 & 60.18 & 96.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The local/global distinction recurs: finite-horizon disagreement can remain substantially smaller than tens-of-meters global divergence. Yaw-dominated drift is a strong diagnostic mechanism in 2/5 sequences, especially the two four-row runs, but is not universal. In the audited June~15 sequence, replacing only the forward-speed channel with the fused reference improves ATE by 1.57~m, whereas replacing yaw rate with fused-reference yaw improves ATE by 23.41~m; integrated IMU-versus-fused-reference heading discrepancy ends near $-66.8^{\circ}$. These oracle substitutions are diagnostics only and do not enter deployable inference.
+
+The external study also exposes severe distribution shift: 21/22 frozen V2 features shift relative to i2Nav normalization, and the learned yaw correction frequently approaches its bounded limit in the audited sequence. Physics-only drift is already large, so poor global fidelity cannot be attributed solely to the neural correction. A portable computational template is therefore not automatically a faithful twin of a new physical asset.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/local_vs_global_comparison.png}
+\caption{TerraSentia external local-versus-global fidelity. The same evaluator remains informative even when the frozen i2Nav maintenance model transfers weakly to a different rough-terrain platform.}
+\label{fig:terrasentia}
+\end{figure}
+
+\subsection{UGV01 Asset-Specific Physical Instantiation}
+The UGV01 experiment asks a different question. Instead of zero-shot transfer, deterministic asset-specific information binds the twin template to a tracked physical robot. In a same-window comparison, asset-specific calibration reduces ATE from 0.131 to 0.099~m, RPE1 from 0.035 to 0.028~m, and heading MAE from $13.3^{\circ}$ to $5.6^{\circ}$. The full repaired low-speed carpet run yields ATE 0.114~m and heading MAE $6.7^{\circ}$.
+
+Table~\ref{tab:ugv} adds two smooth-floor trajectories under the same architecture-independent evaluator. The smooth 1.5-m square has the smallest RPE1 and RPE10 of the three conditions, yet the largest ATE, heading MAE, and $D_{p,95}$. The physical experiment therefore reproduces the central low-local/high-global phenomenon.
+
+\begin{table}[t]
+\caption{UGV01 architecture-independent fidelity profiles.}
+\label{tab:ugv}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.0pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Condition & ATE & Head. & RPE1 & RPE5 & RPE10 & $D_{p,95}$ \\
+ & (m) & ($^\circ$) & (m) & (m) & (m) & (m) \\
+\midrule
+Carpet & 0.114 & 6.7 & 0.029 & 0.086 & 0.109 & 0.207 \\
+Smooth trap. & 0.101 & 17.4 & 0.023 & 0.069 & 0.096 & 0.165 \\
+Smooth square & 0.338 & 28.6 & 0.021 & 0.057 & 0.089 & 0.918 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/ugv01_asset_instantiation.png}
+\caption{UGV01 asset-specific instantiation. Platform-specific binding/calibration improves the physical--virtual match in the validated AprilTag-referenced condition.}
+\label{fig:ugvinstantiation}
+\end{figure}
+
+\begin{figure*}[t]
+\centering
+\safegraphic[0.48\textwidth]{figures/ugv01_condition_fidelity_profile.png}\hfill
+\safegraphic[0.48\textwidth]{figures/ugv01_local_vs_global_fidelity.png}
+\caption{UGV01 fidelity across physical conditions. Left: condition-wise fidelity profile. Right: the smooth-floor square preserves low short-horizon RPE while accumulating substantially larger global position and heading disagreement.}
+\label{fig:ugvconditions}
+\end{figure*}
+
+The UGV01 evidence is intentionally scoped. The smooth-floor records use motion-correlated synchronization and are not repeated prospective held-out trials; rate-domain quantities for these runs are pose-derived because the original model prediction trace is unavailable. They provide cross-condition physical support rather than a universal all-surface/high-speed claim.
+
+\section{Discussion}
+\subsection{What TFP Adds Beyond ATE, RPE, and Trace Alignment}
+ATE and RPE are established robotics metrics; the contribution is not to rename them. TFP changes the evaluation semantics around them. It preserves state components in physical units, separates local from global behavior, retains signed/persistent dynamics residuals, exposes tail behavior, respects the physical sequence as the statistical unit, and conditions benign expectations on operating context. Mu\~noz-style alignment provides a stronger answer when temporal displacement should be abstracted away, while TFP is a more natural operational monitor when the twin is expected to remain synchronized in time. The empirical correlations show agreement where the methods should agree and separation where they intentionally answer different questions.
+
+\subsection{Framework Portability Is Not Model Portability}
+The contrast between i2Nav and TerraSentia is central to the DT interpretation. V2 improves important long-horizon behavior in its source-domain frozen study, yet only modestly changes very large zero-shot TerraSentia drift. TFP nevertheless transfers unchanged and exposes local/global separation, distribution shift, and sequence-specific mechanisms. A model that executes on another platform is therefore only a portable template until asset-specific binding and validation establish that it is a faithful representation of that physical asset.
+
+
+\subsection{Cross-Domain Structure Is Broader Than Robot Trajectory Metrics}
+MAGNET provides an empirical falsification check on the concern that TFP is only ATE/RPE repackaged as DT terminology. No robot pose, heading, wheel odometry, or $SE(2)$ relative transform exists in the heat-pipe audit. Instead, fidelity is defined between measured and forecast thermowell temperatures over a 10-min horizon. The independent-window analysis shows a 6.042~$^{\circ}$C median increase from short to long horizon, a near-maximal paired rank-biserial effect of 0.993, degradation across all ten thermowells, and matched-RMSE examples with markedly different tails and persistence. These observations demonstrate that the organizing principles---component discrepancy, horizon dependence, persistence, tails, and dependence-aware aggregation---remain operationally useful after the physical variables and time scale change. At the same time, strong correlations between aggregate RMSE and some decomposed MAGNET measures show that TFP should not be marketed as a collection of mathematically independent scores. Its value is diagnostic decomposition. One thermal experiment still does not establish universal DT fidelity across energy, structural, manufacturing, electrical, or biological systems.
+
+\subsection{Operational Meaning of Asset-Specific Instantiation}
+We use \emph{instantiation} operationally. A generic template becomes an instantiated twin when (i) deterministic physical--virtual representation choices for the target asset are fixed independently of evaluation---sensor conventions, frames, timing, geometry/calibration---and (ii) fidelity is empirically characterized during physical operation of that asset. UGV01 provides condition-limited evidence of this process. TerraSentia intentionally remains a zero-shot portability test and is not described as a fully instantiated TerraSentia twin.
+
+\subsection{IoT Relevance: Sensing, State Age, and Fidelity}
+The IoT contribution is not simply that the model uses few sensors. The timing study establishes a direct systems relationship between physical--virtual state age/synchronization and measured fidelity: short-horizon disagreement can deteriorate sharply while ATE barely moves. This matters when the twin is updated across an edge/network boundary because an apparently acceptable global trajectory metric may conceal stale or temporally inconsistent virtual state. The lightweight wheel/IMU interface and small model-side state make this operating regime plausible, while TFP provides the measurement layer needed to determine whether the reduced sensing/communication burden remains adequate for the intended DT service.
+
+\subsection{Implications for Later Security Monitoring}
+A detector that treats large physical--virtual disagreement as inherently malicious is unsafe when benign turning, slip, accumulated bias, platform mismatch, or timing error can produce the same symptom. The present work provides the benign object $P_{\mathrm{benign}}(\mathbf{D}\mid c)$ needed before attack discrimination. A later security study can compare attack-conditioned behavior against this distribution while retaining false-alarm interpretation. No attack detector, universal trust threshold, or cybersecurity performance claim is made here.
+
+\subsection{Limitations}
+Several limitations bound the conclusions. First, only one fidelity dimension---maximum accumulated yaw residual---shows a completely consistent V1-to-V2 sequence direction; ATE improvement is concentrated in difficult sequences, and raw $p$-values across multiple metrics are descriptive rather than multiplicity-adjusted proof. Second, the conditioned envelope is more informative in sharpness/quantile loss for several components but is not uniformly better in aggregate coverage. Third, TerraSentia has unresolved upstream provenance for exact motor-speed semantics and publisher-side IMU frame handling, so poor global drift is not attributed purely to V2; RTK position is the primary external reference and the fused EKF is secondary. Fourth, UGV01 smooth-floor evidence is not a prospective repeated held-out experiment and uses motion-correlated synchronization. Fifth, MAGNET provides one non-robot thermal case rather than broad cross-domain validation; its operating-regime comparison is null on the dependence-reduced windows and is not used to support the robotics condition-dependence claim. The audit evaluates released physical/forecast traces and does not claim to reproduce or improve the original INL controller. Sixth, the saved corrected-rate channels were not sufficient to reconstruct the final frozen V2 state trajectory under a zero-perturbation replay audit; consequently, a planned synthetic yaw-bias experiment was excluded rather than reported. Finally, this work does not claim localization SOTA, superiority over sensor-rich systems, universal trace-alignment superiority, or safety/security certification from p95 envelopes.
+
+\section{Conclusion}
+This paper formulates operational physical--virtual fidelity as a multidimensional property of a digital twin rather than a single localization score. The proposed Twin Fidelity Profile separates componentwise disagreement, local or forecast-horizon behavior, global/accumulated mismatch where physically meaningful, persistent signed residuals, tails, timing sensitivity, and condition-dependent benign variability while preserving native physical units. In the frozen i2Nav study, V2's most consistent gains occur in rotational and persistent fidelity: heading and heading-tail errors improve on most sequences, and maximum accumulated yaw residual improves on all 10, while RPE1 remains essentially unchanged. Cross-evaluator analysis provides convergent validity with Mu\~noz-style trace alignment for global fidelity but shows that local RPE carries distinct information. Controlled timing perturbations demonstrate that physical--virtual synchronization can degrade substantially before global ATE reveals it. TerraSentia separates evaluator portability from maintenance-model portability, UGV01 provides condition-limited physical evidence of asset-specific instantiation, and the public MAGNET heat-pipe study shows that the same fidelity organization can be instantiated outside robotics: independent thermal windows exhibit strong horizon degradation across all ten thermowells, while matched aggregate-RMSE examples retain sharply different tail, persistence, and short-horizon behavior. The resulting claim is deliberately bounded: TFP exhibits cross-domain structural portability across mobile-robot and thermal-DT evidence, but one thermal case does not establish universal fidelity across all DT domains. Before a DT is used as a dependable monitoring or security reference, its fidelity should be characterized in physically meaningful components, temporal scales, operating conditions, and synchronization/prediction horizons rather than assumed from one aggregate accuracy number.
+
+\balance
+\begin{thebibliography}{99}
+
+\bibitem{dtc}
+Digital Twin Consortium, ``Definition of a Digital Twin,'' Digital Twin Consortium, accessed Aug. 17, 2026.
+
+\bibitem{jones2020}
+D. Jones, C. Snider, A. Nassehi, J. Yon, and B. Hicks, ``Characterising the Digital Twin: A systematic literature review,'' \emph{CIRP Journal of Manufacturing Science and Technology}, vol. 29, pp. 36--52, 2020, doi: 10.1016/j.cirpj.2020.02.002.
+
+\bibitem{shao2023}
+G. Shao, J. Hightower, and W. Schindel, ``Credibility consideration for digital twins in manufacturing,'' \emph{Manufacturing Letters}, vol. 35, pp. 24--28, 2023, doi: 10.1016/j.mfglet.2022.11.009.
+
+\bibitem{nist8620}
+S. Frechette, G. Shao, and M. Pease, \emph{Digital Twins Workshops Summary Report}, NIST Interagency/Internal Report 8620, National Institute of Standards and Technology, 2026, doi: 10.6028/NIST.IR.8620.
+
+\bibitem{kober2023}
+C. Kober, M. Fette, and J. P. Wulfsberg, ``A Method for Calculating Optimum Digital Twin Fidelity,'' \emph{Procedia CIRP}, vol. 120, pp. 1155--1160, 2023, doi: 10.1016/j.procir.2023.09.141.
+
+\bibitem{zhang2025}
+Y. Zhang, H. Sun, X. Zhang, and W. Liu, ``A fidelity evaluation method for digital twin model of aero-engine assembly characteristics,'' \emph{Journal of Manufacturing Systems}, vol. 78, pp. 444--456, 2025, doi: 10.1016/j.jmsy.2024.12.012.
+
+\bibitem{munoz2024}
+P. Mu\~noz, M. Wimmer, J. Troya, and A. Vallecillo, ``Measuring the Fidelity of a Physical and a Digital Twin Using Trace Alignments,'' \emph{IEEE Transactions on Software Engineering}, vol. 50, no. 12, pp. 3122--3145, 2024, doi: 10.1109/TSE.2024.3462978.
+
+\bibitem{ding2021}
+X. Ding, H. Wang, H. Li, H. Jiang, and J. He, ``Robopheus: A Virtual-Physical Interactive Mobile Robotic Testbed,'' arXiv:2103.04391, 2021.
+
+\bibitem{yang2025}
+H. Yang, Z. Qin, Y. Xia, and F. Cheng, ``Digital Twin-Based Autonomous Navigation and Control of Omnidirectional Mobile Robots,'' \emph{IEEE Transactions on Vehicular Technology}, vol. 74, no. 4, pp. 5687--5697, 2025, doi: 10.1109/TVT.2024.3520991.
+
+\bibitem{betzer2024}
+J. S. Betzer, J. Boudjadar, M. Frasheri, and P. Talasila, ``Digital Twin Enabled Runtime Verification for Autonomous Mobile Robots under Uncertainty,'' in \emph{Proc. 28th IEEE Int. Symp. Distributed Simulation and Real Time Applications (DS-RT)}, 2024, pp. 10--17, doi: 10.1109/DS-RT62209.2024.00012.
+
+\bibitem{bergs2025}
+L. Bergs, M. Huber, A. Moriz, A. G\"oppert, and R. Schmitt, ``Evaluating mobile robot navigation behavior in flexible assembly systems through digital twin and real-world experiments,'' \emph{Discover Robotics}, vol. 1, Art. no. 10, 2025, doi: 10.1007/s44430-025-00010-4.
+
+\bibitem{brossard2019}
+M. Brossard and S. Bonnabel, ``Learning Wheel Odometry and IMU Errors for Localization,'' in \emph{Proc. IEEE Int. Conf. Robotics and Automation (ICRA)}, Montreal, QC, Canada, 2019, pp. 291--297, doi: 10.1109/ICRA.2019.8794237.
+
+\bibitem{jiang2025}
+C. Jiang, K. Zhang, S. Yang, S. Shen, C. Xu, and F. Gao, ``WING: Wheel-Inertial Neural Odometry with Ground Manifold Constraints,'' \emph{IEEE Transactions on Intelligent Vehicles}, vol. 10, no. 3, pp. 1510--1525, 2025, doi: 10.1109/TIV.2024.3429167.
+
+\bibitem{zhou2025ynet}
+P. Zhou, P. Gu, X. Lyu, M. Liao, and Z. Meng, ``Learning Yaw Velocity for Inertial-Wheel Odometry on Autonomous Vehicles,'' \emph{IEEE Transactions on Intelligent Vehicles}, vol. 10, no. 5, pp. 3517--3530, 2025, doi: 10.1109/TIV.2024.3455566.
+
+\bibitem{tang2025}
+H. Tang \emph{et al.}, ``i2Nav-Robot: A Large-Scale Indoor-Outdoor Robot Dataset for Multi-Sensor Fusion Navigation and Mapping,'' arXiv:2508.11485, 2025, doi: 10.48550/arXiv.2508.11485.
+
+\bibitem{cuaran2024}
+J. Cuaran, A. E. Baquero Velasquez, M. Valverde Gasparino, N. K. Uppalapati, A. N. Sivakumar, J. Wasserman, M. Huzaifa, S. Adve, and G. Chowdhary, ``Under-canopy dataset for advancing simultaneous localization and mapping in agricultural robotics,'' \emph{The International Journal of Robotics Research}, vol. 43, no. 6, pp. 739--749, 2024, doi: 10.1177/02783649231215372.
+
+\bibitem{wilsdon2023magnet}
+K. Wilsdon, J. Hansel, M. R. Kunz, and J. Browning, ``Autonomous control of heat pipes through digital twins: Application to fission batteries,'' \emph{Progress in Nuclear Energy}, vol. 163, Art. no. 104813, 2023, doi: 10.1016/j.pnucene.2023.104813.
+
+\bibitem{inlmagnetdata}
+Idaho National Laboratory, ``MAGNET Heat Pipe Data,'' \emph{IdahoLabResearch/MAGNET-Heat-Pipe-Data}, dataset and digital-twin forecast archive, accessed Aug. 22, 2026. [Online]. Available: \url{https://github.com/IdahoLabResearch/MAGNET-Heat-Pipe-Data}
+
+\bibitem{ma2024}
+J. Ma, Y. Guo, C. Fang, and Q. Zhang, ``Digital-Twin-Based CPS Anomaly Diagnosis and Security Defense Countermeasure Recommendation,'' \emph{IEEE Internet of Things Journal}, vol. 11, no. 10, pp. 18726--18738, 2024, doi: 10.1109/JIOT.2024.3366904.
+
+\bibitem{alcaraz2024}
+C. Alcaraz and J. Lopez, ``Digital Twin-assisted anomaly detection for industrial scenarios,'' \emph{International Journal of Critical Infrastructure Protection}, vol. 47, Art. no. 100721, 2024, doi: 10.1016/j.ijcip.2024.100721.
+
+\bibitem{wu2023}
+Z. Y. Wu, A. Chew, X. Meng, J. Cai, J. Pok, R. Kalfarisi, K. C. Lai, S. F. Hew, and J. J. Wong, ``High Fidelity Digital Twin-Based Anomaly Detection and Localization for Smart Water Grid Operation Management,'' \emph{Sustainable Cities and Society}, vol. 91, Art. no. 104446, 2023, doi: 10.1016/j.scs.2023.104446.
+
+\end{thebibliography}
+\end{document}

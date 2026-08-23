@@ -15,6 +15,7 @@ $VenvRoot = Join-Path $ToolRoot ".venv"
 $Requirements = Join-Path $ToolRoot "requirements.txt"
 $Script = Join-Path $ToolRoot "run_analysis.py"
 $HardeningScript = Join-Path $ToolRoot "publication_hardening.py"
+$FinalChecksScript = Join-Path $ToolRoot "final_publication_checks.py"
 $Config = Join-Path $ToolRoot "config.json"
 
 New-Item -ItemType Directory -Force -Path $DataRoot | Out-Null
@@ -83,6 +84,10 @@ Write-Host "[run] Running publication-hardening checks..."
 & $VenvPython $HardeningScript --results $ResultsRoot
 if ($LASTEXITCODE -ne 0) { throw "MAGNET publication-hardening analysis failed. See the error above." }
 
+Write-Host "[run] Running final publication decision checks..."
+& $VenvPython $FinalChecksScript --results $ResultsRoot
+if ($LASTEXITCODE -ne 0) { throw "MAGNET final publication checks failed. See the error above." }
+
 Write-Host ""
 Write-Host "============================================================"
 Write-Host "MAGNET analysis finished"
@@ -93,6 +98,9 @@ Get-Content -Encoding UTF8 (Join-Path $ResultsRoot "SUMMARY.md")
 Write-Host ""
 Write-Host "---------------- Publication hardening ----------------"
 Get-Content -Encoding UTF8 (Join-Path $ResultsRoot "PUBLICATION_HARDENING_SUMMARY.md")
+Write-Host ""
+Write-Host "---------------- Final publication decision ----------------"
+Get-Content -Encoding UTF8 (Join-Path $ResultsRoot "MAGNET_FINAL_PUBLICATION_DECISION.md")
 
 $ResultsZip = Join-Path $ToolRoot "MAGNET_publication_results.zip"
 if (Test-Path $ResultsZip) { Remove-Item $ResultsZip -Force }
