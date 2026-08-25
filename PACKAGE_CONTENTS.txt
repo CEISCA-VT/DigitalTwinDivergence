@@ -1,0 +1,9 @@
+Extract at repository root:
+- DigitalTwin/analysis/i2nav_nested_service_risk.py
+- DigitalTwin/analysis/service_risk_estimator_selftest.py
+- service_risk_estimator/service_risk_config.json
+- service_risk_estimator/NESTED_SERVICE_RISK_PROTOCOL.md
+- service_risk_estimator/README.md
+- run_service_risk_estimator.cmd
+- run_service_risk_estimator.ps1
+- requirements-service-risk-estimator.txt

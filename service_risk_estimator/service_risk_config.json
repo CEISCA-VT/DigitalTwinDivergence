@@ -1,0 +1,73 @@
+{
+  "services": [
+    {
+      "service_id": "local_1s_tight",
+      "family": "local_relative_motion",
+      "horizon_s": 1.0,
+      "position_tolerance_m": 0.1,
+      "heading_tolerance_deg": 2.0
+    },
+    {
+      "service_id": "local_5s_moderate",
+      "family": "local_relative_motion",
+      "horizon_s": 5.0,
+      "position_tolerance_m": 0.2,
+      "heading_tolerance_deg": 5.0
+    },
+    {
+      "service_id": "local_10s_preview",
+      "family": "local_relative_motion",
+      "horizon_s": 10.0,
+      "position_tolerance_m": 0.5,
+      "heading_tolerance_deg": 10.0
+    },
+    {
+      "service_id": "global_state_tracking",
+      "family": "global_synchronization",
+      "horizon_s": 0.0,
+      "position_tolerance_m": 1.0,
+      "heading_tolerance_deg": 5.0
+    }
+  ],
+  "history_windows_s": [
+    5.0,
+    10.0
+  ],
+  "regularization_C_grid": [
+    1.0
+  ],
+  "inner_group_folds": 3,
+  "target_unsafe_rates": [
+    0.01,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "primary_target_unsafe_rate": 0.05,
+  "risk_coverage_grid": [
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "report_coverages": [
+    0.5,
+    0.8,
+    0.9
+  ],
+  "max_iter": 1500,
+  "random_seed": 260824,
+  "go_no_go": {
+    "min_services_history_beats_current_aurc": 3,
+    "min_services_history_beats_constant_aurc": 3,
+    "min_outer_sequences_history_beats_current_per_service": 6,
+    "required_services_with_sequence_majority": 3,
+    "minimum_relative_aurc_improvement_vs_constant": 0.05
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "horizons_s": [1.0, 5.0, 10.0],
+  "local_position_tolerances_m": [0.05, 0.10, 0.20, 0.50, 1.00],
+  "local_heading_tolerances_deg": [1.0, 2.0, 5.0, 10.0, 20.0],
+  "global_position_tolerances_m": [0.50, 1.0, 2.0, 5.0, 10.0, 20.0],
+  "global_heading_tolerances_deg": [2.0, 5.0, 10.0, 20.0, 30.0, 45.0],
+  "e2_min_accepted_sequences_for_protocol_transfer": 4
+}
