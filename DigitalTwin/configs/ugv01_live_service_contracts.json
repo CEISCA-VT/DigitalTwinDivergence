@@ -1,0 +1,67 @@
+{
+  "schema": "ugv01_live_service_contracts_v1",
+  "provenance": {
+    "service_tolerances": "Frozen representative services from results/e1_e2_service_contract_publication/analysis_manifest.json",
+    "runtime_defaults": "Predeclared prototype values for the prospective UGV01 live experiment; not universal safety limits"
+  },
+  "reference_quality": {
+    "minimum_satellites": 4,
+    "maximum_hdop": 2.5,
+    "maximum_gps_age_s": 1.5,
+    "minimum_course_speed_mps": 0.3,
+    "maximum_horizon_match_error_s": 0.35
+  },
+  "state_machine": {
+    "warning_margin_fraction": 0.2,
+    "recovery_interval_s": 1.0
+  },
+  "services": [
+    {
+      "service_id": "local_1s_tight",
+      "label": "Immediate motion",
+      "family": "local_relative_motion",
+      "horizon_s": 1.0,
+      "position_tolerance_m": 0.1,
+      "heading_tolerance_deg": 2.0,
+      "maximum_aoi_s": 0.6
+    },
+    {
+      "service_id": "local_5s_moderate",
+      "label": "Short prediction",
+      "family": "local_relative_motion",
+      "horizon_s": 5.0,
+      "position_tolerance_m": 0.2,
+      "heading_tolerance_deg": 5.0,
+      "maximum_aoi_s": 1.0
+    },
+    {
+      "service_id": "local_10s_preview",
+      "label": "Planning support",
+      "family": "local_relative_motion",
+      "horizon_s": 10.0,
+      "position_tolerance_m": 0.5,
+      "heading_tolerance_deg": 10.0,
+      "maximum_aoi_s": 1.5
+    },
+    {
+      "service_id": "global_state_tracking",
+      "label": "Global asset tracking",
+      "family": "global_synchronization",
+      "horizon_s": 0.0,
+      "position_tolerance_m": 1.0,
+      "heading_tolerance_deg": 5.0,
+      "maximum_aoi_s": 1.0
+    }
+  ],
+  "resource_modes": {
+    "economy": {"update_rate_hz": 2.0, "relative_cost": 0.2},
+    "normal": {"update_rate_hz": 5.0, "relative_cost": 0.5},
+    "high": {"update_rate_hz": 10.0, "relative_cost": 1.0}
+  },
+  "resource_policy": {
+    "minimum_dwell_s": 2.0,
+    "downshift_dwell_s": 5.0,
+    "aoi_normal_trigger_s": 0.2,
+    "aoi_high_trigger_s": 0.45
+  }
+}

@@ -23,6 +23,7 @@ import time
 import urllib.parse
 import urllib.request
 import webbrowser
+from collections import deque
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -30,6 +31,7 @@ from urllib.parse import parse_qs, urlparse
 
 import numpy as np
 
+from DigitalTwin.dashboard.contracts import ContractEngine, ResourcePolicy, load_contract_config
 from DigitalTwin.analysis.real_data_study import AttackSpec, _prepare_run, replay
 from DigitalTwin.detector import InnovationDetector
 from DigitalTwin.kinematics import (
@@ -115,12 +117,19 @@ class TwinStream:
         csv_path: Path | None,
         rover_url: str,
         poll_hz: float,
+        policy: str = "contract-aware",
+        contract_config_path: Path | None = None,
+        output_dir: Path | None = None,
         max_points: int = 2400,
     ) -> None:
         self.mode = mode
         self.csv_path = csv_path
         self.rover_url = rover_url.rstrip("/")
         self.poll_hz = max(0.5, float(poll_hz))
+        self.contract_config = load_contract_config(contract_config_path or Path(__file__).resolve().parents[1] / "configs" / "ugv01_live_service_contracts.json")
+        self.contract_engine = ContractEngine(self.contract_config)
+        self.resource_policy = ResourcePolicy(policy, self.contract_config)
+        self.policy_name = policy
         self.max_points = max_points
         self.geometry = DifferentialDriveGeometry(
             effective_track_width_m=(
@@ -141,9 +150,21 @@ class TwinStream:
         self._last_enc: tuple[int, int] | None = None
         self._last_sample_s: float | None = None
         self._last_seq: int | None = None
+        self._elapsed_s = 0.0
         self._origin: tuple[float, float] | None = None
         self._gps_translation_offset: tuple[float, float] | None = None
         self._gps_heading_offset_rad: float | None = None
+        self._clock_offset_s: float | None = None
+        self._last_arrival_s: float | None = None
+        self._last_source_for_jitter_s: float | None = None
+        self._arrival_jitter_s = 0.0
+        self._bytes_window: deque[tuple[float, int]] = deque()
+        self._events: list[dict[str, object]] = []
+        self._latest_contracts: list[dict[str, object]] = []
+        output_root = output_dir or (REPO_ROOT / "raw_logs" / "live_validation")
+        output_root.mkdir(parents=True, exist_ok=True)
+        stamp = time.strftime("%Y%m%d_%H%M%S")
+        self.log_path = output_root / f"ugv01_live_contract_{stamp}.jsonl"
         self._error = ""
         self._running = False
 
@@ -167,8 +188,10 @@ class TwinStream:
             bounds = dict(self.bounds)
             error = self._error
             running = self._running
+            events = list(self._events[-80:])
+            contracts = list(self._latest_contracts)
         return {
-            "schema": "ugv01_live_twin_stream_v1",
+            "schema": "ugv01_live_twin_stream_v2",
             "mode": self.mode,
             "running": running,
             "error": error,
@@ -179,7 +202,16 @@ class TwinStream:
                 "runtime_inputs": "T:147 encoder counts, IMU yaw rate, firmware yaw, timing, optional GPS",
                 "twin_model": "UGV01 deterministic tracked-drive propagation with gyro blending",
                 "reference_note": "live GPS operational reference",
+                "contract_provenance": self.contract_config["provenance"],
             },
+            "policy": {
+                "name": self.policy_name,
+                "resource_mode": self.resource_policy.mode,
+                "requested_update_rate_hz": self.resource_policy.update_rate_hz,
+                "log_path": str(self.log_path.relative_to(REPO_ROOT)),
+            },
+            "contracts": contracts,
+            "events": events,
             "summary": summary,
             "bounds": bounds,
             "points": points,
@@ -195,7 +227,12 @@ class TwinStream:
                     break
                 if _row_text(row, "cycle_ok", "True").lower() not in {"true", "1", "yes"}:
                     continue
-                self._append_sample(row, edge_arrival_s=time.time(), latency_ms=_number(row, "http_latency_ms"))
+                recorded_arrival = _number(row, "edge_arrival_time_s", math.nan)
+                self._append_sample(
+                    row,
+                    edge_arrival_s=recorded_arrival if math.isfinite(recorded_arrival) else time.time(),
+                    latency_ms=_number(row, "http_latency_ms"),
+                )
                 sample_s = self._sample_time(row)
                 previous = self.points[-2]["source_time_s"] if len(self.points) > 1 else sample_s
                 delay = max(0.0, min(0.25, float(sample_s) - float(previous)))
@@ -210,8 +247,8 @@ class TwinStream:
                 self._running = False
 
     def _run_live(self) -> None:
-        period = 1.0 / self.poll_hz
         while not self._stop.is_set():
+            period = 1.0 / self.resource_policy.update_rate_hz
             started = time.monotonic()
             try:
                 query = urllib.parse.urlencode({"cmd": json.dumps({"T": 147}, separators=(",", ":"))})
@@ -219,7 +256,8 @@ class TwinStream:
                 separator = "&" if "?" in self.rover_url else "?"
                 row = _json_get(f"{self.rover_url}{separator}{query}", timeout_s=min(1.5, max(0.25, period)))
                 edge_arrival = time.time()
-                self._append_sample(row, edge_arrival_s=edge_arrival, latency_ms=(edge_arrival - edge_send) * 1000.0)
+                row_bytes = len(json.dumps(row, separators=(",", ":")).encode("utf-8"))
+                self._append_sample(row, edge_arrival_s=edge_arrival, latency_ms=(edge_arrival - edge_send) * 1000.0, payload_bytes=row_bytes)
             except Exception as exc:  # pragma: no cover - hardware dependent
                 with self._lock:
                     self._error = f"{type(exc).__name__}: {exc}"
@@ -263,8 +301,30 @@ class TwinStream:
                 return value / 1000.0
         return time.monotonic()
 
-    def _append_sample(self, row: dict[str, object], *, edge_arrival_s: float, latency_ms: float) -> None:
+    def _append_sample(self, row: dict[str, object], *, edge_arrival_s: float, latency_ms: float, payload_bytes: int | None = None) -> None:
+        evaluation_started = time.perf_counter()
         sample_s = self._sample_time(row)
+        source_reset = self._last_sample_s is not None and sample_s < self._last_sample_s - 0.5
+        if source_reset:
+            with self._lock:
+                self.points.clear()
+                self._events = [
+                    {"t": 0.0, "type": "source_session_reset", "from": "active", "to": "new_session", "reason": "source clock regressed"}
+                ]
+            self.contract_engine = ContractEngine(self.contract_config)
+            self.resource_policy = ResourcePolicy(self.policy_name, self.contract_config)
+            self._latest_contracts = []
+            self._state = np.array([0.0, 0.0, 0.0], dtype=float)
+            self._last_enc = None
+            self._last_seq = None
+            self._origin = None
+            self._gps_translation_offset = None
+            self._gps_heading_offset_rad = None
+            self._clock_offset_s = None
+            self._last_sample_s = None
+            self._last_arrival_s = None
+            self._last_source_for_jitter_s = None
+            self._elapsed_s = 0.0
         seq = _integer(row, "seq", len(self.points))
         enc_left = _integer(row, "enc_left", _integer(row, "enc_l", 0))
         enc_right = _integer(row, "enc_right", _integer(row, "enc_r", 0))
@@ -275,6 +335,24 @@ class TwinStream:
         lon = _number(row, "lon", math.nan)
         gps_speed_mps = _number(row, "gps_speed_mps", _number(row, "speed_mps", math.nan))
         gps_course_deg = _number(row, "gps_course_deg", _number(row, "course_deg", math.nan))
+        gps_age_s = max(0.0, _number(row, "gps_age_ms", 0.0) / 1000.0)
+
+        observed_offset = edge_arrival_s - sample_s
+        if self._clock_offset_s is None or observed_offset < self._clock_offset_s:
+            self._clock_offset_s = observed_offset
+        aoi_s = max(0.0, observed_offset - float(self._clock_offset_s))
+        if self._last_arrival_s is not None and self._last_source_for_jitter_s is not None:
+            self._arrival_jitter_s = abs(
+                (edge_arrival_s - self._last_arrival_s) - (sample_s - self._last_source_for_jitter_s)
+            )
+        self._last_arrival_s = edge_arrival_s
+        self._last_source_for_jitter_s = sample_s
+        bytes_this_update = int(payload_bytes if payload_bytes is not None else len(json.dumps(row, default=str).encode("utf-8")))
+        self._bytes_window.append((edge_arrival_s, bytes_this_update))
+        while self._bytes_window and edge_arrival_s - self._bytes_window[0][0] > 5.0:
+            self._bytes_window.popleft()
+        window_span = max(1.0, edge_arrival_s - self._bytes_window[0][0]) if self._bytes_window else 1.0
+        bytes_per_s = sum(item[1] for item in self._bytes_window) / window_span
 
         if self._last_sample_s is None:
             dt = 0.0
@@ -293,6 +371,7 @@ class TwinStream:
         omega = (1.0 - self.gyro_weight) * encoder_omega + self.gyro_weight * imu_omega
         if dt > 0.0:
             self._state = integrate_unicycle(self._state, encoder_v, omega, dt)
+            self._elapsed_s += dt
 
         gps_x = gps_y = None
         if gps_valid and math.isfinite(lat) and math.isfinite(lon):
@@ -308,6 +387,8 @@ class TwinStream:
 
         gps_agreement_m = None
         gps_heading_agreement_deg = None
+        gps_heading_rad = None
+        twin_global_heading = None
         if gps_x is not None and gps_y is not None:
             gps_agreement_m = math.hypot(float(self._state[0]) - gps_x, float(self._state[1]) - gps_y)
             if math.isfinite(gps_course_deg) and gps_course_deg >= 0.0 and gps_speed_mps >= 0.30:
@@ -324,7 +405,7 @@ class TwinStream:
         yaw_disagreement = abs(encoder_omega - imu_omega)
         slip_indicator = min(10.0, yaw_disagreement / 0.35)
         condition = self._condition_label(abs(encoder_v), abs(omega), yaw_disagreement)
-        elapsed_s = 0.0 if not self.points else sample_s - float(self.points[0]["source_time_s"])
+        elapsed_s = self._elapsed_s
         point = {
             "t": elapsed_s,
             "source_time_s": sample_s,
@@ -338,6 +419,12 @@ class TwinStream:
             "gps_valid": gps_valid and gps_x is not None and gps_y is not None,
             "gps_speed_mps": gps_speed_mps if math.isfinite(gps_speed_mps) else None,
             "gps_course_deg": gps_course_deg if math.isfinite(gps_course_deg) and gps_course_deg >= 0.0 else None,
+            "gps_heading_rad": gps_heading_rad,
+            "twin_global_theta": twin_global_heading,
+            "gps_age_s": gps_age_s,
+            "aoi_s": aoi_s,
+            "clock_offset_s": self._clock_offset_s,
+            "arrival_jitter_ms": self._arrival_jitter_s * 1000.0,
             "gps_agreement_m": gps_agreement_m,
             "gps_heading_agreement_deg": gps_heading_agreement_deg,
             "firmware_yaw_deg": firmware_yaw_deg,
@@ -349,6 +436,8 @@ class TwinStream:
             "slip_indicator": slip_indicator,
             "condition": condition,
             "latency_ms": latency_ms,
+            "payload_bytes": bytes_this_update,
+            "bytes_per_s": bytes_per_s,
             "packet_gap": packet_gap,
             "stale": _boolean(row, "stale_packet") or dt == 0.0,
             "queue_depth": _integer(row, "queue_depth", 0),
@@ -361,6 +450,16 @@ class TwinStream:
             "hdop": _number(row, "hdop", 99.99),
         }
 
+        quality = self.contract_config["reference_quality"]
+        point["contract_reference_valid"] = bool(
+            point["gps_valid"]
+            and point["satellites"] >= int(quality["minimum_satellites"])
+            and point["hdop"] <= float(quality["maximum_hdop"])
+            and gps_age_s <= float(quality["maximum_gps_age_s"])
+            and gps_heading_rad is not None
+            and twin_global_heading is not None
+        )
+
         self._last_sample_s = sample_s
         self._last_enc = (enc_left, enc_right)
         self._last_seq = seq
@@ -368,7 +467,28 @@ class TwinStream:
             self.points.append(point)
             if len(self.points) > self.max_points:
                 self.points = self.points[-self.max_points :]
+            contracts, contract_events = self.contract_engine.evaluate(self.points)
+            policy_event = self.resource_policy.update(elapsed_s, aoi_s, contracts)
+            events = contract_events + ([policy_event] if policy_event else [])
+            self._events.extend(events)
+            self._events = self._events[-500:]
+            self._latest_contracts = contracts
+            point["contracts"] = contracts
+            point["resource_mode"] = self.resource_policy.mode
+            point["requested_update_rate_hz"] = self.resource_policy.update_rate_hz
+            point["evaluation_ms"] = (time.perf_counter() - evaluation_started) * 1000.0
             self._update_summary_locked()
+            self._write_log_record(point, events)
+
+    def _write_log_record(self, point: dict[str, object], events: list[dict[str, object]]) -> None:
+        record = {
+            "schema": "ugv01_live_contract_record_v1",
+            "policy": self.policy_name,
+            "point": point,
+            "events": events,
+        }
+        with self.log_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(record, allow_nan=False, separators=(",", ":")) + "\n")
 
     @staticmethod
     def _condition_label(speed: float, yaw_rate: float, disagreement: float) -> str:
@@ -427,6 +547,21 @@ class TwinStream:
             "stale_packets": sum(int(bool(p["stale"])) for p in points),
             "max_queue_depth": max((int(p["queue_depth"]) for p in points), default=0),
             "yaw_disagreement_p95_deg_s": math.degrees(_quantile(disagreements, 0.95)),
+            "aoi_p95_ms": 1000.0 * _quantile([float(p["aoi_s"]) for p in points], 0.95),
+            "jitter_p95_ms": _quantile([float(p["arrival_jitter_ms"]) for p in points], 0.95),
+            "bytes_per_s": float(points[-1].get("bytes_per_s", 0.0)) if points else 0.0,
+            "evaluation_p95_ms": _quantile([float(p.get("evaluation_ms", 0.0)) for p in points], 0.95),
+            "resource_mode": self.resource_policy.mode,
+            "requested_update_rate_hz": self.resource_policy.update_rate_hz,
+            "actual_update_rate_hz": (
+                (len(points) - 1) / float(points[-1]["t"])
+                if len(points) > 1 and float(points[-1]["t"]) > 0.0
+                else 0.0
+            ),
+            "contract_qualified_count": sum(item["status"] == "qualified" for item in self._latest_contracts),
+            "contract_at_risk_count": sum(item["status"] == "at_risk" for item in self._latest_contracts),
+            "contract_withdrawn_count": sum(item["status"] == "withdrawn" for item in self._latest_contracts),
+            "contract_unobservable_count": sum(item["status"] == "unobservable" for item in self._latest_contracts),
             "distance_m": self._path_length(points),
             "condition_mode": self._mode_label([str(p["condition"]) for p in points]),
             "fidelity_status": (
@@ -817,6 +952,14 @@ def main() -> None:
         help="UGV01 firmware URL used by --mode live",
     )
     parser.add_argument("--poll-hz", type=float, default=5.0, help="Live/csv stream polling rate")
+    parser.add_argument(
+        "--policy",
+        choices=("static-low", "static-high", "aoi-only", "contract-aware"),
+        default="contract-aware",
+        help="Frozen live resource-allocation policy",
+    )
+    parser.add_argument("--contract-config", type=Path, default=None)
+    parser.add_argument("--output-dir", type=Path, default=None)
     args = parser.parse_args()
 
     if args.mode in {"csv", "live"}:
@@ -828,6 +971,9 @@ def main() -> None:
             csv_path=csv_path if args.mode == "csv" else None,
             rover_url=args.rover_url,
             poll_hz=args.poll_hz,
+            policy=args.policy,
+            contract_config_path=args.contract_config,
+            output_dir=args.output_dir,
         )
         _STREAM.start()
 

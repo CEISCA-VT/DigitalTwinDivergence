@@ -54,9 +54,9 @@
       </article>
 
       <aside class="inspector">
-        <section class="pose-block panel">
+        <section class="pose-block panel compact-pose">
           <div class="panel-heading compact">
-            <div><span class="eyebrow">CURRENT STATE</span><h2>Virtual rover pose</h2></div>
+            <div><span class="eyebrow">VIRTUAL STATE</span><h2>Current twin pose</h2></div>
             <span id="regionBadge" class="badge">--</span>
           </div>
           <div class="pose-grid">
@@ -66,17 +66,14 @@
             <div><span>Velocity</span><strong id="poseVelocity">0.00</strong><small>m/s</small></div>
           </div>
         </section>
-
-        <section class="agreement-block panel">
-          <div class="metric-title"><span>GPS-to-twin divergence Dp</span><strong id="currentResidual">no fix</strong></div>
-          <div class="meter"><i id="residualMeter"></i></div>
-          <div class="metric-foot"><span>RMS agreement <b id="runRmse">--</b></span><span>p95 <b id="runP95">--</b></span></div>
-        </section>
-
-        <section class="consistency-block panel">
-          <div class="metric-title"><span>Wheel-IMU yaw disagreement</span><strong id="currentNis">--</strong></div>
-          <div class="meter nis"><i id="nisMeter"></i><em id="thresholdMark"></em></div>
-          <div class="metric-foot"><span>Context <b id="nisThreshold">--</b></span><span>Slip proxy <b id="confidence">--</b></span></div>
+        <section class="contracts-panel panel">
+          <div class="panel-heading compact">
+            <div><span class="eyebrow">SERVICE CONTRACTS</span><h2>Operational validity</h2></div>
+            <span id="contractCount" class="badge">0 / 4</span>
+          </div>
+          <div id="contractCards" class="contract-cards">
+            <div class="contract-empty">Waiting for synchronized GPS evidence</div>
+          </div>
         </section>
       </aside>
 
@@ -105,35 +102,35 @@
           <span>Last command</span>
           <strong id="lastCommand">none</strong>
         </div>
-        <p class="experiment-note">GPS supplies the live absolute reference while wheel encoders and IMU propagate the virtual rover between fixes.</p>
+        <p class="experiment-note">Drive commands remain on the Waveshare protocol. The contract engine observes the same run and never overrides movement.</p>
       </aside>
     </section>
 
     <section class="sensor-grid">
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon gps-icon">G</span>GPS reference</div>
+        <div class="sensor-label"><span class="sensor-icon gps-icon">R</span>Reference quality</div>
         <strong id="sensorSat">--</strong><small>satellites</small>
-        <footer><span>HDOP</span><b id="sensorHdop">--</b></footer>
+        <footer><span>HDOP / GPS age</span><b id="sensorHdop">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon encoder-icon">D</span>Global agreement</div>
-        <strong id="sensorVelocity">--</strong><small>m RMS</small>
-        <footer><span>p95 / max</span><b id="sensorOmega">--</b></footer>
+        <div class="sensor-label"><span class="sensor-icon encoder-icon">P</span>Resource policy</div>
+        <strong id="sensorVelocity">--</strong><small>mode</small>
+        <footer><span>Requested rate</span><b id="sensorOmega">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon imu-icon">R</span>Local agreement</div>
-        <strong id="sensorYaw">--</strong><small>m RPE1</small>
-        <footer><span>RPE5 / RPE10</span><b id="sensorGyro">--</b></footer>
+        <div class="sensor-label"><span class="sensor-icon imu-icon">A</span>Freshness</div>
+        <strong id="sensorYaw">--</strong><small>ms AoI</small>
+        <footer><span>p95 / jitter p95</span><b id="sensorGyro">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon power-icon">M</span>Motion model</div>
-        <strong id="sensorVoltage">--</strong><small>m/s</small>
-        <footer><span>Yaw / disagreement</span><b id="sensorMotors">--</b></footer>
+        <div class="sensor-label"><span class="sensor-icon power-icon">C</span>Runtime cost</div>
+        <strong id="sensorVoltage">--</strong><small>bytes/s</small>
+        <footer><span>Evaluation p95</span><b id="sensorMotors">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon network-icon">N</span>Transport</div>
+        <div class="sensor-label"><span class="sensor-icon network-icon">N</span>Transport health</div>
         <strong id="sensorLatency">--</strong><small>ms HTTP</small>
-        <footer><span>Queue / loss</span><b id="sensorPacket">--</b></footer>
+        <footer><span>Queue / loss / stale</span><b id="sensorPacket">--</b></footer>
       </article>
     </section>
 
@@ -146,16 +143,9 @@
         <div class="panel-heading compact"><div><span class="eyebrow">HEADING FIDELITY SIGNAL</span><h2>GPS-course Dtheta(t)</h2></div><strong id="latencyNow">--</strong></div>
         <canvas id="latencyChart" aria-label="GPS course to twin heading divergence history"></canvas>
       </article>
-      <article class="run-summary panel">
-        <div class="panel-heading compact"><div><span class="eyebrow">RUN HEALTH</span><h2>Summary</h2></div></div>
-        <dl>
-          <div><dt>Updates</dt><dd id="sumUpdates">--</dd></div>
-          <div><dt>Duration</dt><dd id="sumDuration">--</dd></div>
-          <div><dt>GPS samples</dt><dd id="sumLoss">--</dd></div>
-          <div><dt>Agreement p95</dt><dd id="sumStale">--</dd></div>
-          <div><dt>Heading MAE</dt><dd id="sumLatency">--</dd></div>
-          <div><dt>GPS valid</dt><dd id="sumSat">--</dd></div>
-        </dl>
+      <article class="event-panel panel">
+        <div class="panel-heading compact"><div><span class="eyebrow">AUDIT TRAIL</span><h2>Contract and policy events</h2></div><strong id="eventCount">0</strong></div>
+        <div id="eventLog" class="event-log"><span>No transitions yet</span></div>
       </article>
     </section>
   </main>

@@ -22,7 +22,7 @@ const colors = {
   muted: "#819096",
 };
 
-function setText(id, value) { $(id).textContent = value; }
+function setText(id, value) { const element = $(id); if (element) element.textContent = value; }
 function finite(value, fallback = 0) { return Number.isFinite(Number(value)) ? Number(value) : fallback; }
 function fmt(value, digits = 2) { return finite(value).toFixed(digits); }
 function metric(value, digits = 2, suffix = "") {
@@ -189,18 +189,10 @@ function populateRun() {
   if (!state.data) return;
   const { metadata: meta, summary } = state.data;
   setText("metaSurface", state.mode.toUpperCase());
-  setText("metaSpeed", meta.twin_model || "--");
+  setText("metaSpeed", state.data.policy?.name || meta.twin_model || "--");
   setText("metaRoute", meta.runtime_inputs || "--");
   setText("metaNetwork", meta.reference_note || "--");
-  setText("metaTrial", summary.fidelity_status || "ready");
-  setText("runRmse", metric(summary.gps_agreement_rmse_m, 2, " m"));
-  setText("runP95", metric(summary.gps_agreement_p95_m, 2, " m"));
-  setText("sumUpdates", summary.updates || 0);
-  setText("sumDuration", `${fmt(summary.duration_s, 1)} s`);
-  setText("sumLoss", summary.gps_valid_count || Math.round((summary.gps_valid_fraction || 0) * (summary.updates || 0)));
-  setText("sumStale", metric(summary.gps_agreement_p95_m, 2, " m"));
-  setText("sumLatency", metric(summary.gps_heading_mae_deg, 1, " deg"));
-  setText("sumSat", `${fmt((summary.gps_valid_fraction || 0) * 100, 0)}%`);
+  setText("metaTrial", contractHeadline(state.data.contracts));
   setText("controlMode", state.mode === "live" ? "live" : "dry run");
   $("controlMode").className = `badge ${state.mode === "live" ? "safe" : "warning"}`;
 }
@@ -230,35 +222,75 @@ function render() {
   setText("poseVelocity", fmt(point.encoder_v));
 
   const gpsDelta = point.gps_valid ? finite(point.gps_agreement_m, Math.hypot(point.twin_x - point.gps_x, point.twin_y - point.gps_y)) : NaN;
-  setText("currentResidual", point.gps_valid ? `${fmt(gpsDelta, 2)} m` : "no fix");
-  $("residualMeter").style.width = `${point.gps_valid ? Math.min(100, gpsDelta / 2 * 100) : 0}%`;
 
   const yawDisagreementDeg = Math.abs(deg(point.yaw_disagreement || 0));
-  setText("currentNis", `${fmt(yawDisagreementDeg, 1)} deg/s`);
   setText("residualNow", point.gps_valid ? `${fmt(gpsDelta, 2)} m` : "no fix");
-  setText("nisThreshold", human(point.condition));
-  setText("confidence", fmt(point.slip_indicator, 2));
-  $("nisMeter").style.width = `${Math.min(100, yawDisagreementDeg / 50 * 100)}%`;
-  $("thresholdMark").style.left = "70%";
   const badge = $("regionBadge");
-  badge.textContent = human(point.condition);
-  badge.className = `badge ${conditionClass(point.condition)}`;
+  badge.textContent = human(point.resource_mode || point.condition);
+  badge.className = `badge ${point.resource_mode === "high" ? "blind" : point.resource_mode === "normal" ? "warning" : "safe"}`;
 
   setText("sensorSat", point.gps_valid ? point.satellites : "--");
-  setText("sensorHdop", point.gps_valid ? fmt(point.hdop) : "no fix");
-  setText("sensorVelocity", metric(state.data.summary.gps_agreement_rmse_m, 2));
-  setText("sensorOmega", `${metric(state.data.summary.gps_agreement_p95_m, 2)} / ${metric(state.data.summary.gps_agreement_max_m, 2)} m`);
-  setText("sensorYaw", metric(state.data.summary.gps_RPEp_1s_m, 2));
-  setText("sensorGyro", `${metric(state.data.summary.gps_RPEp_5s_m, 2)} / ${metric(state.data.summary.gps_RPEp_10s_m, 2)} m`);
-  setText("sensorVoltage", fmt(point.encoder_v, 3));
-  setText("sensorMotors", `${fmt(deg(point.omega), 1)} / ${fmt(yawDisagreementDeg, 1)} deg/s`);
+  setText("sensorHdop", point.gps_valid ? `${fmt(point.hdop)} / ${fmt(point.gps_age_s * 1000, 0)} ms` : "no fix");
+  setText("sensorVelocity", human(point.resource_mode || state.data.policy?.resource_mode));
+  setText("sensorOmega", `${metric(point.requested_update_rate_hz || state.data.policy?.requested_update_rate_hz, 1)} / ${metric(state.data.summary.actual_update_rate_hz, 1)} Hz req/actual`);
+  setText("sensorYaw", metric(point.aoi_s * 1000, 0));
+  setText("sensorGyro", `${metric(state.data.summary.aoi_p95_ms, 0)} / ${metric(state.data.summary.jitter_p95_ms, 0)} ms`);
+  setText("sensorVoltage", metric(point.bytes_per_s, 0));
+  setText("sensorMotors", `${metric(state.data.summary.evaluation_p95_ms, 2)} ms`);
   setText("sensorLatency", fmt(point.latency_ms, 0));
-  setText("sensorPacket", `${point.queue_depth || 0} / ${point.packet_gap || 0}`);
+  setText("sensorPacket", `${point.queue_depth || 0} / ${state.data.summary.packet_loss || 0} / ${state.data.summary.stale_packets || 0}`);
   setText("latencyNow", metric(point.gps_heading_agreement_deg, 1, " deg"));
+
+  renderContracts(point.contracts || state.data.contracts || []);
+  renderEvents(state.data.events || []);
 
   drawTrajectory();
   drawSeries($("residualChart"), state.data.points.map(p => p.gps_agreement_m), colors.coral, "m");
   drawSeries($("latencyChart"), state.data.points.map(p => p.gps_heading_agreement_deg), colors.gold, "deg");
+}
+
+function contractHeadline(contracts) {
+  if (!contracts?.length) return "contract engine waiting";
+  const withdrawn = contracts.filter(c => c.status === "withdrawn").length;
+  const unobservable = contracts.filter(c => c.status === "unobservable").length;
+  if (withdrawn) return `${withdrawn} service${withdrawn === 1 ? "" : "s"} withdrawn`;
+  if (unobservable) return `${unobservable} service${unobservable === 1 ? "" : "s"} unobservable`;
+  const qualified = contracts.filter(c => c.status === "qualified").length;
+  return `${qualified} / ${contracts.length} services qualified`;
+}
+
+function renderContracts(contracts) {
+  const container = $("contractCards");
+  if (!container) return;
+  const qualified = contracts.filter(c => c.status === "qualified").length;
+  setText("contractCount", `${qualified} / ${contracts.length || 4}`);
+  if (!contracts.length) {
+    container.innerHTML = '<div class="contract-empty">Waiting for synchronized GPS evidence</div>';
+    return;
+  }
+  container.innerHTML = contracts.map(contract => {
+    const stateClass = String(contract.status || "unobservable").replaceAll("_", "-");
+    const position = contract.position_error_m == null ? "--" : `${fmt(contract.position_error_m, 2)} / ${fmt(contract.position_tolerance_m, 2)} m`;
+    const heading = contract.heading_error_deg == null ? "--" : `${fmt(contract.heading_error_deg, 1)} / ${fmt(contract.heading_tolerance_deg, 0)} deg`;
+    const freshness = contract.aoi_s == null ? "--" : `${fmt(contract.aoi_s * 1000, 0)} / ${fmt(contract.maximum_aoi_s * 1000, 0)} ms`;
+    return `<article class="contract-card ${stateClass}">
+      <header><strong>${contract.label}</strong><span>${human(contract.status)}</span></header>
+      <small>${contract.family === "global_synchronization" ? "Global" : `${contract.horizon_s}s local`} | ${contract.reason}</small>
+      <dl><div><dt>Position</dt><dd>${position}</dd></div><div><dt>Heading</dt><dd>${heading}</dd></div><div><dt>AoI</dt><dd>${freshness}</dd></div></dl>
+    </article>`;
+  }).join("");
+}
+
+function renderEvents(events) {
+  const container = $("eventLog");
+  if (!container) return;
+  setText("eventCount", events.length);
+  const recent = events.slice(-5).reverse();
+  if (!recent.length) {
+    container.innerHTML = "<span>No transitions yet</span>";
+    return;
+  }
+  container.innerHTML = recent.map(event => `<div><time>${timeLabel(event.t)}</time><strong>${human(event.service_id || event.type)}</strong><span>${human(event.from)} to ${human(event.to)}: ${event.reason || "policy update"}</span></div>`).join("");
 }
 
 function conditionClass(condition) {

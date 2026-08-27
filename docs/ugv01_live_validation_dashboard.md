@@ -1,4 +1,4 @@
-# UGV01 Live Digital-Twin Validation Dashboard
+# UGV01 Live Service-Contract Digital Twin
 
 This dashboard is the prototype interface for the final physical validation
 experiment. It uses the same firmware backend as the Waveshare page at
@@ -17,15 +17,39 @@ The display follows the paper framing:
 4. GPS is converted to the same initialized ENU frame and used as the live
    operational reference for position and moving-course agreement.
 5. The same page sends safe bounded movement commands through the UGV01 backend.
-6. The interface reports live GPS-to-twin `Dp`, RMS/p95 agreement,
-   course-to-heading disagreement, and 1/5/10 s displacement disagreement.
+6. A causal contract engine evaluates four frozen service-relative definitions,
+   including quantity, horizon, tolerance, and maximum age of information.
+7. A resource policy selects a `2`, `5`, or `10 Hz` telemetry mode without
+   changing the twin model or overriding rover movement.
+8. Every displayed update, contract state, and policy transition is written to
+   `raw_logs/live_validation/*.jsonl`.
+
+## Frozen Service Contracts
+
+The position and heading tolerances come from
+`results/e1_e2_service_contract_publication/analysis_manifest.json`. Runtime
+freshness and lifecycle defaults are predeclared in
+`DigitalTwin/configs/ugv01_live_service_contracts.json` for the prospective
+experiment; they are not universal safety limits.
+
+| Service | Horizon | Position | Heading | Maximum AoI |
+|---|---:|---:|---:|---:|
+| Immediate motion | `1 s` | `0.10 m` | `2 deg` | `0.60 s` |
+| Short prediction | `5 s` | `0.20 m` | `5 deg` | `1.00 s` |
+| Planning support | `10 s` | `0.50 m` | `10 deg` | `1.50 s` |
+| Global asset tracking | global | `1.00 m` | `5 deg` | `1.00 s` |
+
+Each service is reported as `qualified`, `at risk`, `withdrawn`, or
+`unobservable`. The last state means GPS quality, moving course,
+synchronization, or required history is unavailable, so the system does not
+manufacture a pass/fail result.
 
 ## Dummy CSV Prototype
 
 Use this before the rover is connected, or when testing the frontend layout:
 
 ```powershell
-python -m DigitalTwin.dashboard.server --mode csv --csv raw_logs\telemetry\ugv_t147_bench_20260814_143729.csv --host 127.0.0.1 --port 8765
+python -m DigitalTwin.dashboard.server --mode csv --csv raw_logs\telemetry\ugv_t147_bench_20260814_143729.csv --host 127.0.0.1 --port 8765 --policy contract-aware
 ```
 
 Then open:
@@ -43,7 +67,7 @@ Connect to the UGV01 Wi-Fi or station-mode network, keep the normal rover
 control panel available at `http://192.168.4.1`, and run:
 
 ```powershell
-python -m DigitalTwin.dashboard.server --mode live --rover-url http://192.168.4.1/js --host 127.0.0.1 --port 8765 --poll-hz 5
+python -m DigitalTwin.dashboard.server --mode live --rover-url http://192.168.4.1/js --host 127.0.0.1 --port 8765 --policy contract-aware
 ```
 
 Then open:
@@ -66,6 +90,19 @@ http://192.168.4.1/js?cmd={"T":147}
 
 Use this dashboard for both movement and live twin/fidelity monitoring. The
 original UGV01 page can remain open as a backup control panel.
+
+Select one frozen experiment policy before each run with `--policy`:
+
+```text
+static-low      fixed 2 Hz
+static-high     fixed 10 Hz
+aoi-only        rate selected from calibrated source age
+contract-aware  rate selected from contract state and source age
+```
+
+The adaptive policies include frozen escalation, downshift, and dwell behavior.
+They change the telemetry request rate only; they do not alter the twin model or
+send autonomous motion commands.
 
 ## Movement Controls
 
@@ -108,6 +145,9 @@ The live view can show:
 - GPS-to-twin position divergence and running RMS/p95 agreement;
 - GPS-course heading disagreement while GPS speed is at least `0.30 m/s`;
 - operational 1/5/10 s displacement disagreement when enough fixes exist;
+- local/global contract errors, margins, and lifecycle state;
+- calibrated relative AoI, arrival jitter, bandwidth, and evaluation time;
+- resource-policy transitions and requested telemetry rate;
 - edge latency, stale packets, queue depth, and sequence gaps.
 
 The live metrics describe operational GPS-to-twin agreement. They are not
@@ -118,6 +158,12 @@ The GPS frame uses a single initialization, not trajectory fitting: the first
 valid fix establishes translation, and the first valid course sample above
 `0.30 m/s` establishes heading. NMEA course is converted from clockwise-from-
 north to the local ENU convention.
+
+The live reference gate requires at least four satellites, HDOP at most `2.5`,
+GPS age at most `1.5 s`, and moving course at least `0.30 m/s`. When those
+conditions are absent, affected contracts are `unobservable`. AprilTag/ChArUco
+remains the independent offline accuracy reference; it is intentionally not a
+dependency of the live service.
 
 ## Current UGV01 Twin Parameters
 
