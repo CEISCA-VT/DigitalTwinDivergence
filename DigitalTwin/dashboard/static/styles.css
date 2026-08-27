@@ -64,6 +64,7 @@ main { padding: 14px 18px 86px; max-width: 1720px; margin: 0 auto; }
 .context-strip strong { display: block; margin-top: 2px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 326px; gap: 12px; }
+.experiment-workspace { grid-template-columns: minmax(520px, 1fr) 326px 318px; }
 .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; box-shadow: var(--shadow); }
 .trajectory-panel { min-height: 510px; padding: 14px; }
 .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 44px; }
@@ -88,6 +89,48 @@ canvas { width: 100%; height: 100%; display: block; }
 .map-scale { position: absolute; right: 12px; bottom: 10px; border-bottom: 2px solid var(--ink); width: 70px; text-align: center; font-size: 10px; }
 
 .inspector { display: grid; gap: 12px; align-content: start; }
+.control-deck { padding: 14px; align-self: start; }
+.drive-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+.drive-pad button, .speed-row button {
+  min-height: 48px;
+  border: 1px solid #b8c3c6;
+  background: #f8faf9;
+  color: var(--ink);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.drive-pad button:hover, .speed-row button:hover { border-color: var(--teal); background: var(--teal-soft); }
+.drive-pad button:active, .speed-row button.selected { background: var(--teal); border-color: var(--teal); color: white; }
+.drive-pad .corner { color: var(--muted); font-size: 11px; }
+.drive-pad .stop-drive {
+  min-height: 72px;
+  border-radius: 50%;
+  background: #4b5563;
+  color: white;
+  border-color: #4b5563;
+}
+.drive-pad .stop-drive:hover, .drive-pad .stop-drive:active { background: var(--red); border-color: var(--red); }
+.speed-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.speed-row button { min-height: 40px; }
+.command-status {
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+  padding: 10px;
+  background: #f8faf9;
+  border: 1px solid #e0e6e7;
+}
+.command-status span, .experiment-note { color: var(--muted); font-size: 11px; }
+.command-status strong { font-size: 13px; word-break: break-word; }
+.experiment-note { line-height: 1.45; margin: 12px 0 0; }
 .pose-block, .agreement-block, .consistency-block { padding: 14px; }
 .badge { padding: 4px 7px; font-size: 10px; font-weight: 800; text-transform: uppercase; background: #e6ecee; border-radius: 4px; }
 .badge.safe { color: var(--green); background: #e0efe4; }
@@ -155,6 +198,7 @@ canvas { width: 100%; height: 100%; display: block; }
   .topbar { grid-template-columns: 1fr 1.3fr; }
   .system-state { display: none; }
   .workspace { grid-template-columns: 1fr; }
+  .experiment-workspace { grid-template-columns: 1fr; }
   .inspector { grid-template-columns: 1.3fr 1fr 1fr; }
   .sensor-grid { grid-template-columns: repeat(3, 1fr); }
   .charts { grid-template-columns: 1fr 1fr; }

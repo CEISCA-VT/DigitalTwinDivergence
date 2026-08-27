@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>UGV01 Digital Twin</title>
+  <title>UGV01 Digital Twin Live Validation</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -12,43 +12,42 @@
       <span class="brand-mark">DT</span>
       <div>
         <strong>UGV01 Digital Twin</strong>
-        <span>Edge telemetry replay</span>
+        <span>Physical-virtual fidelity console</span>
       </div>
     </div>
     <div class="run-picker">
-      <label for="runSelect">Benign run</label>
-      <select id="runSelect" disabled><option>Loading logs...</option></select>
+      <label for="runSelect">Data source</label>
+      <select id="runSelect" disabled><option>Loading source...</option></select>
     </div>
     <div class="system-state">
       <span id="stateDot" class="state-dot loading"></span>
-      <div><strong id="systemState">Loading</strong><span id="systemDetail">Connecting to replay service</span></div>
+      <div><strong id="systemState">Loading</strong><span id="systemDetail">Connecting to stream service</span></div>
     </div>
   </header>
 
   <main>
     <section class="context-strip" aria-label="Run context">
-      <div><span>Surface</span><strong id="metaSurface">--</strong></div>
-      <div><span>Speed</span><strong id="metaSpeed">--</strong></div>
-      <div><span>Route</span><strong id="metaRoute">--</strong></div>
-      <div><span>Network</span><strong id="metaNetwork">--</strong></div>
-      <div><span>Trial</span><strong id="metaTrial">--</strong></div>
+      <div><span>Mode</span><strong id="metaSurface">--</strong></div>
+      <div><span>Twin</span><strong id="metaSpeed">--</strong></div>
+      <div><span>Inputs</span><strong id="metaRoute">--</strong></div>
+      <div><span>Reference</span><strong id="metaNetwork">--</strong></div>
+      <div><span>Status</span><strong id="metaTrial">--</strong></div>
     </section>
 
-    <section class="workspace">
+    <section class="workspace experiment-workspace">
       <article class="trajectory-panel panel">
         <div class="panel-heading">
-          <div><span class="eyebrow">LOCAL FRAME</span><h1>Trajectory</h1></div>
+          <div><span class="eyebrow">COMMON INITIALIZED FRAME</span><h1>Live physical-virtual trajectory</h1></div>
           <div class="legend" aria-label="Trajectory legend">
-            <span><i class="line ekf"></i>Operational EKF</span>
-            <span><i class="line security"></i>Security predictor</span>
-            <span><i class="line gps"></i>BN220 GPS</span>
+            <span><i class="line ekf"></i>Sensor-lightweight twin</span>
+            <span><i class="line gps"></i>Live GPS reference</span>
           </div>
         </div>
         <div class="canvas-wrap">
-          <canvas id="trajectoryCanvas" aria-label="GPS and EKF trajectory map"></canvas>
+          <canvas id="trajectoryCanvas" aria-label="Digital twin trajectory map"></canvas>
           <div class="map-readout">
             <span id="mapTime">00:00.0</span>
-            <strong id="mapPosition">E 0.00 m · N 0.00 m</strong>
+            <strong id="mapPosition">E 0.00 m | N 0.00 m</strong>
           </div>
           <div id="mapScale" class="map-scale">1 m</div>
         </div>
@@ -57,7 +56,7 @@
       <aside class="inspector">
         <section class="pose-block panel">
           <div class="panel-heading compact">
-            <div><span class="eyebrow">CURRENT STATE</span><h2>Rover pose</h2></div>
+            <div><span class="eyebrow">CURRENT STATE</span><h2>Virtual rover pose</h2></div>
             <span id="regionBadge" class="badge">--</span>
           </div>
           <div class="pose-grid">
@@ -69,39 +68,67 @@
         </section>
 
         <section class="agreement-block panel">
-          <div class="metric-title"><span>Operational EKF-GPS agreement</span><strong id="currentResidual">0.00 m</strong></div>
+          <div class="metric-title"><span>GPS-to-twin divergence Dp</span><strong id="currentResidual">no fix</strong></div>
           <div class="meter"><i id="residualMeter"></i></div>
-          <div class="metric-foot"><span>Operational RMSE <b id="runRmse">--</b></span><span>Security RMSE <b id="runP95">--</b></span></div>
+          <div class="metric-foot"><span>RMS agreement <b id="runRmse">--</b></span><span>p95 <b id="runP95">--</b></span></div>
         </section>
 
         <section class="consistency-block panel">
-          <div class="metric-title"><span>Security-branch NIS</span><strong id="currentNis">0.00</strong></div>
+          <div class="metric-title"><span>Wheel-IMU yaw disagreement</span><strong id="currentNis">--</strong></div>
           <div class="meter nis"><i id="nisMeter"></i><em id="thresholdMark"></em></div>
-          <div class="metric-foot"><span>Threshold <b id="nisThreshold">--</b></span><span>Confidence <b id="confidence">--</b></span></div>
+          <div class="metric-foot"><span>Context <b id="nisThreshold">--</b></span><span>Slip proxy <b id="confidence">--</b></span></div>
         </section>
+      </aside>
+
+      <aside class="control-deck panel" aria-label="Rover movement controls">
+        <div class="panel-heading compact">
+          <div><span class="eyebrow">UGV01 BACKEND</span><h2>Movement control</h2></div>
+          <span id="controlMode" class="badge">dry run</span>
+        </div>
+        <div class="drive-pad">
+          <button data-command="forward_left" class="corner" title="Forward left">NW</button>
+          <button data-command="forward" title="Forward">UP</button>
+          <button data-command="forward_right" class="corner" title="Forward right">NE</button>
+          <button data-command="left" title="Turn left">LEFT</button>
+          <button data-command="stop" class="stop-drive" title="Stop">STOP</button>
+          <button data-command="right" title="Turn right">RIGHT</button>
+          <button data-command="reverse_left" class="corner" title="Reverse left">SW</button>
+          <button data-command="reverse" title="Reverse">DOWN</button>
+          <button data-command="reverse_right" class="corner" title="Reverse right">SE</button>
+        </div>
+        <div class="speed-row" aria-label="Speed selector">
+          <button data-speed="slow">Slow</button>
+          <button data-speed="medium" class="selected">Middle</button>
+          <button data-speed="fast">Fast</button>
+        </div>
+        <div class="command-status">
+          <span>Last command</span>
+          <strong id="lastCommand">none</strong>
+        </div>
+        <p class="experiment-note">GPS supplies the live absolute reference while wheel encoders and IMU propagate the virtual rover between fixes.</p>
       </aside>
     </section>
 
     <section class="sensor-grid">
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon gps-icon">G</span>GNSS</div>
+        <div class="sensor-label"><span class="sensor-icon gps-icon">G</span>GPS reference</div>
         <strong id="sensorSat">--</strong><small>satellites</small>
         <footer><span>HDOP</span><b id="sensorHdop">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon encoder-icon">E</span>Tracked drive</div>
-        <strong id="sensorVelocity">--</strong><small>m/s</small>
-        <footer><span>Yaw / slip</span><b id="sensorOmega">--</b></footer>
+        <div class="sensor-label"><span class="sensor-icon encoder-icon">D</span>Global agreement</div>
+        <strong id="sensorVelocity">--</strong><small>m RMS</small>
+        <footer><span>p95 / max</span><b id="sensorOmega">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon imu-icon">I</span>IMU</div>
-        <strong id="sensorYaw">--</strong><small>deg yaw</small>
-        <footer><span>Gyro Z / bias</span><b id="sensorGyro">--</b></footer>
+        <div class="sensor-label"><span class="sensor-icon imu-icon">R</span>Local agreement</div>
+        <strong id="sensorYaw">--</strong><small>m RPE1</small>
+        <footer><span>RPE5 / RPE10</span><b id="sensorGyro">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon power-icon">V</span>Power</div>
-        <strong id="sensorVoltage">--</strong><small>volts</small>
-        <footer><span>Motor L / R</span><b id="sensorMotors">--</b></footer>
+        <div class="sensor-label"><span class="sensor-icon power-icon">M</span>Motion model</div>
+        <strong id="sensorVoltage">--</strong><small>m/s</small>
+        <footer><span>Yaw / disagreement</span><b id="sensorMotors">--</b></footer>
       </article>
       <article class="sensor-card">
         <div class="sensor-label"><span class="sensor-icon network-icon">N</span>Transport</div>
@@ -112,45 +139,45 @@
 
     <section class="charts">
       <article class="chart-panel panel">
-        <div class="panel-heading compact"><div><span class="eyebrow">MODEL AGREEMENT</span><h2>Residual history</h2></div><strong id="residualNow">--</strong></div>
-        <canvas id="residualChart" aria-label="EKF GPS residual history"></canvas>
+        <div class="panel-heading compact"><div><span class="eyebrow">GLOBAL FIDELITY SIGNAL</span><h2>GPS-to-twin Dp(t)</h2></div><strong id="residualNow">--</strong></div>
+        <canvas id="residualChart" aria-label="GPS to twin position divergence history"></canvas>
       </article>
       <article class="chart-panel panel">
-        <div class="panel-heading compact"><div><span class="eyebrow">EDGE PIPELINE</span><h2>Latency history</h2></div><strong id="latencyNow">--</strong></div>
-        <canvas id="latencyChart" aria-label="HTTP latency history"></canvas>
+        <div class="panel-heading compact"><div><span class="eyebrow">HEADING FIDELITY SIGNAL</span><h2>GPS-course Dtheta(t)</h2></div><strong id="latencyNow">--</strong></div>
+        <canvas id="latencyChart" aria-label="GPS course to twin heading divergence history"></canvas>
       </article>
       <article class="run-summary panel">
         <div class="panel-heading compact"><div><span class="eyebrow">RUN HEALTH</span><h2>Summary</h2></div></div>
         <dl>
           <div><dt>Updates</dt><dd id="sumUpdates">--</dd></div>
           <div><dt>Duration</dt><dd id="sumDuration">--</dd></div>
-          <div><dt>Packet loss</dt><dd id="sumLoss">--</dd></div>
-          <div><dt>Stale packets</dt><dd id="sumStale">--</dd></div>
-          <div><dt>Median latency</dt><dd id="sumLatency">--</dd></div>
-          <div><dt>Satellite range</dt><dd id="sumSat">--</dd></div>
+          <div><dt>GPS samples</dt><dd id="sumLoss">--</dd></div>
+          <div><dt>Agreement p95</dt><dd id="sumStale">--</dd></div>
+          <div><dt>Heading MAE</dt><dd id="sumLatency">--</dd></div>
+          <div><dt>GPS valid</dt><dd id="sumSat">--</dd></div>
         </dl>
       </article>
     </section>
   </main>
 
   <footer class="transport-bar">
-    <button id="jumpStart" title="Jump to start" aria-label="Jump to start">|◀</button>
-    <button id="stepBack" title="Previous sample" aria-label="Previous sample">◀</button>
-    <button id="playPause" class="primary-control" title="Play or pause" aria-label="Play">▶</button>
-    <button id="stepForward" title="Next sample" aria-label="Next sample">▶</button>
+    <button id="jumpStart" title="Jump to start" aria-label="Jump to start">|&lt;</button>
+    <button id="stepBack" title="Previous sample" aria-label="Previous sample">&lt;</button>
+    <button id="playPause" class="primary-control" title="Play or pause" aria-label="Play">&#9658;</button>
+    <button id="stepForward" title="Next sample" aria-label="Next sample">&gt;</button>
     <input id="timeline" type="range" min="0" max="0" value="0" aria-label="Replay position">
     <span id="timelineTime">00:00.0 / 00:00.0</span>
     <label for="speedSelect">Speed</label>
     <select id="speedSelect">
-      <option value="0.5">0.5×</option>
-      <option value="1" selected>1×</option>
-      <option value="2">2×</option>
-      <option value="4">4×</option>
+      <option value="0.5">0.5x</option>
+      <option value="1" selected>1x</option>
+      <option value="2">2x</option>
+      <option value="4">4x</option>
     </select>
   </footer>
 
   <div id="errorView" class="error-view" hidden>
-    <strong>Dashboard could not load this replay.</strong>
+    <strong>Dashboard could not load this stream.</strong>
     <span id="errorText"></span>
   </div>
   <script src="/app.js"></script>

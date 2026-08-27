@@ -1,18 +1,44 @@
 "use strict";
 
 const $ = (id) => document.getElementById(id);
-const state = { data: null, index: 0, playing: false, speed: 1, lastFrame: 0, carry: 0 };
-const colors = { ink: "#172126", grid: "#dfe6e7", teal: "#087f79", coral: "#dc604c", gold: "#a96f12", muted: "#819096" };
+const state = {
+  data: null,
+  index: 0,
+  playing: false,
+  speed: 1,
+  lastFrame: 0,
+  carry: 0,
+  mode: "replay",
+  liveTimer: null,
+  commandSpeed: "medium",
+  activeCommand: "stop",
+};
+const colors = {
+  ink: "#172126",
+  grid: "#dfe6e7",
+  teal: "#087f79",
+  coral: "#dc604c",
+  gold: "#a96f12",
+  muted: "#819096",
+};
 
 function setText(id, value) { $(id).textContent = value; }
 function finite(value, fallback = 0) { return Number.isFinite(Number(value)) ? Number(value) : fallback; }
 function fmt(value, digits = 2) { return finite(value).toFixed(digits); }
+function metric(value, digits = 2, suffix = "") {
+  return value === null || value === undefined || !Number.isFinite(Number(value)) ? "--" : `${Number(value).toFixed(digits)}${suffix}`;
+}
+function human(value) { return String(value || "--").replaceAll("_", " "); }
+function sourceLabel(value) {
+  const parts = String(value || "").replaceAll("\\", "/").split("/");
+  return parts[parts.length - 1] || "stream";
+}
+function deg(rad) { return finite(rad) * 180 / Math.PI; }
 function timeLabel(seconds) {
   const value = Math.max(0, finite(seconds));
   const minutes = Math.floor(value / 60);
   return `${String(minutes).padStart(2, "0")}:${(value % 60).toFixed(1).padStart(4, "0")}`;
 }
-function human(value) { return String(value || "--").replaceAll("_", " "); }
 
 async function fetchJson(url) {
   const response = await fetch(url);
@@ -23,19 +49,62 @@ async function fetchJson(url) {
 
 async function initialize() {
   try {
-    const result = await fetchJson("/api/logs");
-    const select = $("runSelect");
-    select.innerHTML = "";
-    for (const log of result.logs) {
-      const option = document.createElement("option");
-      option.value = log.id;
-      option.textContent = log.label;
-      select.appendChild(option);
+    const modePayload = await fetchJson("/api/mode");
+    state.mode = modePayload.mode || "replay";
+    if (state.mode === "replay") {
+      await initializeReplay();
+    } else {
+      await initializeStream();
     }
-    if (!result.logs.length) throw new Error("No accepted benign logs were found.");
-    select.disabled = false;
-    select.addEventListener("change", () => loadReplay(select.value));
-    await loadReplay(result.logs[0].id);
+  } catch (error) {
+    showError(error);
+  }
+}
+
+async function initializeReplay() {
+  const result = await fetchJson("/api/logs");
+  const select = $("runSelect");
+  select.innerHTML = "";
+  for (const log of result.logs) {
+    const option = document.createElement("option");
+    option.value = log.id;
+    option.textContent = log.label;
+    select.appendChild(option);
+  }
+  if (!result.logs.length) throw new Error("No accepted benign logs were found.");
+  select.disabled = false;
+  select.addEventListener("change", () => loadReplay(select.value));
+  await loadReplay(result.logs[0].id);
+}
+
+async function initializeStream() {
+  const select = $("runSelect");
+  select.innerHTML = "";
+  const option = document.createElement("option");
+  option.value = "stream";
+  option.textContent = state.mode === "csv" ? "Dummy CSV stream" : "UGV01 live T:147 stream";
+  select.appendChild(option);
+  select.disabled = true;
+  setSystem("Stream starting", "Waiting for T:147 samples", "loading");
+  await pollStream();
+  state.liveTimer = window.setInterval(pollStream, 500);
+}
+
+async function pollStream() {
+  try {
+    const payload = await fetchJson("/api/stream");
+    const previousLength = state.data?.points?.length || 0;
+    state.data = normalizePayload(payload);
+    if (!state.playing || state.index >= previousLength - 1) {
+      state.index = Math.max(0, state.data.points.length - 1);
+    }
+    $("timeline").max = Math.max(0, state.data.points.length - 1);
+    populateRun();
+    render();
+    const detail = `${state.data.summary.updates || 0} updates | ${sourceLabel(state.data.metadata.source)}`;
+    setSystem(payload.running ? "Live prototype running" : "Stream complete", detail, payload.error ? "error" : "ready");
+    if (payload.error) setText("errorText", payload.error);
+    $("errorView").hidden = !payload.error;
   } catch (error) {
     showError(error);
   }
@@ -46,7 +115,7 @@ async function loadReplay(runId) {
   setSystem("Loading replay", "Running the accepted log through the digital twin", "loading");
   $("runSelect").disabled = true;
   try {
-    state.data = await fetchJson(`/api/replay?id=${encodeURIComponent(runId)}`);
+    state.data = normalizePayload(await fetchJson(`/api/replay?id=${encodeURIComponent(runId)}`));
     state.index = 0;
     $("timeline").max = Math.max(0, state.data.points.length - 1);
     $("timeline").value = 0;
@@ -61,6 +130,49 @@ async function loadReplay(runId) {
   }
 }
 
+function normalizePayload(payload) {
+  if (payload.schema === "ugv01_dashboard_replay_v2") {
+    const points = payload.points.map((p) => ({
+      ...p,
+      twin_x: p.ekf_x,
+      twin_y: p.ekf_y,
+      twin_theta: p.path_heading || p.ekf_theta || 0,
+      firmware_yaw_deg: p.yaw,
+      encoder_v: p.velocity,
+      omega: p.omega,
+      gps_valid: Number.isFinite(Number(p.gps_x)) && Number.isFinite(Number(p.gps_y)),
+      gps_agreement_m: Math.hypot(finite(p.ekf_x) - finite(p.gps_x), finite(p.ekf_y) - finite(p.gps_y)),
+      gps_heading_agreement_deg: null,
+      packet_gap: p.packet_loss || 0,
+      condition: p.region || "replay",
+    }));
+    return {
+      ...payload,
+      points,
+      summary: {
+        ...payload.summary,
+        gps_agreement_rmse_m: payload.summary.agreement_rmse_m,
+        gps_agreement_p95_m: payload.summary.agreement_p95_m,
+        gps_agreement_max_m: null,
+        gps_heading_mae_deg: null,
+        gps_heading_p95_deg: null,
+        gps_RPEp_1s_m: null,
+        gps_RPEp_5s_m: null,
+        gps_RPEp_10s_m: null,
+      },
+      metadata: {
+        label: payload.metadata.label,
+        source: payload.metadata.path,
+        paper_role: "accepted benign replay",
+        runtime_inputs: "T:147 telemetry with GPS",
+        twin_model: "legacy replay EKF branch",
+        reference_note: "historical GPS replay",
+      },
+    };
+  }
+  return payload;
+}
+
 function setSystem(title, detail, status) {
   setText("systemState", title);
   setText("systemDetail", detail);
@@ -68,30 +180,40 @@ function setSystem(title, detail, status) {
 }
 
 function showError(error) {
-  setSystem("Replay error", "See the message below", "error");
+  setSystem("Dashboard error", "See the message below", "error");
   setText("errorText", error.message || String(error));
   $("errorView").hidden = false;
 }
 
 function populateRun() {
+  if (!state.data) return;
   const { metadata: meta, summary } = state.data;
-  setText("metaSurface", human(meta.surface));
-  setText("metaSpeed", human(meta.speed));
-  setText("metaRoute", `${human(meta.route)} · ${meta.repeats} loops`);
-  setText("metaNetwork", human(meta.network));
-  setText("metaTrial", meta.trial);
-  setText("runRmse", `${fmt(summary.agreement_rmse_m, 3)} m`);
-  setText("runP95", `${fmt(summary.security_agreement_rmse_m, 3)} m`);
-  setText("sumUpdates", summary.updates);
+  setText("metaSurface", state.mode.toUpperCase());
+  setText("metaSpeed", meta.twin_model || "--");
+  setText("metaRoute", meta.runtime_inputs || "--");
+  setText("metaNetwork", meta.reference_note || "--");
+  setText("metaTrial", summary.fidelity_status || "ready");
+  setText("runRmse", metric(summary.gps_agreement_rmse_m, 2, " m"));
+  setText("runP95", metric(summary.gps_agreement_p95_m, 2, " m"));
+  setText("sumUpdates", summary.updates || 0);
   setText("sumDuration", `${fmt(summary.duration_s, 1)} s`);
-  setText("sumLoss", summary.packet_loss);
-  setText("sumStale", summary.stale_packets);
-  setText("sumLatency", `${fmt(summary.latency_median_ms, 0)} ms`);
-  setText("sumSat", `${summary.satellite_min}–${summary.satellite_max}`);
+  setText("sumLoss", summary.gps_valid_count || Math.round((summary.gps_valid_fraction || 0) * (summary.updates || 0)));
+  setText("sumStale", metric(summary.gps_agreement_p95_m, 2, " m"));
+  setText("sumLatency", metric(summary.gps_heading_mae_deg, 1, " deg"));
+  setText("sumSat", `${fmt((summary.gps_valid_fraction || 0) * 100, 0)}%`);
+  setText("controlMode", state.mode === "live" ? "live" : "dry run");
+  $("controlMode").className = `badge ${state.mode === "live" ? "safe" : "warning"}`;
+}
+
+function gpsAgreementLabel() {
+  const p = current();
+  if (!p || !p.gps_valid) return "no fix";
+  const d = Math.hypot(finite(p.twin_x) - finite(p.gps_x), finite(p.twin_y) - finite(p.gps_y));
+  return `${fmt(d, 2)} m`;
 }
 
 function current() {
-  return state.data?.points[Math.min(state.index, state.data.points.length - 1)] || null;
+  return state.data?.points[Math.min(state.index, Math.max(0, state.data.points.length - 1))] || null;
 }
 
 function render() {
@@ -101,42 +223,49 @@ function render() {
   const total = state.data.points[state.data.points.length - 1].t;
   setText("timelineTime", `${timeLabel(point.t)} / ${timeLabel(total)}`);
   setText("mapTime", timeLabel(point.t));
-  setText("mapPosition", `E ${fmt(point.ekf_x)} m · N ${fmt(point.ekf_y)} m`);
-  setText("poseX", fmt(point.ekf_x));
-  setText("poseY", fmt(point.ekf_y));
-  setText("poseTheta", fmt(point.path_heading * 180 / Math.PI, 1));
-  setText("poseVelocity", fmt(point.velocity));
+  setText("mapPosition", `E ${fmt(point.twin_x)} m | N ${fmt(point.twin_y)} m`);
+  setText("poseX", fmt(point.twin_x));
+  setText("poseY", fmt(point.twin_y));
+  setText("poseTheta", fmt(deg(point.twin_theta), 1));
+  setText("poseVelocity", fmt(point.encoder_v));
 
-  const difference = Math.hypot(point.ekf_x - point.gps_x, point.ekf_y - point.gps_y);
-  setText("currentResidual", `${fmt(difference, 3)} m`);
-  setText("residualNow", `${fmt(difference, 3)} m`);
-  $("residualMeter").style.width = `${Math.min(100, difference / 2 * 100)}%`;
+  const gpsDelta = point.gps_valid ? finite(point.gps_agreement_m, Math.hypot(point.twin_x - point.gps_x, point.twin_y - point.gps_y)) : NaN;
+  setText("currentResidual", point.gps_valid ? `${fmt(gpsDelta, 2)} m` : "no fix");
+  $("residualMeter").style.width = `${point.gps_valid ? Math.min(100, gpsDelta / 2 * 100) : 0}%`;
 
-  setText("currentNis", fmt(point.nis));
-  setText("nisThreshold", fmt(point.threshold));
-  setText("confidence", `${fmt(point.confidence * 100, 0)}%`);
-  const nisMax = Math.max(point.threshold * 1.35, point.nis, 1);
-  $("nisMeter").style.width = `${Math.min(100, point.nis / nisMax * 100)}%`;
-  $("thresholdMark").style.left = `${Math.min(98, point.threshold / nisMax * 100)}%`;
+  const yawDisagreementDeg = Math.abs(deg(point.yaw_disagreement || 0));
+  setText("currentNis", `${fmt(yawDisagreementDeg, 1)} deg/s`);
+  setText("residualNow", point.gps_valid ? `${fmt(gpsDelta, 2)} m` : "no fix");
+  setText("nisThreshold", human(point.condition));
+  setText("confidence", fmt(point.slip_indicator, 2));
+  $("nisMeter").style.width = `${Math.min(100, yawDisagreementDeg / 50 * 100)}%`;
+  $("thresholdMark").style.left = "70%";
   const badge = $("regionBadge");
-  badge.textContent = point.region;
-  badge.className = `badge ${point.region}`;
+  badge.textContent = human(point.condition);
+  badge.className = `badge ${conditionClass(point.condition)}`;
 
-  setText("sensorSat", point.satellites);
-  setText("sensorHdop", fmt(point.hdop));
-  setText("sensorVelocity", fmt(point.velocity, 3));
-  setText("sensorOmega", `${fmt(point.omega * 180 / Math.PI, 1)}°/s / ${fmt(point.slip_indicator, 2)}`);
-  setText("sensorYaw", fmt(point.yaw, 1));
-  setText("sensorGyro", `${fmt(point.imu_omega * 180 / Math.PI, 2)}°/s / ${fmt(point.gyro_bias_deg_s, 2)}°/s`);
-  setText("sensorVoltage", fmt(point.voltage, 2));
-  setText("sensorMotors", `${fmt(point.motor_l, 2)} / ${fmt(point.motor_r, 2)}`);
+  setText("sensorSat", point.gps_valid ? point.satellites : "--");
+  setText("sensorHdop", point.gps_valid ? fmt(point.hdop) : "no fix");
+  setText("sensorVelocity", metric(state.data.summary.gps_agreement_rmse_m, 2));
+  setText("sensorOmega", `${metric(state.data.summary.gps_agreement_p95_m, 2)} / ${metric(state.data.summary.gps_agreement_max_m, 2)} m`);
+  setText("sensorYaw", metric(state.data.summary.gps_RPEp_1s_m, 2));
+  setText("sensorGyro", `${metric(state.data.summary.gps_RPEp_5s_m, 2)} / ${metric(state.data.summary.gps_RPEp_10s_m, 2)} m`);
+  setText("sensorVoltage", fmt(point.encoder_v, 3));
+  setText("sensorMotors", `${fmt(deg(point.omega), 1)} / ${fmt(yawDisagreementDeg, 1)} deg/s`);
   setText("sensorLatency", fmt(point.latency_ms, 0));
-  setText("sensorPacket", `${point.queue_depth} / ${point.packet_loss}`);
-  setText("latencyNow", `${fmt(point.latency_ms, 0)} ms`);
+  setText("sensorPacket", `${point.queue_depth || 0} / ${point.packet_gap || 0}`);
+  setText("latencyNow", metric(point.gps_heading_agreement_deg, 1, " deg"));
 
   drawTrajectory();
-  drawSeries($("residualChart"), state.data.points.map(p => Math.hypot(p.ekf_x - p.gps_x, p.ekf_y - p.gps_y)), colors.coral, "m");
-  drawSeries($("latencyChart"), state.data.points.map(p => p.latency_ms), colors.teal, "ms");
+  drawSeries($("residualChart"), state.data.points.map(p => p.gps_agreement_m), colors.coral, "m");
+  drawSeries($("latencyChart"), state.data.points.map(p => p.gps_heading_agreement_deg), colors.gold, "deg");
+}
+
+function conditionClass(condition) {
+  const label = String(condition || "");
+  if (label.includes("high")) return "blind";
+  if (label.includes("turn")) return "warning";
+  return "safe";
 }
 
 function canvasContext(canvas) {
@@ -176,20 +305,21 @@ function drawTrajectory() {
   drawGrid(ctx, width, height, bounds, map);
 
   const points = state.data.points;
-  drawPath(ctx, points, points.length - 1, map, "gps_x", "gps_y", colors.coral, 1, 0.25);
-  drawPath(ctx, points, points.length - 1, map, "security_x", "security_y", colors.gold, 1, 0.24);
-  drawPath(ctx, points, points.length - 1, map, "ekf_x", "ekf_y", colors.teal, 1, 0.22);
-  drawPath(ctx, points, state.index, map, "gps_x", "gps_y", colors.coral, 1.5, 0.82);
-  drawPath(ctx, points, state.index, map, "security_x", "security_y", colors.gold, 1.8, 0.92);
-  drawPath(ctx, points, state.index, map, "ekf_x", "ekf_y", colors.teal, 2.3, 1);
+  drawPath(ctx, points, points.length - 1, map, "gps_x", "gps_y", colors.coral, 1, 0.22, true);
+  drawPath(ctx, points, points.length - 1, map, "twin_x", "twin_y", colors.teal, 1, 0.18, false);
+  drawPath(ctx, points, state.index, map, "gps_x", "gps_y", colors.coral, 1.6, 0.82, true);
+  drawPath(ctx, points, state.index, map, "twin_x", "twin_y", colors.teal, 2.4, 1, false);
 
   const point = current();
-  const [gx, gy] = map(point.gps_x, point.gps_y);
-  ctx.fillStyle = colors.coral;
-  ctx.beginPath(); ctx.arc(gx, gy, 4, 0, Math.PI * 2); ctx.fill();
-
-  const [x, y] = map(point.ekf_x, point.ekf_y);
-  drawRover(ctx, x, y, -point.path_heading, colors.teal);
+  if (point.gps_valid) {
+    const [gx, gy] = map(point.gps_x, point.gps_y);
+    ctx.fillStyle = colors.coral;
+    ctx.beginPath();
+    ctx.arc(gx, gy, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const [x, y] = map(point.twin_x, point.twin_y);
+  drawRover(ctx, x, y, -point.twin_theta, colors.teal);
   const scalePixels = Math.min(90, scale);
   $("mapScale").style.width = `${scalePixels}px`;
   $("mapScale").textContent = scale >= 55 ? "1 m" : "2 m";
@@ -205,17 +335,23 @@ function drawGrid(ctx, width, height, bounds, map) {
   const startY = Math.floor(bounds.min_y / step) * step;
   for (let value = startX; value <= bounds.max_x; value += step) {
     const [x] = map(value, 0);
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
     ctx.fillText(`${value}m`, x + 3, height - 7);
   }
   for (let value = startY; value <= bounds.max_y; value += step) {
     const [, y] = map(0, value);
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
     ctx.fillText(`${value}m`, 5, y - 4);
   }
 }
 
-function drawPath(ctx, points, end, map, xKey, yKey, color, lineWidth, alpha) {
+function drawPath(ctx, points, end, map, xKey, yKey, color, lineWidth, alpha, requireValid) {
   if (end < 1) return;
   ctx.save();
   ctx.globalAlpha = alpha;
@@ -223,10 +359,36 @@ function drawPath(ctx, points, end, map, xKey, yKey, color, lineWidth, alpha) {
   ctx.lineWidth = lineWidth;
   ctx.lineJoin = "round";
   ctx.beginPath();
+  let started = false;
   for (let i = 0; i <= end; i++) {
-    const [x, y] = map(points[i][xKey], points[i][yKey]);
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    if (requireValid && !points[i].gps_valid) continue;
+    const xVal = points[i][xKey];
+    const yVal = points[i][yKey];
+    if (!Number.isFinite(Number(xVal)) || !Number.isFinite(Number(yVal))) continue;
+    const [x, y] = map(xVal, yVal);
+    if (!started) {
+      ctx.moveTo(x, y);
+      started = true;
+    } else {
+      ctx.lineTo(x, y);
+    }
   }
+  if (started) ctx.stroke();
+  ctx.restore();
+}
+
+function drawFirmwareHeadingPath(ctx, points, map) {
+  const point = current();
+  const [x, y] = map(point.twin_x, point.twin_y);
+  const angle = -finite(point.firmware_yaw_deg) * Math.PI / 180;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.strokeStyle = colors.gold;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(28, 0);
   ctx.stroke();
   ctx.restore();
 }
@@ -239,31 +401,54 @@ function drawRover(ctx, x, y, angle, color) {
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(13, 0); ctx.lineTo(-8, -8); ctx.lineTo(-5, 0); ctx.lineTo(-8, 8); ctx.closePath();
-  ctx.fill(); ctx.stroke();
+  ctx.moveTo(13, 0);
+  ctx.lineTo(-8, -8);
+  ctx.lineTo(-5, 0);
+  ctx.lineTo(-8, 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
   ctx.restore();
 }
 
 function drawSeries(canvas, values, color, unit) {
   const { ctx, width, height } = canvasContext(canvas);
-  const pad = { left: 34, right: 8, top: 8, bottom: 20 };
-  const visible = values.slice(0, state.index + 1);
-  const max = Math.max(...values, 1);
+  const pad = { left: 36, right: 8, top: 8, bottom: 20 };
+  const numeric = values.map(v => v === null || v === undefined || !Number.isFinite(Number(v)) ? null : Number(v));
+  const validValues = numeric.filter(v => v !== null);
+  const max = Math.max(...validValues, 1);
   ctx.clearRect(0, 0, width, height);
-  ctx.strokeStyle = colors.grid; ctx.lineWidth = 1;
+  ctx.strokeStyle = colors.grid;
+  ctx.lineWidth = 1;
   for (let i = 0; i <= 3; i++) {
     const y = pad.top + (height - pad.top - pad.bottom) * i / 3;
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(width - pad.right, y); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(width - pad.right, y);
+    ctx.stroke();
   }
-  ctx.fillStyle = colors.muted; ctx.font = "9px Segoe UI";
+  ctx.fillStyle = colors.muted;
+  ctx.font = "9px Segoe UI";
   ctx.fillText(`${max.toFixed(max < 10 ? 1 : 0)} ${unit}`, 2, pad.top + 4);
   ctx.fillText("0", 20, height - pad.bottom + 3);
-  if (visible.length < 2) return;
-  ctx.strokeStyle = color; ctx.lineWidth = 1.8; ctx.beginPath();
-  visible.forEach((value, index) => {
+  if (validValues.length < 2) return;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  let started = false;
+  ctx.beginPath();
+  numeric.slice(0, state.index + 1).forEach((value, index) => {
+    if (value === null) {
+      started = false;
+      return;
+    }
     const x = pad.left + (width - pad.left - pad.right) * index / Math.max(1, values.length - 1);
-    const y = height - pad.bottom - finite(value) / max * (height - pad.top - pad.bottom);
-    if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    const y = height - pad.bottom - value / max * (height - pad.top - pad.bottom);
+    if (!started) {
+      ctx.moveTo(x, y);
+      started = true;
+    } else {
+      ctx.lineTo(x, y);
+    }
   });
   ctx.stroke();
 }
@@ -272,14 +457,14 @@ function stopPlayback() {
   state.playing = false;
   state.lastFrame = 0;
   state.carry = 0;
-  $("playPause").textContent = "▶";
+  $("playPause").innerHTML = "&#9658;";
   $("playPause").setAttribute("aria-label", "Play");
 }
 
 function togglePlayback() {
-  if (!state.data) return;
+  if (!state.data || state.mode !== "replay") return;
   state.playing = !state.playing;
-  $("playPause").textContent = state.playing ? "❚❚" : "▶";
+  $("playPause").textContent = state.playing ? "Pause" : "Play";
   $("playPause").setAttribute("aria-label", state.playing ? "Pause" : "Play");
   state.lastFrame = performance.now();
   if (state.playing) requestAnimationFrame(playFrame);
@@ -290,7 +475,7 @@ function playFrame(now) {
   const elapsed = (now - state.lastFrame) / 1000 * state.speed;
   state.lastFrame = now;
   const points = state.data.points;
-  let targetTime = points[state.index].t + elapsed + state.carry;
+  const targetTime = points[state.index].t + elapsed + state.carry;
   let moved = false;
   while (state.index < points.length - 1 && points[state.index + 1].t <= targetTime) {
     state.index++;
@@ -316,6 +501,55 @@ $("stepForward").addEventListener("click", () => {
 });
 $("timeline").addEventListener("input", (event) => { stopPlayback(); state.index = Number(event.target.value); render(); });
 $("speedSelect").addEventListener("change", (event) => { state.speed = Number(event.target.value); });
+document.querySelectorAll("[data-speed]").forEach((button) => {
+  button.addEventListener("click", () => {
+    state.commandSpeed = button.dataset.speed;
+    document.querySelectorAll("[data-speed]").forEach((item) => item.classList.toggle("selected", item === button));
+  });
+});
+
+async function sendDrive(command) {
+  state.activeCommand = command;
+  setText("lastCommand", `${command} @ ${state.commandSpeed}`);
+  try {
+    const response = await fetchJsonPost("/api/command", { command, speed: state.commandSpeed });
+    const sent = response.sent ? "sent" : "dry run";
+    const payload = response.payload || {};
+    setText("lastCommand", `${command} ${sent} L=${fmt(payload.L, 2)} R=${fmt(payload.R, 2)}`);
+  } catch (error) {
+    showError(error);
+  }
+}
+
+async function fetchJsonPost(url, body) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+  return payload;
+}
+
+document.querySelectorAll("[data-command]").forEach((button) => {
+  const command = button.dataset.command;
+  button.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    sendDrive(command);
+  });
+  button.addEventListener("pointerup", () => {
+    if (command !== "stop") sendDrive("stop");
+  });
+  button.addEventListener("pointerleave", () => {
+    if (state.activeCommand === command && command !== "stop") sendDrive("stop");
+  });
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (command === "stop") sendDrive("stop");
+  });
+});
+
 window.addEventListener("resize", render);
 window.addEventListener("keydown", (event) => {
   if (event.target.matches("select,input")) return;
