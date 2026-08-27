@@ -190,6 +190,8 @@ class TwinStream:
             running = self._running
             events = list(self._events[-80:])
             contracts = list(self._latest_contracts)
+            latest_aoi = float(points[-1]["aoi_s"]) if points else None
+            policy_decision = self.resource_policy.snapshot(latest_aoi, contracts)
         return {
             "schema": "ugv01_live_twin_stream_v2",
             "mode": self.mode,
@@ -209,6 +211,7 @@ class TwinStream:
                 "resource_mode": self.resource_policy.mode,
                 "requested_update_rate_hz": self.resource_policy.update_rate_hz,
                 "log_path": str(self.log_path.relative_to(REPO_ROOT)),
+                "decision": policy_decision,
             },
             "contracts": contracts,
             "events": events,

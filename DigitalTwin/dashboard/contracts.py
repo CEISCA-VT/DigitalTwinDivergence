@@ -269,6 +269,22 @@ class ResourcePolicy:
     def update_rate_hz(self) -> float:
         return float(self.config["resource_modes"][self.mode]["update_rate_hz"])
 
+    def snapshot(self, aoi_s: float | None, contracts: list[dict[str, object]]) -> dict[str, object]:
+        desired, reason = self._desired_mode(aoi_s, contracts)
+        mode_cfg = self.config["resource_modes"][self.mode]
+        return {
+            "policy": self.policy,
+            "current_mode": self.mode,
+            "desired_mode": desired,
+            "reason": reason,
+            "update_rate_hz": self.update_rate_hz,
+            "relative_cost": float(mode_cfg["relative_cost"]),
+            "aoi_s": aoi_s,
+            "aoi_normal_trigger_s": float(self.config["resource_policy"]["aoi_normal_trigger_s"]),
+            "aoi_high_trigger_s": float(self.config["resource_policy"]["aoi_high_trigger_s"]),
+            "contract_statuses": {str(item["service_id"]): str(item["status"]) for item in contracts},
+        }
+
     def update(self, now_s: float, aoi_s: float | None, contracts: list[dict[str, object]]) -> dict[str, object] | None:
         desired, reason = self._desired_mode(aoi_s, contracts)
         if desired == self.mode:

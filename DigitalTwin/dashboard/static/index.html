@@ -34,7 +34,14 @@
       <div><span>Status</span><strong id="metaTrial">--</strong></div>
     </section>
 
-    <section class="workspace experiment-workspace">
+    <nav class="view-nav" aria-label="Dashboard sections">
+      <button class="selected" data-view="overview">Live Twin</button>
+      <button data-view="contracts">C<sub>s</sub> Contracts</button>
+      <button data-view="resources">Resource Policy</button>
+      <button data-view="audit">Fidelity Audit</button>
+    </nav>
+
+    <section class="workspace experiment-workspace" data-view-panel="overview">
       <article class="trajectory-panel panel">
         <div class="panel-heading">
           <div><span class="eyebrow">COMMON INITIALIZED FRAME</span><h1>Live physical-virtual trajectory</h1></div>
@@ -106,41 +113,109 @@
       </aside>
     </section>
 
-    <section class="sensor-grid">
+    <section class="service-contract-view" data-view-panel="contracts" hidden>
+      <article class="panel contract-detail-panel">
+        <div class="panel-heading">
+          <div><span class="eyebrow">SERVICE CONTRACT OBJECT</span><h1>C<sub>s</sub> = (Q<sub>s</sub>, H<sub>s</sub>, &tau;<sub>s</sub>, C<sub>s</sub>, A<sub>s</sub>)</h1></div>
+          <span id="contractDetailState" class="badge">waiting</span>
+        </div>
+        <div class="contract-definition-grid">
+          <div><span>Q<sub>s</sub></span><strong>position and heading disagreement</strong></div>
+          <div><span>H<sub>s</sub></span><strong>1 s, 5 s, 10 s, or global</strong></div>
+          <div><span>&tau;<sub>s</sub></span><strong>frozen service tolerance</strong></div>
+          <div><span>C<sub>s</sub></span><strong>GPS quality and history gate</strong></div>
+          <div><span>A<sub>s</sub></span><strong>age-of-information limit</strong></div>
+        </div>
+        <div class="table-wrap">
+          <table class="contract-table">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Horizon H<sub>s</sub></th>
+                <th>Tolerance &tau;<sub>s</sub></th>
+                <th>AoI limit A<sub>s</sub></th>
+                <th>Current margin</th>
+                <th>State</th>
+              </tr>
+            </thead>
+            <tbody id="contractTableBody">
+              <tr><td colspan="6">Waiting for synchronized GPS evidence</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel timeline-panel">
+        <div class="panel-heading compact">
+          <div><span class="eyebrow">ROLLING QUALIFICATION</span><h2>Service-state timelines</h2></div>
+          <strong id="timelineWindow">latest samples</strong>
+        </div>
+        <div id="qualificationTimelines" class="qualification-timelines"></div>
+      </article>
+    </section>
+
+    <section class="resource-policy-view" data-view-panel="resources" hidden>
+      <article class="panel policy-panel">
+        <div class="panel-heading">
+          <div><span class="eyebrow">RESOURCE POLICY &pi;</span><h1>Why the dashboard selected the current telemetry rate</h1></div>
+          <span id="policyStateBadge" class="badge">--</span>
+        </div>
+        <div class="policy-hero">
+          <div><span>Current mode</span><strong id="policyMode">--</strong></div>
+          <div><span>Request rate</span><strong id="policyRate">--</strong></div>
+          <div><span>Relative cost</span><strong id="policyCost">--</strong></div>
+          <div><span>Decision reason</span><strong id="policyReason">--</strong></div>
+        </div>
+        <div class="policy-thresholds">
+          <div><span>AoI now</span><strong id="policyAoi">--</strong></div>
+          <div><span>Normal trigger</span><strong id="policyNormalTrigger">--</strong></div>
+          <div><span>High trigger</span><strong id="policyHighTrigger">--</strong></div>
+          <div><span>Observed states</span><strong id="policyStates">--</strong></div>
+        </div>
+      </article>
+      <article class="sensor-grid policy-sensors">
+        <div class="sensor-card"><div class="sensor-label">Source freshness</div><strong id="policyFreshness">--</strong><small>AoI p95</small></div>
+        <div class="sensor-card"><div class="sensor-label">Transport jitter</div><strong id="policyJitter">--</strong><small>p95</small></div>
+        <div class="sensor-card"><div class="sensor-label">Bandwidth</div><strong id="policyBandwidth">--</strong><small>bytes/s</small></div>
+        <div class="sensor-card"><div class="sensor-label">Compute</div><strong id="policyCompute">--</strong><small>evaluation p95</small></div>
+      </article>
+    </section>
+
+    <section class="sensor-grid" data-view-panel="overview">
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon gps-icon">R</span>Reference quality</div>
+        <div class="sensor-label"><span class="sensor-icon gps-icon">R</span>Operational reference</div>
         <strong id="sensorSat">--</strong><small>satellites</small>
         <footer><span>HDOP / GPS age</span><b id="sensorHdop">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon encoder-icon">P</span>Resource policy</div>
+        <div class="sensor-label"><span class="sensor-icon encoder-icon">P</span>Policy arm &pi;</div>
         <strong id="sensorVelocity">--</strong><small>mode</small>
         <footer><span>Requested rate</span><b id="sensorOmega">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon imu-icon">A</span>Freshness</div>
+        <div class="sensor-label"><span class="sensor-icon imu-icon">A</span>Age of information</div>
         <strong id="sensorYaw">--</strong><small>ms AoI</small>
         <footer><span>p95 / jitter p95</span><b id="sensorGyro">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon power-icon">C</span>Runtime cost</div>
+        <div class="sensor-label"><span class="sensor-icon power-icon">C</span>Edge cost</div>
         <strong id="sensorVoltage">--</strong><small>bytes/s</small>
         <footer><span>Evaluation p95</span><b id="sensorMotors">--</b></footer>
       </article>
       <article class="sensor-card">
-        <div class="sensor-label"><span class="sensor-icon network-icon">N</span>Transport health</div>
+        <div class="sensor-label"><span class="sensor-icon network-icon">N</span>Transport service</div>
         <strong id="sensorLatency">--</strong><small>ms HTTP</small>
         <footer><span>Queue / loss / stale</span><b id="sensorPacket">--</b></footer>
       </article>
     </section>
 
-    <section class="charts">
+    <section class="charts" data-view-panel="audit" hidden>
       <article class="chart-panel panel">
-        <div class="panel-heading compact"><div><span class="eyebrow">GLOBAL FIDELITY SIGNAL</span><h2>GPS-to-twin Dp(t)</h2></div><strong id="residualNow">--</strong></div>
+        <div class="panel-heading compact"><div><span class="eyebrow">GLOBAL FIDELITY SIGNAL</span><h2>GPS-to-twin D<sub>p</sub>(t)</h2></div><strong id="residualNow">--</strong></div>
         <canvas id="residualChart" aria-label="GPS to twin position divergence history"></canvas>
       </article>
       <article class="chart-panel panel">
-        <div class="panel-heading compact"><div><span class="eyebrow">HEADING FIDELITY SIGNAL</span><h2>GPS-course Dtheta(t)</h2></div><strong id="latencyNow">--</strong></div>
+        <div class="panel-heading compact"><div><span class="eyebrow">HEADING FIDELITY SIGNAL</span><h2>GPS-course D<sub>&theta;</sub>(t)</h2></div><strong id="latencyNow">--</strong></div>
         <canvas id="latencyChart" aria-label="GPS course to twin heading divergence history"></canvas>
       </article>
       <article class="event-panel panel">

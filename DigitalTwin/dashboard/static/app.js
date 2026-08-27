@@ -12,6 +12,7 @@ const state = {
   liveTimer: null,
   commandSpeed: "medium",
   activeCommand: "stop",
+  activeView: "overview",
 };
 const colors = {
   ink: "#172126",
@@ -29,6 +30,9 @@ function metric(value, digits = 2, suffix = "") {
   return value === null || value === undefined || !Number.isFinite(Number(value)) ? "--" : `${Number(value).toFixed(digits)}${suffix}`;
 }
 function human(value) { return String(value || "--").replaceAll("_", " "); }
+function percent(value, digits = 0) {
+  return value === null || value === undefined || !Number.isFinite(Number(value)) ? "--" : `${(Number(value) * 100).toFixed(digits)}%`;
+}
 function sourceLabel(value) {
   const parts = String(value || "").replaceAll("\\", "/").split("/");
   return parts[parts.length - 1] || "stream";
@@ -179,6 +183,17 @@ function setSystem(title, detail, status) {
   $("stateDot").className = `state-dot ${status === "ready" ? "" : status}`.trim();
 }
 
+function setActiveView(view) {
+  state.activeView = view;
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.classList.toggle("selected", button.dataset.view === view);
+  });
+  document.querySelectorAll("[data-view-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.viewPanel !== view;
+  });
+  render();
+}
+
 function showError(error) {
   setSystem("Dashboard error", "See the message below", "error");
   setText("errorText", error.message || String(error));
@@ -242,6 +257,9 @@ function render() {
   setText("latencyNow", metric(point.gps_heading_agreement_deg, 1, " deg"));
 
   renderContracts(point.contracts || state.data.contracts || []);
+  renderContractTable(point.contracts || state.data.contracts || []);
+  renderQualificationTimelines();
+  renderPolicyReasoning();
   renderEvents(state.data.events || []);
 
   drawTrajectory();
@@ -279,6 +297,103 @@ function renderContracts(contracts) {
       <dl><div><dt>Position</dt><dd>${position}</dd></div><div><dt>Heading</dt><dd>${heading}</dd></div><div><dt>AoI</dt><dd>${freshness}</dd></div></dl>
     </article>`;
   }).join("");
+}
+
+function combinedMargin(contract) {
+  const margins = [];
+  if (Number.isFinite(Number(contract.position_margin_m))) margins.push(`${metric(contract.position_margin_m, 2, " m")} pos`);
+  if (Number.isFinite(Number(contract.heading_margin_deg))) margins.push(`${metric(contract.heading_margin_deg, 1, " deg")} head`);
+  if (Number.isFinite(Number(contract.freshness_margin_s))) margins.push(`${metric(contract.freshness_margin_s * 1000, 0, " ms")} AoI`);
+  return margins.length ? margins.join(" | ") : "--";
+}
+
+function renderContractTable(contracts) {
+  const body = $("contractTableBody");
+  if (!body) return;
+  const qualified = contracts.filter(c => c.status === "qualified").length;
+  const withdrawn = contracts.filter(c => c.status === "withdrawn").length;
+  const badge = $("contractDetailState");
+  if (badge) {
+    badge.textContent = contracts.length ? `${qualified}/${contracts.length} qualified` : "waiting";
+    badge.className = `badge ${withdrawn ? "blind" : qualified === contracts.length ? "safe" : "warning"}`;
+  }
+  if (!contracts.length) {
+    body.innerHTML = '<tr><td colspan="6">Waiting for synchronized GPS evidence</td></tr>';
+    return;
+  }
+  body.innerHTML = contracts.map(contract => {
+    const horizon = contract.family === "global_synchronization" ? "global" : `${metric(contract.horizon_s, 0, " s")}`;
+    const tolerance = `${metric(contract.position_tolerance_m, 2, " m")} / ${metric(contract.heading_tolerance_deg, 0, " deg")}`;
+    const aoi = metric(contract.maximum_aoi_s * 1000, 0, " ms");
+    const stateClass = String(contract.status || "unobservable").replaceAll("_", "-");
+    const satisfaction = contract.satisfaction_fraction == null ? "--" : percent(contract.satisfaction_fraction, 0);
+    return `<tr class="${stateClass}">
+      <td><strong>${contract.label}</strong><small>${human(contract.reason)} | pass ${satisfaction}</small></td>
+      <td>${horizon}</td>
+      <td>${tolerance}</td>
+      <td>${aoi}</td>
+      <td>${combinedMargin(contract)}</td>
+      <td><span class="state-chip ${stateClass}">${human(contract.status)}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function renderQualificationTimelines() {
+  const container = $("qualificationTimelines");
+  if (!container || !state.data?.points?.length) return;
+  const points = state.data.points.slice(Math.max(0, state.index - 119), state.index + 1);
+  const latestContracts = current()?.contracts || state.data.contracts || [];
+  setText("timelineWindow", `${points.length} samples`);
+  if (!latestContracts.length) {
+    container.innerHTML = '<div class="contract-empty">Waiting for contract evaluations</div>';
+    return;
+  }
+  container.innerHTML = latestContracts.map(contract => {
+    const serviceId = contract.service_id;
+    const segments = points.map(point => {
+      const match = (point.contracts || []).find(item => item.service_id === serviceId);
+      const status = String(match?.status || "unobservable").replaceAll("_", "-");
+      return `<i class="${status}" title="${human(match?.status)}"></i>`;
+    }).join("");
+    return `<div class="timeline-row">
+      <span>${contract.label}</span>
+      <div class="timeline-track">${segments}</div>
+      <b>${human(contract.status)}</b>
+    </div>`;
+  }).join("");
+}
+
+function renderPolicyReasoning() {
+  const decision = state.data?.policy?.decision || {};
+  const summary = state.data?.summary || {};
+  const currentMode = decision.current_mode || state.data?.policy?.resource_mode;
+  const desiredMode = decision.desired_mode || currentMode;
+  const stateClass = currentMode === "high" ? "blind" : currentMode === "normal" ? "warning" : "safe";
+  setText("policyMode", human(currentMode));
+  setText("policyRate", metric(decision.update_rate_hz || state.data?.policy?.requested_update_rate_hz, 1, " Hz"));
+  setText("policyCost", metric(decision.relative_cost, 2));
+  setText("policyReason", `${human(decision.reason)}${desiredMode !== currentMode ? ` -> waiting to switch to ${human(desiredMode)}` : ""}`);
+  setText("policyAoi", metric(decision.aoi_s * 1000, 0, " ms"));
+  setText("policyNormalTrigger", metric(decision.aoi_normal_trigger_s * 1000, 0, " ms"));
+  setText("policyHighTrigger", metric(decision.aoi_high_trigger_s * 1000, 0, " ms"));
+  setText("policyStates", statusCounts(decision.contract_statuses || {}));
+  setText("policyFreshness", metric(summary.aoi_p95_ms, 0, " ms"));
+  setText("policyJitter", metric(summary.jitter_p95_ms, 0, " ms"));
+  setText("policyBandwidth", metric(summary.bytes_per_s, 0));
+  setText("policyCompute", metric(summary.evaluation_p95_ms, 2, " ms"));
+  const badge = $("policyStateBadge");
+  if (badge) {
+    badge.textContent = human(currentMode);
+    badge.className = `badge ${stateClass}`;
+  }
+}
+
+function statusCounts(statuses) {
+  const values = Object.values(statuses);
+  if (!values.length) return "--";
+  const counts = {};
+  values.forEach(value => { counts[value] = (counts[value] || 0) + 1; });
+  return Object.entries(counts).map(([key, value]) => `${value} ${human(key)}`).join(" | ");
 }
 
 function renderEvents(events) {
@@ -538,6 +653,9 @@ document.querySelectorAll("[data-speed]").forEach((button) => {
     state.commandSpeed = button.dataset.speed;
     document.querySelectorAll("[data-speed]").forEach((item) => item.classList.toggle("selected", item === button));
   });
+});
+document.querySelectorAll("[data-view]").forEach((button) => {
+  button.addEventListener("click", () => setActiveView(button.dataset.view));
 });
 
 async function sendDrive(command) {

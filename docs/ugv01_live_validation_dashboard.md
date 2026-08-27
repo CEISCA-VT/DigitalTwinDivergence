@@ -24,6 +24,17 @@ The display follows the paper framing:
 8. Every displayed update, contract state, and policy transition is written to
    `raw_logs/live_validation/*.jsonl`.
 
+## Dashboard Views
+
+The prototype is organized around four paper-facing views:
+
+| View | Purpose |
+|---|---|
+| Live Twin | Shows the common-frame GPS reference, sensor-lightweight twin trajectory, current virtual pose, and UGV01 movement controls. |
+| `C_s` Contracts | Shows the formal service-contract object `C_s = (Q_s, H_s, tau_s, C_s, A_s)`, per-service tolerances, current margins, lifecycle state, and rolling qualification timelines. |
+| Resource Policy | Shows why the selected policy arm requested the current `2`, `5`, or `10 Hz` telemetry mode, including AoI triggers, relative cost, and contract states. |
+| Fidelity Audit | Shows live `D_p(t)`, `D_theta(t)`, and the contract/policy event trail. |
+
 ## Frozen Service Contracts
 
 The position and heading tolerances come from
