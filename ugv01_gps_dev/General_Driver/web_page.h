@@ -59,13 +59,15 @@ const char index_html[] PROGMEM = R"rawliteral(
         display: flex;
     }
     main {
-        width: 960px;
-        margin: auto;
+        width: min(1600px, calc(100% - 24px));
+        margin: 0 auto;
     }
     section{margin: 40px 0;}
     .for-move {
-        display: flex;
-        align-items: center;
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(360px, 0.8fr);
+        gap: 28px;
+        align-items: start;
     }
     .for-move-a, .for-move-b{
         flex: 1;
@@ -192,6 +194,52 @@ const char index_html[] PROGMEM = R"rawliteral(
     }
     .w-btn:hover{color: #2698EA;}
     .w-btn:active{color: #1b87d4;}
+    .telemetry-box {
+        padding: 16px;
+        max-height: 620px;
+        overflow-y: auto;
+    }
+    .telemetry-section {
+        margin-bottom: 16px;
+    }
+    .telemetry-section:last-child {
+        margin-bottom: 0;
+    }
+    .telemetry-section h3 {
+        color: rgba(255,255,255,0.9);
+        font-size: 0.95em;
+        margin: 0 0 8px 0;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .telemetry-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 8px;
+    }
+    .telemetry-grid > div {
+        background: rgba(0,0,0,0.16);
+        border: 1px solid rgba(194,196,201,0.10);
+        border-radius: 4px;
+        padding: 8px;
+        min-width: 0;
+    }
+    .telemetry-grid span {
+        display: block;
+        color: #2698EA;
+        font-size: 1.05em;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .telemetry-grid small {
+        display: block;
+        color: rgba(255,255,255,0.55);
+        font-size: 0.7em;
+        margin-top: 3px;
+    }
     @media screen and (min-width: 768px) and (max-width: 1200px){
         body{font-size: 16px;}
         main {
@@ -245,7 +293,126 @@ const char index_html[] PROGMEM = R"rawliteral(
         .big-num{font-size: 2em;}
         .controlor > div{margin: 40px 0;}
     }
-    </style>
+    
+    /* Final telemetry dashboard layout */
+    main {
+        width: min(1400px, calc(100% - 32px));
+        margin: 0 auto;
+    }
+    .for-move {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+        gap: 28px;
+        align-items: start;
+    }
+    .for-move-a, .for-move-b {
+        min-width: 0;
+        margin: 0;
+    }
+    .info-device-box {
+        width: 100%;
+    }
+    .telemetry-box {
+        padding: 18px;
+        margin: 0;
+        max-height: none;
+        overflow: visible;
+        box-sizing: border-box;
+    }
+    .telemetry-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+    .telemetry-header h3 {
+        margin: 0;
+        color: rgba(255,255,255,0.9);
+        font-size: 1.05em;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .logging-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .logging-controls button {
+        color: rgba(255,255,255,0.9);
+        background: #5E6270;
+        border: none;
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .logging-controls button:hover { background: #2698EA; }
+    .logging-status {
+        color: rgba(255,255,255,0.65);
+        font-size: 0.82em;
+        min-width: 120px;
+        text-align: left;
+    }
+    .telemetry-sections {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .telemetry-section {
+        margin: 0;
+        padding: 12px;
+        box-sizing: border-box;
+        background: rgba(0,0,0,0.10);
+        border: 1px solid rgba(194,196,201,0.08);
+        border-radius: 5px;
+        min-width: 0;
+    }
+    .telemetry-section.gps-section,
+    .telemetry-section.timing-section {
+        grid-column: 1 / -1;
+    }
+    .telemetry-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+        gap: 7px;
+        min-width: 0;
+    }
+    .telemetry-grid > div {
+        min-width: 0;
+        padding: 8px 5px;
+        box-sizing: border-box;
+        text-align: center;
+        background: rgba(0,0,0,0.12);
+    }
+    .telemetry-grid span {
+        font-size: clamp(0.9em, 1.3vw, 1.08em);
+        line-height: 1.18;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .telemetry-grid small {
+        white-space: normal;
+        line-height: 1.15;
+        font-size: 0.64em;
+    }
+    @media screen and (max-width: 1050px) {
+        .for-move { grid-template-columns: 1fr; }
+        .telemetry-sections { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media screen and (max-width: 700px) {
+        main { width: calc(100% - 16px); }
+        .telemetry-sections { grid-template-columns: 1fr; }
+        .telemetry-section.gps-section,
+        .telemetry-section.timing-section { grid-column: auto; }
+        .logging-controls { width: 100%; }
+        .logging-controls button { flex: 1 1 auto; }
+        .logging-status { width: 100%; }
+    }
+
+</style>
 </head>
 <body>
     <main>
@@ -256,58 +423,87 @@ const char index_html[] PROGMEM = R"rawliteral(
             <div class="for-move">
                 <div class="for-move-a">
                     <div class="info-device-box">
-                        <div class="info-box num-box-big">
-                            <div >
-                                <span class="big-num num-color" id="V">-1.01</span>
-                                <span id="Vn">VOLTAGE</span>
+                        <div class="info-box telemetry-box">
+                            <div class="telemetry-header">
+                                <h3>Live Telemetry</h3>
+                                <div class="logging-controls">
+                                    <button type="button" onclick="startLogging();">START LOGGING</button>
+                                    <button type="button" onclick="stopLogging();">STOP LOGGING</button>
+                                    <button type="button" onclick="downloadCSV();">DOWNLOAD CSV</button>
+                                    <span class="logging-status" id="loggingStatus">NOT LOGGING</span>
+                                </div>
                             </div>
-                            <div>
-                                <span class="big-num num-color" id="RSSI">-1.01</span>
-                                <span id="RSSIn">RSSI</span>
+
+                            <div class="telemetry-sections">
+                                <div class="telemetry-section">
+                                    <h3>Motion / IMU</h3>
+                                    <div class="telemetry-grid">
+                                        <div><span id="r">--</span><small>ROLL</small></div>
+                                        <div><span id="p">--</span><small>PITCH</small></div>
+                                        <div><span id="y">--</span><small>YAW</small></div>
+                                        <div><span id="v">--</span><small>VELOCITY</small></div>
+                                        <div><span id="L">--</span><small>LEFT SPEED</small></div>
+                                        <div><span id="R">--</span><small>RIGHT SPEED</small></div>
+                                        <div><span id="temp">--</span><small>TEMP °C</small></div>
+                                    </div>
+                                </div>
+
+                                <div class="telemetry-section">
+                                    <h3>Acceleration</h3>
+                                    <div class="telemetry-grid">
+                                        <div><span id="ax">--</span><small>AX</small></div>
+                                        <div><span id="ay">--</span><small>AY</small></div>
+                                        <div><span id="az">--</span><small>AZ</small></div>
+                                    </div>
+                                </div>
+
+                                <div class="telemetry-section">
+                                    <h3>Gyroscope</h3>
+                                    <div class="telemetry-grid">
+                                        <div><span id="gx">--</span><small>GX</small></div>
+                                        <div><span id="gy">--</span><small>GY</small></div>
+                                        <div><span id="gz">--</span><small>GZ</small></div>
+                                    </div>
+                                </div>
+
+                                <div class="telemetry-section">
+                                    <h3>Magnetometer</h3>
+                                    <div class="telemetry-grid">
+                                        <div><span id="mx">--</span><small>MX</small></div>
+                                        <div><span id="my">--</span><small>MY</small></div>
+                                        <div><span id="mz">--</span><small>MZ</small></div>
+                                    </div>
+                                </div>
+
+                                <div class="telemetry-section gps-section">
+                                    <h3>GPS</h3>
+                                    <div class="telemetry-grid gps-grid">
+                                        <div><span id="gps_valid">--</span><small>VALID</small></div>
+                                        <div><span id="gps_fix_type">--</span><small>FIX TYPE</small></div>
+                                        <div><span id="gps_lat">--</span><small>LATITUDE</small></div>
+                                        <div><span id="gps_lon">--</span><small>LONGITUDE</small></div>
+                                        <div><span id="gps_sat">--</span><small>SATELLITES</small></div>
+                                        <div><span id="gps_hdop">--</span><small>HDOP</small></div>
+                                        <div><span id="gps_alt_m">--</span><small>ALTITUDE m</small></div>
+                                        <div><span id="gps_speed_mps">--</span><small>GPS SPEED m/s</small></div>
+                                        <div><span id="gps_course_deg">--</span><small>COURSE °</small></div>
+                                        <div><span id="gps_age_ms">--</span><small>GPS AGE ms</small></div>
+                                    </div>
+                                </div>
+
+                                <div class="telemetry-section timing-section">
+                                    <h3>Encoders / Timing</h3>
+                                    <div class="telemetry-grid">
+                                        <div><span id="enc_left">--</span><small>ENC LEFT</small></div>
+                                        <div><span id="enc_right">--</span><small>ENC RIGHT</small></div>
+                                        <div><span id="sample_ms">--</span><small>SAMPLE ms</small></div>
+                                        <div><span id="seq">--</span><small>SEQ</small></div>
+                                        <div><span id="send_ms">--</span><small>SEND ms</small></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="info-device-box">
-                        <div class="info-box num-box-mid">
-                            <div>
-                                <span class="num-color mid-num" id="r">-1.01</span>
-                                <span id="rn">ROLL</span>
-                            </div>
-                            <div>
-                                <span class="num-color mid-num" id="p">-1.01</span>
-                                <span id="pn">PITCH</span>
-                            </div>
-                            <div>
-                                <span class="num-color mid-num" id="temp">-1.01</span>
-                                <span id="yn">TEMP</span>
-                            </div>
-                            <div>
-                                <span class="num-color mid-num" id="mX">-1.01</span>
-                                <span id="mXn">PAN</span>
-                            </div>
-                            <div>
-                                <span class="num-color mid-num" id="mY">-1.01</span>
-                                <span id="mYn">TILT</span>
-                            </div>
-                            <div>
-                                <span class="num-color mid-num" id="mZ">-1.01</span>
-                                <span id="mZn">SPD_R</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="info-device-box">
-                        <div class="info-box num-box-sma">
-                            <div>
-                                <span class="num-color sma-num" id="IP">192.168.10.67</span>
-                                <span id="IPn">IP</span>
-                            </div>
-                            <div>
-                                <span class="num-color sma-num" id="MAC">44:17:93:EE:F8:F8</span>
-                                <span id="MACn">MAC</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div class="for-move-b controlor">
                     <div class="controlor-c">
                         <div>
@@ -657,19 +853,33 @@ const char index_html[] PROGMEM = R"rawliteral(
     var steady_status = 0;
     var steady_bias   = 0;
 
-    getDevInfo();
+    var telemetryLogging = false;
+    var telemetryRows = [];
+    var telemetrySampleCount = 0;
+
+    const telemetryColumns = [
+        "pc_time", "T", "seq", "sample_ms", "millis", "L", "R",
+        "enc_left", "enc_right", "v", "r", "p", "y",
+        "ax", "ay", "az", "gx", "gy", "gz", "mx", "my", "mz",
+        "temp", "gps_valid", "gps_age_ms", "gps_fix_type",
+        "gps_lat", "gps_lon", "gps_sat", "gps_hdop", "gps_alt_m",
+        "gps_speed_mps", "gps_course_deg", "gps_chars",
+        "gps_sentences", "gps_failed_checksums", "lat", "lon", "sat",
+        "hdop", "send_ms"
+    ];
+
     ledCtrl(0);
-    setInterval(function() {
-        getDevInfo();
-    }, 2510);
 
     setInterval(function() {
         heartBeat();
     }, 1500);
 
+    // Poll the complete telemetry packet at 10 Hz.
+    // The existing ESP32 WebServer endpoint returns the JSON produced by T=147.
+    var telemetryBusy = false;
     setInterval(function() {
         infoUpdate();
-    }, 1000);
+    }, 100);
 
     function cmdFill(rawInfo, fillInfo) {
         document.getElementById(rawInfo).value = document.getElementById(fillInfo).innerHTML;
@@ -686,65 +896,179 @@ const char index_html[] PROGMEM = R"rawliteral(
         xhttp.open("GET", "js?json="+document.getElementById('jsonData').value, true);
         xhttp.send();
     }
+    function telemetryValue(value, digits) {
+        if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+            return "--";
+        }
+        return Number(value).toFixed(digits);
+    }
+
+    function telemetryInteger(value) {
+        if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+            return "--";
+        }
+        return String(Math.trunc(Number(value)));
+    }
+
+    function telemetrySet(id, value, digits) {
+        var element = document.getElementById(id);
+        if (!element) return;
+        element.innerHTML = (digits === undefined)
+            ? telemetryInteger(value)
+            : telemetryValue(value, digits);
+    }
+
+    function telemetrySetText(id, value) {
+        var element = document.getElementById(id);
+        if (!element) return;
+        element.innerHTML = value === null || value === undefined ? "--" : value;
+    }
+
+
+    function csvEscape(value) {
+        if (value === null || value === undefined) return "";
+        var str = String(value);
+        if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+    }
+
+    function telemetryCsvValue(obj, key) {
+        return Object.prototype.hasOwnProperty.call(obj, key) ? obj[key] : "";
+    }
+
+    function logTelemetryToCsv(jsonResponse) {
+        if (!telemetryLogging) return;
+
+        var row = telemetryColumns.map(function(key) {
+            if (key === "pc_time") return csvEscape(new Date().toISOString());
+            return csvEscape(telemetryCsvValue(jsonResponse, key));
+        });
+
+        telemetryRows.push(row.join(","));
+        telemetrySampleCount++;
+
+        var status = document.getElementById("loggingStatus");
+        if (status) {
+            status.textContent = "LOGGING: " + telemetrySampleCount + " SAMPLES";
+        }
+    }
+
+    function startLogging() {
+        telemetryRows = [telemetryColumns.join(",")];
+        telemetrySampleCount = 0;
+        telemetryLogging = true;
+
+        var status = document.getElementById("loggingStatus");
+        if (status) status.textContent = "LOGGING: 0 SAMPLES";
+    }
+
+    function stopLogging() {
+        telemetryLogging = false;
+
+        var status = document.getElementById("loggingStatus");
+        if (status) status.textContent = "STOPPED: " + telemetrySampleCount + " SAMPLES";
+    }
+
+    function downloadCSV() {
+        if (telemetryRows.length <= 1) {
+            alert("No telemetry data has been recorded.");
+            return;
+        }
+
+        var csvContent = telemetryRows.join("\r\n");
+        var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        var stamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+        link.href = url;
+        link.download = "UGV_telemetry_" + stamp + ".csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
     function infoUpdate() {
-        var jsonCmd = {
-            "T": 130
-        }
-        var jsonString = JSON.stringify(jsonCmd);
+        // Do not queue multiple HTTP requests if the ESP32 is still processing
+        // the previous telemetry request.
+        if (telemetryBusy) return;
+        telemetryBusy = true;
+
+        var jsonString = JSON.stringify({"T":147});
         var xhttp = new XMLHttpRequest();
+
         xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var jsonResponse = JSON.parse(this.responseText);
-                document.getElementById("V").innerHTML = jsonResponse.v.toFixed(2);
-                if (jsonResponse.V<11.06) {
-                    document.getElementById("V").classList.remove("num-color");
-                    document.getElementById("V").classList.add("num-color-red");
-                }else{
-                    document.getElementById("V").classList.remove("num-color-red");
-                    document.getElementById("V").classList.add("num-color");
-                }
+            if (this.readyState == 4) {
+                telemetryBusy = false;
 
-                document.getElementById("r").innerHTML = jsonResponse.r?.toFixed(2);
-                document.getElementById("p").innerHTML = jsonResponse.p?.toFixed(2);
-                document.getElementById("temp").innerHTML = jsonResponse.temp?.toFixed(2);
-                document.getElementById("mZ").innerHTML = speed_rate;
+                if (this.status == 200) {
+                    try {
+                        var jsonResponse = JSON.parse(this.responseText);
 
-                if (jsonResponse.hasOwnProperty('pan')) {
-                    document.getElementById("mX").innerHTML = jsonResponse.pan?.toFixed(2);
-                    document.getElementById("mY").innerHTML = jsonResponse.tilt?.toFixed(2);
+                        logTelemetryToCsv(jsonResponse);
 
-                    read_X = jsonResponse.pan;
-                    read_Y = jsonResponse.tilt;
-                } else{
-                    document.getElementById("mX").innerHTML = "null";
-                    document.getElementById("mY").innerHTML = "null";
+                        telemetrySet("r", jsonResponse.r, 2);
+                        telemetrySet("p", jsonResponse.p, 2);
+                        telemetrySet("y", jsonResponse.y, 2);
+                        telemetrySet("v", jsonResponse.v, 4);
+                        telemetrySet("L", jsonResponse.L, 3);
+                        telemetrySet("R", jsonResponse.R, 3);
+                        telemetrySet("temp", jsonResponse.temp, 2);
 
-                    read_X = 0;
-                    read_Y = 0;
+                        telemetrySet("ax", jsonResponse.ax, 3);
+                        telemetrySet("ay", jsonResponse.ay, 3);
+                        telemetrySet("az", jsonResponse.az, 3);
+
+                        telemetrySet("gx", jsonResponse.gx, 4);
+                        telemetrySet("gy", jsonResponse.gy, 4);
+                        telemetrySet("gz", jsonResponse.gz, 4);
+
+                        telemetrySet("mx", jsonResponse.mx, 2);
+                        telemetrySet("my", jsonResponse.my, 2);
+                        telemetrySet("mz", jsonResponse.mz, 2);
+
+                        telemetrySetText("gps_valid",
+                            jsonResponse.gps_valid === true ? "YES" :
+                            jsonResponse.gps_valid === false ? "NO" : "--");
+                        telemetrySet("gps_fix_type", jsonResponse.gps_fix_type);
+                        telemetrySet("gps_lat", jsonResponse.gps_lat, 6);
+                        telemetrySet("gps_lon", jsonResponse.gps_lon, 6);
+                        telemetrySet("gps_sat", jsonResponse.gps_sat);
+                        telemetrySet("gps_hdop", jsonResponse.gps_hdop, 2);
+                        telemetrySet("gps_alt_m", jsonResponse.gps_alt_m, 2);
+                        telemetrySet("gps_speed_mps", jsonResponse.gps_speed_mps, 3);
+                        telemetrySet("gps_course_deg", jsonResponse.gps_course_deg, 2);
+
+                        // TinyGPS++ uses UINT32_MAX for an unavailable age.
+                        if (jsonResponse.gps_age_ms === 4294967295) {
+                            telemetrySetText("gps_age_ms", "N/A");
+                        } else {
+                            telemetrySet("gps_age_ms", jsonResponse.gps_age_ms);
+                        }
+
+                        telemetrySet("enc_left", jsonResponse.enc_left);
+                        telemetrySet("enc_right", jsonResponse.enc_right);
+                        telemetrySet("sample_ms", jsonResponse.sample_ms);
+                        telemetrySet("seq", jsonResponse.seq);
+                        telemetrySet("send_ms", jsonResponse.send_ms);
+                    } catch (error) {
+                        console.error("Invalid telemetry JSON:", error);
+                    }
                 }
             }
         };
-        xhttp.open("GET", "js?json=" + jsonString, true);
-        xhttp.send();
-    }
-    function getDevInfo() {
-        var jsonCmd = {
-            "T": 405
-        }
-        var jsonString = JSON.stringify(jsonCmd);
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var jsonResponse = JSON.parse(this.responseText);
 
-                document.getElementById("IP").innerHTML = jsonResponse.ip;
-                document.getElementById("MAC").innerHTML = jsonResponse.mac;
-                document.getElementById("RSSI").innerHTML = jsonResponse.rssi;
-            }
+        xhttp.onerror = function() {
+            telemetryBusy = false;
         };
-        xhttp.open("GET", "js?json=" + jsonString, true);
+
+        xhttp.open("GET", "js?json=" + encodeURIComponent(jsonString), true);
         xhttp.send();
     }
+
     function changeSpeed(inputSpd) {
         speed_rate = inputSpd;
     }

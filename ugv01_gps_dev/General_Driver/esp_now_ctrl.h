@@ -88,12 +88,11 @@ void changeEspNowMode(byte inputMode) {
 
 
 // callback when data is sent
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  char macStr[18];
-  // Serial.print("Packet to: ");
+void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status) {
+  char macStr[18];  // Serial.print("Packet to: ");
   // Copies the sender mac address to a string
   snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+           tx_info->des_addr[0], tx_info->des_addr[1], tx_info->des_addr[2], tx_info->des_addr[3], tx_info->des_addr[4], tx_info->des_addr[5]);
 
   jsonInfoHttp.clear();
   jsonInfoHttp["T"] = CMD_ESP_NOW_SEND;
@@ -115,7 +114,7 @@ void macStringToByteArray(const String& macString, uint8_t* byteArray) {
 }
 
 
-void OnDataRecv(const unsigned char* mac, const unsigned char* incomingData, int len) {
+void OnDataRecv(const esp_now_recv_info_t* info, const unsigned char* incomingData, int len) {
   if (espNowMode != 3){
     return;
   }
@@ -124,7 +123,7 @@ void OnDataRecv(const unsigned char* mac, const unsigned char* incomingData, int
   if (espNowMegsRecv.cmd == 3) {
     char macStr[18];
     snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+           info->src_addr[0], info->src_addr[1], info->src_addr[2], info->src_addr[3], info->src_addr[4], info->src_addr[5]);
 
     jsonInfoHttp.clear();
     jsonInfoHttp["T"] = CMD_ESP_NOW_RECV;
@@ -137,7 +136,7 @@ void OnDataRecv(const unsigned char* mac, const unsigned char* incomingData, int
   }
 
   if (!ctrlByBroadcast) {
-    if (memcmp(mac, mac_whitelist_broadcast, 6) != 0) {
+    if (memcmp(info->src_addr, mac_whitelist_broadcast, 6) != 0) {
       return;
     }
   }
