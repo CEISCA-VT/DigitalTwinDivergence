@@ -1,146 +1,55 @@
 # Digital Twin Divergence
 
-Security-aware UGV01 digital-twin implementation, hardware telemetry pipeline,
-and reproducible offline GPS-attack evaluation.
+This repository supports the current sensor-lightweight mobile-robot digital
+twin fidelity paper. The project studies how a computational twin follows a
+physical robot over time, how local and global physical-virtual divergence
+behave under changing conditions, and how a generic model becomes an
+asset-specific UGV01 twin through calibration and independent reference data.
 
-## Start Here
+Security and GPS-attack experiments from earlier project phases are not the
+active paper scope. Current claims should be made from the frozen i2Nav V2
+LOSO results, post-LOSO fidelity analyses, UGV01 AprilTag validation, official
+i2Nav benchmark outputs, and TerraSentia/AIFARMS portability analysis.
 
-- Project overview for a new collaborator or LLM:
-  `docs/project_context_for_llm.md`
-- Repository map and cleanup conventions:
-  `docs/repo_structure.md`
-- Raw-log inclusion/exclusion audit:
-  `docs/log_quality_audit.md`
-- Hardware/firmware bring-up:
-  `docs/ugv01_esp32_bringup.md`
-- Running commands:
-  `docs/running.md`
+## Repository Map
 
-Run a quick synthetic experiment:
+- `DigitalTwin/`: core models, adapters, evaluators, analysis scripts, and the
+  live dashboard prototype.
+- `public_datasets/`: small prepared public/physical datasets used by the
+  paper workflows, including UGV01 physical validation exports.
+- `results/`: retained paper-relevant result artifacts and figures.
+- `docs/`: concise experiment and operator documentation.
+- `figures/`: paper/advisor-ready figure assets.
+- `tests/`: focused regression tests.
 
-```powershell
-python -m DigitalTwin.experiments.experiment --quick
-```
-
-Run the full proposal matrix or a step-bias sweep:
-
-```powershell
-python -m DigitalTwin.experiments.experiment --full-matrix --nominal-only
-python -m DigitalTwin.experiments.experiment --full-matrix --step-sweep
-```
-
-Plot one generated CSV:
+## Install
 
 ```powershell
-python -m DigitalTwin.plotting.plot DigitalTwin/datasets/speed-0.20_terrain-0.0_latency-10_attack-none_trial-0.csv
+python -m pip install -r requirements.txt
 ```
 
-Summarize detection probability, lock thresholds, and plot ROC curves:
+Some workflows also require optional computer-vision packages such as OpenCV
+and AprilTag/ArUco support, depending on the local Python build.
 
-```powershell
-python -m DigitalTwin.analysis.summarize_pd "DigitalTwin/datasets/*.csv"
-python -m DigitalTwin.analysis.threshold_lock "DigitalTwin/datasets/*attack-none*.csv"
-python -m DigitalTwin.analysis.plot_detection "DigitalTwin/datasets/*.csv"
-python -m DigitalTwin.analysis.train_uncertainty
-```
+## Main Workflows
 
-Run the accepted-hardware-log study (manifest, run-level split, benign-only
-threshold lock, paired GPS attacks, summaries, and plots):
-
-```powershell
-python -m DigitalTwin.analysis.real_data_study
-```
-
-The July 29 security-predictor revision supersedes the previously generated
-alarm thresholds and attack-campaign outputs. Regenerate them before quoting
-security results. The existing rover logs are sufficient for this software
-rerun.
-
-Regenerate plots and the report from an already completed campaign without
-rerunning all EKF replays:
-
-```powershell
-python -m DigitalTwin.analysis.real_data_study --summarize-existing
-```
-
-See `docs/real_data_study.md` for the threat boundary and interpretation
-limits.
-
-The previously completed statistical attack matrix is documented in
-`docs/statistical_attack_campaign.md`.
-
-Run or regenerate the paired covariance-poisoning analysis:
-
-```powershell
-python -m DigitalTwin.analysis.covariance_poisoning
-python -m DigitalTwin.analysis.covariance_poisoning --summarize-existing
-```
-
-The causal comparison and current conclusion are documented in
-`docs/covariance_poisoning_analysis.md`.
-
-The frozen uncertainty variants, learned target, and current model decision are
-documented in `docs/uncertainty_policy_freeze.md`.
-
-Listen for UGV01 bridge packets:
-
-```powershell
-python -m DigitalTwin.telemetry_receiver --port 5005
-```
-
-Open the visual digital-twin replay dashboard:
+Run the live dashboard prototype:
 
 ```powershell
 python -m DigitalTwin.dashboard.server --open
 ```
 
-The dashboard reads the 20 accepted benign `T:147` logs and shows BN220 GPS,
-the GPS-fused operational EKF, and the GPS-independent security predictor.
-It also shows current rover pose, sensor state, uncertainty, security-branch
-NIS, and edge packet health. EKF-to-GPS distance is labeled as sensor
-agreement rather than physical accuracy because the current logs do not
-contain independent ground truth.
-
-Core modules:
-
-- `DigitalTwin/telemetry.py`: packet serializer/deserializer
-- `DigitalTwin/telemetry_receiver.py`: UDP hardware packet listener
-- `DigitalTwin/kinematics.py`: tracked-drive-compatible motion model
-- `DigitalTwin/motion.py`: gyro-bias correction, encoder/IMU yaw fusion, and slip indicators
-- `DigitalTwin/ekf.py`: prediction and GPS update
-- `DigitalTwin/security.py`: GPS-independent predictor, covariance bounds, and trusted evidence gate
-- `DigitalTwin/uncertainty.py`: `Q` and `R` estimator
-- `DigitalTwin/detector.py`: Mahalanobis, eigenvalue detectability bounds, confidence envelopes
-- `DigitalTwin/alarm.py`: robust initialization, motion gating, and persistent alarms
-- `DigitalTwin/attack.py`: step, freeze, replay, random drift
-- `DigitalTwin/logger.py`: experiment CSV schema
-- `DigitalTwin/experiments/experiment.py`: batch automation
-- `DigitalTwin/plotting/plot.py`: trajectory/detection plots
-- `DigitalTwin/analysis/`: replay, attack campaigns, uncertainty training, and statistical analysis
-- `DigitalTwin/dashboard/`: visual accepted-log replay and sensor-health interface
-
-Generate the benign digital-twin accuracy and consistency report:
+Run the dashboard against a recorded CSV:
 
 ```powershell
-python -m DigitalTwin.analysis.digital_twin_accuracy
+python -m DigitalTwin.dashboard.server --mode replay --csv path\to\run.csv --open
 ```
 
-The hardware-facing protocol is documented in `docs/telemetry_protocol.md`.
-Running commands are documented in `docs/running.md`.
-UGV01 firmware bring-up, wiring, protocol lock, and log dictionaries are in:
+Run tests:
 
-- `docs/ugv01_esp32_bringup.md`
-- `docs/log_data_dictionary.md`
-- `docs/preregistered_protocol.md`
-- `docs/calibration_ready.md`
-
-UGV01 Wi-Fi notes:
-
-- default AP mode: SSID `UGV`, password `12345678`, IP `192.168.4.1`
-- to connect the rover to another Wi-Fi network, use `T:404`:
-
-```json
-{"T":404,"ap_ssid":"UGV","ap_password":"12345678","sta_ssid":"YOUR_WIFI","sta_password":"YOUR_PASSWORD"}
+```powershell
+python -m pytest -q
 ```
 
-After sending `T:404`, the OLED `ST` line should show the router-assigned IP.
+The frozen V2 study should not be retrained or retuned when preparing paper
+results. Use the saved result artifacts and documented post-LOSO analyses.

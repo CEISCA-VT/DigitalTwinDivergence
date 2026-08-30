@@ -1,6 +1,0 @@
-numpy>=1.26
-pandas>=2.0
-matplotlib>=3.8
-torch>=2.1
-# scipy is optional; Bergs/Hausdorff uses scipy.spatial.cKDTree when available
-# and falls back to a NumPy implementation when it is not installed.
