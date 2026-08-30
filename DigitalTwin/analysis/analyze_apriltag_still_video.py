@@ -28,6 +28,12 @@ RECTANGLE_2P0_BY_1P0_1234_WORLD_TAGS_M = {
     3: (2.0, 1.0),
     4: (0.0, 1.0),
 }
+RECTANGLE_2P0_BY_1P5_1234_WORLD_TAGS_M = {
+    1: (0.0, 0.0),
+    2: (2.0, 0.0),
+    3: (2.0, 1.5),
+    4: (0.0, 1.5),
+}
 SQUARE_1P5_WORLD_TAGS_M = {
     4: (0.0, 0.0),
     3: (1.5, 0.0),
@@ -55,6 +61,7 @@ TRAPEZOID_WORLD_TAGS_M = {
 WORLD_LAYOUTS = {
     "rectangle": RECTANGLE_WORLD_TAGS_M,
     "rectangle_2p0x1p0_1234": RECTANGLE_2P0_BY_1P0_1234_WORLD_TAGS_M,
+    "rectangle_2p0x1p5_1234": RECTANGLE_2P0_BY_1P5_1234_WORLD_TAGS_M,
     "square_1p5": SQUARE_1P5_WORLD_TAGS_M,
     "square_2p0": SQUARE_2P0_WORLD_TAGS_M,
     "square_2p0_1236": SQUARE_2P0_1236_WORLD_TAGS_M,

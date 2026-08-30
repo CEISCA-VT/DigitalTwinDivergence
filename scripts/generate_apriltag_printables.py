@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 from PIL import Image
@@ -22,13 +23,6 @@ ROVER_OPTION_TAG_SIZES_MM = (50.0, 60.0, 70.0, 80.0)
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "docs" / "printables"
-COMBINED_PDF_PATH = (
-    OUTPUT_DIR / "apriltag_tag36h11_ids_0_to_6_120mm_letter.pdf"
-)
-ROVER_PDF_PATH = OUTPUT_DIR / "apriltag_rover_id0_120mm_letter.pdf"
-WORLD_PDF_PATH = (
-    OUTPUT_DIR / "apriltag_world_reference_ids_1_to_6_120mm_letter.pdf"
-)
 ROVER_SIZE_SHEET_PDF_PATH = OUTPUT_DIR / "apriltag_rover_id0_50_60_70_80mm_letter.pdf"
 
 
@@ -222,16 +216,58 @@ def write_rover_size_sheet(path: Path, png_paths: dict[float, Path]) -> None:
     pdf.save()
 
 
+def build_output_paths(tag_size_mm: float) -> dict[str, Path]:
+    tag_size_token = f"{int(tag_size_mm)}mm"
+    return {
+        "combined_pdf": OUTPUT_DIR / f"apriltag_tag36h11_ids_0_to_6_{tag_size_token}_letter.pdf",
+        "rover_pdf": OUTPUT_DIR / f"apriltag_rover_id0_{tag_size_token}_letter.pdf",
+        "world_pdf": OUTPUT_DIR / f"apriltag_world_reference_ids_1_to_6_{tag_size_token}_letter.pdf",
+    }
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate print-ready AprilTag PDFs for rover and fixed references."
+    )
+    parser.add_argument(
+        "--tag-size-mm",
+        type=float,
+        default=TAG_SIZE_MM,
+        help="Outer black-square width for the main rover/world tag pack.",
+    )
+    parser.add_argument(
+        "--skip-rover-size-sheet",
+        action="store_true",
+        help="Skip the 50/60/70/80 mm rover size comparison sheet.",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
+    args = parse_args()
+    output_paths = build_output_paths(args.tag_size_mm)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    png_paths = {tag_id: generate_tag_png(tag_id) for tag_id in TAG_IDS}
+    png_paths = {
+        tag_id: generate_tag_png(tag_id, tag_size_mm=args.tag_size_mm)
+        for tag_id in TAG_IDS
+    }
     rover_option_pngs = {
         tag_size_mm: {0: generate_tag_png(0, tag_size_mm=tag_size_mm)}
         for tag_size_mm in ROVER_OPTION_TAG_SIZES_MM
     }
 
-    write_pdf(COMBINED_PDF_PATH, list(TAG_IDS), png_paths)
-    write_pdf(ROVER_PDF_PATH, [0], png_paths)
+    write_pdf(
+        output_paths["combined_pdf"],
+        list(TAG_IDS),
+        png_paths,
+        tag_size_mm=args.tag_size_mm,
+    )
+    write_pdf(
+        output_paths["rover_pdf"],
+        [0],
+        png_paths,
+        tag_size_mm=args.tag_size_mm,
+    )
     for tag_size_mm, rover_png in rover_option_pngs.items():
         rover_pdf_path = (
             OUTPUT_DIR / f"apriltag_rover_id0_{int(tag_size_mm)}mm_letter.pdf"
@@ -242,18 +278,25 @@ def main() -> None:
             rover_png,
             tag_size_mm=tag_size_mm,
         )
-    write_rover_size_sheet(
-        ROVER_SIZE_SHEET_PDF_PATH,
-        {tag_size_mm: rover_png[0] for tag_size_mm, rover_png in rover_option_pngs.items()},
+    if not args.skip_rover_size_sheet:
+        write_rover_size_sheet(
+            ROVER_SIZE_SHEET_PDF_PATH,
+            {tag_size_mm: rover_png[0] for tag_size_mm, rover_png in rover_option_pngs.items()},
+        )
+    write_pdf(
+        output_paths["world_pdf"],
+        list(range(1, 7)),
+        png_paths,
+        tag_size_mm=args.tag_size_mm,
     )
-    write_pdf(WORLD_PDF_PATH, list(range(1, 7)), png_paths)
 
-    print(COMBINED_PDF_PATH)
-    print(ROVER_PDF_PATH)
+    print(output_paths["combined_pdf"])
+    print(output_paths["rover_pdf"])
     for tag_size_mm in ROVER_OPTION_TAG_SIZES_MM:
         print(OUTPUT_DIR / f"apriltag_rover_id0_{int(tag_size_mm)}mm_letter.pdf")
-    print(ROVER_SIZE_SHEET_PDF_PATH)
-    print(WORLD_PDF_PATH)
+    if not args.skip_rover_size_sheet:
+        print(ROVER_SIZE_SHEET_PDF_PATH)
+    print(output_paths["world_pdf"])
     for path in png_paths.values():
         print(path)
 
