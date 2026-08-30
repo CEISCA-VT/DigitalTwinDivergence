@@ -23,6 +23,7 @@ import time
 import urllib.parse
 import urllib.request
 import webbrowser
+import re
 from collections import deque
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -65,6 +66,28 @@ COMMAND_PRESETS = {
     "reverse_right": (0.28, 0.14),
 }
 SPEED_SCALE = {"slow": 0.65, "medium": 1.0, "fast": 1.35}
+
+
+def sanitize_rover_url(value: str) -> str:
+    """Accept plain URLs and common Markdown-pasted URL forms."""
+    text = str(value).strip()
+    markdown = re.search(r"\]\((https?://[^)]+)\)", text)
+    if markdown:
+        text = markdown.group(1)
+    elif text.startswith("[") and text.endswith("]"):
+        text = text[1:-1].strip()
+    if not text:
+        raise ValueError("rover URL is empty")
+    if not text.startswith(("http://", "https://")):
+        text = f"http://{text}"
+    return text
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
 
 
 def _row_text(row: dict[str, object], key: str, default: str = "") -> str:
@@ -120,11 +143,12 @@ class TwinStream:
         policy: str = "contract-aware",
         contract_config_path: Path | None = None,
         output_dir: Path | None = None,
+        experiment_metadata: dict[str, object] | None = None,
         max_points: int = 2400,
     ) -> None:
         self.mode = mode
         self.csv_path = csv_path
-        self.rover_url = rover_url.rstrip("/")
+        self.rover_url = sanitize_rover_url(rover_url).rstrip("/")
         self.poll_hz = max(0.5, float(poll_hz))
         self.contract_config = load_contract_config(contract_config_path or Path(__file__).resolve().parents[1] / "configs" / "ugv01_live_service_contracts.json")
         self.contract_engine = ContractEngine(self.contract_config)
@@ -161,10 +185,14 @@ class TwinStream:
         self._bytes_window: deque[tuple[float, int]] = deque()
         self._events: list[dict[str, object]] = []
         self._latest_contracts: list[dict[str, object]] = []
+        self.experiment_metadata = experiment_metadata or {}
         output_root = output_dir or (REPO_ROOT / "raw_logs" / "live_validation")
         output_root.mkdir(parents=True, exist_ok=True)
         stamp = time.strftime("%Y%m%d_%H%M%S")
-        self.log_path = output_root / f"ugv01_live_contract_{stamp}.jsonl"
+        suffix = str(self.experiment_metadata.get("run_label") or "").strip()
+        suffix = re.sub(r"[^A-Za-z0-9_.-]+", "_", suffix).strip("_")
+        name = f"ugv01_live_contract_{suffix}_{stamp}.jsonl" if suffix else f"ugv01_live_contract_{stamp}.jsonl"
+        self.log_path = output_root / name
         self._error = ""
         self._running = False
 
@@ -205,12 +233,13 @@ class TwinStream:
                 "twin_model": "UGV01 deterministic tracked-drive propagation with gyro blending",
                 "reference_note": "live GPS operational reference",
                 "contract_provenance": self.contract_config["provenance"],
+                "experiment": self.experiment_metadata,
             },
             "policy": {
                 "name": self.policy_name,
                 "resource_mode": self.resource_policy.mode,
                 "requested_update_rate_hz": self.resource_policy.update_rate_hz,
-                "log_path": str(self.log_path.relative_to(REPO_ROOT)),
+                "log_path": display_path(self.log_path),
                 "decision": policy_decision,
             },
             "contracts": contracts,
@@ -487,6 +516,7 @@ class TwinStream:
         record = {
             "schema": "ugv01_live_contract_record_v1",
             "policy": self.policy_name,
+            "experiment": self.experiment_metadata,
             "point": point,
             "events": events,
         }
@@ -963,12 +993,24 @@ def main() -> None:
     )
     parser.add_argument("--contract-config", type=Path, default=None)
     parser.add_argument("--output-dir", type=Path, default=None)
+    parser.add_argument("--run-label", default="", help="Short run label added to live/csv JSONL filenames")
+    parser.add_argument("--physical-condition", default="", help="Prospective experiment condition, for example static, transition, or turning")
+    parser.add_argument("--wireless-condition", default="", help="Wireless condition, for example baseline or buffered")
+    parser.add_argument("--trial", type=int, default=None, help="Prospective repetition number")
+    parser.add_argument("--notes", default="", help="Short operator note stored in the JSONL metadata")
     args = parser.parse_args()
 
     if args.mode in {"csv", "live"}:
         csv_path = (REPO_ROOT / args.csv).resolve() if not args.csv.is_absolute() else args.csv
         if args.mode == "csv" and not csv_path.is_file():
             raise FileNotFoundError(f"CSV stream source not found: {csv_path}")
+        experiment_metadata = {
+            "run_label": args.run_label,
+            "physical_condition": args.physical_condition,
+            "wireless_condition": args.wireless_condition,
+            "trial": args.trial,
+            "notes": args.notes,
+        }
         _STREAM = TwinStream(
             mode=args.mode,
             csv_path=csv_path if args.mode == "csv" else None,
@@ -977,6 +1019,7 @@ def main() -> None:
             policy=args.policy,
             contract_config_path=args.contract_config,
             output_dir=args.output_dir,
+            experiment_metadata={key: value for key, value in experiment_metadata.items() if value not in {"", None}},
         )
         _STREAM.start()
 

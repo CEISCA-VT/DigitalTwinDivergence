@@ -203,11 +203,14 @@ function showError(error) {
 function populateRun() {
   if (!state.data) return;
   const { metadata: meta, summary } = state.data;
+  const experiment = meta.experiment || {};
+  const condition = [experiment.physical_condition, experiment.wireless_condition].filter(Boolean).join(" / ");
+  const trial = experiment.trial == null ? "" : `trial ${experiment.trial}`;
   setText("metaSurface", state.mode.toUpperCase());
   setText("metaSpeed", state.data.policy?.name || meta.twin_model || "--");
   setText("metaRoute", meta.runtime_inputs || "--");
-  setText("metaNetwork", meta.reference_note || "--");
-  setText("metaTrial", contractHeadline(state.data.contracts));
+  setText("metaNetwork", condition || meta.reference_note || "--");
+  setText("metaTrial", [trial, contractHeadline(state.data.contracts)].filter(Boolean).join(" | "));
   setText("controlMode", state.mode === "live" ? "live" : "dry run");
   $("controlMode").className = `badge ${state.mode === "live" ? "safe" : "warning"}`;
 }
