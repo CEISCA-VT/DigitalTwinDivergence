@@ -1,0 +1,71 @@
+{
+  "schema": "ugv01_physical_public_dataset_manifest_v2",
+  "created_date": "2026-08-29",
+  "dataset_root": "public_datasets/UGV01_physical",
+  "coordinate_frame": "AprilTag world frame treated as local planar ENU-style coordinates",
+  "reference_type": "apriltag_charuco_elevation_corrected",
+  "world_layout": "rectangle_2p0x1p5_1234_top",
+  "matched_camera_calibration": "DigitalTwin/datasets/analysis/camera_calibration_charuco1280720/camera_calibration_charuco.json",
+  "rover_tag_id": 0,
+  "fixed_tag_ids": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "current_runs": [
+    {
+      "run_id": "aug29_run1_153555_elevation_fitted",
+      "role": "asset_specific_calibration_reference",
+      "video": "docs/footage/WIN_20260829_15_35_55_Pro.mp4",
+      "source_fidelity_dir": "DigitalTwin/datasets/analysis/WIN_20260829_153555_elevation1280720_full_fitted",
+      "source_telemetry": "raw_logs/telemetry/WIN_20260829_15_35_55_Pro_telemetry_adapted.csv",
+      "position_rmse_m": 0.148621696756131,
+      "position_median_m": 0.0985344335096448,
+      "position_p95_m": 0.29543808620741047,
+      "heading_mae_deg": 21.152888563359685,
+      "rpe_1s_rmse_m": 0.02444774490720095,
+      "sync_correlation": 0.9376223873507353,
+      "sync_uncertainty_s": 0.2250000000000032
+    },
+    {
+      "run_id": "aug29_run2_160114_elevation_baseline",
+      "role": "corrected_holdout_preferred_baseline",
+      "video": "docs/footage/WIN_20260829_16_01_14_Pro.mp4",
+      "source_fidelity_dir": "DigitalTwin/datasets/analysis/WIN_20260829_160114_elevation1280720_baseline",
+      "source_telemetry": "raw_logs/telemetry/WIN_20260829_16_01_14_Pro_telemetry_adapted.csv",
+      "position_rmse_m": 0.2838879757020709,
+      "position_median_m": 0.25108740133371765,
+      "position_p95_m": 0.4776728021136119,
+      "heading_mae_deg": 28.789274191515474,
+      "rpe_1s_rmse_m": 0.03364900848342801,
+      "sync_correlation": 0.9614564984889133,
+      "sync_uncertainty_s": 0.37500000000000533
+    },
+    {
+      "run_id": "aug29_run3_161516_elevation_baseline",
+      "role": "corrected_holdout_preferred_baseline",
+      "video": "docs/footage/WIN_20260829_16_15_16_Pro.mp4",
+      "source_fidelity_dir": "DigitalTwin/datasets/analysis/WIN_20260829_161516_elevation1280720_baseline",
+      "source_telemetry": "raw_logs/telemetry/WIN_20260829_16_15_16_Pro_telemetry_adapted.csv",
+      "position_rmse_m": 0.6847311195032779,
+      "position_median_m": 0.4352865510041255,
+      "position_p95_m": 1.3213705626537962,
+      "heading_mae_deg": 35.25534184786366,
+      "rpe_1s_rmse_m": 0.09119406707111656,
+      "sync_correlation": 0.8557082503668424,
+      "sync_uncertainty_s": 0.5250000000000075
+    }
+  ],
+  "legacy_planar_exports": [
+    "aug29_run1_153555_fitted",
+    "aug29_run2_160114_fitted_holdout",
+    "aug29_run3_161516_fitted_holdout"
+  ],
+  "limitations": [
+    "These exports use corrected elevation-calibrated AprilTag reference geometry rather than the older planar-only package.",
+    "GPS is absent from the current public exports; gps_available remains 0 throughout.",
+    "Camera and telemetry synchronization are inherited from motion-correlation alignment rather than a dedicated hardware sync pulse.",
+    "The asset-specific fitted settings improved the calibration/reference run but did not transfer cleanly to the two holdout runs; the corrected holdouts therefore use the preferred baseline deterministic twin."
+  ]
+}

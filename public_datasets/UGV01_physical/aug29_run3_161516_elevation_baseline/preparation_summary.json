@@ -1,0 +1,21 @@
+{
+  "schema": "ugv01_apriltag_aligned_v1",
+  "source_aligned_fidelity_samples": "DigitalTwin\\datasets\\analysis\\WIN_20260829_161516_elevation1280720_baseline\\aligned_fidelity_samples.csv",
+  "source_fidelity_summary": "DigitalTwin\\datasets\\analysis\\WIN_20260829_161516_elevation1280720_baseline\\fidelity_summary.json",
+  "coordinate_frame": "AprilTag world frame treated as ENU-style local coordinates: x=east-like, y=north-like, heading counterclockwise in radians",
+  "ground_truth_role": "AprilTag trajectory labels and evaluation reference",
+  "gnss_role": "unavailable in this pilot export; gps_available is 0 for every row",
+  "odometry_feature_role": "derived from aligned digital-twin prediction, not raw i2Nav wheel odometry",
+  "rows": 635,
+  "duration_s": 315.3056725237946,
+  "median_rate_hz": 2.0202617824832423,
+  "gps_updates": 0,
+  "mean_position_error_m": 0.5438807950348452,
+  "position_rmse_m": 0.6847311195032779,
+  "heading_mae_deg": 35.25534184786366,
+  "limitations": [
+    "pilot export only; not final synchronized GPS plus AprilTag validation",
+    "camera/telemetry offset is inherited from fidelity analysis",
+    "feature columns are i2Nav-like for tooling compatibility, not sensor-identical"
+  ]
+}
