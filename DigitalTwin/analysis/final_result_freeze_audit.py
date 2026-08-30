@@ -347,7 +347,7 @@ def claims_audit(root: Path, out_dir: Path) -> list[dict[str, str]]:
         ("condition-dependent fidelity", "turning/wheel-IMU degrade RPE; acceleration/curvature degrade global metrics", "condition_fidelity/condition_fidelity_summary.md", "physical sequence", "strong descriptive", "Fidelity depends on operating condition.", "Not every variable is strong/monotonic.", "One scalar condition explains everything."),
         ("benign fidelity characterization", "Componentwise p95 envelopes and condition distributions", "benign_fidelity_characterization", "physical sequence", "moderate descriptive", "Benign divergence can be characterized empirically.", "p95 is descriptive, not a detector threshold.", "Exceeding p95 means attack/failure."),
         ("LOSO benign-envelope behavior", "rate-domain generalizes better than global dimensions", "loso_envelope_validation", "physical sequence", "strong descriptive", "Envelope is partially stable; rate-domain components generalize better.", "Global Dp/Dtheta sequence-sensitive.", "Envelope is universal stable guarantee."),
-        ("UGV01 asset instantiation", "UGV01 staged instantiation artifacts and comparison figure", "ugv01_asset_instantiation", "asset run/condition", "moderate", "The framework can be instantiated on UGV01 under tested conditions.", "Condition-limited; reference uncertainty matters.", "Universal UGV01 performance."),
+        ("UGV01 asset instantiation", "UGV01 staged instantiation artifacts and comparison figure", "ugv01_physical_instantiation", "asset run/condition", "moderate", "The framework can be instantiated on UGV01 under tested conditions.", "Condition-limited; reference uncertainty matters.", "Universal UGV01 performance."),
         ("official i2Nav benchmark", "Verified public protocol; V2 official macro values", "i2nav_official_benchmark", "physical sequence", "strong", "Official benchmark layer validates trajectory performance under standardized alignment.", "Separate from DT-fidelity layer.", "Official APE replaces fidelity profile."),
         ("Fixed Physics comparison", "V2 better APE translation 9/10; RPE50 10/10", "official_method_comparison.csv", "physical sequence", "moderate", "V2 improves translation APE relative to available fixed baseline.", "Orientation/RPE likely frame mismatch.", "Huge rotation/RPE gap is entirely model superiority."),
         ("official alignment vs operational synchronization", "parking02 ATE 11.350 -> official APE 5.747", "official_vs_internal_fidelity.csv", "physical sequence", "strong", "Official alignment changes apparent long-horizon error magnitude.", "Alignment is valid for benchmark; answers different question.", "Official benchmark is wrong."),
@@ -381,10 +381,10 @@ def manuscript_tables_and_figures(root: Path, out_dir: Path) -> None:
         (root / "i2nav_official_benchmark" / "official_per_sequence_results.csv", pub / "table_v2_official_per_sequence.csv"),
         (out_dir / "official_vs_internal_fidelity.csv", pub / "table_official_vs_internal_fidelity.csv"),
         (out_dir / "hard_sequence_alignment_effect.png", pub / "figure_hard_sequence_alignment_effect.png"),
-        (root / "i2nav_v2_post_loso_analysis" / "condition_fidelity" / "fidelity_by_turning.png", pub / "figure_condition_dependent_fidelity_turning.png"),
-        (root / "i2nav_v2_post_loso_analysis" / "benign_fidelity_characterization" / "benign_envelope_by_condition.png", pub / "figure_benign_envelope_by_condition.png"),
-        (root / "i2nav_v2_post_loso_analysis" / "loso_envelope_validation" / "loso_conditioned_vs_unconditional_coverage.png", pub / "figure_loso_envelope_coverage.png"),
-        (root.parent / "results" / "ugv01_asset_instantiation" / "ugv01_instantiation_comparison.png", pub / "figure_ugv01_asset_instantiation.png"),
+        (root / "i2nav_frozen_v2_fidelity_analysis" / "condition_fidelity" / "fidelity_by_turning.png", pub / "figure_condition_dependent_fidelity_turning.png"),
+        (root / "i2nav_frozen_v2_fidelity_analysis" / "benign_fidelity_characterization" / "benign_envelope_by_condition.png", pub / "figure_benign_envelope_by_condition.png"),
+        (root / "i2nav_frozen_v2_fidelity_analysis" / "loso_envelope_validation" / "loso_conditioned_vs_unconditional_coverage.png", pub / "figure_loso_envelope_coverage.png"),
+        (root.parent / "results" / "ugv01_physical_instantiation" / "ugv01_instantiation_comparison.png", pub / "figure_ugv01_asset_instantiation.png"),
     ]:
         if src.exists():
             dst.write_bytes(src.read_bytes())
@@ -401,11 +401,11 @@ def freeze_manifest(root: Path, out_dir: Path, status: str, headline_rows: list[
         root / "i2nav_official_benchmark" / "official_macro_summary.csv",
         root / "i2nav_official_benchmark" / "official_per_sequence_results.csv",
         root / "i2nav_official_benchmark" / "official_method_comparison.csv",
-        root / "i2nav_v2_post_loso_analysis" / "all_sequence_mechanism" / "mechanism_summary.md",
-        root / "i2nav_v2_post_loso_analysis" / "condition_fidelity" / "condition_fidelity_summary.md",
-        root / "i2nav_v2_post_loso_analysis" / "benign_fidelity_characterization" / "benign_fidelity_framework_summary.md",
-        root / "i2nav_v2_post_loso_analysis" / "loso_envelope_validation" / "loso_benign_envelope_validation_summary.md",
-        root / "ugv01_asset_instantiation" / "ugv01_asset_instantiation_summary.md",
+        root / "i2nav_frozen_v2_fidelity_analysis" / "all_sequence_mechanism" / "mechanism_summary.md",
+        root / "i2nav_frozen_v2_fidelity_analysis" / "condition_fidelity" / "condition_fidelity_summary.md",
+        root / "i2nav_frozen_v2_fidelity_analysis" / "benign_fidelity_characterization" / "benign_fidelity_framework_summary.md",
+        root / "i2nav_frozen_v2_fidelity_analysis" / "loso_envelope_validation" / "loso_benign_envelope_validation_summary.md",
+        root / "ugv01_physical_instantiation" / "ugv01_asset_instantiation_summary.md",
     ]
     checksums = []
     for p in files:
@@ -483,7 +483,7 @@ def readiness_report(out_dir: Path, status: str, blockers: list[str]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-root", type=Path, default=Path("results"))
-    parser.add_argument("--output-dir", type=Path, default=Path("results/final_audit"))
+    parser.add_argument("--output-dir", type=Path, default=Path("results/result_freeze_audit"))
     args = parser.parse_args()
 
     out_dir = args.output_dir

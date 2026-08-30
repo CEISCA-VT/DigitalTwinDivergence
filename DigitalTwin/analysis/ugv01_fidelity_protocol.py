@@ -236,7 +236,7 @@ def write_report(profiles: list[dict[str, object]], output: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=Path("results/ugv01_asset_instantiation/fidelity_protocol"))
+    parser.add_argument("--output-dir", type=Path, default=Path("results/ugv01_physical_instantiation/fidelity_protocol"))
     args = parser.parse_args()
     root = _repo_root()
     profiles = []

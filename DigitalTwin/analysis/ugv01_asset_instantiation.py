@@ -18,7 +18,7 @@ import numpy as np
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "results" / "ugv01_asset_instantiation"
+OUT_DIR = ROOT / "results" / "ugv01_physical_instantiation"
 
 STRICT_TRACKING = (
     ROOT

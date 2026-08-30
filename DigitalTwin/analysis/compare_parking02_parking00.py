@@ -36,7 +36,7 @@ It compares:
 
 Outputs
 -------
-results/i2nav_v2_post_loso_analysis/parking02_vs_parking00/
+results/i2nav_frozen_v2_fidelity_analysis/parking02_vs_parking00/
     per_run_summary.csv
     per_sequence_summary.csv
     short_horizon_rpe.csv
@@ -841,7 +841,7 @@ def main() -> int:
         default=(
             repo
             / "results"
-            / "i2nav_v2_post_loso_analysis"
+            / "i2nav_frozen_v2_fidelity_analysis"
             / "parking02_vs_parking00"
         ),
     )

@@ -688,7 +688,7 @@ def write_report(
         "",
         "## Implementation Audit",
         "",
-        "- Condition definitions: `results/i2nav_v2_post_loso_analysis/condition_fidelity/condition_definitions.json`.",
+        "- Condition definitions: `results/i2nav_frozen_v2_fidelity_analysis/condition_fidelity/condition_definitions.json`.",
         "- Existing envelope code reused: `DigitalTwin.analysis.i2nav_v2_benign_fidelity_envelope`.",
         "- Existing LOSO alignment reused: `DigitalTwin.analysis.i2nav_v2_loso_envelope_validation` / `i2nav_v2_all_sequence_mechanism`.",
         "- Context variables: speed, acceleration, turning, curvature, wheel-IMU disagreement, elapsed-time regime.",
@@ -867,7 +867,7 @@ def main() -> None:
         type=Path,
         default=repo
         / "results"
-        / "i2nav_v2_post_loso_analysis"
+        / "i2nav_frozen_v2_fidelity_analysis"
         / "condition_fidelity"
         / "condition_definitions.json",
     )

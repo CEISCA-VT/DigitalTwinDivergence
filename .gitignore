@@ -27,6 +27,7 @@ ugv01_gps_dev/
 # Download / extraction caches
 **/.download_cache/
 *.zip
+magnet_tfp/
 
 # ============================================================
 # Generated experiment outputs

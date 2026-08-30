@@ -543,7 +543,7 @@ Do not delete or overwrite raw results.
 Create a separate analysis output root, for example:
 
 ```text
-results/i2nav_v2_post_loso_analysis/
+results/i2nav_frozen_v2_fidelity_analysis/
 ```
 
 All new analysis must write there.
@@ -551,7 +551,7 @@ All new analysis must write there.
 Recommended subdirectories:
 
 ```text
-results/i2nav_v2_post_loso_analysis/
+results/i2nav_frozen_v2_fidelity_analysis/
 ├── audit/
 ├── reproducibility/
 ├── condition_fidelity/

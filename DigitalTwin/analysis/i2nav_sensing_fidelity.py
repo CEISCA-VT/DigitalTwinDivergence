@@ -260,7 +260,7 @@ def fmt(value: Any, digits: int = 3) -> str:
 
 def build_our_rows(results_root: Path) -> list[dict[str, Any]]:
     macro = pd.read_csv(results_root / "i2nav_official_benchmark" / "official_macro_summary.csv")
-    agg = read_csv(results_root / "final_audit" / "official_aggregation_semantics.csv")
+    agg = read_csv(results_root / "result_freeze_audit" / "official_aggregation_semantics.csv")
 
     rows: list[dict[str, Any]] = []
     for method in ["Twin V2", "Fixed Physics"]:
@@ -307,7 +307,7 @@ def build_our_rows(results_root: Path) -> list[dict[str, Any]]:
 
 def source_for_method(row: dict[str, Any]) -> str:
     if row["method"] in {"Twin V2", "Fixed Physics"}:
-        return "results/i2nav_official_benchmark/ + results/final_audit/"
+        return "results/i2nav_official_benchmark/ + results/result_freeze_audit/"
     return "i2Nav-Robot README benchmark table"
 
 
@@ -480,7 +480,7 @@ def write_provenance(out_dir: Path) -> None:
         "- i2Nav-Robot citation listed by the repository: Tang et al., `i2Nav-Robot: A Large-Scale Indoor-Outdoor Robot Dataset for Multi-Sensor Fusion Navigation and Mapping`, arXiv:2508.11485, DOI 10.48550/arXiv.2508.11485.",
         "- Official evaluator repository used by the project protocol audit: https://github.com/i2Nav-WHU/evaluate_odometry",
         "- Local frozen Twin V2 benchmark outputs: `results/i2nav_official_benchmark/`.",
-        "- Local final aggregation audit: `results/final_audit/official_aggregation_semantics.csv`.",
+        "- Local final aggregation audit: `results/result_freeze_audit/official_aggregation_semantics.csv`.",
         "",
         "The i2Nav-Robot README explicitly identifies the dataset sensor suite, sequence count/duration, ground truth, tested odometry systems, tested GNSS-based systems, and the published ARE/ATE benchmark tables. External RPE50/RPE100/RPE300 values are not provided in the README table and are therefore recorded as NR.",
     ]
@@ -598,7 +598,7 @@ def run(args: argparse.Namespace) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-root", type=Path, default=Path("results"))
-    parser.add_argument("--output-dir", type=Path, default=Path("results/i2nav_sensing_fidelity"))
+    parser.add_argument("--output-dir", type=Path, default=Path("results/sensing_fidelity_comparison"))
     run(parser.parse_args())
 
 

@@ -47,7 +47,7 @@ No files inside results/i2nav_v1_frozen are modified.
 
 Outputs are written separately to:
 
-    results/i2nav_physical_residuals/
+    results/i2nav_physics_residual_diagnostics/
 
 The analysis includes:
 
@@ -3365,7 +3365,7 @@ def main() -> int:
         "--output-dir",
         type=Path,
         default=Path(
-            "results/i2nav_physical_residuals"
+            "results/i2nav_physics_residual_diagnostics"
         ),
     )
 

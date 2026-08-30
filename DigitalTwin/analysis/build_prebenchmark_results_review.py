@@ -1,4 +1,4 @@
-"""Build a polished pre-benchmark advisor results review.
+"""Build a polished pre-benchmark presentation results review.
 
 This document intentionally excludes official i2Nav benchmark scoring,
 sensing-fidelity comparisons, portability datasets, and security experiments.
@@ -47,11 +47,11 @@ def copy_fig(src: Path, dst_dir: Path, name: str) -> Path:
 
 def gather(results_root: Path) -> dict:
     macro = read_json(results_root / "i2nav_v2_full_loso" / "i2nav_v2_full_loso_summary" / "full_loso_macro_summary.json")
-    mech_seq = pd.read_csv(results_root / "i2nav_v2_post_loso_analysis" / "all_sequence_mechanism" / "per_sequence_mechanism.csv")
-    assoc = pd.read_csv(results_root / "i2nav_v2_post_loso_analysis" / "all_sequence_mechanism" / "mechanism_sequence_associations.csv")
-    cond = pd.read_csv(results_root / "i2nav_v2_post_loso_analysis" / "condition_fidelity" / "condition_degradation_summary.csv")
-    loso = pd.read_csv(results_root / "i2nav_v2_post_loso_analysis" / "loso_envelope_validation" / "loso_envelope_validation_summary.csv")
-    ugv = pd.read_csv(results_root / "ugv01_asset_instantiation" / "ugv01_fidelity_by_stage.csv")
+    mech_seq = pd.read_csv(results_root / "i2nav_frozen_v2_fidelity_analysis" / "all_sequence_mechanism" / "per_sequence_mechanism.csv")
+    assoc = pd.read_csv(results_root / "i2nav_frozen_v2_fidelity_analysis" / "all_sequence_mechanism" / "mechanism_sequence_associations.csv")
+    cond = pd.read_csv(results_root / "i2nav_frozen_v2_fidelity_analysis" / "condition_fidelity" / "condition_degradation_summary.csv")
+    loso = pd.read_csv(results_root / "i2nav_frozen_v2_fidelity_analysis" / "loso_envelope_validation" / "loso_envelope_validation_summary.csv")
+    ugv = pd.read_csv(results_root / "ugv01_physical_instantiation" / "ugv01_fidelity_by_stage.csv")
     return {"macro": macro, "mech_seq": mech_seq, "assoc": assoc, "cond": cond, "loso": loso, "ugv": ugv}
 
 
@@ -90,32 +90,32 @@ def build_figures(results_root: Path, out_dir: Path) -> list[Path]:
     fig_dir = out_dir / "figures"
     return [
         copy_fig(
-            results_root / "i2nav_v2_post_loso_analysis" / "all_sequence_mechanism" / "local_vs_global_fidelity.png",
+            results_root / "i2nav_frozen_v2_fidelity_analysis" / "all_sequence_mechanism" / "local_vs_global_fidelity.png",
             fig_dir,
             "fig1_local_vs_global_fidelity.png",
         ),
         copy_fig(
-            results_root / "i2nav_v2_post_loso_analysis" / "all_sequence_mechanism" / "persistent_yaw_vs_global_divergence.png",
+            results_root / "i2nav_frozen_v2_fidelity_analysis" / "all_sequence_mechanism" / "persistent_yaw_vs_global_divergence.png",
             fig_dir,
             "fig2_persistent_yaw_mechanism.png",
         ),
         copy_fig(
-            results_root / "i2nav_v2_post_loso_analysis" / "condition_fidelity" / "fidelity_by_turning.png",
+            results_root / "i2nav_frozen_v2_fidelity_analysis" / "condition_fidelity" / "fidelity_by_turning.png",
             fig_dir,
             "fig3_condition_turning.png",
         ),
         copy_fig(
-            results_root / "i2nav_v2_post_loso_analysis" / "benign_fidelity_characterization" / "benign_envelope_by_condition.png",
+            results_root / "i2nav_frozen_v2_fidelity_analysis" / "benign_fidelity_characterization" / "benign_envelope_by_condition.png",
             fig_dir,
             "fig4_benign_envelope_by_condition.png",
         ),
         copy_fig(
-            results_root / "i2nav_v2_post_loso_analysis" / "loso_envelope_validation" / "loso_conditioned_vs_unconditional_coverage.png",
+            results_root / "i2nav_frozen_v2_fidelity_analysis" / "loso_envelope_validation" / "loso_conditioned_vs_unconditional_coverage.png",
             fig_dir,
             "fig5_loso_envelope_coverage.png",
         ),
         copy_fig(
-            results_root / "ugv01_asset_instantiation" / "ugv01_instantiation_comparison.png",
+            results_root / "ugv01_physical_instantiation" / "ugv01_instantiation_comparison.png",
             fig_dir,
             "fig6_ugv01_asset_instantiation.png",
         ),
@@ -493,7 +493,7 @@ def run(args: argparse.Namespace) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-root", type=Path, default=Path("results"))
-    parser.add_argument("--output-dir", type=Path, default=Path("results/advisor_results_review"))
+    parser.add_argument("--output-dir", type=Path, default=Path("results/results_quality_review"))
     run(parser.parse_args())
 
 

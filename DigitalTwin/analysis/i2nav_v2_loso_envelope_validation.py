@@ -568,7 +568,7 @@ def main() -> int:
         type=Path,
         default=repo
         / "results"
-        / "i2nav_v2_post_loso_analysis"
+        / "i2nav_frozen_v2_fidelity_analysis"
         / "condition_fidelity"
         / "condition_definitions.json",
     )
@@ -577,7 +577,7 @@ def main() -> int:
         type=Path,
         default=repo
         / "results"
-        / "i2nav_v2_post_loso_analysis"
+        / "i2nav_frozen_v2_fidelity_analysis"
         / "loso_envelope_validation",
     )
     args = parser.parse_args()

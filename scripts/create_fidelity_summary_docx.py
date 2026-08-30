@@ -223,7 +223,7 @@ def build_document() -> tuple[str, list[tuple[str, Path]], list[tuple[str, str]]
 
     body: list[str] = []
     body.append(para("Digital Twin Fidelity and Results Summary", "Title"))
-    body.append(para("UGV01 rover project status document for advisor discussion", "Subtitle"))
+    body.append(para("UGV01 rover project status document for research discussion", "Subtitle"))
     body.append(para("Prepared from the current repository results and generated artifacts."))
 
     body.append(para("Executive Summary", "Heading1"))

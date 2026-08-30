@@ -1,4 +1,4 @@
-"""Build a compact advisor-facing digital-twin fidelity results dossier."""
+"""Build a compact presentation-facing digital-twin fidelity results dossier."""
 
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ def save_fig(path: Path) -> None:
 
 
 def build_official_tradeoff(results_root: Path, fig_dir: Path) -> Path:
-    df = pd.read_csv(results_root / "i2nav_sensing_fidelity" / "sensing_fidelity_comparison.csv")
+    df = pd.read_csv(results_root / "sensing_fidelity_comparison" / "sensing_fidelity_comparison.csv")
     direct = df[
         (df["comparability_status"] == "DIRECTLY_COMPARABLE")
         & df["official_ape_translation_rmse_m"].notna()
@@ -69,7 +69,7 @@ def build_official_tradeoff(results_root: Path, fig_dir: Path) -> Path:
     )
     for y, value in enumerate(direct["official_ape_translation_rmse_m"]):
         ax.text(value + 0.08, y, f"{value:.2f}", va="center", fontsize=9)
-    out = fig_dir / "advisor_fig1_official_sensing_tradeoff.png"
+    out = fig_dir / "summary_fig1_official_sensing_tradeoff.png"
     save_fig(out)
     return out
 
@@ -89,13 +89,13 @@ def build_v1_v2_progress(fig_dir: Path) -> Path:
         for i, val in enumerate([a, b]):
             ax.text(i, val, f"{val:.3g}", ha="center", va="bottom", fontsize=9)
     fig.suptitle("Frozen LOSO: V2 Improves the Main Fidelity Metrics", fontsize=14, fontweight="bold")
-    out = fig_dir / "advisor_fig2_v1_v2_progress.png"
+    out = fig_dir / "summary_fig2_v1_v2_progress.png"
     save_fig(out)
     return out
 
 
 def build_local_global_scatter(results_root: Path, fig_dir: Path) -> Path:
-    df = pd.read_csv(results_root / "i2nav_v2_post_loso_analysis" / "all_sequence_mechanism" / "per_sequence_mechanism.csv")
+    df = pd.read_csv(results_root / "i2nav_frozen_v2_fidelity_analysis" / "all_sequence_mechanism" / "per_sequence_mechanism.csv")
     fig, ax = plt.subplots(figsize=(7.2, 4.8))
     colors = [ORANGE if s in {"parking01", "parking02"} else BLUE for s in df["sequence"]]
     ax.scatter(df["RPE10_m"], df["Dp_p95_m"], s=80, c=colors, edgecolor="white", linewidth=1.0)
@@ -116,13 +116,13 @@ def build_local_global_scatter(results_root: Path, fig_dir: Path) -> Path:
         fontsize=9,
         bbox={"boxstyle": "round,pad=0.35", "facecolor": "white", "edgecolor": "#d0d7de", "alpha": 0.95},
     )
-    out = fig_dir / "advisor_fig3_local_vs_global.png"
+    out = fig_dir / "summary_fig3_local_vs_global.png"
     save_fig(out)
     return out
 
 
 def build_ugv01_instantiation(results_root: Path, fig_dir: Path) -> Path:
-    df = pd.read_csv(results_root / "ugv01_asset_instantiation" / "ugv01_fidelity_by_stage.csv")
+    df = pd.read_csv(results_root / "ugv01_physical_instantiation" / "ugv01_fidelity_by_stage.csv")
     current = df[df["stage_id"] == "S1"].iloc[0]
     fitted = df[df["stage_id"] == "S2"].iloc[0]
     metrics = [
@@ -141,7 +141,7 @@ def build_ugv01_instantiation(results_root: Path, fig_dir: Path) -> Path:
         for i, val in enumerate(vals):
             ax.text(i, val, f"{val:.3g}", ha="center", va="bottom", fontsize=9)
     fig.suptitle("UGV01: Asset-Specific Calibration Improves the Physical Twin", fontsize=14, fontweight="bold")
-    out = fig_dir / "advisor_fig4_ugv01_instantiation.png"
+    out = fig_dir / "summary_fig4_ugv01_instantiation.png"
     save_fig(out)
     return out
 
@@ -164,7 +164,7 @@ def pct_change(old: float, new: float) -> str:
 
 def build_markdown(out_dir: Path, figures: list[Path]) -> Path:
     fig_rel = [f"figures/{p.name}" for p in figures]
-    text = f"""# Digital Twin Fidelity: Advisor Results Brief
+    text = f"""# Digital Twin Fidelity: Presentation Results Brief
 
 Date: 2026-08-20  
 Scope: frozen Twin V2 i2Nav fidelity analysis, official benchmark positioning, and UGV01 asset-specific instantiation.
@@ -177,7 +177,7 @@ The project is now best framed as a **sensor-lightweight digital-twin fidelity**
 
 ## Key Results To Show First
 
-| Question | Result | Advisor-level interpretation |
+| Question | Result | Presentation-level interpretation |
 |---|---:|---|
 | Does V2 improve over V1? | ATE: 2.834 m -> 2.398 m; Heading: 3.336 deg -> 2.569 deg; RPE10: 0.271 m -> 0.253 m | V2 improves the main fidelity metrics without changing the frozen result after inspection. |
 | Is short-horizon accuracy enough? | parking02 has RPE10 = 0.097 m but Dp p95 = 22.345 m | No. A twin can move correctly locally while drifting globally. |
@@ -225,11 +225,11 @@ Twin V2 ranks in the middle of directly comparable i2Nav ATE/ARE rows, while usi
 - Do not claim UGV01 performance across surfaces/speeds that were not validated.
 - Do not claim Pareto optimality in sensing burden.
 
-## Recommended Advisor Narrative
+## Recommended Presentation Narrative
 
 "Since the last version, I moved the work into a cleaner digital-twin fidelity framing. The core contribution is a framework for measuring when a sensor-lightweight computational twin remains synchronized with the physical robot, when it diverges, and why. The i2Nav results give the broad frozen validation; the UGV01 AprilTag result shows asset-specific instantiation on the actual rover."
 """
-    out = out_dir / "Digital_Twin_Fidelity_Advisor_Brief.md"
+    out = out_dir / "Digital_Twin_Fidelity_Presentation_Brief.md"
     out.write_text(text, encoding="utf-8")
     return out
 
@@ -284,11 +284,11 @@ def table(rows: list[list[str]]) -> str:
 
 
 def build_docx(out_dir: Path, figures: list[Path]) -> Path:
-    docx_path = out_dir / "Digital_Twin_Fidelity_Advisor_Brief.docx"
+    docx_path = out_dir / "Digital_Twin_Fidelity_Presentation_Brief.docx"
     image_refs = [ImageRef(path=p, rel_id=f"rId{i + 1}", width_in=5.9) for i, p in enumerate(figures)]
 
     body = [
-        paragraph("Digital Twin Fidelity: Advisor Results Brief", "Title"),
+        paragraph("Digital Twin Fidelity: Presentation Results Brief", "Title"),
         paragraph("Frozen Twin V2 i2Nav fidelity analysis, official benchmark positioning, and UGV01 asset-specific instantiation.", "Subtitle"),
         paragraph("One-Page Takeaway", "Heading1"),
         paragraph("The project is now best framed as a sensor-lightweight digital-twin fidelity study. The core contribution is measuring when the virtual robot remains synchronized with the physical robot, when it diverges, and why."),
@@ -385,7 +385,7 @@ def run(args: argparse.Namespace) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-root", type=Path, default=Path("results"))
-    parser.add_argument("--output-dir", type=Path, default=Path("results/advisor_clean_results_brief"))
+    parser.add_argument("--output-dir", type=Path, default=Path("results/presentation_summary_brief"))
     run(parser.parse_args())
 
 

@@ -718,7 +718,7 @@ def main() -> int:
         type=Path,
         default=repo
         / "results"
-        / "i2nav_v2_post_loso_analysis"
+        / "i2nav_frozen_v2_fidelity_analysis"
         / "all_sequence_mechanism",
     )
     args = parser.parse_args()

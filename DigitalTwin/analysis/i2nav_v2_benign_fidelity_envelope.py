@@ -631,14 +631,14 @@ def main() -> int:
     parser.add_argument(
         "--condition-dir",
         type=Path,
-        default=repo / "results" / "i2nav_v2_post_loso_analysis" / "condition_fidelity",
+        default=repo / "results" / "i2nav_frozen_v2_fidelity_analysis" / "condition_fidelity",
     )
     parser.add_argument(
         "--mechanism-per-run",
         type=Path,
         default=repo
         / "results"
-        / "i2nav_v2_post_loso_analysis"
+        / "i2nav_frozen_v2_fidelity_analysis"
         / "all_sequence_mechanism"
         / "per_run_mechanism.csv",
     )
@@ -647,7 +647,7 @@ def main() -> int:
         type=Path,
         default=repo
         / "results"
-        / "i2nav_v2_post_loso_analysis"
+        / "i2nav_frozen_v2_fidelity_analysis"
         / "condition_fidelity"
         / "condition_definitions.json",
     )
@@ -656,7 +656,7 @@ def main() -> int:
         type=Path,
         default=repo
         / "results"
-        / "i2nav_v2_post_loso_analysis"
+        / "i2nav_frozen_v2_fidelity_analysis"
         / "benign_fidelity_characterization",
     )
     args = parser.parse_args()

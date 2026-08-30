@@ -11,11 +11,11 @@ FIGURES_ROOT = REPOSITORY_ROOT / "figures"
 
 PAPER_SOURCE = REPOSITORY_ROOT / "DigitalTwin_Fidelity_Research_Draft.tex"
 FROZEN_LOSO_ROOT = RESULTS_ROOT / "i2nav_v2_full_loso"
-POST_LOSO_ROOT = RESULTS_ROOT / "i2nav_v2_post_loso_analysis"
-UGV01_ROOT = RESULTS_ROOT / "ugv01_asset_instantiation"
+POST_LOSO_ROOT = RESULTS_ROOT / "i2nav_frozen_v2_fidelity_analysis"
+UGV01_ROOT = RESULTS_ROOT / "ugv01_physical_instantiation"
 OFFICIAL_BENCHMARK_ROOT = RESULTS_ROOT / "i2nav_official_benchmark"
-SENSING_ROOT = RESULTS_ROOT / "i2nav_sensing_fidelity"
-FINAL_AUDIT_ROOT = RESULTS_ROOT / "final_audit"
+SENSING_ROOT = RESULTS_ROOT / "sensing_fidelity_comparison"
+FINAL_AUDIT_ROOT = RESULTS_ROOT / "result_freeze_audit"
 
 
 REQUIRED_PAPER_ARTIFACTS = (

@@ -19,7 +19,7 @@ i2Nav benchmark outputs, and TerraSentia/AIFARMS portability analysis.
   paper workflows, including UGV01 physical validation exports.
 - `results/`: retained paper-relevant result artifacts and figures.
 - `docs/`: concise experiment and operator documentation.
-- `figures/`: paper/advisor-ready figure assets.
+- `figures/`: paper and presentation-ready figure assets.
 - `tests/`: focused regression tests.
 
 ## Install

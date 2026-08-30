@@ -118,5 +118,5 @@ Do not use it as an output directory for Twin V2 or residual-analysis scripts.
 The next work directory should be separate, e.g.:
 
 ```text
-results/i2nav_physical_residuals/
+results/i2nav_physics_residual_diagnostics/
 ```
