@@ -144,6 +144,7 @@ class TwinStream:
         contract_config_path: Path | None = None,
         output_dir: Path | None = None,
         experiment_metadata: dict[str, object] | None = None,
+        duration_s: float | None = None,
         max_points: int = 2400,
     ) -> None:
         self.mode = mode
@@ -195,6 +196,7 @@ class TwinStream:
         self.log_path = output_root / name
         self._error = ""
         self._running = False
+        self.duration_s = duration_s if duration_s is None else max(0.0, float(duration_s))
 
     def start(self) -> None:
         if self._thread is not None:
@@ -254,8 +256,11 @@ class TwinStream:
         try:
             rows = _read_csv(self.csv_path)
             last_wall = time.monotonic()
+            started_wall = time.monotonic()
             for row in rows:
                 if self._stop.is_set():
+                    break
+                if self.duration_s is not None and time.monotonic() - started_wall >= self.duration_s:
                     break
                 if _row_text(row, "cycle_ok", "True").lower() not in {"true", "1", "yes"}:
                     continue
@@ -279,21 +284,28 @@ class TwinStream:
                 self._running = False
 
     def _run_live(self) -> None:
-        while not self._stop.is_set():
-            period = 1.0 / self.resource_policy.update_rate_hz
-            started = time.monotonic()
-            try:
-                query = urllib.parse.urlencode({"cmd": json.dumps({"T": 147}, separators=(",", ":"))})
-                edge_send = time.time()
-                separator = "&" if "?" in self.rover_url else "?"
-                row = _json_get(f"{self.rover_url}{separator}{query}", timeout_s=min(1.5, max(0.25, period)))
-                edge_arrival = time.time()
-                row_bytes = len(json.dumps(row, separators=(",", ":")).encode("utf-8"))
-                self._append_sample(row, edge_arrival_s=edge_arrival, latency_ms=(edge_arrival - edge_send) * 1000.0, payload_bytes=row_bytes)
-            except Exception as exc:  # pragma: no cover - hardware dependent
-                with self._lock:
-                    self._error = f"{type(exc).__name__}: {exc}"
-            time.sleep(max(0.0, period - (time.monotonic() - started)))
+        started_wall = time.monotonic()
+        try:
+            while not self._stop.is_set():
+                if self.duration_s is not None and time.monotonic() - started_wall >= self.duration_s:
+                    break
+                period = 1.0 / self.resource_policy.update_rate_hz
+                started = time.monotonic()
+                try:
+                    query = urllib.parse.urlencode({"cmd": json.dumps({"T": 147}, separators=(",", ":"))})
+                    edge_send = time.time()
+                    separator = "&" if "?" in self.rover_url else "?"
+                    row = _json_get(f"{self.rover_url}{separator}{query}", timeout_s=min(1.5, max(0.25, period)))
+                    edge_arrival = time.time()
+                    row_bytes = len(json.dumps(row, separators=(",", ":")).encode("utf-8"))
+                    self._append_sample(row, edge_arrival_s=edge_arrival, latency_ms=(edge_arrival - edge_send) * 1000.0, payload_bytes=row_bytes)
+                except Exception as exc:  # pragma: no cover - hardware dependent
+                    with self._lock:
+                        self._error = f"{type(exc).__name__}: {exc}"
+                time.sleep(max(0.0, period - (time.monotonic() - started)))
+        finally:
+            with self._lock:
+                self._running = False
 
     def send_drive_command(self, command: str, speed: str) -> dict[str, object]:
         command = command.strip().lower()
@@ -998,6 +1010,12 @@ def main() -> None:
     parser.add_argument("--wireless-condition", default="", help="Wireless condition, for example baseline or buffered")
     parser.add_argument("--trial", type=int, default=None, help="Prospective repetition number")
     parser.add_argument("--notes", default="", help="Short operator note stored in the JSONL metadata")
+    parser.add_argument(
+        "--duration-s",
+        type=float,
+        default=None,
+        help="Optional live/csv trial duration before the stream stops automatically",
+    )
     args = parser.parse_args()
 
     if args.mode in {"csv", "live"}:
@@ -1020,6 +1038,7 @@ def main() -> None:
             contract_config_path=args.contract_config,
             output_dir=args.output_dir,
             experiment_metadata={key: value for key, value in experiment_metadata.items() if value not in {"", None}},
+            duration_s=args.duration_s,
         )
         _STREAM.start()
 
@@ -1029,6 +1048,9 @@ def main() -> None:
     print(f"mode={args.mode}")
     if args.open:
         threading.Timer(0.4, lambda: webbrowser.open(url)).start()
+    if args.mode in {"csv", "live"} and args.duration_s is not None:
+        shutdown_delay = max(0.1, float(args.duration_s) + 1.0)
+        threading.Timer(shutdown_delay, server.shutdown).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

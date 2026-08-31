@@ -42,8 +42,17 @@ python -m DigitalTwin.dashboard.server --open
 Run the dashboard against a recorded CSV:
 
 ```powershell
-python -m DigitalTwin.dashboard.server --mode replay --csv path\to\run.csv --open
+python -m DigitalTwin.dashboard.server --mode csv --csv path\to\run.csv --open
 ```
+
+Run the compact live UGV01 contract experiment:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://192.168.4.1/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -Open
+```
+
+Detailed live-experiment instructions are in
+`docs/ugv01_compact_live_contract_experiment.md`.
 
 Run tests:
 
