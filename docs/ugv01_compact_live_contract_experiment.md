@@ -170,15 +170,17 @@ motion profile through the dashboard command API, logs the live contract stream,
 and stops automatically after the chosen duration.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://192.168.4.1/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -Open
+powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://192.168.4.1/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -RestSeconds 15 -Open
 ```
 
-Repeat with `-Trial 2`, `-Trial 3`, and so on.
+Repeat with `-Trial 2`, `-Trial 3`, and so on. `-RestSeconds 15` keeps the
+rover stopped between policy arms so tracks, GPS/course, and the live dashboard
+state have a short settling interval before the next policy begins.
 
 For station-mode Wi-Fi:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://<ROVER_IP>/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -Open
+powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://<ROVER_IP>/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -RestSeconds 15 -Open
 ```
 
 ## Automated Motion Profiles
@@ -199,10 +201,10 @@ Available profiles:
 | `compact_validation` | Balanced forward, reverse, curves, and turns. |
 | `stop_only` | Safety stop helper. |
 
-For the paper experiment, keep `MotionProfile`, `MotionSpeed`, and
-`DurationSeconds` fixed across all four policies within the same physical
-condition. This prevents policy comparisons from being confounded by different
-driving behavior.
+For the paper experiment, keep `MotionProfile`, `MotionSpeed`,
+`DurationSeconds`, and `RestSeconds` fixed across all four policies within the
+same physical condition. This prevents policy comparisons from being confounded
+by different driving behavior or different settling time.
 
 You can also run a motion profile against an already-open dashboard:
 

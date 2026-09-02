@@ -9,6 +9,7 @@ param(
     [string]$Python = "python",
     [string]$MotionProfile = "turning_intensive",
     [string]$MotionSpeed = "slow",
+    [int]$RestSeconds = 15,
     [switch]$Open
 )
 
@@ -20,7 +21,8 @@ if ($Open) {
     $openArg = @("--open")
 }
 
-foreach ($policy in $policies) {
+for ($policyIndex = 0; $policyIndex -lt $policies.Count; $policyIndex++) {
+    $policy = $policies[$policyIndex]
     $safePolicy = $policy.Replace("-", "_")
     $runLabel = "${PhysicalCondition}_${WirelessCondition}_${safePolicy}_trial${Trial}"
     Write-Host ""
@@ -67,6 +69,11 @@ foreach ($policy in $policies) {
         if (-not $serverProcess.HasExited) {
             Stop-Process -Id $serverProcess.Id -Force
         }
+    }
+
+    if ($RestSeconds -gt 0 -and $policyIndex -lt ($policies.Count - 1)) {
+        Write-Host "Resting stopped rover for $RestSeconds seconds before next policy arm." -ForegroundColor Yellow
+        Start-Sleep -Seconds $RestSeconds
     }
 }
 
