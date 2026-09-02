@@ -165,10 +165,12 @@ fraction is high enough for service contracts to become observable.
 ## Run One Complete Policy Set
 
 This command runs all four policies sequentially for one physical condition and
-one repetition. Each policy arm stops automatically after the chosen duration.
+one repetition. Each policy arm starts the dashboard, runs the same automated
+motion profile through the dashboard command API, logs the live contract stream,
+and stops automatically after the chosen duration.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://192.168.4.1/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -Open
+powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://192.168.4.1/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -Open
 ```
 
 Repeat with `-Trial 2`, `-Trial 3`, and so on.
@@ -176,24 +178,40 @@ Repeat with `-Trial 2`, `-Trial 3`, and so on.
 For station-mode Wi-Fi:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://<ROVER_IP>/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -Open
+powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://<ROVER_IP>/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -Open
 ```
 
-## Motion Script
+## Automated Motion Profiles
 
-Keep motion matched across policies. For each run:
+The policy-set runner uses:
 
-1. keep the rover still for 5-10 s,
-2. drive forward slowly,
-3. reverse slowly,
-4. perform gentle left and right curves,
-5. include repeated turns for `turning_intensive`,
-6. stop for 5-10 s at the end.
+```powershell
+python -m DigitalTwin.dashboard.automated_motion
+```
 
-Keep the same approximate timing and route shape for every policy arm in the
-same condition. Manual control is acceptable for a compact experiment, but
-matched motion matters because otherwise policy comparisons are confounded by
-different rover behavior.
+Available profiles:
+
+| Profile | Use |
+|---|---|
+| `stationary_low_motion` | Mostly stationary with short forward/reverse checks. |
+| `surface_transition` | Forward/reverse and curves across a surface change. |
+| `turning_intensive` | Repeated turns, short translations, and curves. |
+| `compact_validation` | Balanced forward, reverse, curves, and turns. |
+| `stop_only` | Safety stop helper. |
+
+For the paper experiment, keep `MotionProfile`, `MotionSpeed`, and
+`DurationSeconds` fixed across all four policies within the same physical
+condition. This prevents policy comparisons from being confounded by different
+driving behavior.
+
+You can also run a motion profile against an already-open dashboard:
+
+```powershell
+python -m DigitalTwin.dashboard.automated_motion --dashboard-url http://127.0.0.1:8765 --profile turning_intensive --speed slow --duration-s 115
+```
+
+Manual control from the browser is still useful for smoke tests, but the final
+policy comparison should use the automated script.
 
 ## Analyze Completed Runs
 

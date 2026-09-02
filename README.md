@@ -48,7 +48,7 @@ python -m DigitalTwin.dashboard.server --mode csv --csv path\to\run.csv --open
 Run the compact live UGV01 contract experiment:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://192.168.4.1/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -Open
+powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://192.168.4.1/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -Open
 ```
 
 Detailed live-experiment instructions are in

@@ -7,6 +7,8 @@ param(
     [string]$HostAddress = "127.0.0.1",
     [int]$Port = 8765,
     [string]$Python = "python",
+    [string]$MotionProfile = "turning_intensive",
+    [string]$MotionSpeed = "slow",
     [switch]$Open
 )
 
@@ -23,22 +25,48 @@ foreach ($policy in $policies) {
     $runLabel = "${PhysicalCondition}_${WirelessCondition}_${safePolicy}_trial${Trial}"
     Write-Host ""
     Write-Host "==> Starting $policy | $PhysicalCondition | $WirelessCondition | trial $Trial" -ForegroundColor Cyan
-    Write-Host "Use the same motion script for this policy arm. The server stops after $DurationSeconds seconds." -ForegroundColor Yellow
-    & $Python -m DigitalTwin.dashboard.server `
-        --mode live `
-        --rover-url $RoverUrl `
-        --host $HostAddress `
-        --port $Port `
-        --policy $policy `
-        --run-label $runLabel `
-        --physical-condition $PhysicalCondition `
-        --wireless-condition $WirelessCondition `
-        --trial $Trial `
-        --duration-s $DurationSeconds `
-        --notes "compact_live_contract_policy_set" `
-        @openArg
-    if ($LASTEXITCODE -ne 0) {
-        throw "Dashboard run failed for policy $policy"
+    Write-Host "Automated motion: $MotionProfile at $MotionSpeed speed for $DurationSeconds seconds." -ForegroundColor Yellow
+
+    $dashboardArgs = @(
+        "-m", "DigitalTwin.dashboard.server",
+        "--mode", "live",
+        "--rover-url", $RoverUrl,
+        "--host", $HostAddress,
+        "--port", "$Port",
+        "--policy", $policy,
+        "--run-label", $runLabel,
+        "--physical-condition", $PhysicalCondition,
+        "--wireless-condition", $WirelessCondition,
+        "--trial", "$Trial",
+        "--duration-s", "$DurationSeconds",
+        "--notes", "compact_live_contract_policy_set"
+    ) + $openArg
+
+    $serverProcess = Start-Process -FilePath $Python -ArgumentList $dashboardArgs -PassThru -WindowStyle Hidden
+    try {
+        & $Python -m DigitalTwin.dashboard.automated_motion `
+            --dashboard-url "http://${HostAddress}:$Port" `
+            --profile $MotionProfile `
+            --speed $MotionSpeed `
+            --duration-s ([Math]::Max(1, $DurationSeconds - 5))
+        if ($LASTEXITCODE -ne 0) {
+            throw "Automated motion failed for policy $policy"
+        }
+        Wait-Process -Id $serverProcess.Id -Timeout ([Math]::Max(5, $DurationSeconds + 10)) -ErrorAction SilentlyContinue
+    }
+    finally {
+        try {
+            & $Python -m DigitalTwin.dashboard.automated_motion `
+                --dashboard-url "http://${HostAddress}:$Port" `
+                --profile stop_only `
+                --speed slow `
+                --duration-s 1 | Out-Null
+        } catch {
+            Write-Host "Final stop request could not be confirmed; checking server process." -ForegroundColor Yellow
+        }
+        if (-not $serverProcess.HasExited) {
+            Stop-Process -Id $serverProcess.Id -Force
+        }
     }
 }
 
