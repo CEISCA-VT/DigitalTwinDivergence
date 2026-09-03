@@ -22,6 +22,42 @@
 body { margin: 0; min-width: 320px; background: var(--bg); }
 button, select, input { font: inherit; }
 
+.logging-controls {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #dfe6e7;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.download-csv {
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  padding: 11px 14px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  background: #087f79;
+  color: white;
+}
+
+.download-csv:hover {
+  filter: brightness(0.95);
+}
+
+.download-csv:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+#loggingStatus {
+  color: #819096;
+  font-size: 11px;
+  text-align: center;
+}
+
 .topbar {
   min-height: 68px;
   padding: 10px 22px;

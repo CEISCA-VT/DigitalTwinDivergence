@@ -1,5 +1,5 @@
 param(
-    [string]$RoverUrl = "http://192.168.4.1/js",
+    [string]$RoverUrl = "http://10.0.0.171/js",
     [string]$PhysicalCondition = "turning_intensive",
     [string]$WirelessCondition = "wifi_baseline",
     [int]$Trial = 1,
@@ -45,6 +45,37 @@ for ($policyIndex = 0; $policyIndex -lt $policies.Count; $policyIndex++) {
     ) + $openArg
 
     $serverProcess = Start-Process -FilePath $Python -ArgumentList $dashboardArgs -PassThru -WindowStyle Hidden
+
+    # Wait for the dashboard server to become available
+    $dashboardReady = $false
+    $maxWaitSeconds = 30
+
+    for ($i = 0; $i -lt ($maxWaitSeconds * 2); $i++) {
+        if ($serverProcess.HasExited) {
+            throw "Dashboard server exited before becoming ready for policy $policy"
+        }
+
+        try {
+            $response = Invoke-WebRequest `
+                -Uri "http://${HostAddress}:$Port" `
+                -UseBasicParsing `
+                -TimeoutSec 2 `
+                -ErrorAction Stop
+
+            $dashboardReady = $true
+            break
+        }
+        catch {
+            Start-Sleep -Milliseconds 500
+        }
+    }
+
+    if (-not $dashboardReady) {
+        throw "Dashboard server did not become ready within $maxWaitSeconds seconds for policy $policy"
+    }
+
+    Write-Host "Dashboard ready. Starting automated motion..." -ForegroundColor Green
+
     try {
         & $Python -m DigitalTwin.dashboard.automated_motion `
             --dashboard-url "http://${HostAddress}:$Port" `

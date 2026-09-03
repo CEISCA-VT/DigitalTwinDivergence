@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import json
 import math
 import mimetypes
@@ -251,6 +252,55 @@ class TwinStream:
             "points": points,
         }
 
+    def csv_data(self) -> tuple[str, str]:
+        """Return the currently collected live-twin samples as CSV."""
+        with self._lock:
+            points = list(self.points)
+
+        if not points:
+            raise RuntimeError("No telemetry samples have been collected yet.")
+
+        # Collect all scalar point fields.
+        fieldnames = []
+        for point in points:
+            for key in point.keys():
+                if key not in fieldnames:
+                    fieldnames.append(key)
+
+        # Keep nested contract information in one CSV cell as JSON.
+        output = io.StringIO(newline="")
+        writer = csv.DictWriter(
+            output,
+            fieldnames=fieldnames,
+            extrasaction="ignore",
+        )
+        writer.writeheader()
+
+        for point in points:
+            row = {}
+
+            for key in fieldnames:
+                value = point.get(key, "")
+
+                if isinstance(value, (dict, list, tuple)):
+                    value = json.dumps(
+                        value,
+                        separators=(",", ":"),
+                        allow_nan=False,
+                    )
+
+                elif value is None:
+                    value = ""
+
+                row[key] = value
+
+            writer.writerow(row)
+
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        filename = f"ugv01_live_twin_{timestamp}.csv"
+
+        return output.getvalue(), filename
+
     def _run_csv(self) -> None:
         assert self.csv_path is not None
         try:
@@ -284,28 +334,48 @@ class TwinStream:
                 self._running = False
 
     def _run_live(self) -> None:
-        started_wall = time.monotonic()
-        try:
-            while not self._stop.is_set():
-                if self.duration_s is not None and time.monotonic() - started_wall >= self.duration_s:
-                    break
-                period = 1.0 / self.resource_policy.update_rate_hz
-                started = time.monotonic()
-                try:
-                    query = urllib.parse.urlencode({"cmd": json.dumps({"T": 147}, separators=(",", ":"))})
-                    edge_send = time.time()
-                    separator = "&" if "?" in self.rover_url else "?"
-                    row = _json_get(f"{self.rover_url}{separator}{query}", timeout_s=min(1.5, max(0.25, period)))
-                    edge_arrival = time.time()
-                    row_bytes = len(json.dumps(row, separators=(",", ":")).encode("utf-8"))
-                    self._append_sample(row, edge_arrival_s=edge_arrival, latency_ms=(edge_arrival - edge_send) * 1000.0, payload_bytes=row_bytes)
-                except Exception as exc:  # pragma: no cover - hardware dependent
-                    with self._lock:
-                        self._error = f"{type(exc).__name__}: {exc}"
-                time.sleep(max(0.0, period - (time.monotonic() - started)))
-        finally:
-            with self._lock:
-                self._running = False
+        while not self._stop.is_set():
+            period = 1.0 / self.resource_policy.update_rate_hz
+            started = time.monotonic()
+
+            try:
+                query = urllib.parse.urlencode({
+                    "cmd": json.dumps({"T": 147}, separators=(",", ":"))
+                })
+
+                edge_send = time.time()
+
+                separator = "&" if "?" in self.rover_url else "?"
+
+                row = _json_get(
+                    f"{self.rover_url}{separator}{query}",
+                    timeout_s=1.0,
+                )
+
+                edge_arrival = time.time()
+
+                row_bytes = len(
+                    json.dumps(row, separators=(",", ":")).encode("utf-8")
+                )
+
+                self._append_sample(
+                    row,
+                    edge_arrival_s=edge_arrival,
+                    latency_ms=(edge_arrival - edge_send) * 1000.0,
+                    payload_bytes=row_bytes,
+                )
+
+                # Clear any previous transient communication error
+                # after a successful T:147 request.
+                with self._lock:
+                    self._error = ""
+
+            except Exception as exc:
+                with self._lock:
+                    self._error = f"{type(exc).__name__}: {exc}"
+
+            elapsed = time.monotonic() - started
+            time.sleep(max(0.0, period - elapsed))
 
     def send_drive_command(self, command: str, speed: str) -> dict[str, object]:
         command = command.strip().lower()
@@ -900,6 +970,28 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     self._json({"error": "Stream mode is not active"}, HTTPStatus.BAD_REQUEST)
                     return
                 self._json(_STREAM.payload())
+                return
+            if parsed.path == "/api/download-csv":
+                if _STREAM is None:
+                    self._json(
+                        {"error": "Live stream is not active"},
+                        HTTPStatus.BAD_REQUEST,
+                    )
+                    return
+
+                csv_text, filename = _STREAM.csv_data()
+                body = csv_text.encode("utf-8")
+
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "text/csv; charset=utf-8")
+                self.send_header(
+                    "Content-Disposition",
+                    f'attachment; filename="{filename}"',
+                )
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(body)
                 return
             if parsed.path == "/api/replay":
                 run_id = parse_qs(parsed.query).get("id", [""])[0]

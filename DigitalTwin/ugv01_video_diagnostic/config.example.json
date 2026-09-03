@@ -1,0 +1,17 @@
+{
+  "moving_tag_ids": [0],
+  "reference_tag_ids": [],
+  "expected_runs": 5,
+  "minimum_run_seconds": 90,
+  "sample_hz": 4.0,
+  "minimum_moving_tag_coverage": 0.85,
+  "warning_moving_tag_coverage": 0.65,
+  "maximum_gap_seconds": 0.5,
+  "warning_gap_seconds": 1.0,
+  "minimum_tag_side_pixels": 24.0,
+  "minimum_sharp_fraction": 0.70,
+  "blur_laplacian_threshold": 45.0,
+  "minimum_median_brightness": 35.0,
+  "maximum_median_brightness": 220.0
+}
+

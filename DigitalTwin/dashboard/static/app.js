@@ -711,4 +711,58 @@ window.addEventListener("keydown", (event) => {
   if (event.code === "ArrowRight") $("stepForward").click();
 });
 
+async function downloadCsv() {
+  const button = $("downloadCsv");
+  const status = $("loggingStatus");
+
+  button.disabled = true;
+  status.textContent = "Preparing CSV...";
+
+  try {
+    const response = await fetch("/api/download-csv");
+
+    if (!response.ok) {
+      let message = `HTTP ${response.status}`;
+
+      try {
+        const payload = await response.json();
+        message = payload.error || message;
+      } catch (_) {
+        // Response wasn't JSON.
+      }
+
+      throw new Error(message);
+    }
+
+    const blob = await response.blob();
+
+    const disposition = response.headers.get("Content-Disposition") || "";
+    const match = disposition.match(/filename="([^"]+)"/);
+
+    const filename = match
+      ? match[1]
+      : `ugv01_live_twin_${new Date().toISOString().replace(/[:.]/g, "-")}.csv`;
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+
+    status.textContent = `${state.data?.points?.length || 0} samples exported`;
+  } catch (error) {
+    status.textContent = "CSV export failed";
+    showError(error);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+$("downloadCsv").addEventListener("click", downloadCsv);
+
 initialize();
