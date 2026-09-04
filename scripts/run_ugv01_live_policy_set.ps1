@@ -1,5 +1,5 @@
 param(
-    [string]$RoverUrl = "http://10.0.0.171/js",
+    [string]$RoverUrl = "http://192.168.4.1/telemetry",
     [string]$PhysicalCondition = "turning_intensive",
     [string]$WirelessCondition = "wifi_baseline",
     [int]$Trial = 1,
@@ -33,6 +33,7 @@ for ($policyIndex = 0; $policyIndex -lt $policies.Count; $policyIndex++) {
         "-m", "DigitalTwin.dashboard.server",
         "--mode", "live",
         "--rover-url", $RoverUrl,
+        "--rover-request-mode", "stream",
         "--host", $HostAddress,
         "--port", "$Port",
         "--policy", $policy,

@@ -130,6 +130,8 @@ main { padding: 14px 18px 86px; max-width: 1720px; margin: 0 auto; }
 
 .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 326px; gap: 12px; }
 .experiment-workspace { grid-template-columns: minmax(520px, 1fr) 326px 318px; }
+body.stream-only .experiment-workspace { grid-template-columns: minmax(520px, 1fr) 360px; }
+body.stream-only .control-deck { display: none; }
 .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; box-shadow: var(--shadow); }
 .trajectory-panel { min-height: 510px; padding: 14px; }
 .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 44px; }

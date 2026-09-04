@@ -203,6 +203,7 @@ function showError(error) {
 function populateRun() {
   if (!state.data) return;
   const { metadata: meta, summary } = state.data;
+  document.body.classList.toggle("stream-only", Boolean(meta.stream_only));
   const experiment = meta.experiment || {};
   const condition = [experiment.physical_condition, experiment.wireless_condition].filter(Boolean).join(" / ");
   const trial = experiment.trial == null ? "" : `trial ${experiment.trial}`;
@@ -662,6 +663,10 @@ document.querySelectorAll("[data-view]").forEach((button) => {
 });
 
 async function sendDrive(command) {
+  if (state.data?.metadata?.stream_only) {
+    setText("lastCommand", "disabled in stream-only mode");
+    return;
+  }
   state.activeCommand = command;
   setText("lastCommand", `${command} @ ${state.commandSpeed}`);
   try {

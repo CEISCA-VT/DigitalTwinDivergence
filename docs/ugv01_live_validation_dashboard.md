@@ -75,10 +75,10 @@ Any `T:147` CSV with the standard bench-logger fields can be used with
 ## Live Rover Prototype
 
 Connect to the UGV01 Wi-Fi or station-mode network, keep the normal rover
-control panel available at `http://192.168.4.1`, and run:
+network available, and run the stream-only dashboard first:
 
 ```powershell
-python -m DigitalTwin.dashboard.server --mode live --rover-url http://192.168.4.1/js --host 127.0.0.1 --port 8765 --policy contract-aware
+python -m DigitalTwin.dashboard.server --mode live --rover-url "http://192.168.4.1/telemetry" --rover-request-mode stream --stream-only --host 127.0.0.1 --port 8765 --policy contract-aware --open
 ```
 
 Then open:
@@ -87,7 +87,24 @@ Then open:
 http://127.0.0.1:8765
 ```
 
-The live dashboard repeatedly sends:
+The stream-only dashboard requests:
+
+```text
+http://192.168.4.1/telemetry
+```
+
+This is the preferred path for the live contract experiment because firmware is
+only responsible for emitting telemetry and the Python dashboard is responsible
+for twin propagation, service contracts, resource policy, and logging.
+
+If the rover has not yet been flashed with the direct `/telemetry` endpoint,
+use the legacy firmware path temporarily:
+
+```powershell
+python -m DigitalTwin.dashboard.server --mode live --rover-url "http://192.168.4.1/js" --rover-request-mode cmd --stream-only --host 127.0.0.1 --port 8765 --policy contract-aware --open
+```
+
+The legacy dashboard path repeatedly sends:
 
 ```json
 {"T":147}
@@ -98,9 +115,6 @@ to the firmware backend as:
 ```text
 http://192.168.4.1/js?cmd={"T":147}
 ```
-
-Use this dashboard for both movement and live twin/fidelity monitoring. The
-original UGV01 page can remain open as a backup control panel.
 
 Select one frozen experiment policy before each run with `--policy`:
 
@@ -114,6 +128,9 @@ contract-aware  rate selected from contract state and source age
 The adaptive policies include frozen escalation, downshift, and dwell behavior.
 They change the telemetry request rate only; they do not alter the twin model or
 send autonomous motion commands.
+
+For the first live-contract test, do not drive from this dashboard. Confirm that
+the stream, service contracts, JSONL log, and analyzer work first.
 
 ## Movement Controls
 

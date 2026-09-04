@@ -1,4 +1,10 @@
-from DigitalTwin.dashboard.server import TwinStream, build_replay_payload, list_logs, sanitize_rover_url
+from DigitalTwin.dashboard.server import (
+    TwinStream,
+    build_replay_payload,
+    build_rover_request_url,
+    list_logs,
+    sanitize_rover_url,
+)
 
 
 def test_dashboard_lists_and_replays_an_accepted_run() -> None:
@@ -43,12 +49,29 @@ def test_sanitize_rover_url_accepts_common_paste_forms() -> None:
     )
 
 
+def test_build_rover_request_url_supports_stream_and_legacy_modes() -> None:
+    assert (
+        build_rover_request_url("192.168.4.1/telemetry", {"T": 147}, "stream")
+        == "http://192.168.4.1/telemetry"
+    )
+    assert (
+        build_rover_request_url("http://192.168.4.1/js", {"T": 147}, "cmd")
+        == "http://192.168.4.1/js?cmd=%7B%22T%22%3A147%7D"
+    )
+    assert (
+        build_rover_request_url("http://192.168.4.1/js", {"T": 147}, "json")
+        == "http://192.168.4.1/js?json=%7B%22T%22%3A147%7D"
+    )
+
+
 def test_twin_stream_records_experiment_metadata(tmp_path) -> None:
     stream = TwinStream(
         mode="csv",
         csv_path=None,
         rover_url="[http://192.168.4.1/js](http://192.168.4.1/js)",
+        rover_request_mode="cmd",
         poll_hz=5.0,
+        stream_only=True,
         output_dir=tmp_path,
         experiment_metadata={
             "run_label": "carpet_contract_trial_1",
@@ -61,3 +84,5 @@ def test_twin_stream_records_experiment_metadata(tmp_path) -> None:
     assert stream.rover_url == "http://192.168.4.1/js"
     assert "carpet_contract_trial_1" in stream.log_path.name
     assert payload["metadata"]["experiment"]["physical_condition"] == "carpet"
+    assert payload["metadata"]["rover_request_mode"] == "cmd"
+    assert payload["metadata"]["stream_only"] is True

@@ -23,7 +23,7 @@ Required:
 
 - UGV01 powered on.
 - Laptop connected to the rover access point or the same station-mode Wi-Fi.
-- Firmware backend reachable at `/js`.
+- Firmware backend reachable at `/telemetry`.
 - T:147 telemetry working.
 - GPS connected and valid for observable live contract states.
 
@@ -38,25 +38,38 @@ the live operational reference used by the dashboard contracts.
 
 ## Firmware Backend
 
-Default access-point URL:
+Default access-point stream URL after flashing the experiment firmware:
 
 ```powershell
-http://192.168.4.1/js
+http://192.168.4.1/telemetry
 ```
 
 Station-mode URL:
 
 ```powershell
-http://<ROVER_IP_FROM_DISPLAY>/js
+http://<ROVER_IP_FROM_DISPLAY>/telemetry
 ```
 
-The dashboard polls combined telemetry with:
+The stream endpoint returns the combined telemetry packet directly. This is the
+preferred live-contract path because the firmware is only a telemetry backend
+and the local Python dashboard owns the digital twin, service contracts, and
+logging.
+
+If the rover has not yet been flashed with `/telemetry`, the legacy endpoint can
+still be used temporarily:
+
+```powershell
+http://192.168.4.1/js
+```
+
+Legacy mode polls combined telemetry with:
 
 ```json
 {"T":147}
 ```
 
-Movement commands from the browser use the existing rover command style:
+Movement commands use the existing rover command style, but they should be kept
+out of the first stream smoke test:
 
 ```json
 {"T":1,"L":...,"R":...}
@@ -144,7 +157,13 @@ resource-control experiment because the samples were already recorded.
 Run this before the policy comparison:
 
 ```powershell
-python -m DigitalTwin.dashboard.server --mode live --rover-url http://192.168.4.1/js --host 127.0.0.1 --port 8765 --policy contract-aware --run-label live_smoke_gps_check --physical-condition stationary_low_motion --wireless-condition wifi_baseline --trial 0 --duration-s 60 --open
+python -m DigitalTwin.dashboard.server --mode live --rover-url "http://192.168.4.1/telemetry" --rover-request-mode stream --stream-only --host 127.0.0.1 --port 8765 --policy contract-aware --run-label live_smoke_gps_check --physical-condition stationary_low_motion --wireless-condition wifi_baseline --trial 0 --duration-s 60 --open
+```
+
+If `/telemetry` is not flashed yet, use the legacy compatibility command:
+
+```powershell
+python -m DigitalTwin.dashboard.server --mode live --rover-url "http://192.168.4.1/js" --rover-request-mode cmd --stream-only --host 127.0.0.1 --port 8765 --policy contract-aware --run-label live_smoke_gps_check --physical-condition stationary_low_motion --wireless-condition wifi_baseline --trial 0 --duration-s 60 --open
 ```
 
 After it finishes, analyze logs:
@@ -165,12 +184,10 @@ fraction is high enough for service contracts to become observable.
 ## Run One Complete Policy Set
 
 This command runs all four policies sequentially for one physical condition and
-one repetition. Each policy arm starts the dashboard, runs the same automated
-motion profile through the dashboard command API, logs the live contract stream,
-and stops automatically after the chosen duration.
+one repetition. Do this only after the stream-only smoke test succeeds.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://192.168.4.1/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -RestSeconds 15 -Open
+powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://192.168.4.1/telemetry" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -RestSeconds 15 -Open
 ```
 
 Repeat with `-Trial 2`, `-Trial 3`, and so on. `-RestSeconds 15` keeps the
@@ -180,7 +197,7 @@ state have a short settling interval before the next policy begins.
 For station-mode Wi-Fi:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://<ROVER_IP>/js" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -RestSeconds 15 -Open
+powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 -RoverUrl "http://<ROVER_IP>/telemetry" -PhysicalCondition "turning_intensive" -WirelessCondition "wifi_baseline" -Trial 1 -DurationSeconds 120 -MotionProfile "turning_intensive" -MotionSpeed "slow" -RestSeconds 15 -Open
 ```
 
 ## Automated Motion Profiles

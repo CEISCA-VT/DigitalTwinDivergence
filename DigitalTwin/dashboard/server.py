@@ -7,8 +7,8 @@ The server supports three modes:
 ``csv``
     A dummy/live-prototype stream driven from a T:147 CSV file.
 ``live``
-    A live stream that polls the UGV01 firmware at ``http://192.168.4.1/js`` using
-    ``T:147`` and propagates the same sensor-lightweight twin shown in the paper.
+    A live stream that polls the UGV01 firmware telemetry endpoint and propagates
+    the same sensor-lightweight twin shown in the paper.
 """
 
 from __future__ import annotations
@@ -131,6 +131,20 @@ def _json_get(url: str, timeout_s: float) -> dict[str, object]:
     return payload
 
 
+def build_rover_request_url(rover_url: str, payload: dict[str, object], mode: str) -> str:
+    """Build the rover HTTP URL for direct streaming or legacy command polling."""
+    sanitized = sanitize_rover_url(rover_url).rstrip("/")
+    if mode == "stream":
+        return sanitized
+    if mode not in {"cmd", "json"}:
+        raise ValueError(f"unsupported rover request mode: {mode}")
+    separator = "&" if "?" in sanitized else "?"
+    query = urllib.parse.urlencode({
+        mode: json.dumps(payload, separators=(",", ":")),
+    })
+    return f"{sanitized}{separator}{query}"
+
+
 class TwinStream:
     """Incrementally propagates the paper's sensor-lightweight UGV01 twin."""
 
@@ -141,7 +155,9 @@ class TwinStream:
         csv_path: Path | None,
         rover_url: str,
         poll_hz: float,
+        rover_request_mode: str = "stream",
         policy: str = "contract-aware",
+        stream_only: bool = False,
         contract_config_path: Path | None = None,
         output_dir: Path | None = None,
         experiment_metadata: dict[str, object] | None = None,
@@ -151,11 +167,13 @@ class TwinStream:
         self.mode = mode
         self.csv_path = csv_path
         self.rover_url = sanitize_rover_url(rover_url).rstrip("/")
+        self.rover_request_mode = rover_request_mode
         self.poll_hz = max(0.5, float(poll_hz))
         self.contract_config = load_contract_config(contract_config_path or Path(__file__).resolve().parents[1] / "configs" / "ugv01_live_service_contracts.json")
         self.contract_engine = ContractEngine(self.contract_config)
         self.resource_policy = ResourcePolicy(policy, self.contract_config)
         self.policy_name = policy
+        self.stream_only = stream_only
         self.max_points = max_points
         self.geometry = DifferentialDriveGeometry(
             effective_track_width_m=(
@@ -231,6 +249,8 @@ class TwinStream:
             "metadata": {
                 "label": "CSV prototype" if self.mode == "csv" else "UGV01 live firmware",
                 "source": str(self.csv_path) if self.csv_path else self.rover_url,
+                "rover_request_mode": self.rover_request_mode,
+                "stream_only": self.stream_only,
                 "paper_role": "sensor-lightweight physical-virtual fidelity prototype",
                 "runtime_inputs": "T:147 encoder counts, IMU yaw rate, firmware yaw, timing, optional GPS",
                 "twin_model": "UGV01 deterministic tracked-drive propagation with gyro blending",
@@ -339,16 +359,13 @@ class TwinStream:
             started = time.monotonic()
 
             try:
-                query = urllib.parse.urlencode({
-                    "cmd": json.dumps({"T": 147}, separators=(",", ":"))
-                })
-
                 edge_send = time.time()
-
-                separator = "&" if "?" in self.rover_url else "?"
-
                 row = _json_get(
-                    f"{self.rover_url}{separator}{query}",
+                    build_rover_request_url(
+                        self.rover_url,
+                        {"T": 147},
+                        self.rover_request_mode,
+                    ),
                     timeout_s=1.0,
                 )
 
@@ -392,10 +409,20 @@ class TwinStream:
         payload = {"T": 1, "L": round(left, 3), "R": round(right, 3)}
         if self.mode != "live":
             return {"sent": False, "dry_run": True, "payload": payload, "mode": self.mode}
-        query = urllib.parse.urlencode({"cmd": json.dumps(payload, separators=(",", ":"))})
-        separator = "&" if "?" in self.rover_url else "?"
+        if self.stream_only:
+            return {
+                "sent": False,
+                "dry_run": True,
+                "payload": payload,
+                "mode": self.mode,
+                "note": "Movement commands are disabled in stream-only dashboard mode.",
+            }
+        command_url = self.rover_url
+        if self.rover_request_mode == "stream":
+            parsed = urllib.parse.urlparse(command_url)
+            command_url = urllib.parse.urlunparse(parsed._replace(path="/js", query=""))
         started = time.time()
-        response = _json_get(f"{self.rover_url}{separator}{query}", timeout_s=1.0)
+        response = _json_get(build_rover_request_url(command_url, payload, "cmd"), timeout_s=1.0)
         return {
             "sent": True,
             "dry_run": False,
@@ -1085,8 +1112,22 @@ def main() -> None:
     )
     parser.add_argument(
         "--rover-url",
-        default="http://192.168.4.1/js",
+        default="http://192.168.4.1/telemetry",
         help="UGV01 firmware URL used by --mode live",
+    )
+    parser.add_argument(
+        "--rover-request-mode",
+        choices=("stream", "cmd", "json"),
+        default="stream",
+        help=(
+            "How live telemetry is requested: stream reads --rover-url directly; "
+            "cmd/json append a legacy /js query argument."
+        ),
+    )
+    parser.add_argument(
+        "--stream-only",
+        action="store_true",
+        help="Hide dashboard movement controls and reject dashboard drive commands.",
     )
     parser.add_argument("--poll-hz", type=float, default=5.0, help="Live/csv stream polling rate")
     parser.add_argument(
@@ -1125,8 +1166,10 @@ def main() -> None:
             mode=args.mode,
             csv_path=csv_path if args.mode == "csv" else None,
             rover_url=args.rover_url,
+            rover_request_mode=args.rover_request_mode,
             poll_hz=args.poll_hz,
             policy=args.policy,
+            stream_only=args.stream_only,
             contract_config_path=args.contract_config,
             output_dir=args.output_dir,
             experiment_metadata={key: value for key, value in experiment_metadata.items() if value not in {"", None}},
