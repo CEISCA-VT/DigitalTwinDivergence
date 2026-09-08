@@ -88,6 +88,8 @@
 #define CMD_GET_IMU_DATA	126
 #define CMD_GET_GPS_DATA 146
 #define CMD_GET_ALL_TELEMETRY 147
+// Browser/network round-trip latency test.
+#define CMD_LATENCY_TEST 998
 #define FEEDBACK_ALL_TELEMETRY 1007
 // the robot need to be put on a ground and kept still
 // getting the imu offset and set as default

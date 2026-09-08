@@ -11,9 +11,19 @@ void webCtrlServer(){
   server.on("/", handleRoot);
 
   server.on("/js", [](){
-    String jsonCmdWebString = server.arg(0);
+    String jsonCmdWebString = server.arg("json");
+    if (jsonCmdWebString.length() == 0) jsonCmdWebString = server.arg(0);
     deserializeJson(jsonCmdReceive, jsonCmdWebString);
-    jsonCmdReceiveHandler();
+
+    // T=998 is a network latency test. The browser measures the HTTP RTT.
+    if (jsonCmdReceive["T"].as<int>() == 998) {
+      jsonInfoHttp.clear();
+      jsonInfoHttp["T"] = 998;
+      jsonInfoHttp["echo"] = jsonCmdReceive["echo"] | 0;
+      jsonInfoHttp["ugv_ms"] = millis();
+    } else {
+      jsonCmdReceiveHandler();
+    }
     serializeJson(jsonInfoHttp, jsonFeedbackWeb);
     server.send(200, "application/json", jsonFeedbackWeb);
     jsonFeedbackWeb = "";
