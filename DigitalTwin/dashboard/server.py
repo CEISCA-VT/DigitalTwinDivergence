@@ -123,11 +123,13 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
 
 
 def _json_get(url: str, timeout_s: float) -> dict[str, object]:
-    with urllib.request.urlopen(url, timeout=timeout_s) as response:  # noqa: S310 - local rover URL
+    with urllib.request.urlopen(url, timeout=timeout_s) as response:  # noqa: S310
         text = response.read().decode("utf-8", errors="replace").strip()
+    if not text or text == "null":
+        return {}  # Return empty payload instead of crashing json.loads
     payload = json.loads(text)
     if not isinstance(payload, dict):
-        raise RuntimeError("UGV01 response was not a JSON object")
+        return {}
     return payload
 
 
@@ -422,7 +424,14 @@ class TwinStream:
             parsed = urllib.parse.urlparse(command_url)
             command_url = urllib.parse.urlunparse(parsed._replace(path="/js", query=""))
         started = time.time()
-        response = _json_get(build_rover_request_url(command_url, payload, "cmd"), timeout_s=1.0)
+        cmd_url = build_rover_request_url(command_url, payload, "cmd")
+        req = urllib.request.Request(cmd_url)
+        with urllib.request.urlopen(req, timeout=1.0) as resp:
+            raw_text = resp.read().decode("utf-8", errors="replace").strip()
+            try:
+                response = json.loads(raw_text)
+            except json.JSONDecodeError:
+                response = {"raw": raw_text}
         return {
             "sent": True,
             "dry_run": False,
