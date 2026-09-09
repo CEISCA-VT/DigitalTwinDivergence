@@ -1,5 +1,19 @@
+"""
+run with this
+powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 `
+>>     -RoverUrl "http://10.0.0.171/js" `
+>>     -PhysicalCondition "turning_intensive" `
+>>     -WirelessCondition "wifi_baseline" `
+>>     -Trial 1 `
+>>     -DurationSeconds 70 `
+>>     -MotionProfile "turning_intensive" `
+>>     -MotionSpeed "slow" `
+>>     -RestSeconds 15 `
+>>     -Open
+"""
+
 param(
-    [string]$RoverUrl = "http://192.168.4.1/telemetry",
+    [string]$RoverUrl = "http://10.0.0.171/js",
     [string]$PhysicalCondition = "turning_intensive",
     [string]$WirelessCondition = "wifi_baseline",
     [int]$Trial = 1,
@@ -33,7 +47,7 @@ for ($policyIndex = 0; $policyIndex -lt $policies.Count; $policyIndex++) {
         "-m", "DigitalTwin.dashboard.server",
         "--mode", "live",
         "--rover-url", $RoverUrl,
-        "--rover-request-mode", "stream",
+        "--rover-request-mode", "json",
         "--host", $HostAddress,
         "--port", "$Port",
         "--policy", $policy,
