@@ -1,0 +1,3 @@
+PUBLICATION_REPLAY_GATE: FAIL
+max zero-bias reconstruction RMSE = 36.435623 m
+Use this experiment only as controlled replay-based yaw-bias sensitivity, not attack detection.

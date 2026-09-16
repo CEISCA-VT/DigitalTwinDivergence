@@ -1,0 +1,109 @@
+{
+  "analysis": "cross_domain_operational_fidelity_contract",
+  "protocol_version": "E3_cross_domain_contract_v4_hardened_alignment",
+  "config": {
+    "horizons_s": [
+      60,
+      300,
+      600
+    ],
+    "normalized_tolerances": [
+      0.01,
+      0.02,
+      0.05,
+      0.1,
+      0.2,
+      0.5
+    ],
+    "contract_quantile": 0.95,
+    "robust_scale_q_low": 0.05,
+    "robust_scale_q_high": 0.95,
+    "robust_scale_relative_floor": 0.01,
+    "min_components_for_transfer": 2,
+    "min_horizons_for_transfer": 3,
+    "min_units_per_horizon": 5,
+    "freetwinev_cd_physical_start_s": 1305.0,
+    "freetwinev_cd_physical_end_s": 3500.0,
+    "freetwinev_dis_physical_start_s": 4110.0,
+    "freetwinev_dis_physical_end_s": 8105.0,
+    "random_seed": 260825
+  },
+  "claim_boundary": "contract-structure portability across independent DT domains; not universal fidelity or target-domain model superiority",
+  "datasets": {
+    "MAGNET": {
+      "source": "Idaho National Laboratory MAGNET Heat Pipe Digital Twin",
+      "official_urls": {
+        "MAGNET_Heat_Pipe_2022-03-30.csv": "https://raw.githubusercontent.com/IdahoLabResearch/MAGNET-Heat-Pipe-Data/main/Experiment/Single_File/MAGNET_Heat_Pipe_2022-03-30.csv",
+        "ML_MAGNET_2022-03-30.csv": "https://raw.githubusercontent.com/IdahoLabResearch/MAGNET-Heat-Pipe-Data/main/Machine_Learning/Single_File/ML_MAGNET_2022-03-30.csv"
+      }
+    },
+    "FreeTwinEV_1S4P": {
+      "zenodo_record": "19935693",
+      "doi": "10.5281/zenodo.19935693",
+      "official_md5": "a37cf1619d14a28e4e4397b55f0b58ac",
+      "official_urls": [
+        "https://zenodo.org/records/19935693/files/FTEV_1S4P_IdentValid_SimPackage_V1.zip?download=1",
+        "https://zenodo.org/api/records/19935693/files/FTEV_1S4P_IdentValid_SimPackage_V1.zip/content"
+      ]
+    },
+    "TUWien_SNG": {
+      "record": "6mmjq-1tj37",
+      "doi": "10.48436/6mmjq-1tj37",
+      "official_md5": {
+        "Data_MPC_DFB.csv": "ac8362f321887c55ae80d05429f2e001",
+        "Data_MPC_Syngas.csv": "46b0b80fc160fa073627b0bd7127b191",
+        "Data_SoftSensor.csv": "c905a047747d121bb622391e30bf15bb",
+        "README.txt": "2194099097a489152d47b21755ab02fa"
+      }
+    }
+  },
+  "metadata": {
+    "MAGNET": {
+      "physical_file": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\magnet_tfp\\data\\MAGNET_Heat_Pipe_2022-03-30.csv",
+      "forecast_file": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\magnet_tfp\\data\\ML_MAGNET_2022-03-30.csv",
+      "n_total_forecast_windows": 111,
+      "n_strict_nonoverlap_windows": 23,
+      "components": 10
+    },
+    "FreeTwinEV_1S4P": {
+      "record": "19935693",
+      "zip": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\freetwinev_1s4p\\FTEV_1S4P_IdentValid_SimPackage_V1.zip",
+      "experiment_csv": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\freetwinev_1s4p\\extracted\\FTEV_1S4P_IdentValid_SimPackage_V1\\Experiment data\\ID22_20251210_144332381\\FreeTwinEV_1s4p_ID_22.csv",
+      "cooldown_sim_csv": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\freetwinev_1s4p\\extracted\\FTEV_1S4P_IdentValid_SimPackage_V1\\Simulation data\\CASE_ID22_CD\\CASE_ID22_CD_2DresultsFULL.csv",
+      "discharge_sim_csv": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\freetwinev_1s4p\\extracted\\FTEV_1S4P_IdentValid_SimPackage_V1\\Simulation data\\CASE_ID22_DIS\\CASE_ID22_DIS_2DresultsFULL.csv",
+      "paired_components": [
+        "temperature_max",
+        "temperature_mean",
+        "temperature_spread"
+      ],
+      "n_paired_rows": 1602
+    },
+    "TUWien_SNG": {
+      "record": "6mmjq-1tj37",
+      "files": {
+        "Data_MPC_DFB.csv": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\tuwien_sng\\Data_MPC_DFB.csv",
+        "Data_MPC_Syngas.csv": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\tuwien_sng\\Data_MPC_Syngas.csv",
+        "Data_SoftSensor.csv": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\tuwien_sng\\Data_SoftSensor.csv",
+        "README.txt": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\tuwien_sng\\README.txt"
+      },
+      "paired_components": [
+        "PG_C2H4",
+        "PG_CH4",
+        "PG_CO",
+        "PG_CO2",
+        "PG_H2",
+        "PG_temperature",
+        "PG_volume_flow"
+      ],
+      "n_paired_rows": 16316
+    }
+  },
+  "errors": {},
+  "completed_datasets": [
+    "FreeTwinEV_1S4P",
+    "MAGNET",
+    "TUWien_SNG"
+  ],
+  "structural_pass_count": 3,
+  "all_three_pass": true
+}

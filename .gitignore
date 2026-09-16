@@ -19,9 +19,12 @@ venv/
 Thumbs.db
 
 # ============================================================
-# Large datasets - keep local, never commit
+# Large datasets; the paper's UGV01 trial set is explicitly included below
 # ============================================================
-public_datasets/
+public_datasets/*
+!public_datasets/ugv01_live_contract/
+public_datasets/ugv01_live_contract/raw_jsonl_pool/
+public_datasets/ugv01_live_contract/jsonl_inventory.csv
 raw_logs/
 docs/footage/
 ugv01_gps_dev/
@@ -34,8 +37,14 @@ magnet_tfp/
 # ============================================================
 # Generated experiment outputs
 # ============================================================
-results/
-
+results/*
+!results/ugv01_live_contract_dataset_audit/
+!results/ugv01_live_contract_trace_replay/
+!results/ugv01_live_contract_experiment/
+!results/e1_e2_service_contract_publication/
+!results/cross_domain_contract_generalization/
+!results/publication_hardening/
+live_contract_trials/
 # Original V1 training-output directory outside results
 i2nav_dual_10fold_3seed_results/
 

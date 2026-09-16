@@ -1,0 +1,4 @@
+local_horizon_s,n_pairs,inversions,concordant,ties
+1.0,45,17,28,0
+5.0,45,17,28,0
+10.0,45,15,30,0

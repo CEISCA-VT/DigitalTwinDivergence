@@ -1,0 +1,30 @@
+{
+  "schema": "ugv01_live_contract_dataset_audit_v1",
+  "dataset": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\ugv01_live_contract",
+  "run_count": 20,
+  "complete_triplets": 20,
+  "policies": {
+    "aoi-only": 5,
+    "contract-aware": 5,
+    "static-high": 5,
+    "static-low": 5
+  },
+  "json_parse_errors": 0,
+  "sequence_gap_total": 7,
+  "json_record_count": 2702,
+  "json_duration_s_total": 1791.2040000000006,
+  "telemetry_schema_count": 1,
+  "json_schema_values": [
+    "ugv01_live_contract_record_v1"
+  ],
+  "duplicate_file_groups": [],
+  "delivered_rate_spread_hz": 0.06553699536527935,
+  "verdict": "prototype_ready_policy_effectiveness_not_established",
+  "outputs": [
+    "per_run_audit.csv",
+    "per_service_audit.csv",
+    "policy_summary.csv",
+    "service_policy_summary.csv",
+    "dataset_audit_report.md"
+  ]
+}

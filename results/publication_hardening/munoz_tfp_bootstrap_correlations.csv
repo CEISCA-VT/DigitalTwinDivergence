@@ -1,0 +1,199 @@
+method,domain,mad,metric_a,metric_b,n_sequences,spearman,bootstrap_ci_low,bootstrap_ci_high,valid_bootstrap_replicates,interpretation
+Fixed Physics (recomputed),heading,2.0,heading_mae_deg,pct_matched,10,-0.9757575757575757,-1.0,-0.8101265822784811,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,2.0,dtheta_p95_deg,pct_matched,10,-0.9636363636363635,-1.0,-0.7901565322095171,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,2.0,heading_mae_deg,ed_mean_deg,10,0.12727272727272726,-0.5686478758169934,0.8,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,2.0,dtheta_p95_deg,fd_max_deg,10,-0.6,-0.9480519480519479,0.11949685534591196,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,5.0,heading_mae_deg,pct_matched,10,-0.9878787878787878,-1.0,-0.8692810457516338,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,5.0,dtheta_p95_deg,pct_matched,10,-0.9757575757575757,-1.0,-0.8101265822784811,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,5.0,heading_mae_deg,ed_mean_deg,10,0.5878787878787878,-0.06918238993710693,0.9610514485514473,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,5.0,dtheta_p95_deg,fd_max_deg,10,0.34545454545454546,-0.3292194092827004,0.8616352201257862,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,10.0,heading_mae_deg,pct_matched,10,-0.9878787878787878,-1.0,-0.8692810457516338,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,10.0,dtheta_p95_deg,pct_matched,10,-0.9757575757575757,-1.0,-0.8101265822784811,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,10.0,heading_mae_deg,ed_mean_deg,10,0.8787878787878788,0.45454545454545453,1.0,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),heading,10.0,dtheta_p95_deg,fd_max_deg,10,0.04242424242424241,-0.6981132075471699,0.7987421383647799,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.25,ate_m,pct_matched,10,0.12727272727272726,-0.6666666666666666,0.8641975308641975,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.25,rpe10_m,pct_matched,10,0.4424242424242424,-0.38271604938271603,0.9259259259259257,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.25,dp_p95_m,pct_matched,10,0.12727272727272726,-0.6732026143790849,0.8701714951714915,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.25,ate_m,ed_mean_m,10,-0.32121212121212117,-0.903448275862069,0.5139501633986873,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.25,ate_m,fd_max_m,10,-0.33333333333333326,-0.849056603773585,0.3856209150326797,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.25,rpe10_m,ed_mean_m,10,-0.3939393939393939,-0.9166666666666666,0.39133186571271095,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.25,dp_p95_m,fd_max_m,10,-0.33333333333333326,-0.8441809803100125,0.40372670807453415,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.5,ate_m,pct_matched,10,-0.6242424242424242,-0.9230891719745223,-0.0588235294117647,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.5,rpe10_m,pct_matched,10,0.17575757575757575,-0.6026490066225165,0.8124999999999999,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.5,dp_p95_m,pct_matched,10,-0.6242424242424242,-0.9240506329113924,-0.06167525141035539,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.5,ate_m,ed_mean_m,10,-0.4666666666666666,-0.9622641509433963,0.3464117647058817,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.5,ate_m,fd_max_m,10,-0.6121212121212121,-0.9245283018867925,0.1234567901234568,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.5,rpe10_m,ed_mean_m,10,-0.6363636363636362,-0.9629629629629629,0.03321069413783789,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,0.5,dp_p95_m,fd_max_m,10,-0.6121212121212121,-0.9250116459627329,0.1372549019607843,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,1.0,ate_m,pct_matched,10,-0.9272727272727272,-1.0,-0.6538461538461539,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,1.0,rpe10_m,pct_matched,10,0.11515151515151514,-0.7777777777777778,0.9205557719776629,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,1.0,dp_p95_m,pct_matched,10,-0.9272727272727272,-1.0,-0.6515725806451648,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,1.0,ate_m,ed_mean_m,10,-0.6848484848484848,-0.9874999999999999,0.018633540372670808,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,1.0,ate_m,fd_max_m,10,-0.309090909090909,-0.8571428571428571,0.6100628930817611,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,1.0,rpe10_m,ed_mean_m,10,-0.24848484848484845,-0.9245283018867925,0.45698141422772665,20000,exploratory sequence-level correlation
+Fixed Physics (recomputed),position_xy,1.0,dp_p95_m,fd_max_m,10,-0.309090909090909,-0.854375591296121,0.6149187768752976,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,2.0,heading_mae_deg,pct_matched,10,-0.6606060606060605,-1.0,0.006289308176100629,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,2.0,dtheta_p95_deg,pct_matched,10,-0.49090909090909085,-0.9620253164556963,0.20784431617764496,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,2.0,heading_mae_deg,ed_mean_deg,10,-0.6242424242424242,-0.9496855345911951,0.01886792452830189,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,2.0,dtheta_p95_deg,fd_max_deg,10,-0.29696969696969694,-0.9006364542596427,0.4702361614394569,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,5.0,heading_mae_deg,pct_matched,10,-0.6606060606060605,-1.0,0.006213133325520358,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,5.0,dtheta_p95_deg,pct_matched,10,-0.49090909090909085,-0.9620253164556963,0.20987654320987656,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,5.0,heading_mae_deg,ed_mean_deg,10,0.10303030303030303,-0.6556291390728477,0.8374999999999999,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,5.0,dtheta_p95_deg,fd_max_deg,10,-0.06666666666666665,-0.708333333333333,0.6226415094339623,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,10.0,heading_mae_deg,pct_matched,10,-0.7575757575757575,-0.9874999999999999,-0.2,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,10.0,dtheta_p95_deg,pct_matched,10,-0.6121212121212121,-0.9480519480519479,-0.01886792452830189,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,10.0,heading_mae_deg,ed_mean_deg,10,0.2727272727272727,-0.6874999999999999,0.9245283018867925,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),heading,10.0,dtheta_p95_deg,fd_max_deg,10,-0.16363636363636364,-0.802469135802469,0.6075949367088608,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.25,ate_m,pct_matched,10,0.43030303030303024,-0.2546644744854464,0.8471337579617836,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.25,rpe10_m,pct_matched,10,-0.2121212121212121,-0.8124999999999999,0.5432098765432098,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.25,dp_p95_m,pct_matched,10,0.38181818181818183,-0.36645962732919257,0.8385093167701864,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.25,ate_m,ed_mean_m,10,-0.7333333333333332,-1.0,-0.006211180124223603,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.25,ate_m,fd_max_m,10,-0.24848484848484845,-0.7806451612903226,0.49389870002452163,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.25,rpe10_m,ed_mean_m,10,-0.006060606060606061,-0.7610062893081762,0.7254901960784311,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.25,dp_p95_m,fd_max_m,10,-0.16363636363636364,-0.7532467532467532,0.5471698113207548,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.5,ate_m,pct_matched,10,-0.3696969696969697,-0.85,0.4896551724137931,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.5,rpe10_m,pct_matched,10,-0.406060606060606,-0.9125,0.39743589743589747,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.5,dp_p95_m,pct_matched,10,-0.38181818181818183,-0.9,0.6024844720496895,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.5,ate_m,ed_mean_m,10,-0.5272727272727272,-0.9259259259259257,0.1372549019607843,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.5,ate_m,fd_max_m,10,-0.41818181818181815,-0.8961038961038961,0.2704402515723271,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.5,rpe10_m,ed_mean_m,10,0.05454545454545454,-0.7358490566037736,0.6603773584905661,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,0.5,dp_p95_m,fd_max_m,10,-0.49090909090909085,-0.9108280254777071,0.20529801324503308,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,1.0,ate_m,pct_matched,10,-0.4545454545454545,-0.9108280254777071,0.39622641509433965,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,1.0,rpe10_m,pct_matched,10,-0.32121212121212117,-0.8867924528301887,0.40372670807453415,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,1.0,dp_p95_m,pct_matched,10,-0.4666666666666666,-0.9615384615384615,0.38749999999999996,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,1.0,ate_m,ed_mean_m,10,-0.3939393939393939,-0.8364779874213837,0.2704402515723271,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,1.0,ate_m,fd_max_m,10,0.006060606060606061,-0.9610389610389609,0.6025641025641026,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,1.0,rpe10_m,ed_mean_m,10,0.2606060606060606,-0.4968553459119497,0.8181818181818181,20000,exploratory sequence-level correlation
+LWOI-IMU adaptation (sparse RBF residual),position_xy,1.0,dp_p95_m,fd_max_m,10,0.0303030303030303,-0.9205298013245032,0.6103896103896104,20000,exploratory sequence-level correlation
+Twin V1,heading,2.0,heading_mae_deg,pct_matched,10,-0.9757575757575757,-1.0,-0.8101265822784811,20000,exploratory sequence-level correlation
+Twin V1,heading,2.0,dtheta_p95_deg,pct_matched,10,-0.9636363636363635,-1.0,-0.7916666666666665,20000,exploratory sequence-level correlation
+Twin V1,heading,2.0,heading_mae_deg,ed_mean_deg,10,0.9878787878787878,0.8701298701298701,1.0,20000,exploratory sequence-level correlation
+Twin V1,heading,2.0,dtheta_p95_deg,fd_max_deg,10,0.4424242424242424,-0.38749999999999996,0.9259259259259257,20000,exploratory sequence-level correlation
+Twin V1,heading,5.0,heading_mae_deg,pct_matched,10,-0.8727860481775686,-0.9905211130872972,-0.5325572505133518,19979,exploratory sequence-level correlation
+Twin V1,heading,5.0,dtheta_p95_deg,pct_matched,10,-0.9245067028843873,-0.9905211130872972,-0.7115124735378854,19995,exploratory sequence-level correlation
+Twin V1,heading,5.0,heading_mae_deg,ed_mean_deg,10,0.9999999999999999,0.9999999999999999,1.0,20000,exploratory sequence-level correlation
+Twin V1,heading,5.0,dtheta_p95_deg,fd_max_deg,10,0.9272727272727272,0.6603773584905661,1.0,20000,exploratory sequence-level correlation
+Twin V1,heading,10.0,heading_mae_deg,pct_matched,10,-0.812776759390954,-0.9712858623572642,-0.528680532637681,19401,exploratory sequence-level correlation
+Twin V1,heading,10.0,dtheta_p95_deg,pct_matched,10,-0.812776759390954,-0.9712858623572642,-0.528680532637681,19389,exploratory sequence-level correlation
+Twin V1,heading,10.0,heading_mae_deg,ed_mean_deg,10,0.9999999999999999,0.9999999999999999,1.0,20000,exploratory sequence-level correlation
+Twin V1,heading,10.0,dtheta_p95_deg,fd_max_deg,10,0.9272727272727272,0.6603773584905661,1.0,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.25,ate_m,pct_matched,10,-0.9757575757575757,-1.0,-0.8101265822784811,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.25,rpe10_m,pct_matched,10,-0.24848484848484845,-0.9125,0.6209581945985903,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.25,dp_p95_m,pct_matched,10,-0.8787878787878788,-1.0,-0.4197530864197531,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.25,ate_m,ed_mean_m,10,-0.07878787878787878,-0.647837539818672,0.5279503105590063,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.25,ate_m,fd_max_m,10,-0.4666666666666666,-0.9215813598166538,0.3636833855799331,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.25,rpe10_m,ed_mean_m,10,0.06666666666666665,-0.6124999999999999,0.6296296296296295,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.25,dp_p95_m,fd_max_m,10,-0.34545454545454546,-0.8875,0.4545742232451068,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.5,ate_m,pct_matched,10,-0.9757575757575757,-1.0,-0.8101265822784811,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.5,rpe10_m,pct_matched,10,-0.24848484848484845,-0.9119496855345913,0.605095541401274,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.5,dp_p95_m,pct_matched,10,-0.8787878787878788,-1.0,-0.4125,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.5,ate_m,ed_mean_m,10,0.8909090909090909,0.559748427672956,1.0,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.5,ate_m,fd_max_m,10,0.6,-0.21251008064516128,0.9622641509433963,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.5,rpe10_m,ed_mean_m,10,0.3696969696969697,-0.4,0.9220779220779219,20000,exploratory sequence-level correlation
+Twin V1,position_xy,0.5,dp_p95_m,fd_max_m,10,0.6484848484848483,-0.1069182389937107,1.0,20000,exploratory sequence-level correlation
+Twin V1,position_xy,1.0,ate_m,pct_matched,10,-0.9726488698881034,-1.0,-0.8075749961538342,20000,exploratory sequence-level correlation
+Twin V1,position_xy,1.0,rpe10_m,pct_matched,10,-0.23708316203522517,-0.8881987577639753,0.6153846153846154,20000,exploratory sequence-level correlation
+Twin V1,position_xy,1.0,dp_p95_m,pct_matched,10,-0.8753839828992931,-1.0,-0.41558441558441556,20000,exploratory sequence-level correlation
+Twin V1,position_xy,1.0,ate_m,ed_mean_m,10,0.8909090909090909,0.5454545454545453,1.0,20000,exploratory sequence-level correlation
+Twin V1,position_xy,1.0,ate_m,fd_max_m,10,0.7454545454545454,0.056504468718967325,1.0,20000,exploratory sequence-level correlation
+Twin V1,position_xy,1.0,rpe10_m,ed_mean_m,10,0.23636363636363633,-0.6363636363636362,0.8867924528301887,20000,exploratory sequence-level correlation
+Twin V1,position_xy,1.0,dp_p95_m,fd_max_m,10,0.7212121212121211,0.01886792452830189,1.0,20000,exploratory sequence-level correlation
+Twin V2,heading,2.0,heading_mae_deg,pct_matched,10,-0.9848069807617047,-1.0,-0.8673184577074425,20000,exploratory sequence-level correlation
+Twin V2,heading,2.0,dtheta_p95_deg,pct_matched,10,-0.996965091635306,-1.0,-0.9669875568304562,20000,exploratory sequence-level correlation
+Twin V2,heading,2.0,heading_mae_deg,ed_mean_deg,10,0.8787878787878788,0.4437086092715231,1.0,20000,exploratory sequence-level correlation
+Twin V2,heading,2.0,dtheta_p95_deg,fd_max_deg,10,0.7696969696969697,0.12987012987012986,1.0,20000,exploratory sequence-level correlation
+Twin V2,heading,5.0,heading_mae_deg,pct_matched,10,-0.8986463755309779,-0.9968701018688442,-0.555136110002701,19975,exploratory sequence-level correlation
+Twin V2,heading,5.0,dtheta_p95_deg,pct_matched,10,-0.937436866561092,-0.9999999999999999,-0.7137464271463299,19983,exploratory sequence-level correlation
+Twin V2,heading,5.0,heading_mae_deg,ed_mean_deg,10,0.9878787878787878,0.8692810457516338,1.0,20000,exploratory sequence-level correlation
+Twin V2,heading,5.0,dtheta_p95_deg,fd_max_deg,10,0.9757575757575757,0.8101265822784811,1.0,20000,exploratory sequence-level correlation
+Twin V2,heading,10.0,heading_mae_deg,pct_matched,10,-0.7006490497453708,-0.938351290644441,-0.5254270830780441,17890,exploratory sequence-level correlation
+Twin V2,heading,10.0,dtheta_p95_deg,pct_matched,10,-0.7006490497453708,-0.938351290644441,-0.5254270830780441,17823,exploratory sequence-level correlation
+Twin V2,heading,10.0,heading_mae_deg,ed_mean_deg,10,0.9999999999999999,0.9999999999999999,1.0,20000,exploratory sequence-level correlation
+Twin V2,heading,10.0,dtheta_p95_deg,fd_max_deg,10,0.9878787878787878,0.8692810457516338,1.0,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.25,ate_m,pct_matched,10,-0.9393939393939393,-1.0,-0.6732026143790849,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.25,rpe10_m,pct_matched,10,-0.32121212121212117,-0.9108280254777071,0.5250737577639686,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.25,dp_p95_m,pct_matched,10,-0.8424242424242423,-1.0,-0.33749999999999997,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.25,ate_m,ed_mean_m,10,-0.07878787878787878,-0.6688741721854303,0.509433962264151,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.25,ate_m,fd_max_m,10,-0.6606060606060605,-0.9620253164556963,0.12658227848101267,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.25,rpe10_m,ed_mean_m,10,0.05454545454545454,-0.6100628930817611,0.6603773584905661,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.25,dp_p95_m,fd_max_m,10,-0.49090909090909085,-0.9240625746357775,0.3461538461538462,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.5,ate_m,pct_matched,10,-0.9757575757575757,-1.0,-0.8101265822784811,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.5,rpe10_m,pct_matched,10,-0.28484848484848485,-0.9259259259259257,0.5679012345679012,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.5,dp_p95_m,pct_matched,10,-0.8787878787878788,-1.0,-0.4197530864197531,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.5,ate_m,ed_mean_m,10,0.8060606060606059,0.37254901960784303,0.9622641509433963,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.5,ate_m,fd_max_m,10,0.49090909090909085,-0.28760416666666655,0.9149379432624076,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.5,rpe10_m,ed_mean_m,10,0.5030303030303029,-0.33333333333333326,0.9620253164556963,20000,exploratory sequence-level correlation
+Twin V2,position_xy,0.5,dp_p95_m,fd_max_m,10,0.3696969696969697,-0.4409937888198758,0.9070295983086635,20000,exploratory sequence-level correlation
+Twin V2,position_xy,1.0,ate_m,pct_matched,10,-0.9726488698881034,-1.0,-0.8075749961538342,20000,exploratory sequence-level correlation
+Twin V2,position_xy,1.0,rpe10_m,pct_matched,10,-0.2735574946560291,-0.9143271813113513,0.5512820512820513,20000,exploratory sequence-level correlation
+Twin V2,position_xy,1.0,dp_p95_m,pct_matched,10,-0.8753839828992931,-1.0,-0.41401273885350326,20000,exploratory sequence-level correlation
+Twin V2,position_xy,1.0,ate_m,ed_mean_m,10,0.8909090909090909,0.49999999999999994,1.0,20000,exploratory sequence-level correlation
+Twin V2,position_xy,1.0,ate_m,fd_max_m,10,0.709090909090909,-0.006211180124223603,1.0,20000,exploratory sequence-level correlation
+Twin V2,position_xy,1.0,rpe10_m,ed_mean_m,10,0.2727272727272727,-0.611111111111111,0.9230769230769231,20000,exploratory sequence-level correlation
+Twin V2,position_xy,1.0,dp_p95_m,fd_max_m,10,0.6606060606060605,-0.16049382716049382,0.9874213836477987,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,2.0,heading_mae_deg,pct_matched,10,0.04242424242424241,-0.6729559748427674,0.7070063694267518,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,2.0,dtheta_p95_deg,pct_matched,10,-0.07878787878787878,-0.8039215686274508,0.6296532200990779,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,2.0,heading_mae_deg,ed_mean_deg,10,0.0303030303030303,-0.8076923076923078,0.7307692307692307,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,2.0,dtheta_p95_deg,fd_max_deg,10,0.32121212121212117,-0.9012345679012346,0.8113207547169812,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,5.0,heading_mae_deg,pct_matched,10,-0.07878787878787878,-0.6962025316455698,0.6100628930817611,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,5.0,dtheta_p95_deg,pct_matched,10,-0.17575757575757575,-0.8089171974522295,0.5403983858843986,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,5.0,heading_mae_deg,ed_mean_deg,10,-0.5515151515151515,-0.89937106918239,0.22223991507430843,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,5.0,dtheta_p95_deg,fd_max_deg,10,0.5272727272727272,-0.1139240506329114,0.8300653594771241,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,10.0,heading_mae_deg,pct_matched,10,-0.19999999999999998,-0.8411370086866774,0.5900621118012424,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,10.0,dtheta_p95_deg,pct_matched,10,-0.28484848484848485,-0.9230769230769231,0.5220125786163523,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,10.0,heading_mae_deg,ed_mean_deg,10,-0.8181818181818182,-0.9876543209876544,-0.27499999999999997,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",heading,10.0,dtheta_p95_deg,fd_max_deg,10,-0.2727272727272727,-0.8867924528301887,0.5031055900621119,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.25,ate_m,pct_matched,10,0.18787878787878787,-0.5512820512820513,0.8101265822784811,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.25,rpe10_m,pct_matched,10,-0.6121212121212121,-0.9240506329113924,0.0588235294117647,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.25,dp_p95_m,pct_matched,10,0.19999999999999998,-0.5286624203821656,0.8148148148148148,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.25,ate_m,ed_mean_m,10,-0.10303030303030303,-0.7721518987341772,0.8,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.25,ate_m,fd_max_m,10,-0.09090909090909088,-0.764705882352941,0.7961783439490446,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.25,rpe10_m,ed_mean_m,10,0.18787878787878787,-0.5512820512820513,0.7324840764331212,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.25,dp_p95_m,fd_max_m,10,-0.04242424242424241,-0.7361723856209148,0.8404907975460123,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.5,ate_m,pct_matched,10,0.49090909090909085,-0.3461538461538462,0.9875795567824551,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.5,rpe10_m,pct_matched,10,0.0303030303030303,-0.6981132075471699,0.6363636363636362,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.5,dp_p95_m,pct_matched,10,0.5151515151515151,-0.32911392405063294,1.0,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.5,ate_m,ed_mean_m,10,0.05454545454545454,-0.5925925925925926,0.6556291390728477,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.5,ate_m,fd_max_m,10,-0.24848484848484845,-0.8148148148148148,0.5723270440251573,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.5,rpe10_m,ed_mean_m,10,0.6969696969696969,0.01886792452830189,0.9622641509433963,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,0.5,dp_p95_m,fd_max_m,10,-0.22424242424242422,-0.7872340425531915,0.6226415094339623,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,1.0,ate_m,pct_matched,10,0.2121212121212121,-0.5541401273885351,0.8882160110420966,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,1.0,rpe10_m,pct_matched,10,0.006060606060606061,-0.8395061728395062,0.7735849056603774,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,1.0,dp_p95_m,pct_matched,10,0.28484848484848485,-0.5220125786163523,0.89937106918239,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,1.0,ate_m,ed_mean_m,10,-0.2727272727272727,-0.7735849056603774,0.4509803921568627,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,1.0,ate_m,fd_max_m,10,0.04242424242424241,-0.6666666666666666,0.68944099378882,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,1.0,rpe10_m,ed_mean_m,10,0.5515151515151515,-0.18238993710691825,0.9622641509433963,20000,exploratory sequence-level correlation
+"Wheel-IMU EKF (planar EKF-IW, corrected)",position_xy,1.0,dp_p95_m,fd_max_m,10,0.09090909090909088,-0.6124999999999999,0.7358490566037736,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,2.0,heading_mae_deg,pct_matched,10,-0.6727272727272726,-0.9617834394904461,-0.030928853754951812,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,2.0,dtheta_p95_deg,pct_matched,10,-0.6121212121212121,-0.9620253164556963,0.1210191082802548,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,2.0,heading_mae_deg,ed_mean_deg,10,-0.2121212121212121,-0.8385093167701864,0.5346370111208257,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,2.0,dtheta_p95_deg,fd_max_deg,10,-0.49090909090909085,-0.849056603773585,0.2356687898089172,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,5.0,heading_mae_deg,pct_matched,10,-0.7575757575757575,-0.9874999999999999,-0.1949685534591195,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,5.0,dtheta_p95_deg,pct_matched,10,-0.7212121212121211,-0.9867549668874172,-0.125,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,5.0,heading_mae_deg,ed_mean_deg,10,-0.07878787878787878,-0.7962424388094379,0.6153846153846154,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,5.0,dtheta_p95_deg,fd_max_deg,10,-0.5151515151515151,-0.9480519480519479,0.3037974683544304,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,10.0,heading_mae_deg,pct_matched,10,-0.7333333333333332,-0.9874233490566038,-0.18471337579617836,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,10.0,dtheta_p95_deg,pct_matched,10,-0.709090909090909,-0.9869281045751633,-0.11538461538461539,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,10.0,heading_mae_deg,ed_mean_deg,10,0.35757575757575755,-0.2948717948717949,0.8051948051948052,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,heading,10.0,dtheta_p95_deg,fd_max_deg,10,0.12727272727272726,-0.5849056603773586,0.7580378960862011,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.25,ate_m,pct_matched,10,0.32121212121212117,-0.40510912265386295,0.8961371961371932,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.25,rpe10_m,pct_matched,10,-0.0303030303030303,-0.7215189873417722,0.8101265822784811,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.25,dp_p95_m,pct_matched,10,0.2606060606060606,-0.4591194968553459,0.8300653594771241,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.25,ate_m,ed_mean_m,10,-0.7333333333333332,-0.9622641509433963,-0.18012422360248448,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.25,ate_m,fd_max_m,10,-0.4545454545454545,-0.9230769230769231,0.3584905660377359,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.25,rpe10_m,ed_mean_m,10,-0.23636363636363633,-0.8867924528301887,0.6603773584905661,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.25,dp_p95_m,fd_max_m,10,-0.4424242424242424,-0.89873417721519,0.3836477987421384,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.5,ate_m,pct_matched,10,-0.406060606060606,-0.8461538461538461,0.4339622641509434,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.5,rpe10_m,pct_matched,10,-0.01818181818181818,-0.7517622033139274,0.7735849056603774,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.5,dp_p95_m,pct_matched,10,-0.35757575757575755,-0.8113207547169812,0.5334615384615273,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.5,ate_m,ed_mean_m,10,-0.6121212121212121,-0.9166666666666666,-0.006289308176100629,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.5,ate_m,fd_max_m,10,-0.5515151515151515,-0.9259259259259257,0.08609271523178808,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.5,rpe10_m,ed_mean_m,10,-0.10303030303030303,-0.9607843137254901,0.5849056603773586,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,0.5,dp_p95_m,fd_max_m,10,-0.4424242424242424,-0.9483870967741936,0.2337662337662338,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,1.0,ate_m,pct_matched,10,-0.5636363636363636,-0.9629629629629629,0.25925925925925924,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,1.0,rpe10_m,pct_matched,10,-0.11515151515151514,-0.8136933517368301,0.7721518987341772,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,1.0,dp_p95_m,pct_matched,10,-0.5393939393939393,-0.9615384615384615,0.3167701863354037,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,1.0,ate_m,ed_mean_m,10,-0.8181818181818182,-0.9876543209876544,-0.3207547169811321,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,1.0,ate_m,fd_max_m,10,-0.7333333333333332,-1.0,-0.12987012987012986,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,1.0,rpe10_m,ed_mean_m,10,-0.22424242424242422,-0.8624999999999999,0.6874999999999999,20000,exploratory sequence-level correlation
+YNet-style reduced-input yaw + EKF,position_xy,1.0,dp_p95_m,fd_max_m,10,-0.7818181818181817,-0.9999999999999999,-0.2298136645962733,20000,exploratory sequence-level correlation

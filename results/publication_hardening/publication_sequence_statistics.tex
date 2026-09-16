@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\caption{Sequence-level paired statistics for frozen Twin V1 versus Twin V2. The physical sequence is the statistical unit ($n=10$). Negative paired differences favor V2 because all reported errors are lower-better.}
+\label{tab:paired_stats}
+\centering\scriptsize
+\begin{tabular}{lrrrrrr}
+\toprule
+Metric & V1 med. & V2 med. & Med. $\Delta$ & 95\% CI of mean $\Delta$ & Wilcoxon $p$ & Improved \\
+\midrule
+ATE RMSE (m) & 1.632 & 1.588 & -0.001332 & [-1.059,-0.0007037] & 0.2754 & 6/10 \\
+Heading MAE ($^\circ$) & 0.7487 & 0.6445 & -0.0902 & [-1.691,-0.07451] & 0.009766 & 8/10 \\
+RPE1 (m) & 0.04011 & 0.03498 & -0.0003637 & [-0.004043,0.006655] & 0.4922 & 7/10 \\
+RPE5 (m) & 0.1155 & 0.09776 & -0.008663 & [-0.01523,0.004852] & 0.08398 & 9/10 \\
+RPE10 (m) & 0.1958 & 0.1632 & -0.01564 & [-0.03064,-0.006047] & 0.03711 & 8/10 \\
+$D_{p,95}$ (m) & 2.721 & 2.523 & -0.0002663 & [-2.102,0.0188] & 0.5566 & 5/10 \\
+$D_{\theta,95}$ ($^\circ$) & 2.489 & 2.178 & -0.3325 & [-4.116,-0.2459] & 0.005859 & 9/10 \\
+$|I_\omega|_{\max}$ ($^\circ$) & 4.575 & 3.978 & -1.055 & [-4.58,-0.7774] & 0.001953 & 10/10 \\
+Hausdorff (m) & 3.34 & 3.367 & -0.05651 & [-1.08,-0.04263] & 0.08398 & 7/10 \\
+Mean bidirectional nearest (m) & 0.5957 & 0.5887 & -0.01077 & [-0.08965,-0.006123] & 0.01953 & 8/10 \\
+Terminal position error (m) & 0.6912 & 0.6856 & -0.0007484 & [-2.808,0.02885] & 0.4316 & 7/10 \\
+\bottomrule
+\end{tabular}
+\end{table*}

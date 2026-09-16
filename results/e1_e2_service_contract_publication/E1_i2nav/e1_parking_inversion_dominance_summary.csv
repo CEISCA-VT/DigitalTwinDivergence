@@ -1,0 +1,5 @@
+family,horizon_s,n_grid_points,parking02_wins,parking00_wins,equal,mean_validity_difference,median_validity_difference
+global_synchronization,0.0,36,0,36,0,-0.38457144497833406,-0.38561152084031736
+local_relative_motion,1.0,25,25,0,0,0.015052966811934283,0.009649122807017574
+local_relative_motion,5.0,25,25,0,0,0.15782553994548124,0.0323093590550082
+local_relative_motion,10.0,25,25,0,0,0.2231157894736842,0.14343859649122803

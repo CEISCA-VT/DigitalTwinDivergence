@@ -1,0 +1,35 @@
+{
+  "schema": "ugv01_live_contract_public_dataset_v1",
+  "dataset_id": "ugv01_live_contract",
+  "source_root": "live_contract_trials",
+  "output_root": "public_datasets/ugv01_live_contract",
+  "trial_count": 20,
+  "policies": [
+    "aoi-only",
+    "contract-aware",
+    "static-high",
+    "static-low"
+  ],
+  "trials_per_policy": {
+    "aoi-only": 5,
+    "contract-aware": 5,
+    "static-high": 5,
+    "static-low": 5
+  },
+  "has_per_trial_live_contract_jsonl": {
+    "aoi-only": 5,
+    "contract-aware": 5,
+    "static-high": 5,
+    "static-low": 5
+  },
+  "raw_jsonl_pool_count": 0,
+  "exact_expected_jsonl_count": 20,
+  "video_duration_s_total": 2077.866,
+  "gps_valid_fraction_mean": 1.0,
+  "analysis_folder_copied": true,
+  "notes": [
+    "Dataset represents an indoor smooth-floor prospective live-contract trial set.",
+    "Telemetry CSV is the primary source for current AprilTag/fidelity analysis tooling.",
+    "All 20 trials include a matching JSONL contract log for online contract-policy analysis."
+  ]
+}

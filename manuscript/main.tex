@@ -1,0 +1,464 @@
+\documentclass[journal]{IEEEtran}
+
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{balance}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\safegraphic}[2][\linewidth]{%
+  \IfFileExists{#2}{\includegraphics[width=#1]{#2}}{%
+    \fbox{\parbox[c][1.15in][c]{0.92\linewidth}{\centering\scriptsize
+      Missing figure:\\[-1mm]\detokenize{#2}}}%
+  }%
+}
+
+\title{Service-Relative Operational Fidelity Contracts for IoT Digital Twins Under Changing Conditions}
+
+\author{Shreyas Udaya%
+\thanks{S. Udaya is with the Bradley Department of Electrical and Computer Engineering, Virginia Tech, Blacksburg, VA, USA.}%
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A digital twin can be accurate for one operational service while being inadequate for another, yet digital-twin fidelity is often summarized by one aggregate error or model-centric score. This paper formulates \emph{service-relative operational fidelity} as an explicit contract between physical and virtual quantities, service horizon, tolerated discrepancy, operating context, and synchronization age. On frozen i2Nav trajectories, parking02 is preferred to parking00 at every tested local-service tolerance while parking00 is preferred at every global-service tolerance, demonstrating a threshold-robust local/global inversion. Across all ten sequences, local-versus-global service orderings invert for 15--17 of 45 sequence pairs, while ATE aligns with global validity and finite-horizon RPE with local validity. The unchanged construction remains non-degenerate on five TerraSentia sequences and transfers under one normalized protocol to thermal, battery electro-thermal, and biomass-to-SNG twins. Controlled timing replay shows that 50-ms jitter increases 1-s relative error by 66.2\% while changing ATE by only 0.085\%. We further deploy the contracts on a physical UGV01 in 20 matched runs (four frozen resource policies, five repetitions each). All runs yield paired telemetry, video, and online contract traces. The policies request distinct 2/5/10-Hz modes, but the serial HTTP path limits every policy to approximately 1.5 delivered updates/s; trace-driven replay reproduces this null resource effect. Thus, the experiment validates online contract execution and exposes a real deployment bottleneck without claiming unobserved communication savings. The results support fidelity as a service-specific operational claim rather than a scalar property of a twin.
+\end{abstract}
+
+\begin{IEEEkeywords}
+digital twin, Internet of Things, operational fidelity, service contract, physical--virtual synchronization, edge systems, mobile robot, cyber--physical systems
+\end{IEEEkeywords}
+
+\section{Introduction}
+\IEEEPARstart{D}{igital} twins (DTs) are increasingly used as computational references for monitoring, prediction, control, verification, maintenance, and cyber--physical decision making. Their usefulness therefore depends on more than whether a model is accurate on average: the virtual state must be sufficiently credible for the \emph{particular service} that consumes it \cite{dtc,jones2020,shao2023,nist8620}. A collision-warning service, a local motion predictor, a global geofence monitor, and a long-horizon thermal predictor need not impose the same quantities, horizons, tolerances, or state-age requirements.
+
+This distinction is especially visible in sensor-lightweight mobile robots. Wheel/odometry and inertial sensing can preserve short segments of relative motion while heading bias, slip, timing error, or accumulated drift displaces the virtual asset globally. A single trajectory score can therefore be simultaneously informative and insufficient: ATE answers a global synchronization question, whereas RPE answers a finite-horizon relative-motion question. Neither by itself specifies which operational claim the twin is expected to support.
+
+We address this by treating fidelity as a \emph{service-relative operational contract}. The core hypothesis is
+\begin{equation}
+\boxed{\text{DT fidelity is not a scalar property of a twin; it is a service-specific operational claim.}}
+\end{equation}
+Rather than replacing established metrics, the contract makes their semantics explicit. A service selects the physical/virtual quantities that matter, the time horizon over which they matter, tolerated discrepancy, operating context, and allowable state age. The same twin can then validly support one service and reject another.
+
+The paper makes five contributions:
+\begin{enumerate}
+    \item \textbf{Service-relative fidelity contracts.} We formalize an operational contract over quantity set, horizon, tolerance, context, and state age, with native-unit robot instantiations and a normalized cross-domain specialization.
+    \item \textbf{Threshold-robust evidence that service choice changes the fidelity judgment.} On frozen i2Nav trajectories, the parking00/parking02 ordering reverses between global and every local service across the complete predeclared tolerance grid; dataset-wide sequence orderings also invert.
+    \item \textbf{Metric-to-service validation.} Conventional scalar metrics are not declared wrong: ATE is most aligned with global service validity, while RPE is most aligned with finite-horizon local validity. This establishes that the contract organizes existing metrics by operational claim rather than renaming them.
+    \item \textbf{Cross-platform and cross-domain structural portability.} The same contract construction transfers unchanged to five TerraSentia sequences and, using one frozen normalized protocol, to MAGNET, FreeTwinEV, and TU Wien SNG data.
+    \item \textbf{Context, synchronization, and live deployment.} Operating-condition analysis, benign envelopes, timing replay, AprilTag-referenced UGV01 evidence, and a 20-run online contract campaign show how dynamics, asset binding, observability, and a measured communication bottleneck affect service validity and resource-policy execution.
+\end{enumerate}
+
+The claim is deliberately bounded. We do not claim a universal tolerance, universal DT certification, localization state of the art, or successful zero-shot transfer of one learned maintenance model across assets. The cross-domain experiments test portability of the \emph{representation and evaluation structure}; numerical validity values remain dataset- and service-specific.
+
+\section{Related Work}
+\subsection{Digital-Twin Fidelity and Intended Use}
+The DT literature treats fidelity, synchronization, metrology, verification, validation, and uncertainty as central credibility concerns \cite{jones2020,shao2023,nist8620}. Kober \emph{et al.} formulate objective-dependent optimum fidelity \cite{kober2023}, and Zhang \emph{et al.} propose multidimensional fidelity evaluation for aero-engine assembly \cite{zhang2025}. These works motivate fidelity as an intended-use-dependent property, but they do not by themselves provide a service-level operational contract that can distinguish local, global, horizon-dependent, and synchronization-age requirements in a continuously updated edge twin.
+
+Mu\~noz \emph{et al.} compare physical and digital behavioral traces using snapshot similarity and trace alignment \cite{munoz2024}. Their formulation is broad and can intentionally absorb temporal displacement to judge behavioral equivalence. Our objective is complementary: when an operational service requires the virtual state to correspond to the physical state \emph{now}, temporal displacement can itself be fidelity loss. Bergs \emph{et al.} similarly demonstrate the value of multiple physical/virtual robot-validation measures \cite{bergs2025}. The novelty claimed here is therefore not ``multiple metrics,'' but explicit mapping from measurements to service-specific validity claims.
+
+\subsection{Robot Twins, Synchronization, and Sensor-Lightweight Maintenance}
+Robot DTs have been used for virtual--physical experimentation, navigation/control, and runtime verification \cite{ding2021,yang2025,betzer2024}. Wheel--inertial localization work demonstrates that low-burden proprioceptive sensing can support useful state estimation \cite{brossard2019,jiang2025,zhou2025ynet}. We use this sensing regime as a demanding DT maintenance case, but the object of study is the physical--virtual relationship rather than an odometry leaderboard. i2Nav provides the primary frozen robot evidence \cite{tang2025}; TerraSentia supplies a substantially different skid-steer agricultural platform \cite{cuaran2024}.
+
+\subsection{Cross-Domain Digital-Twin Evidence}
+The MAGNET single-heat-pipe DT combines a physical heat-pipe experiment with predictive thermal modeling \cite{wilsdon2023magnet,inlmagnetdata}. FreeTwinEV provides controlled electro-thermal measurements of a 1S4P battery module and corresponding high-fidelity multiphysics simulation data \cite{freetwinevmeas2026,freetwinevsim2026}. The TU Wien biomass-to-SNG pilot-plant DT integrates MPC, online process simulation, and soft sensing; its released campaign contains measured and estimated process variables across native update rates \cite{jankovic2025sng,tuwiensngdata}. These systems are not used as model-comparison benchmarks. They serve as independent tests of whether the same contract representation remains computable and informative after robot-specific geometry and trajectory metrics disappear.
+
+\subsection{Why Benign Fidelity Matters for IoT Monitoring}
+DT-assisted anomaly diagnosis and cyber--physical monitoring implicitly assume that benign physical--virtual disagreement is understood \cite{ma2024,alcaraz2024,wu2023}. Turning, slip, stale state, model mismatch, or accumulated bias can all enlarge divergence without an attack. We therefore characterize benign fidelity first and do not present an attack detector in this paper.
+
+\section{Service-Relative Operational Fidelity Contracts}
+\subsection{Physical--Virtual Discrepancy}
+Let a physical asset expose application-relevant quantities
+\begin{equation}
+\mathbf{z}_p(t)=[z_{p,1}(t),\ldots,z_{p,M}(t)]^{\top},
+\end{equation}
+with corresponding twin quantities $\mathbf{z}_T(t)$. For each component $q$, an application-appropriate discrepancy operator defines
+\begin{equation}
+D_q(t)=d_q\!\left(z_{p,q}(t),z_{T,q}(t)\right).
+\end{equation}
+The discrepancy need not have the same physical meaning across domains: it may represent pose error, heading disagreement, temperature error, or process-state mismatch.
+
+\subsection{Operational Service Contract}
+For service $s$, define
+\begin{equation}
+\mathcal{C}_s=(Q_s,H_s,\boldsymbol{\tau}_s,C_s,A_s),
+\label{eq:contract}
+\end{equation}
+where $Q_s$ is the set of required physical/virtual quantities, $H_s$ is the service horizon, $\boldsymbol{\tau}_s$ contains tolerated discrepancy limits, $C_s$ describes the operating context over which the claim applies, and $A_s$ is the allowable age of the physical information represented by the twin. $C_s$ and $A_s$ may be omitted when the experiment does not manipulate them; they are retained in the general specification because context and synchronization are operational properties of an edge DT.
+
+Let $g_{q,H_s}(t)$ summarize discrepancy for quantity $q$ over the service window. A service-validity indicator is
+\begin{equation}
+V_s(t)=\mathbb{I}\left[g_{q,H_s}(t)\le\tau_{s,q},\;\forall q\in Q_s,\;\mathrm{AoI}(t)\le A_s\right].
+\label{eq:validity}
+\end{equation}
+When age is not part of the experiment, the final constraint is omitted. This construction intentionally permits
+\begin{equation}
+V_{s_1}(t)\ne V_{s_2}(t)
+\end{equation}
+for the same twin state: fidelity is evaluated relative to the service contract, not asserted globally.
+
+\subsection{Mobile-Robot Instantiation}
+For planar motion,
+\begin{align}
+\mathbf{x}_p(t)&=[x_p(t),y_p(t),\theta_p(t)]^{\top},\\
+\mathbf{x}_T(t)&=[x_T(t),y_T(t),\theta_T(t)]^{\top}.
+\end{align}
+Global synchronized disagreement includes
+\begin{align}
+D_p(t)&=\sqrt{(x_p-x_T)^2+(y_p-y_T)^2},\\
+D_\theta(t)&=|\operatorname{wrap}(\theta_p-\theta_T)|.
+\end{align}
+Finite-horizon relative motion is formed in $SE(2)$,
+\begin{align}
+\Delta T_p(t,h)&=T_p(t)^{-1}T_p(t+h),\\
+\Delta T_T(t,h)&=T_T(t)^{-1}T_T(t+h),\\
+E_R(t,h)&=\Delta T_p(t,h)^{-1}\Delta T_T(t,h),
+\end{align}
+with translational RPE computed from $\operatorname{trans}(E_R)$. We evaluate local services at $h\in\{1,5,10\}$~s and a synchronized global-state service. The local services ask whether relative motion remains faithful over a bounded horizon; the global service asks whether the twin remains physically co-located with the asset.
+
+Signed velocity/yaw-rate residuals, accumulated yaw mismatch, p95/max tails, and condition-dependent summaries are retained as diagnostics. They explain \emph{why} a contract may fail without being collapsed into one weighted fidelity score.
+
+\subsection{Cross-Domain Normalized Contract}
+Native physical tolerances are not transferable between temperatures, battery states, process composition, and robot pose. For the frozen cross-domain experiment we therefore normalize each paired quantity by its physical dynamic range,
+\begin{equation}
+e_q(t)=\frac{|z_{T,q}(t)-z_{p,q}(t)|}{P_{95}(z_{p,q})-P_{05}(z_{p,q})},
+\label{eq:normerr}
+\end{equation}
+using only a small numerical floor for near-constant channels. In each non-overlapping service window, $g_{q,H}$ is the p95 of $e_q$. We freeze
+\begin{equation}
+H\in\{60,300,600\}\;\mathrm{s},
+\quad
+\tau\in\{0.01,0.02,0.05,0.10,0.20,0.50\}.
+\end{equation}
+No domain-specific numerical threshold is selected after observing outcomes. ``Grid-average validity'' is descriptive aggregation across this frozen tolerance grid, not a universal safety probability.
+
+\subsection{Statistical Hierarchy and Claim Boundaries}
+Robot timestamps within one run are correlated. The hierarchy is
+\begin{equation}
+\text{timestamp}\subset\text{seed run}\subset\text{physical sequence}\subset\text{dataset}.
+\end{equation}
+Dataset-level robot claims therefore use the physical sequence as the primary statistical unit. Threshold-robust ordering analyses evaluate the complete predeclared grid instead of selecting one favorable tolerance. Cross-domain transfer is declared only when the unchanged contract is computable at all required horizons, contains sufficient contract units, and produces a non-degenerate validity surface.
+
+\section{Sensor-Lightweight Twin and Frozen Evaluation Protocol}
+\subsection{Twin Maintenance Mechanism}
+The robot twin is maintained from wheel/odometry and IMU streams. The virtual state propagates corrected forward speed and yaw rate,
+\begin{align}
+\theta_{T,k+1}&=\operatorname{wrap}(\theta_{T,k}+\omega_{T,k}\Delta t),\\
+x_{T,k+1}&=x_{T,k}+v_{T,k}\Delta t\cos(\theta_{T,k}+\omega_{T,k}\Delta t/2),\\
+y_{T,k+1}&=y_{T,k}+v_{T,k}\Delta t\sin(\theta_{T,k}+\omega_{T,k}\Delta t/2).
+\end{align}
+The frozen V2 maintenance model separates transient correction from a bounded slow rotational correction. Ground truth is used for training supervision and held-out evaluation only. The present paper does not claim that this maintenance architecture is state-of-the-art localization; it provides a repeatable sensor-lightweight twin on which fidelity contracts can be studied.
+
+\subsection{Evaluation Layers}
+\begin{table*}[t]
+\caption{Evaluation layers and the claim each layer is allowed to support.}
+\label{tab:layers}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{p{0.13\textwidth}p{0.17\textwidth}p{0.28\textwidth}p{0.34\textwidth}}
+\toprule
+Layer & Domain & Role & Claim boundary \\
+\midrule
+i2Nav E1 & mobile robot & Frozen 10-sequence service-contract necessity and metric/service alignment & Primary methodological evidence; no threshold selection after outcomes \\
+TerraSentia E2 & agricultural robot & Unchanged robot contract on 5 accepted sequences & Contract-structure portability, not zero-shot V2 superiority \\
+MAGNET E3 & thermal heat pipe & Frozen normalized cross-domain contract & Structural portability; published physical/forecast traces used without retraining \\
+FreeTwinEV E3 & battery electro-thermal & Experimental 1S4P data versus released multiphysics simulation & Structural portability; no cross-domain threshold interpretation \\
+TU Wien SNG E3 & process/energy & Measured/estimated process and soft-sensor pairs & Structural portability; setpoints are not treated as physical truth \\
+UGV01 offline & physical robot & AprilTag-referenced asset instantiation & Independent physical-reference support for asset binding and local/global separation \\
+UGV01 live & edge-connected physical robot & 4 policies $\times$ 5 repetitions with online contracts and trace-driven communication replay & Online execution and transport-bottleneck evidence; no energy or fresh 10-Hz fidelity claim \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+E1 and E2 are frozen publication-hardening studies. E2 uses all five accepted TerraSentia sequences with the same 1/5/10-s and synchronized-global contract construction; no target normalization refit, checkpoint selection, or service-threshold selection is performed. E3 freezes the normalized contract in Eq.~\eqref{eq:normerr} before comparing MAGNET, FreeTwinEV, and TU Wien SNG. The E3 structural gate requires at least two legitimate physical/virtual quantities, all three horizons with at least five contract units, and a non-degenerate tolerance surface.
+
+\section{E1: Service Choice Changes the Fidelity Judgment}
+\subsection{Threshold-Robust Local/Global Inversion}
+The most direct evidence comes from parking00 and parking02. Under the synchronized global-state contract, parking00 is preferred at all 36 tested tolerance combinations and parking02 at none. Under each local service, parking02 is preferred at all 25 tested tolerance combinations. The grid-average parking02-minus-parking00 validity difference is $-0.385$ globally but $+0.015$, $+0.158$, and $+0.223$ for the 1-, 5-, and 10-s local services, respectively.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/e1_parking_full_grid_inversion.png}
+\caption{Threshold-robust service inversion. Negative values mean parking00 has higher grid-average validity; positive values mean parking02 does. The ordering reverses between the global service and every finite-horizon local service across the complete predeclared tolerance sweep.}
+\label{fig:e1inversion}
+\end{figure}
+
+This is not only a parking02 anecdote. Across all ten physical sequences, 17 of 45 sequence-pair orderings invert between local1 and global validity, 17/45 between local5 and global, and 15/45 between local10 and global. Grid-average Kendall $\tau$ between local and global sequence rankings is only 0.244, 0.244, and 0.333, respectively. Thus the service definition materially changes which twin/sequence is judged more faithful.
+
+\subsection{Established Metrics Answer Different Service Questions}
+The contract does not invalidate ATE or RPE. Instead, rank alignment shows that each scalar is strongest for the service matching its semantics. Median Kendall $\tau$ between ATE and global validity is 0.708, compared with 0.151 for RPE10. For local validity, the pattern reverses: RPE1/local1 gives 0.692 versus 0.200 for ATE; RPE5/local5 gives 0.674 versus 0.277; and RPE10/local10 gives 0.762 versus 0.333.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/e1_metric_service_rank_alignment.png}
+\caption{Conventional metrics rank different services differently. ATE aligns most strongly with synchronized-global validity, whereas finite-horizon RPE aligns most strongly with the corresponding local service. This supports service-relative interpretation rather than a universal metric hierarchy.}
+\label{fig:metricalignment}
+\end{figure}
+
+The result clarifies the contribution: the problem is not that ATE and RPE are ``wrong,'' but that a scalar metric becomes ambiguous when the intended service is left implicit.
+
+\subsection{Condition and Mechanism Diagnostics}
+Operating conditions affect different fidelity dimensions. High wheel--IMU disagreement worsens RPE1 in 10/10 sequences; high turning worsens RPE5/RPE10 in 9/10; high acceleration worsens position-tail error in 9/10; and high curvature worsens heading-tail error in 10/10. Persistent signed yaw mismatch is strongly associated with accumulated yaw residual, while accumulated mismatch propagates to global position/heading in a geometry- and trajectory-dependent manner.
+
+\begin{figure*}[t]
+\centering
+\safegraphic[0.48\textwidth]{figures/condition_dependent_fidelity.png}\hfill
+\safegraphic[0.48\textwidth]{figures/persistent_yaw_mechanism.png}
+\caption{Supporting diagnostics for service failures. Left: different operating conditions stress different fidelity dimensions. Right: persistent yaw mismatch provides a measured mechanism for accumulated/global divergence, without implying a universal one-to-one causal law.}
+\label{fig:conditionmechanism}
+\end{figure*}
+
+Conditioned q95 benign envelopes were evaluated leave-one-physical-sequence-out. Conditioning does not uniformly improve aggregate coverage; it primarily changes contextual sharpness. For example, the yaw-rate-disagreement envelope is 10.9\% sharper with 9.3\% lower quantile loss, whereas the velocity-disagreement envelope is 4.6\% wider with essentially unchanged quantile loss. We therefore use conditioned envelopes as descriptive context, not as a claimed superior online risk predictor.
+
+\section{Synchronization and Edge-System Sensitivity}
+A DT updated across an embedded/edge boundary depends on the temporal consistency of physical and virtual streams. We perturb the frozen physical--virtual timing relationship during replay while leaving trajectory values unchanged. This isolates synchronization sensitivity; it is not presented as a packet-level wireless experiment.
+
+\begin{table}[t]
+\caption{Controlled timing sensitivity. Entries are relative changes from synchronized replay.}
+\label{tab:timingnew}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.4pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Perturbation & $\Delta$ATE & $\Delta$Head. & $\Delta$RPE1 & $\Delta$RPE5 & $\Delta$RPE10 \\
+ & (\%) & (\%) & (\%) & (\%) & (\%) \\
+\midrule
+50-ms jitter & +0.085 & +1.35 & +66.2 & +15.9 & +9.7 \\
+100-ms delay & +1.40 & +7.53 & +6.66 & +19.7 & +28.7 \\
+200-ms delay & +3.88 & +19.2 & +25.6 & +58.0 & +82.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The asymmetry is operationally important: a 50-ms jitter condition barely changes global ATE but increases 1-s relative error by 66.2\%. A 200-ms delay increases RPE10 by 82.1\% while ATE rises by 3.88\%. The service contract therefore exposes a systems property that a single global trajectory score can miss: the acceptable state age depends on what the twin is being used to do.
+
+The frozen V2 checkpoint is small (approximately 0.16~MiB serialized), and its six-feature 10-Hz fast-branch input corresponds to roughly 240~B/s of model-side feature values before protocol overhead. These quantities establish feasibility of a lightweight interface but are not substituted for measured network bandwidth, energy, or end-to-end edge latency. A final IoT systems study must measure those quantities directly.
+
+\section{E2: Cross-Platform Robot Contract Portability}
+TerraSentia changes the robot morphology, drivetrain, environment, and sensing distribution. The objective is not to show that frozen i2Nav V2 is a faithful TerraSentia maintenance model. Instead, E2 asks whether the \emph{same service-contract construction} remains informative without target-domain threshold tuning.
+
+All five accepted physical sequences satisfy the frozen data-quality gates. The unchanged 1/5/10-s and global position-contract grid yields 20/20 non-degenerate sequence/service position surfaces, satisfying the structural-transfer criterion. Macro grid-average validity for frozen V2 is 0.778, 0.418, 0.223, and 0.083 for local1, local5, local10, and global services, respectively. The large local-to-global reduction is therefore visible on a different robot platform even though absolute validity is substantially lower than on i2Nav.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/E1_E2_cross_platform_position_contracts.png}
+\caption{Unchanged position-service contract across independent robot platforms. TerraSentia is a zero-tuning \emph{contract-portability} study: lower absolute validity does not establish or refute cross-asset model superiority. The same service ordering remains measurable without redefining the contract.}
+\label{fig:e2crossplatform}
+\end{figure}
+
+A separate model-performance check reinforces the claim boundary. Relative to the TerraSentia physics-only reference, frozen V2 improves grid-average local validity only modestly on average and provides essentially no global gain. E2 is therefore evidence for framework portability, not successful model transfer.
+
+\section{E3: Cross-Domain Contract Portability}
+\subsection{Frozen Transfer Protocol}
+The strongest test against a ``robotics metrics in DT language'' interpretation is to remove robot trajectory variables entirely. E3 applies the same normalized quantity--horizon--tolerance contract to three independent non-robot DT datasets. MAGNET pairs ten thermowell measurements with released DT forecasts \cite{wilsdon2023magnet,inlmagnetdata}. FreeTwinEV pairs experimental 1S4P electro-thermal measurements with released identification/validation multiphysics simulation outputs \cite{freetwinevmeas2026,freetwinevsim2026}. TU Wien SNG pairs measured and estimated DFB process states and measured product-gas composition with corresponding soft-sensor outputs \cite{jankovic2025sng,tuwiensngdata}. Setpoints/references are excluded as physical truth.
+
+The numerical protocol is frozen across all three: p95 normalized discrepancy within non-overlapping 60-, 300-, and 600-s windows and the same six-value dimensionless tolerance grid. A structural PASS means only that the unchanged abstraction produces complete, non-degenerate validity surfaces over all required horizons; it is not a claim of model superiority or a universal physical-unit safety limit.
+
+\subsection{Three-Domain Structural PASS}
+All three required datasets complete and pass the frozen structural gate. Table~\ref{tab:e3} shows that they do \emph{not} collapse to the same fidelity level. MAGNET is high-validity and strongly horizon-sensitive, while FreeTwinEV and SNG occupy lower validity ranges. This variation is desirable: the representation is shared, not the outcome.
+
+\begin{table}[t]
+\caption{Frozen E3 cross-domain structural transfer. Values are grid-average descriptive validity over the unchanged normalized tolerance sweep.}
+\label{tab:e3}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\begin{tabular}{lrrrr}
+\toprule
+Dataset & Components & 60 s & 300 s & 600 s \\
+\midrule
+FreeTwinEV 1S4P & 3 & 0.3438 & 0.3131 & 0.2685 \\
+MAGNET & 10 & 0.9428 & 0.8188 & 0.6594 \\
+TU Wien SNG & 7 & 0.3851 & 0.3243 & 0.2975 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\safegraphic[0.49\textwidth]{figures/cross_domain_horizon_profile.png}\hfill
+\safegraphic[0.49\textwidth]{figures/cross_domain_contract_heatmap.png}
+\caption{E3 cross-domain portability under one frozen normalized contract. Left: horizon-dependent grid-average validity for thermal, battery electro-thermal, and biomass-to-SNG DT data. Right: the same result as a contract map. The common representation exposes different domain-specific fidelity profiles rather than forcing numerical agreement.}
+\label{fig:e3crossdomain}
+\end{figure*}
+
+The horizon trend is consistent in direction: validity decreases from 60 to 600~s in all three domains. MAGNET provides the strongest inferential non-robot evidence because its earlier hardened audit also uses dependence-reduced forecast windows. In 23 non-overlapping MAGNET windows, median thermal RMSE increases from 0.0876~$^{\circ}$C at 0--60~s to 6.618~$^{\circ}$C at 301--599~s, with long-horizon error larger in 95.7\% of windows. Matched aggregate-RMSE examples further retain different tail and persistence behavior. The FreeTwinEV and SNG results are used more narrowly: they demonstrate that the contract structure remains computable and non-degenerate in electro-thermal and industrial-process DT data without post-hoc threshold redesign.
+
+\section{Physical Asset Instantiation on UGV01}
+Existing AprilTag-referenced UGV01 experiments provide a physical check distinct from public-dataset transfer. Asset-specific calibration reduces same-window ATE from 0.131 to 0.099~m and heading MAE from $13.3^{\circ}$ to $5.6^{\circ}$. Across three existing physical conditions, the smooth 1.5-m square has the lowest short-horizon RPE but the largest global position and heading disagreement: ATE is 0.338~m while RPE10 is 0.089~m. This reproduces the local/global separation on a physical robot.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/ugv01_local_vs_global_fidelity.png}
+\caption{Existing UGV01 physical evidence. The square trajectory preserves relatively low finite-horizon motion error while accumulating larger synchronized-global disagreement, consistent with the service-relative interpretation.}
+\label{fig:ugvexisting}
+\end{figure}
+
+The AprilTag experiment supplies independent physical-reference evidence. The live campaign below uses GPS as an operational online reference and therefore addresses a different question: whether the contract and resource-policy stack executes causally on the physical asset.
+
+\section{Live UGV01 Contract and Resource-Policy Study}
+\subsection{Protocol and Evidence Boundary}
+We executed 20 indoor smooth-floor runs using four frozen policies---static-low, static-high, AoI-only, and contract-aware---with five repetitions per policy. Each run contains a phone video, a 46-column telemetry CSV, and an online JSONL trace containing sensor age, twin state, contract states, policy mode, requested rate, response latency, and payload size. The complete package contains 2702 valid online records over 29.9~min of live traces and 34.6~min of paired video. All 20 triplets are present, GPS is valid in every telemetry export, no JSON record is malformed, and seven sequence gaps occur across the full set (0.26\% of expected sequence steps).
+
+GPS is used only as the live operational reference. The AprilTag experiments remain the independent physical reference for fidelity claims. At the rover's low indoor speed, GPS course frequently falls below the configured observability gate. Consequently, the finite-horizon position-plus-heading contracts are predominantly unobservable; these windows are retained as such rather than counted as passes or failures.
+
+\subsection{Measured Online Behavior}
+Table~\ref{tab:liveugv} reports run-level means with the physical run as the replicate. The policy engine clearly generates different requested rates: static-low remains at 2~Hz, static-high at 10~Hz, AoI-only averages 2.77~Hz, and contract-aware averages 8.61~Hz because incomplete or withdrawn contract evidence requests normal or high service. However, delivered rates cluster between 1.45 and 1.52~Hz. The spread between policy means is only 0.066~Hz, and payload throughput remains 915--949~B/s. The serialized HTTP request/response time, approximately 0.7~s per update, therefore dominates the nominal 2/5/10-Hz scheduler periods.
+
+\begin{table}[t]
+\caption{Measured live UGV01 policy behavior (five runs per policy). Requested rates are policy outputs; delivered rates and payload are measured.}
+\label{tab:liveugv}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Policy & Req. Hz & Deliv. Hz & B/s & p95 AoI (s) & Observable \\
+\midrule
+Static-low & 2.00 & 1.45 & 915.1 & 0.163 & 0.204 \\
+Static-high & 10.00 & 1.49 & 942.8 & 0.149 & 0.234 \\
+AoI-only & 2.77 & 1.52 & 937.3 & 0.181 & 0.201 \\
+Contract-aware & 8.61 & 1.52 & 948.7 & 0.148 & 0.180 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The global position contract is observable more often than the heading-dependent finite-horizon services, but it is generally withdrawn because GPS-to-twin disagreement exceeds the frozen 1-m tolerance. The observed qualified fractions are therefore very small for all policies. These outcomes show why observability is part of the contract: valid GPS packets alone do not imply that the reference supports every requested quantity and horizon.
+
+\subsection{Trace-Driven Transport Replay}
+To test whether policy-rate differences were merely hidden by aggregation, we replayed five measured UGV01 traces through all four frozen policies. Within each trial every policy sees the same recorded source arrivals, response sizes, response times, and recorded contract-state inputs. The simulator permits one outstanding HTTP request, returns the newest recorded source sample available when a request is sent, and does not synthesize sensor updates. The physical trial is the statistical unit.
+
+The replay produces the same result for every policy: 1.536 delivered requests/s, 951.8 response B/s, 1.304-s p95 delivery age, and a 5.3\% repeated-source fraction. Figure~\ref{fig:livereplay} shows the null policy effect under the measured transport. The result is operationally informative: the resource policy executes, but a scheduler cannot create fresh information faster than the source and serialized transport make it available.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/trace_replay_policy_comparison.png}
+\caption{Trace-driven replay under measured UGV01 response times. Requested policy rates differ, but the serial HTTP service bottleneck equalizes delivered requests, response payload, and AoI. The plot reports simulated transport quantities calibrated from measured traces, not fresh 5/10-Hz sensing performance.}
+\label{fig:livereplay}
+\end{figure}
+
+We additionally sweep an explicit transport-capacity bound while holding each policy's observed offered demand fixed. At the measured 1.5-update/s capacity, all policies saturate. At 10 updates/s, the implied response-payload demand is 80.0\%, 72.4\%, and 13.9\% below static-high for static-low, AoI-only, and contract-aware, respectively. These are capacity-planning bounds rather than measured savings, and they do not estimate contract satisfaction. Figure~\ref{fig:capacity} makes the systems requirement explicit: a policy effect can become observable only after transport capacity exceeds the common bottleneck.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/transport_capacity_sensitivity.png}
+\caption{Transport-capacity sensitivity using observed policy demand and the measured mean 619.4-B response. All policies collapse at the measured capacity; separation appears only when the transport is provisioned above that bottleneck.}
+\label{fig:capacity}
+\end{figure}
+
+\section{Discussion}
+\subsection{Fidelity Is a Service Claim, Not a Metric Contest}
+E1 provides the central methodological evidence. The same physical/virtual trajectories reverse their ordering between local and global services across the full tolerance grid, and this behavior extends beyond one hand-picked pair. At the same time, ATE and RPE align strongly with the services matching their established semantics. The contract therefore does not need to declare one metric universally superior. It makes the intended operational question explicit and permits several metrics to coexist without being collapsed into an arbitrary weighted score.
+
+\subsection{Framework Portability Is Not Model Portability}
+E2 is deliberately conservative. The contract transfers unchanged to TerraSentia, but frozen V2 does not become a high-fidelity TerraSentia twin merely because it executes there. This distinction is important for DT terminology: a portable computational template becomes an asset-specific twin only after representation choices are bound to the physical asset and fidelity is empirically validated for the intended services.
+
+\subsection{Cross-Domain Evidence Changes the Novelty Boundary}
+E3 removes ATE, RPE, robot pose, wheel odometry, and $SE(2)$ geometry from the evaluation. The same quantity--horizon--tolerance abstraction remains informative on thermal forecasts, a battery electro-thermal simulation/measurement pair, and an industrial process twin. This makes it harder to interpret the framework as merely a robotics metric wrapper. The defensible claim, however, remains \emph{structural portability}: the experiments do not establish universal thresholds, universal certification, or statistical independence of every decomposed fidelity measure.
+
+\subsection{Implications for Resource-Constrained Edge Twins}
+The timing and live experiments connect fidelity contracts to IoT deployment. Short-horizon validity can degrade before ATE changes materially, but a nominal rate decision is useful only when the sensing and transport path can realize it. The UGV01 policy generated distinct requested rates while the measured serial HTTP path collapsed them to the same delivered rate. Service-aware resource control therefore requires joint contracts for fidelity, observability, and transport capacity. The current result validates causal policy execution and identifies the binding transport constraint; it does not demonstrate bandwidth or energy savings.
+
+\subsection{Implications for Security Monitoring}
+A security detector that treats large physical--virtual disagreement as inherently malicious is unsafe when benign turning, slip, domain shift, or stale state can create the same symptom. Service-relative fidelity and conditioned benign distributions provide the prerequisite characterization for a later divergence-based security study, but no attack detector or cybersecurity-performance claim is made here.
+
+\subsection{Limitations}
+The principal limitations are as follows. First, E1 is anchored in one robot dataset, although E2 and E3 broaden the structural evidence. Second, the TerraSentia fused EKF is a secondary heading reference, and upstream motor/IMU semantics limit causal attribution of its global drift. Third, the cross-domain tolerance grid is an evaluation device rather than a safety standard. Fourth, E3 supports structural portability rather than pooled cross-domain performance inference. Fifth, conditioned benign envelopes remain descriptive. Sixth, the live UGV01 campaign covers one smooth-floor and baseline-Wi-Fi condition. Low-speed GPS course makes most finite-horizon online contracts unobservable, and GPS is not independent ground truth. Finally, trace replay quantifies request and response-payload behavior under measured response times, but it cannot establish fresh-sensor fidelity at 5/10~Hz, radio energy savings, or performance under controlled wireless stress.
+
+\subsection{Reproducibility and Artifact Scope}
+The UGV01 live dataset is organized as 20 policy/trial directories with paired video, telemetry CSV, and JSONL contract traces. Machine-readable manifests record source paths, durations, schemas, and GPS quality. The dataset audit and trace replay are deterministic command-line analyses; their outputs include per-run, per-service, policy, paired-difference, and capacity-sensitivity tables. Frozen i2Nav and TerraSentia outputs are consumed without retraining. Public release of the UGV01 package will include the exact contract configuration and analysis scripts used for the reported tables and figures.
+
+\section{Conclusion}
+This paper reframes operational digital-twin fidelity as a service-relative contract rather than a scalar property. The formulation makes explicit which physical/virtual quantities matter, over what horizon, under what tolerance and context, and with what synchronization-age requirement. On i2Nav, local and global service judgments reverse across complete predeclared tolerance grids, while ATE and RPE align with their corresponding services. The unchanged construction transfers to another robot platform and, under one frozen normalized protocol, to thermal, battery electro-thermal, and biomass-to-SNG data. Timing replay demonstrates that a twin can become locally stale before a global score changes appreciably, and AprilTag-referenced UGV01 experiments reproduce local/global separation on a physical asset. A 20-run UGV01 deployment further demonstrates online contract and policy execution. Its null resource result exposes the transport layer as the binding constraint: distinct requested rates do not imply distinct fresh update rates. Fidelity is therefore an operational physical--virtual relationship whose validity depends jointly on service requirements, observability, context, and the capacity of the IoT path that maintains the twin.
+
+\balance
+\begin{thebibliography}{99}
+
+\bibitem{dtc}
+Digital Twin Consortium, ``Definition of a Digital Twin,'' Digital Twin Consortium, accessed Aug. 17, 2026.
+
+\bibitem{jones2020}
+D. Jones, C. Snider, A. Nassehi, J. Yon, and B. Hicks, ``Characterising the Digital Twin: A systematic literature review,'' \emph{CIRP Journal of Manufacturing Science and Technology}, vol. 29, pp. 36--52, 2020, doi: 10.1016/j.cirpj.2020.02.002.
+
+\bibitem{shao2023}
+G. Shao, J. Hightower, and W. Schindel, ``Credibility consideration for digital twins in manufacturing,'' \emph{Manufacturing Letters}, vol. 35, pp. 24--28, 2023, doi: 10.1016/j.mfglet.2022.11.009.
+
+\bibitem{nist8620}
+S. Frechette, G. Shao, and M. Pease, \emph{Digital Twins Workshops Summary Report}, NIST Interagency/Internal Report 8620, National Institute of Standards and Technology, 2026, doi: 10.6028/NIST.IR.8620.
+
+\bibitem{kober2023}
+C. Kober, M. Fette, and J. P. Wulfsberg, ``A Method for Calculating Optimum Digital Twin Fidelity,'' \emph{Procedia CIRP}, vol. 120, pp. 1155--1160, 2023, doi: 10.1016/j.procir.2023.09.141.
+
+\bibitem{zhang2025}
+Y. Zhang, H. Sun, X. Zhang, and W. Liu, ``A fidelity evaluation method for digital twin model of aero-engine assembly characteristics,'' \emph{Journal of Manufacturing Systems}, vol. 78, pp. 444--456, 2025, doi: 10.1016/j.jmsy.2024.12.012.
+
+\bibitem{munoz2024}
+P. Mu\~noz, M. Wimmer, J. Troya, and A. Vallecillo, ``Measuring the Fidelity of a Physical and a Digital Twin Using Trace Alignments,'' \emph{IEEE Transactions on Software Engineering}, vol. 50, no. 12, pp. 3122--3145, 2024, doi: 10.1109/TSE.2024.3462978.
+
+\bibitem{ding2021}
+X. Ding, H. Wang, H. Li, H. Jiang, and J. He, ``Robopheus: A Virtual-Physical Interactive Mobile Robotic Testbed,'' arXiv:2103.04391, 2021.
+
+\bibitem{yang2025}
+H. Yang, Z. Qin, Y. Xia, and F. Cheng, ``Digital Twin-Based Autonomous Navigation and Control of Omnidirectional Mobile Robots,'' \emph{IEEE Transactions on Vehicular Technology}, vol. 74, no. 4, pp. 5687--5697, 2025, doi: 10.1109/TVT.2024.3520991.
+
+\bibitem{betzer2024}
+J. S. Betzer, J. Boudjadar, M. Frasheri, and P. Talasila, ``Digital Twin Enabled Runtime Verification for Autonomous Mobile Robots under Uncertainty,'' in \emph{Proc. 28th IEEE Int. Symp. Distributed Simulation and Real Time Applications (DS-RT)}, 2024, pp. 10--17, doi: 10.1109/DS-RT62209.2024.00012.
+
+\bibitem{bergs2025}
+L. Bergs, M. Huber, A. Moriz, A. G\"oppert, and R. Schmitt, ``Evaluating mobile robot navigation behavior in flexible assembly systems through digital twin and real-world experiments,'' \emph{Discover Robotics}, vol. 1, Art. no. 10, 2025, doi: 10.1007/s44430-025-00010-4.
+
+\bibitem{brossard2019}
+M. Brossard and S. Bonnabel, ``Learning Wheel Odometry and IMU Errors for Localization,'' in \emph{Proc. IEEE Int. Conf. Robotics and Automation (ICRA)}, Montreal, QC, Canada, 2019, pp. 291--297, doi: 10.1109/ICRA.2019.8794237.
+
+\bibitem{jiang2025}
+C. Jiang, K. Zhang, S. Yang, S. Shen, C. Xu, and F. Gao, ``WING: Wheel-Inertial Neural Odometry with Ground Manifold Constraints,'' \emph{IEEE Transactions on Intelligent Vehicles}, vol. 10, no. 3, pp. 1510--1525, 2025, doi: 10.1109/TIV.2024.3429167.
+
+\bibitem{zhou2025ynet}
+P. Zhou, P. Gu, X. Lyu, M. Liao, and Z. Meng, ``Learning Yaw Velocity for Inertial-Wheel Odometry on Autonomous Vehicles,'' \emph{IEEE Transactions on Intelligent Vehicles}, vol. 10, no. 5, pp. 3517--3530, 2025, doi: 10.1109/TIV.2024.3455566.
+
+\bibitem{tang2025}
+H. Tang \emph{et al.}, ``i2Nav-Robot: A Large-Scale Indoor-Outdoor Robot Dataset for Multi-Sensor Fusion Navigation and Mapping,'' arXiv:2508.11485, 2025, doi: 10.48550/arXiv.2508.11485.
+
+\bibitem{cuaran2024}
+J. Cuaran, A. E. Baquero Velasquez, M. Valverde Gasparino, N. K. Uppalapati, A. N. Sivakumar, J. Wasserman, M. Huzaifa, S. Adve, and G. Chowdhary, ``Under-canopy dataset for advancing simultaneous localization and mapping in agricultural robotics,'' \emph{The International Journal of Robotics Research}, vol. 43, no. 6, pp. 739--749, 2024, doi: 10.1177/02783649231215372.
+
+\bibitem{wilsdon2023magnet}
+K. Wilsdon, J. Hansel, M. R. Kunz, and J. Browning, ``Autonomous control of heat pipes through digital twins: Application to fission batteries,'' \emph{Progress in Nuclear Energy}, vol. 163, Art. no. 104813, 2023, doi: 10.1016/j.pnucene.2023.104813.
+
+\bibitem{inlmagnetdata}
+Idaho National Laboratory, ``MAGNET Heat Pipe Data,'' \emph{IdahoLabResearch/MAGNET-Heat-Pipe-Data}, dataset and digital-twin forecast archive, accessed Aug. 22, 2026. [Online]. Available: \url{https://github.com/IdahoLabResearch/MAGNET-Heat-Pipe-Data}
+
+\bibitem{ma2024}
+J. Ma, Y. Guo, C. Fang, and Q. Zhang, ``Digital-Twin-Based CPS Anomaly Diagnosis and Security Defense Countermeasure Recommendation,'' \emph{IEEE Internet of Things Journal}, vol. 11, no. 10, pp. 18726--18738, 2024, doi: 10.1109/JIOT.2024.3366904.
+
+\bibitem{alcaraz2024}
+C. Alcaraz and J. Lopez, ``Digital Twin-assisted anomaly detection for industrial scenarios,'' \emph{International Journal of Critical Infrastructure Protection}, vol. 47, Art. no. 100721, 2024, doi: 10.1016/j.ijcip.2024.100721.
+
+\bibitem{wu2023}
+Z. Y. Wu, A. Chew, X. Meng, J. Cai, J. Pok, R. Kalfarisi, K. C. Lai, S. F. Hew, and J. J. Wong, ``High Fidelity Digital Twin-Based Anomaly Detection and Localization for Smart Water Grid Operation Management,'' \emph{Sustainable Cities and Society}, vol. 91, Art. no. 104446, 2023, doi: 10.1016/j.scs.2023.104446.
+
+
+
+\bibitem{freetwinevmeas2026}
+M. Plz\'{a}k, \v{S}. Berta, A. {\"U}rge, and M. Ba\v{t}a, ``P45B 1s4p Battery Module Measurement,'' Zenodo, 2026, doi: 10.5281/zenodo.18405243.
+
+\bibitem{freetwinevsim2026}
+M. Ba\v{t}a, R. Horobets, M. Plz\'{a}k, and A. {\"U}rge, ``FreeTwinEV 1S4P Battery Module Multiphysics Simulation Package---Identification and Validation,'' Zenodo, 2026, doi: 10.5281/zenodo.19935693.
+
+\bibitem{jankovic2025sng}
+S. Jankovic, L. Stanger, A. Bartik, M. Hammerschmid, F. Benedikt, M. Mittermayr, M. Binder, M. Kozek, and S. M\"uller, ``Design and implementation of a digital twin for a biomass-to-gas plant,'' \emph{Applied Energy}, vol. 402, Art. no. 126861, 2025, doi: 10.1016/j.apenergy.2025.126861.
+
+\bibitem{tuwiensngdata}
+S. Jankovic, ``Dataset of an experimental campaign of a Digital Twin for a biomass-to-SNG pilot plant,'' TU Wien Research Data, ver. 1.1.0, 2025, doi: 10.48436/6mmjq-1tj37.
+
+\end{thebibliography}
+
+
+\end{document}

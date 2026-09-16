@@ -1,0 +1,16 @@
+claim,source,expected_value,status,note
+Twin V1 ATE,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,2.8339329328876137,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Twin V1 heading MAE,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,3.3358076829826366,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Twin V1 RPE1,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,0.0606221960221878,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Twin V1 RPE5,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,0.1669655998006607,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Twin V1 RPE10,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,0.2714466276788639,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Twin V2 ATE,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,2.3979393554148,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Twin V2 heading MAE,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,2.5689349101374024,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Twin V2 RPE1,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,0.0611485990502786,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Twin V2 RPE5,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,0.1602910527875951,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Twin V2 RPE10,results\i2nav_fidelity_baselines\tfp\tfp_dataset_summary.csv,0.2532473054039135,PASS,Value should appear consistently in manuscript if it is a headline claim.
+Official V2 aligned APE headline provenance,results\i2nav_fidelity_baselines\validation\i2nav_evo_ape_summary.csv,recomputed macro=1.251050; frozen headline=1.635000,UNRESOLVED,Do not silently relabel one aggregation as the other. Audit original official benchmark source/preprocessing/aggregation.
+Frozen V1 availability wording,DigitalTwin_Fidelity_Research_Draft.tex,30 matched V1/V2 pairs exist,PASS,30/30 sequence-replicate pairs were protocol-validated; remove obsolete no-V1-export sentence if still present.
+Risk phrase: universal superiority,DigitalTwin_Fidelity_Research_Draft.tex,0,PASS,Avoid universal superiority over trace alignment.
+Risk phrase: state-of-the-art,DigitalTwin_Fidelity_Research_Draft.tex,1,REVIEW,Only retain if explicitly negated/qualified.
+Risk phrase: SOTA,DigitalTwin_Fidelity_Research_Draft.tex,1,REVIEW,Only retain if explicitly negated/qualified.

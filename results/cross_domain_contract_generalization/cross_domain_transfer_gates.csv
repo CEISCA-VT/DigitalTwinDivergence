@@ -1,0 +1,4 @@
+dataset,n_components,horizons_meeting_min_units,required_horizons,contract_units_by_horizon,surface_nondegenerate,structural_transfer_pass
+FreeTwinEV_1S4P,3,3,3,60s:144;300s:33;600s:18,True,True
+MAGNET,10,3,3,60s:230;300s:230;600s:230,True,True
+TUWien_SNG,7,3,3,60s:3930;300s:798;600s:399,True,True

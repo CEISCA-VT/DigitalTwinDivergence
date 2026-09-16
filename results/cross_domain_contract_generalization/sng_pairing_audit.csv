@@ -1,0 +1,8 @@
+component,status,physical_column,twin_column,n,twin_scale_factor,unit_harmonization
+PG_volume_flow,paired,Plt1_PGVolFlow_Measurement,Plt1_PGVolFlow_Estimate,6733,,
+PG_temperature,paired,Plt3_GasTemp_Measurement,Plt3_GasTemp_Estimate,6733,,
+PG_H2,paired,Plt5_PG_H2,y_H2_pg_wf_filter,570,100.0,soft-sensor fraction -> percent
+PG_CO,paired,Plt5_PG_CO,y_CO_pg_wf_filter,570,100.0,soft-sensor fraction -> percent
+PG_CO2,paired,Plt5_PG_CO2,y_CO2_pg_wf_filter,570,100.0,soft-sensor fraction -> percent
+PG_CH4,paired,Plt5_PG_CH4,y_CH4_pg_wf_filter,570,100.0,soft-sensor fraction -> percent
+PG_C2H4,paired,Plt5_PG_C2H4,y_C2H4_pg_wf_filter,570,100.0,soft-sensor fraction -> percent

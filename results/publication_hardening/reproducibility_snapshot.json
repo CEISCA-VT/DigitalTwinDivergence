@@ -1,0 +1,61 @@
+{
+  "generated_utc": "2026-08-22T03:13:13.798251+00:00",
+  "python": "3.12.9 | packaged by Anaconda, Inc. | (main, Feb  6 2025, 18:49:16) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "git_commit": "aee718cb54e49f92c6c4a905ccfe671e88ebf190",
+  "git_status_porcelain": "?? DigitalTwin/analysis/build_publication_hardening_report.py\n?? DigitalTwin/analysis/claim_audit.py\n?? DigitalTwin/analysis/munoz_bootstrap_uncertainty.py\n?? DigitalTwin/analysis/publication_figures.py\n?? DigitalTwin/analysis/publication_sequence_stats.py\n?? DigitalTwin/analysis/reproducibility_snapshot.py\n?? DigitalTwin/analysis/yaw_bias_replay_sensitivity.py\n?? magnet_tfp/\n?? publication_hardening/\n?? requirements-publication-hardening.txt\n?? run_magnet_tfp.ps1\n?? run_pre_gps_publication_hardening.ps1",
+  "v1_csv_count": 30,
+  "v2_evaluated_trajectory_count": 30,
+  "primary_statistical_unit": "physical sequence",
+  "known_i2nav_sequences": [
+    "building00",
+    "building01",
+    "building02",
+    "parking00",
+    "parking01",
+    "parking02",
+    "playground00",
+    "street00",
+    "street01",
+    "street02"
+  ],
+  "known_training_seed_bases": [
+    42,
+    1042,
+    2042
+  ],
+  "operational_alignment": "common initialized physical-virtual frame; no post-hoc alignment",
+  "official_benchmark_alignment": "reported separately; audit exact evo/source aggregation before final freeze",
+  "sample_file_hashes": [
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_01_building00_gru_dual_trajectory.csv",
+      "sha256": "17d6794a211b272cb98d25ae8399b362ddabc2f6f583f148f86d8491ef8ab67a",
+      "bytes": 3178363
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_02_building01_gru_dual_trajectory.csv",
+      "sha256": "ceb6582dde17a77e3bf3f563101569f4bc93ca3d093b5372d536b339059b02a3",
+      "bytes": 3654422
+    },
+    {
+      "path": "results\\i2nav_v1_frozen\\canonical_predictions\\replicate_01_base42\\fold_03_building02_gru_dual_trajectory.csv",
+      "sha256": "eac5e532f06058cce1dc737a653bd732db5ad463b6f88272adce2a7a9199df7c",
+      "bytes": 4940683
+    },
+    {
+      "path": "results\\i2nav_v2_full_loso\\i2nav_v2_full_loso\\replicate_01_base42\\fold_01_building00\\v2_evaluated_trajectory.csv",
+      "sha256": "13cfcb146576bd5fff62a03d405c34e5bdc9212fae86b5aaf87706fdd96386f8",
+      "bytes": 3179111
+    },
+    {
+      "path": "results\\i2nav_v2_full_loso\\i2nav_v2_full_loso\\replicate_01_base42\\fold_02_building01\\v2_evaluated_trajectory.csv",
+      "sha256": "0846a89b35392a0ed029879bfcaf691d75ed58fe60ab8df8c2518cbd4b023c81",
+      "bytes": 3655686
+    },
+    {
+      "path": "results\\i2nav_v2_full_loso\\i2nav_v2_full_loso\\replicate_01_base42\\fold_03_building02\\v2_evaluated_trajectory.csv",
+      "sha256": "cbe526543288a195d15ed92efd2724d29ea2adf8b3e78a70d684bb85958b2e6a",
+      "bytes": 4945676
+    }
+  ]
+}

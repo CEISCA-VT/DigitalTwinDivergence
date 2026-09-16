@@ -1,0 +1,9 @@
+platform,family,horizon_s,n_sequences,position_grid_average_sequence_mean,position_grid_average_sequence_median
+i2Nav frozen V2,global_synchronization,0.0,10,0.7549311867462885,0.7822244960789646
+i2Nav frozen V2,local_relative_motion,1.0,10,0.9835342366805735,0.9912571935255946
+i2Nav frozen V2,local_relative_motion,5.0,10,0.837869963117629,0.8178181818181818
+i2Nav frozen V2,local_relative_motion,10.0,10,0.6828116138911664,0.648187988218722
+TerraSentia frozen V2 transfer,global_synchronization,0.0,5,0.08279562895530604,0.0858585858585858
+TerraSentia frozen V2 transfer,local_relative_motion,1.0,5,0.777609636678571,0.8060606060606061
+TerraSentia frozen V2 transfer,local_relative_motion,5.0,5,0.4176821514837819,0.4514285714285714
+TerraSentia frozen V2 transfer,local_relative_motion,10.0,5,0.22346834687052075,0.2461538461538461

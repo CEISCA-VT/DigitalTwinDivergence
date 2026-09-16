@@ -1,0 +1,17 @@
+at_risk_fraction_mean,dominant_unobservable_reason,observable_fraction_mean,policy,qualified_fraction_mean,run_count,satisfied_given_observable_mean,service_id,withdrawn_fraction_mean
+0.0,GPS course unobservable at low speed,0.7802985745639607,aoi-only,0.010041407867494825,5,0.013895037105084147,global_state_tracking,0.7702571666964658
+0.0,GPS course unobservable at low speed,0.002857142857142857,aoi-only,0.0,5,0.0,local_10s_preview,0.002857142857142857
+0.0,GPS course unobservable at low speed,0.020000440509228667,aoi-only,0.0014285714285714286,5,0.027777777777777776,local_1s_tight,0.01857186908065724
+0.0,GPS course unobservable at low speed,0.0014285714285714286,aoi-only,0.0,5,0.0,local_5s_moderate,0.0014285714285714286
+0.002898550724637681,GPS course unobservable at low speed,0.6703439236188689,contract-aware,0.0057553956834532375,5,0.015933185155250218,global_state_tracking,0.6616899772107779
+0.0,GPS course unobservable at low speed,0.007215097487227609,contract-aware,0.0,5,0.0,local_10s_preview,0.007215097487227609
+0.0,GPS course unobservable at low speed,0.031738087790637054,contract-aware,0.0,5,0.0,local_1s_tight,0.031738087790637054
+0.0,GPS course unobservable at low speed,0.01010322177040976,contract-aware,0.0,5,0.0,local_5s_moderate,0.01010322177040976
+0.00145985401459854,GPS course unobservable at low speed,0.8411822266196227,static-high,0.004390296264491198,5,0.006131997662606356,global_state_tracking,0.835332076340533
+0.0,GPS course unobservable at low speed,0.007299425641408579,static-high,0.0,5,0.0,local_10s_preview,0.007299425641408579
+0.0,GPS course unobservable at low speed,0.0730477719491478,static-high,0.00291970802919708,5,0.05333333333333333,local_1s_tight,0.07012806391995072
+0.0,GPS course unobservable at low speed,0.014620630861040068,static-high,0.0,5,0.0,local_5s_moderate,0.014620630861040068
+0.0015503875968992248,GPS course unobservable at low speed,0.7317325806240227,static-low,0.0063486370157819225,5,0.009542780102035645,global_state_tracking,0.7238335560113416
+0.0,GPS course unobservable at low speed,0.0156734479031005,static-low,0.0,5,0.0,local_10s_preview,0.0156734479031005
+0.0,GPS course unobservable at low speed,0.04893790084139389,static-low,0.0,5,0.0,local_1s_tight,0.04893790084139389
+0.0,GPS course unobservable at low speed,0.020111868613247815,static-low,0.0,5,0.0,local_5s_moderate,0.020111868613247815

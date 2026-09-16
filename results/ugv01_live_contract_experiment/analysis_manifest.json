@@ -1,0 +1,21 @@
+{
+  "schema": "ugv01_live_contract_analysis_manifest_v1",
+  "input_dir": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\raw_logs\\live_validation",
+  "output_dir": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\results\\ugv01_live_contract_experiment",
+  "logs_found": 1,
+  "runs_analyzed": 1,
+  "service_rows": 4,
+  "skipped": [],
+  "policy_set_required_for_final_experiment": [
+    "static-low",
+    "static-high",
+    "aoi-only",
+    "contract-aware"
+  ],
+  "outputs": [
+    "live_run_summary.csv",
+    "live_service_summary.csv",
+    "live_policy_summary.csv",
+    "live_contract_experiment_report.md"
+  ]
+}

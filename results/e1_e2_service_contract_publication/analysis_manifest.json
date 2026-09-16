@@ -1,0 +1,153 @@
+{
+  "analysis": "service_contract_E1_E2_publication_hardening",
+  "claim_boundary": {
+    "E1": "service-relative synchronized fidelity evidence; not discovery that RPE and ATE differ",
+    "E2": "cross-platform contract-structure portability; not proof frozen i2Nav V2 is an asset-specific TerraSentia twin"
+  },
+  "config": {
+    "e2_min_accepted_sequences_for_protocol_transfer": 4,
+    "global_heading_tolerances_deg": [
+      2.0,
+      5.0,
+      10.0,
+      20.0,
+      30.0,
+      45.0
+    ],
+    "global_position_tolerances_m": [
+      0.5,
+      1.0,
+      2.0,
+      5.0,
+      10.0,
+      20.0
+    ],
+    "horizons_s": [
+      1.0,
+      5.0,
+      10.0
+    ],
+    "local_heading_tolerances_deg": [
+      1.0,
+      2.0,
+      5.0,
+      10.0,
+      20.0
+    ],
+    "local_position_tolerances_m": [
+      0.05,
+      0.1,
+      0.2,
+      0.5,
+      1.0
+    ],
+    "representative_services": [
+      {
+        "family": "local_relative_motion",
+        "heading_tolerance_deg": 2.0,
+        "horizon_s": 1.0,
+        "position_tolerance_m": 0.1,
+        "service_id": "local_1s_tight"
+      },
+      {
+        "family": "local_relative_motion",
+        "heading_tolerance_deg": 5.0,
+        "horizon_s": 5.0,
+        "position_tolerance_m": 0.2,
+        "service_id": "local_5s_moderate"
+      },
+      {
+        "family": "local_relative_motion",
+        "heading_tolerance_deg": 10.0,
+        "horizon_s": 10.0,
+        "position_tolerance_m": 0.5,
+        "service_id": "local_10s_preview"
+      },
+      {
+        "family": "global_synchronization",
+        "heading_tolerance_deg": 5.0,
+        "horizon_s": 0.0,
+        "position_tolerance_m": 1.0,
+        "service_id": "global_state_tracking"
+      }
+    ],
+    "terra_heading_reference_role": "secondary fused-EKF reference; not independent ground truth",
+    "terra_primary_reference": "RTK position"
+  },
+  "generated_utc": "2026-08-25T00:01:54.682750+00:00",
+  "numpy": "2.5.0",
+  "pandas": "3.0.5",
+  "python": "3.12.9",
+  "results": {
+    "E1": {
+      "dominance": [
+        {
+          "equal": 0,
+          "family": "global_synchronization",
+          "horizon_s": 0.0,
+          "mean_validity_difference": -0.38457144497833406,
+          "median_validity_difference": -0.38561152084031736,
+          "n_grid_points": 36,
+          "parking00_wins": 36,
+          "parking02_wins": 0
+        },
+        {
+          "equal": 0,
+          "family": "local_relative_motion",
+          "horizon_s": 1.0,
+          "mean_validity_difference": 0.015052966811934283,
+          "median_validity_difference": 0.009649122807017574,
+          "n_grid_points": 25,
+          "parking00_wins": 0,
+          "parking02_wins": 25
+        },
+        {
+          "equal": 0,
+          "family": "local_relative_motion",
+          "horizon_s": 5.0,
+          "mean_validity_difference": 0.15782553994548124,
+          "median_validity_difference": 0.0323093590550082,
+          "n_grid_points": 25,
+          "parking00_wins": 0,
+          "parking02_wins": 25
+        },
+        {
+          "equal": 0,
+          "family": "local_relative_motion",
+          "horizon_s": 10.0,
+          "mean_validity_difference": 0.2231157894736842,
+          "median_validity_difference": 0.14343859649122803,
+          "n_grid_points": 25,
+          "parking00_wins": 0,
+          "parking02_wins": 25
+        }
+      ],
+      "n_sequences": 10,
+      "rank_summary": [
+        {
+          "kendall_tau_local_vs_global_grid_average": 0.24444444444444444,
+          "local_horizon_s": 1.0
+        },
+        {
+          "kendall_tau_local_vs_global_grid_average": 0.24444444444444444,
+          "local_horizon_s": 5.0
+        },
+        {
+          "kendall_tau_local_vs_global_grid_average": 0.3333333333333333,
+          "local_horizon_s": 10.0
+        }
+      ]
+    },
+    "E2": {
+      "accepted_sequences": [
+        "ts_2022_06_09_13h16m39s_one_row",
+        "ts_2022_06_15_11h48m34s_four_rows",
+        "ts_2022_09_01_11h20m00s_two_random",
+        "ts_2022_09_01_12h32m56s_double_loop_corridor",
+        "ts_2022_09_06_12h37m11s_four_rows"
+      ],
+      "protocol_transfer_pass": true
+    }
+  },
+  "source_full_loso_commit": "6540c01f90f3c1074de0d8dae9964a5276fbbc91"
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "ugv01_live_contract_trace_replay_v1",
+  "input_dataset": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\ugv01_live_contract",
+  "input_trials": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "input_policy_trace": "contract-aware",
+  "counterfactual_policies": [
+    "static-low",
+    "static-high",
+    "aoi-only",
+    "contract-aware"
+  ],
+  "transport": "one outstanding on-demand request; no parallel responses",
+  "source": "latest recorded source sample at request send time; no synthesized updates",
+  "latency": "recorded HTTP latency of selected source sample",
+  "bytes": "recorded JSON response payload only; HTTP headers and request bytes excluded",
+  "policy_inputs": "recorded contract statuses reused as exogenous decisions; service outcomes not recomputed",
+  "statistical_unit": "physical trial; five paired traces",
+  "limits": [
+    "The original stream contains only about 1.5 new samples/s.",
+    "The replay cannot establish 5/10 Hz fresh-sensor fidelity or service satisfaction.",
+    "Latency is sampled from one measured condition; no independent wireless-stress factor is claimed.",
+    "Capacity sensitivity is a fluid demand bound; it does not estimate service satisfaction."
+  ]
+}

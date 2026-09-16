@@ -1,0 +1,21 @@
+{
+  "schema": "ugv01_live_contract_analysis_manifest_v1",
+  "input_dir": "raw_logs\\new_trials",
+  "output_dir": "results\\ugv01_live_20_trials",
+  "logs_found": 20,
+  "runs_analyzed": 20,
+  "service_rows": 80,
+  "skipped": [],
+  "policy_set_required_for_final_experiment": [
+    "static-low",
+    "static-high",
+    "aoi-only",
+    "contract-aware"
+  ],
+  "outputs": [
+    "live_run_summary.csv",
+    "live_service_summary.csv",
+    "live_policy_summary.csv",
+    "live_contract_experiment_report.md"
+  ]
+}
