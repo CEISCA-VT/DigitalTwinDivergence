@@ -1,0 +1,8 @@
+{
+  "schema": "e1_exact_rank_inference_v1",
+  "null": "two independent random rankings of ten sequences",
+  "method": "exact Mahonian inversion-count distribution",
+  "independent_units": 10,
+  "warning": "The 45 pairwise comparisons share sequences and are not independent replicates.",
+  "block_bootstrap_scope": "Within-sequence block resampling may quantify temporal estimator uncertainty but cannot increase the physical-sequence sample size."
+}

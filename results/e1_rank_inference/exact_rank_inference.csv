@@ -1,0 +1,4 @@
+horizon_s,physical_sequences,pairwise_orderings,observed_inversions,kendall_tau_from_inversions,exact_random_ranking_two_sided_p,independent_unit,interpretation
+1.0,10,45,17,0.24444444444444446,0.38071979717813054,physical sequence,descriptive existence/extent; pairwise orderings are dependent
+5.0,10,45,17,0.24444444444444446,0.38071979717813054,physical sequence,descriptive existence/extent; pairwise orderings are dependent
+10.0,10,45,15,0.33333333333333337,0.21637345679012346,physical sequence,descriptive existence/extent; pairwise orderings are dependent

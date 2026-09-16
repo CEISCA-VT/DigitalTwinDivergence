@@ -104,7 +104,16 @@ For service $s$, define
 \end{equation}
 where $Q_s$ is the set of required quantities, $H_s$ is the service horizon, $\boldsymbol{\tau}_s$ contains tolerated discrepancies, $C_s$ is the context over which the claim applies, and $A_s$ is the maximum allowable age of the represented physical information.
 
-Let $g_{q,H_s}(W_k)$ summarize discrepancy for quantity $q$ over service window $W_k$. A window satisfies the contract when
+Let $O_{s,k}\in\{0,1\}$ indicate whether all reference quantities, quality gates, synchronization evidence, and history required by service $s$ are available in window $W_k$. Let $g_{q,H_s}(W_k)$ summarize discrepancy for quantity $q$ over that window. The contract has an explicit three-state outcome
+\begin{equation}
+V_{s,k}=\begin{cases}
+1, & O_{s,k}=1\ \text{and all contract limits pass},\\
+0, & O_{s,k}=1\ \text{and at least one limit fails},\\
+\varnothing, & O_{s,k}=0.
+\end{cases}
+\label{eq:threestate}
+\end{equation}
+For an observable window, the binary pass/fail rule is
 \begin{equation}
 \begin{aligned}
 V_{s,k}=\mathbb{I}\!\big[&g_{q,H_s}(W_k)\le\tau_{s,q}\;\forall q\in Q_s,\\
@@ -121,10 +130,16 @@ where the context term is omitted when no context restriction is imposed and the
 Equation~\eqref{eq:windowvalidity} is a local decision. To connect it to the run-level quantities reported later, define service satisfaction over $N_s$ eligible windows as
 \begin{equation}
 S_s=
-\frac{1}{N_s}\sum_{k=1}^{N_s}V_{s,k}.
+\frac{\sum_k \mathbb{I}[V_{s,k}=1]}
+{\sum_k \mathbb{I}[V_{s,k}\in\{0,1\}]},
 \label{eq:runsatisfaction}
 \end{equation}
-Thus $S_s=1$ means that every eligible service window in that run satisfies the specified contract, while intermediate values represent the fraction of eligible windows satisfying it.
+with observability coverage
+\begin{equation}
+\Omega_s=\frac{1}{N_s}\sum_{k=1}^{N_s}O_{s,k}.
+\label{eq:observability}
+\end{equation}
+Thus $S_s$ is defined only over observable windows and must be reported with $\Omega_s$. An unobservable outcome is an abstention, not a pass or a failure. The implementation's \emph{at-risk} label is a lifecycle warning within an observable passing state; it is not a fourth mathematical validity outcome.
 
 Several experiments intentionally evaluate a prespecified tolerance grid $\mathcal{G}_s$ rather than one deployment threshold. For those sensitivity studies we report
 \begin{equation}
@@ -293,6 +308,8 @@ The contract turns that metric tension into an explicit service decision. Under 
 \end{figure}
 
 Across all ten physical sequences, 17/45 pairwise orderings invert between local1 and global satisfaction, 17/45 between local5 and global, and 15/45 between local10 and global. Thus the effect is not limited to one hand-picked sequence pair.
+
+These 45 pairwise orderings share the same ten physical sequences and are not independent replicates. Under the exact Mahonian inversion-count distribution for two random rankings of ten objects, the two-sided probabilities are 0.3807, 0.3807, and 0.2164 for the 1-, 5-, and 10-s comparisons. The result therefore supports RQ1 as an existence and threshold-robust demonstration of metric--decision misalignment; it is not a population-wide prevalence estimate and does not support a claimed $p<0.001$. Temporal block resampling can quantify within-sequence estimator uncertainty, but it cannot increase the physical-sequence sample size beyond $n=10$.
 
 \subsection{What the Contract Adds Beyond Standard Metrics}
 The contract is not proposed as a replacement for ATE or RPE. Stage-1 publication hardening separates four evaluation layers in Table~\ref{tab:baseline}: a single global scalar, ordinary multi-metric reporting, a generic weighted aggregate, and the proposed service contract.
@@ -576,6 +593,17 @@ physical--virtual fidelity evidence under the tested low-speed operating
 conditions, while also identifying the remaining gap between in-run calibration
 quality and frozen cross-run robustness.
 
+Applying the predeclared global contract (position error no greater than 1~m and heading error no greater than $5^{\circ}$) makes that limitation operational. Satisfaction is 0.207 on the fitted calibration run and falls to 0.027 and 0.030 on the two frozen fitted holdouts. The engine therefore withdraws the heading-sensitive service claim on most observable samples. This is evidence that the contract exposes an unqualified model; it is not evidence that an external deployment controller actually prevented use of that model.
+
+We also swept effective track width from 0.180 to 0.210~m in 0.005-m steps on all three recordings without selecting a separate width for either holdout. No tested width attains $S_s\ge0.8$ on any run, and the common feasible set is empty (Fig.~\ref{fig:widthsensitivity}). Track-width drift alone therefore does not explain or repair the transfer failure. We do not report a first-10-s recalibration result because track width is not identifiable from an arbitrary initial window without sufficient differential-turn excitation.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/track_width_contract_sensitivity.png}
+\caption{Predeclared effective-track-width sensitivity on the August 29 UGV01 runs. The sweep does not select parameters independently on the holdouts. No tested width produces global-contract satisfaction of 0.8, so no allowable parameter-drift interval is claimed.}
+\label{fig:widthsensitivity}
+\end{figure}
+
 \section{Live UGV01 Contract and Resource-Policy Study}
 \label{sec:live-ugv01}
 \subsection{Protocol and Independent-Reference Boundary}
@@ -625,6 +653,18 @@ A separate capacity calculation caps the observed offered demand at 1.5, 2, 5, a
 \end{figure}
 
 The live experiment therefore establishes that the end-to-end stack executes on the physical rover, records observability and policy decisions, and exposes an important edge-systems constraint. It does not establish a causal resource-saving or service-preservation advantage for contract-aware scheduling.
+
+\subsection{Retrospective Position-Only Contract}
+Because GPS position remained available more often than low-speed course, we additionally define a retrospective position-only service with $Q_s=\{x,y\}$. This analysis is separate from the original online position-plus-heading decisions. It applies the same GPS quality, synchronization-history, tolerance, and AoI gates, uses Eq.~\eqref{eq:threestate}, and reports satisfaction only over observable windows.
+
+Across the five paired source traces used for replay, global position observability becomes 1.000. Global satisfaction is only 0.215, however; local position-only satisfaction is 0.010, 0.128, and 0.440 at 1, 5, and 10~s, respectively. Thus removing unavailable heading converts abstentions into valid position judgments but does not make the strict services pass. All four policies still receive identical replay outcomes and approximately 1.536 delivered requests/s because the recorded source and serial HTTP path remain the limiting factors.
+
+\begin{figure}[t]
+\centering
+\safegraphic{figures/position_only_replay.png}
+\caption{Offline position-only contract replay on five measured source traces. Position observability is restored, but the measured serial transport still collapses all four policies to identical delivery and service outcomes. This retrospective service analysis does not rewrite the original online decisions.}
+\label{fig:positiononly}
+\end{figure}
 
 \section{Discussion}
 \subsection{The Contract Makes Metrics Actionable}

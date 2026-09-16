@@ -1,0 +1,20 @@
+{
+  "schema": "ugv01_position_only_offline_v1",
+  "dataset": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\ugv01_live_contract",
+  "contract_source": "{'service_tolerances': 'Frozen representative services from results/e1_e2_service_contract_publication/analysis_manifest.json', 'runtime_defaults': 'Predeclared prototype values for the prospective UGV01 live experiment; not universal safety limits'}",
+  "source_records": 2702,
+  "states": [
+    "pass",
+    "fail",
+    "unobservable"
+  ],
+  "denominator": "observable windows only for satisfaction; observability separately",
+  "local_position_error": "difference of world-frame displacement vectors; no heading required",
+  "replay": "five recorded contract-aware source traces; four policies; one outstanding HTTP request",
+  "limitations": [
+    "Retrospective position-only service, not original online policy result",
+    "GPS is operational reference, not AprilTag ground truth",
+    "Recorded approximately 1.5 Hz source cannot establish fresh 5/10 Hz fidelity",
+    "Capacity sweeps in the separate transport analysis are hypothetical bounds"
+  ]
+}

@@ -4,7 +4,8 @@ Main source:
 
 - `main.tex`
 
-The `figures/` directory contains only the fourteen figures referenced by the
+The `figures/` directory contains the paper-facing figures, including all sixteen
+figures referenced by the current manuscript. The
 manuscript. The `supplementary/live_contract/` directory contains the
 machine-readable UGV01 dataset audit and trace-driven communication replay
 used for the live experiment section.

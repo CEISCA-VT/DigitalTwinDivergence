@@ -44,6 +44,9 @@ results/*
 !results/e1_e2_service_contract_publication/
 !results/cross_domain_contract_generalization/
 !results/publication_hardening/
+!results/ugv01_live_position_contract/
+!results/ugv01_contract_parameter_study/
+!results/e1_rank_inference/
 live_contract_trials/
 # Original V1 training-output directory outside results
 i2nav_dual_10fold_3seed_results/

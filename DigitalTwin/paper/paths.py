@@ -18,6 +18,9 @@ SENSING_ROOT = RESULTS_ROOT / "sensing_fidelity_comparison"
 FINAL_AUDIT_ROOT = RESULTS_ROOT / "result_freeze_audit"
 LIVE_AUDIT_ROOT = RESULTS_ROOT / "ugv01_live_contract_dataset_audit"
 LIVE_REPLAY_ROOT = RESULTS_ROOT / "ugv01_live_contract_trace_replay"
+LIVE_POSITION_ROOT = RESULTS_ROOT / "ugv01_live_position_contract"
+UGV01_PARAMETER_ROOT = RESULTS_ROOT / "ugv01_contract_parameter_study"
+E1_RANK_ROOT = RESULTS_ROOT / "e1_rank_inference"
 
 
 REQUIRED_PAPER_ARTIFACTS = (
@@ -31,6 +34,9 @@ REQUIRED_PAPER_ARTIFACTS = (
     FINAL_AUDIT_ROOT / "FINAL_RESULT_FREEZE_READINESS.md",
     LIVE_AUDIT_ROOT / "dataset_audit_report.md",
     LIVE_REPLAY_ROOT / "trace_replay_report.md",
+    LIVE_POSITION_ROOT / "position_only_study.md",
+    UGV01_PARAMETER_ROOT / "ugv01_contract_parameter_report.md",
+    E1_RANK_ROOT / "rank_inference_report.md",
 )
 
 
@@ -49,4 +55,6 @@ REQUIRED_PAPER_FIGURES = (
     "ugv01_aug29_fidelity_diagnostics.png",
     "trace_replay_policy_comparison.png",
     "transport_capacity_sensitivity.png",
+    "position_only_replay.png",
+    "track_width_contract_sensitivity.png",
 )

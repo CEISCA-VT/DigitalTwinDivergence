@@ -1,0 +1,16 @@
+{
+  "target_satisfaction": 0.8,
+  "tested_width_interval_m": [
+    0.18,
+    0.21
+  ],
+  "tested_width_step_m": 0.005,
+  "feasible_widths_by_run": {
+    "calibration": [],
+    "holdout_1": [],
+    "holdout_2": []
+  },
+  "common_feasible_widths": [],
+  "maximum_supported_parameter_drift_m": null,
+  "interpretation": "No tolerance is claimed when the common feasible set is empty."
+}
