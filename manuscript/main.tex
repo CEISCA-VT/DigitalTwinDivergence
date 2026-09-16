@@ -216,6 +216,23 @@ Operating conditions affect different fidelity dimensions. High wheel--IMU disag
 
 Conditioned q95 benign envelopes were evaluated leave-one-physical-sequence-out. Conditioning does not uniformly improve aggregate coverage; it primarily changes contextual sharpness. For example, the yaw-rate-disagreement envelope is 10.9\% sharper with 9.3\% lower quantile loss, whereas the velocity-disagreement envelope is 4.6\% wider with essentially unchanged quantile loss. We therefore use conditioned envelopes as descriptive context, not as a claimed superior online risk predictor.
 
+\begin{figure*}[t]
+\centering
+\safegraphic[0.94\textwidth]{figures/coverage_vs_sharpness.png}
+\caption{Leave-one-physical-sequence-out comparison of conditioned and unconditional q95 benign envelopes. Aggregate held-out coverage remains similar, while conditioning changes envelope sharpness by fidelity component and operating context. The result supports context-specific characterization, not a universal coverage improvement.}
+\label{fig:coveragesharpness}
+\end{figure*}
+
+\subsection{Frozen Model Benchmark Sanity Check}
+The service-relative analysis is distinct from conventional odometry scoring, but the underlying frozen V2 trajectory model was also evaluated with the verified public i2Nav protocol. Across ten held-out sequences, official SE(3)-aligned APE translation RMSE decreases from 3.299~m for Fixed Physics to 1.635~m for V2, a 50.4\% reduction in the macro mean. V2 improves APE on 9/10 sequences. At 50~m, translation RPE decreases from 46.154 to 1.310~m. These aligned benchmark metrics establish that V2 improves the nominal model under the official protocol; they do not replace the unaligned physical--virtual synchronization metrics used by the fidelity framework.
+
+\begin{figure*}[t]
+\centering
+\safegraphic[0.94\textwidth]{figures/official_benchmark_results.png}
+\caption{Official i2Nav benchmark comparison for Fixed Physics and frozen Twin V2. Top: per-sequence SE(3)-aligned APE translation RMSE. Bottom: 50-m translation RPE RMSE. Official aligned metrics assess odometry-style model performance, whereas the contract analysis retains unaligned accumulated divergence for operational synchronization.}
+\label{fig:officialbenchmark}
+\end{figure*}
+
 \section{Synchronization and Edge-System Sensitivity}
 A DT updated across an embedded/edge boundary depends on the temporal consistency of physical and virtual streams. We perturb the frozen physical--virtual timing relationship during replay while leaving trajectory values unchanged. This isolates synchronization sensitivity; it is not presented as a packet-level wireless experiment.
 
@@ -293,6 +310,20 @@ The horizon trend is consistent in direction: validity decreases from 60 to 600~
 
 \section{Physical Asset Instantiation on UGV01}
 Existing AprilTag-referenced UGV01 experiments provide a physical check distinct from public-dataset transfer. Asset-specific calibration reduces same-window ATE from 0.131 to 0.099~m and heading MAE from $13.3^{\circ}$ to $5.6^{\circ}$. Across three existing physical conditions, the smooth 1.5-m square has the lowest short-horizon RPE but the largest global position and heading disagreement: ATE is 0.338~m while RPE10 is 0.089~m. This reproduces the local/global separation on a physical robot.
+
+\begin{figure*}[t]
+\centering
+\safegraphic[0.94\textwidth]{figures/ugv01_instantiation_comparison.png}
+\caption{UGV01 asset-instantiation stages on the AprilTag-referenced development recording. S1 is the current UGV01 model, S2 adds asset-specific calibration on strict windows, and S3 applies the fitted asset-specific model to the complete repaired window. The same-window comparison demonstrates the effect of binding geometry and motion parameters to the physical rover; it is not presented as an independent held-out fit.}
+\label{fig:ugvinstantiation}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\safegraphic[0.94\textwidth]{figures/ugv01_fidelity_profile_comparison.png}
+\caption{Componentwise UGV01 fidelity profiles across the available AprilTag-referenced conditions. Short-horizon RPE can remain low while global position, heading, and rate disagreement vary substantially, reinforcing that physical--virtual fidelity must be reported by quantity and service horizon rather than as one scalar accuracy score.}
+\label{fig:ugvprofile}
+\end{figure*}
 
 \begin{figure}[t]
 \centering
