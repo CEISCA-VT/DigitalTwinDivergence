@@ -51,10 +51,6 @@ REQUIRED_PAPER_FIGURES = (
     "timing_jitter_stage2.png",
     "timing_delay_stage2.png",
     "ugv01_aug29_validation_summary.png",
-    "ugv01_aug29_trajectory_fidelity.png",
-    "ugv01_aug29_fidelity_diagnostics.png",
     "trace_replay_policy_comparison.png",
     "transport_capacity_sensitivity.png",
-    "position_only_replay.png",
-    "track_width_contract_sensitivity.png",
 )

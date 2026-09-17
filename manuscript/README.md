@@ -4,9 +4,8 @@ Main source:
 
 - `main.tex`
 
-The `figures/` directory contains the paper-facing figures, including all sixteen
-figures referenced by the current manuscript. The
-manuscript. The `supplementary/live_contract/` directory contains the
+The `figures/` directory contains only the twelve image assets referenced by
+the current manuscript. The `supplementary/live_contract/` directory contains the
 machine-readable UGV01 dataset audit and trace-driven communication replay
 used for the live experiment section.
 
@@ -22,6 +21,10 @@ The live experiment has two evidence layers:
 
 1. measured hardware traces from 20 UGV01 runs;
 2. trace-driven transport replay and a labeled capacity-sensitivity study.
+
+The main narrative uses one physical-validation summary and one paired
+edge-policy figure. Detailed trajectory, parameter-sensitivity, and
+position-only plots remain in `results/` as auditable supporting artifacts.
 
 The manuscript does not report the replay as measured communication savings
 or as evidence of fresh 5/10-Hz sensor fidelity.

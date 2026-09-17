@@ -75,10 +75,10 @@ def main() -> None:
             }
         )
 
-    fig, axes = plt.subplots(1, 3, figsize=(14.5, 5.6))
+    fig, axes = plt.subplots(1, 3, figsize=(14.5, 5.2))
     fig.suptitle(
-        "UGV01 August 29, 2026 Validation With Matched 1280x720 Elevation Calibration",
-        fontsize=17,
+        "UGV01 Calibration Improves One Run but Does Not Transfer",
+        fontsize=16,
         fontweight="bold",
     )
 
@@ -114,16 +114,7 @@ def main() -> None:
 
     axes[0].legend(frameon=False, loc="upper left")
 
-    fig.text(
-        0.5,
-        0.02,
-        "Corrected world layout: ID1 top-left, ID2 top-right, ID3 bottom-right, ID4 bottom-left. "
-        "Matched 1280x720 ChArUco calibration enabled valid elevation correction. "
-        "The frozen fitted settings materially improve the calibration run, but the two holdouts remain better under baseline geometry.",
-        ha="center",
-        fontsize=10,
-    )
-    fig.tight_layout(rect=(0, 0.08, 1, 0.92))
+    fig.tight_layout(rect=(0, 0, 1, 0.91))
     OUT.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT, dpi=180)
     plt.close(fig)

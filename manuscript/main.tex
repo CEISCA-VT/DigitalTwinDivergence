@@ -27,7 +27,7 @@
 \maketitle
 
 \begin{abstract}
-Digital-twin (DT) fidelity is often reported as a model-centric score even though an IoT service consumes specific physical quantities over specific horizons, with explicit error and freshness requirements. This paper formulates \emph{service-relative operational fidelity} as an engineering contract over required quantities, service horizon, tolerated discrepancy, operating context, and information age. We connect window validity to run-level contract satisfaction and distinguish deployment qualification from grid-based sensitivity analysis. On frozen i2Nav trajectories, local and synchronized-global service rankings reverse across prespecified tolerance surfaces, while ATE and finite-horizon RPE align most strongly with the services matching their semantics. The same contract construction remains usable on TerraSentia and, through one frozen normalized specialization, on thermal, battery electro-thermal, and biomass-to-SNG DT data. Controlled synchronization replay shows that 50-ms timestamp jitter increases 1-s RPE by 66.2\% while changing ATE by only 0.085\%. AprilTag-referenced UGV01 runs provide physical-asset evidence, including an adverse frozen-parameter cross-run transfer result. In a separate 20-run online UGV01 study, four resource policies produce distinct requested rates but only 1.45--1.52 delivered updates/s because the serial HTTP path is the bottleneck. Measured traces and trace-driven replay thus demonstrate online contract execution and a null delivered-resource effect, not communication savings. The contribution is a mapping from application requirements to measurable fidelity evidence, explicit service decisions, and their observable edge-system limits.
+Digital-twin (DT) fidelity is commonly reported as a model-centric score, although an IoT service consumes particular physical quantities over a particular horizon and under explicit error and freshness limits. We formulate \emph{service-relative operational fidelity} as a contract over required quantities, horizon, tolerated discrepancy, operating context, and information age. On frozen i2Nav trajectories, local and synchronized-global service rankings reverse over prespecified tolerance surfaces; ATE and finite-horizon RPE align most strongly with services that match their respective semantics. The same contract representation remains usable on TerraSentia and, through a frozen normalized specialization, on thermal, battery electro-thermal, and biomass-to-SNG DT data. Controlled replay further shows that 50-ms timestamp jitter increases 1-s RPE by 66.2\% while changing ATE by only 0.085\%. AprilTag-referenced UGV01 experiments demonstrate both the benefit and the cross-run limit of asset-specific calibration. Finally, a 20-run online study shows that four policies request different telemetry rates, yet a serial HTTP bottleneck collapses delivery to 1.45--1.52 updates/s. The experiments therefore demonstrate contract execution and expose its physical, observational, and transport boundaries; they do not claim communication savings. The contribution is an auditable mapping from application requirements to measurable fidelity evidence and explicit service decisions.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -56,7 +56,7 @@ This paper is organized around four research questions:
     \item \textbf{RQ1:} Can the same physical--virtual pair receive different fidelity judgments when the service changes?
     \item \textbf{RQ2:} Does an explicit service contract add decision-relevant information beyond a single scalar score or ordinary multi-metric reporting?
     \item \textbf{RQ3:} Does the contract structure remain usable across another robot platform and across non-robot DT domains without outcome-tuned thresholds?
-    \item \textbf{RQ4:} Does physical--virtual timing perturbation affect service horizons differently in a way that matters to edge/IoT deployment?
+    \item \textbf{RQ4:} How do synchronization, reference observability, and transport capacity constrain service-relative fidelity decisions at the edge?
 \end{itemize}
 
 The paper makes four main contributions:
@@ -64,7 +64,7 @@ The paper makes four main contributions:
     \item \textbf{Operational fidelity contract and lifecycle.} We formalize a service contract over quantity set, horizon, tolerance, context, and information age, and define how it is specified, qualified, monitored, and handled when violated.
     \item \textbf{Decision-value evidence beyond metric reporting.} A frozen i2Nav study shows threshold-robust local/global ordering reversals, service-specific metric alignment, and sequence-level robustness. The contract therefore makes conventional metrics actionable rather than claiming that they are invalid.
     \item \textbf{Cross-platform and cross-domain structural portability.} The same robot contract transfers unchanged to TerraSentia, and one frozen normalized quantity--horizon--tolerance protocol remains non-degenerate on MAGNET, FreeTwinEV, and TU Wien SNG.
-    \item \textbf{Synchronization and physical-asset evidence.} Controlled Gaussian timestamp jitter and fixed update-delay replay show that local services can deteriorate before global ATE reveals a large change. AprilTag-referenced UGV01 runs reveal asset-specific calibration gains and cross-run limits; 20 additional live runs demonstrate online contract and policy execution under a measured transport bottleneck.
+    \item \textbf{Edge and physical-asset evidence.} Controlled timing replay shows horizon-specific degradation. AprilTag-referenced UGV01 runs reveal asset-specific calibration gains and cross-run limits, while 20 live runs demonstrate online contract and policy execution under a measured transport bottleneck.
 \end{enumerate}
 
 The claim boundary is deliberate. We do not claim a universal fidelity threshold, a universal DT certificate, localization state of the art, successful zero-shot transfer of one learned maintenance model across assets, or measured communication savings. The paper evaluates the \emph{operational contract representation and the service decisions it induces}; its live experiment identifies why requested resource modes did not translate into different delivered update rates.
@@ -478,61 +478,31 @@ The frozen V2 checkpoint is small (approximately 0.16~MiB serialized), and its s
 \section{UGV01 Asset-Specific Physical Validation}
 \label{sec:ugv01-physical-validation}
 
-To complement the broad cross-sequence fidelity analysis on i2Nav, we evaluated
-the instantiated twin on a real UGV01 tracked rover using overhead
-AprilTag-referenced video and matched onboard telemetry collected on August 29,
-2026. The physical reference used four fixed world tags and a rover-mounted tag
-in a corrected $2.0\,\mathrm{m}\times1.5\,\mathrm{m}$ layout with tag ordering
-$1=\mathrm{top\text{-}left}$, $2=\mathrm{top\text{-}right}$,
-$3=\mathrm{bottom\text{-}right}$, and $4=\mathrm{bottom\text{-}left}$. A
-matched $1280\times720$ ChArUco calibration was used to support
-elevation-corrected reference recovery, so the resulting analysis measures
-planar physical--virtual fidelity in a common local frame rather than
-post-aligned trajectory agreement.
+We evaluated the instantiated twin on a UGV01 tracked rover using matched
+telemetry and overhead AprilTag video collected on August 29, 2026. Four fixed
+world tags defined a corrected $2.0\,\mathrm{m}\times1.5\,\mathrm{m}$ reference
+rectangle, and a rover-mounted tag provided planar pose. A matched
+$1280\times720$ ChArUco calibration supported elevation correction. The
+evaluation therefore compares physical and virtual trajectories in one local
+frame without trajectory post-alignment.
 
-We first evaluated a baseline deterministic UGV01 twin and then fit an
-asset-specific parameterization on the run
-\texttt{WIN\_20260829\_15\_35\_55\_Pro}. The fitted configuration used an
-effective track width of $0.192\,\mathrm{m}$ together with the current
-low-speed gyro-fusion setting of $0.20$. This fitted instantiation was then
-held fixed and assessed against two additional runs from the same day to test
-cross-run transfer without retuning.
+We compared a corrected deterministic baseline with an asset-specific
+parameterization fitted on \texttt{WIN\_20260829\_15\_35\_55\_Pro}. The fitted
+configuration used a 0.192-m effective track width and a 0.20 low-speed gyro
+fusion weight. Both parameters were then frozen for two same-day holdout runs.
 
-On the calibration/reference run, asset-specific fitting materially improved
-physical--virtual fidelity over the full $164.7\,\mathrm{s}$ evaluated
-trajectory. The baseline configuration achieved $0.297\,\mathrm{m}$ ATE RMSE,
-$0.044\,\mathrm{m}$ RPE$_{1\mathrm{s}}$ RMSE, and $35.6^\circ$ heading MAE,
-whereas the fitted twin achieved $0.149\,\mathrm{m}$ ATE RMSE,
-$0.024\,\mathrm{m}$ RPE$_{1\mathrm{s}}$ RMSE, and $21.2^\circ$ heading MAE. The
-fitted run also achieved a median position error of $0.099\,\mathrm{m}$, a
-position-error p95 of $0.295\,\mathrm{m}$, and remained within
-$0.25\,\mathrm{m}$ for $87.3\%$ of evaluated samples. This confirms that
-binding the generic template to the specific UGV01 geometry and turning
-behavior can substantially improve local physical--virtual agreement on the
-target asset.
+On the 164.7-s calibration trajectory, fitting reduces ATE by 49.8\%, 1-s RPE
+by 45.5\%, and heading MAE by 40.4\% (Table~\ref{tab:ugv01_aug29_results}). The
+fitted position-error median and p95 are 0.099 and 0.295~m, respectively, and
+87.3\% of samples are within 0.25~m. Thus, deterministic asset information can
+materially improve the instantiated twin on its calibration condition.
 
-We then tested whether that fitted instantiation transferred to two additional
-August 29 runs. On \texttt{WIN\_20260829\_16\_01\_14\_Pro}, the corrected
-baseline twin achieved $0.284\,\mathrm{m}$ ATE RMSE,
-$0.034\,\mathrm{m}$ RPE$_{1\mathrm{s}}$ RMSE, and $28.8^\circ$ heading MAE,
-while the frozen fitted twin degraded to $0.505\,\mathrm{m}$ ATE RMSE,
-$0.062\,\mathrm{m}$ RPE$_{1\mathrm{s}}$ RMSE, and $76.3^\circ$ heading MAE. On
-\texttt{WIN\_20260829\_16\_15\_16\_Pro}, the corrected baseline twin achieved
-$0.685\,\mathrm{m}$ ATE RMSE, $0.091\,\mathrm{m}$ RPE$_{1\mathrm{s}}$ RMSE, and
-$35.3^\circ$ heading MAE, whereas the frozen fitted twin degraded further to
-$1.136\,\mathrm{m}$ ATE RMSE, $0.166\,\mathrm{m}$ RPE$_{1\mathrm{s}}$ RMSE, and
-$108.7^\circ$ heading MAE. Thus, the fitted instantiation improves the
-calibration run strongly but does not yet generalize robustly across repeated
-holdout trials, particularly for heading-sensitive behavior.
-
-This outcome is scientifically important rather than merely negative. It shows
-that asset-specific instantiation is real and beneficial, but also that twin
-fidelity remains condition- and run-sensitive even on the same physical robot.
-In the best case, the UGV01 twin attains strong positional and short-horizon
-agreement; however, heading fidelity remains weaker and transfers less
-reliably. This directly supports the paper's central argument that digital-twin
-fidelity is multidimensional and service-relative rather than a single scalar
-notion of accuracy.
+The same parameters do not transfer favorably to either holdout: ATE, 1-s RPE,
+and heading MAE are all worse than the corrected baseline
+(Fig.~\ref{fig:ugv01_aug29_summary}). The strongest degradation is in heading,
+which reaches $108.7^\circ$ MAE on the second holdout. This contrast is central
+to the service-relative argument: successful in-run calibration is not evidence
+that every service remains qualified under a repeated physical run.
 
 \begin{table}[t]
 \centering
@@ -563,25 +533,6 @@ Run / configuration & ATE RMSE (m) & RPE 1\,s (m) & Heading MAE (deg) \\
     \label{fig:ugv01_aug29_summary}
 \end{figure}
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{figures/ugv01_aug29_trajectory_fidelity.png}
-    \caption{Physical versus virtual trajectory comparison for the August 29
-    calibration/reference run after asset-specific fitting. The fitted twin
-    follows the local route shape more closely than the baseline
-    configuration.}
-    \label{fig:ugv01_aug29_traj}
-\end{figure}
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{figures/ugv01_aug29_fidelity_diagnostics.png}
-    \caption{Detailed fidelity diagnostics for the August 29 calibration run.
-    Position and short-horizon fidelity improve clearly after asset-specific
-    fitting, while heading disagreement remains the weaker component.}
-    \label{fig:ugv01_aug29_diag}
-\end{figure}
-
 \paragraph{Reference and synchronization limitations.}
 The present UGV01 validation uses an elevation-corrected AprilTag plus ChArUco
 reference and motion-correlation alignment between video and telemetry. These
@@ -595,14 +546,7 @@ quality and frozen cross-run robustness.
 
 Applying the predeclared global contract (position error no greater than 1~m and heading error no greater than $5^{\circ}$) makes that limitation operational. Satisfaction is 0.207 on the fitted calibration run and falls to 0.027 and 0.030 on the two frozen fitted holdouts. The engine therefore withdraws the heading-sensitive service claim on most observable samples. This is evidence that the contract exposes an unqualified model; it is not evidence that an external deployment controller actually prevented use of that model.
 
-We also swept effective track width from 0.180 to 0.210~m in 0.005-m steps on all three recordings without selecting a separate width for either holdout. No tested width attains $S_s\ge0.8$ on any run, and the common feasible set is empty (Fig.~\ref{fig:widthsensitivity}). Track-width drift alone therefore does not explain or repair the transfer failure. We do not report a first-10-s recalibration result because track width is not identifiable from an arbitrary initial window without sufficient differential-turn excitation.
-
-\begin{figure}[t]
-\centering
-\safegraphic{figures/track_width_contract_sensitivity.png}
-\caption{Predeclared effective-track-width sensitivity on the August 29 UGV01 runs. The sweep does not select parameters independently on the holdouts. No tested width produces global-contract satisfaction of 0.8, so no allowable parameter-drift interval is claimed.}
-\label{fig:widthsensitivity}
-\end{figure}
+We also swept effective track width from 0.180 to 0.210~m in 0.005-m steps on all three recordings without selecting a separate width for either holdout. No tested width attains $S_s\ge0.8$ on any run, and the common feasible set is empty. Track-width drift alone therefore does not explain or repair the transfer failure. We do not report a first-10-s recalibration result because track width is not identifiable from an arbitrary initial window without sufficient differential-turn excitation.
 
 \section{Live UGV01 Contract and Resource-Policy Study}
 \label{sec:live-ugv01}
@@ -634,37 +578,28 @@ Contract-aware & 8.61 & 1.52 & 948.7 & 0.148 & 0.180 \\
 \subsection{Trace-Driven Counterfactual Transport Replay}
 We replayed five measured contract-aware UGV01 traces through each of the four frozen policies. Within a trial all policies see the same recorded source arrivals, response times, payload sizes, and contract-state inputs. The replay allows one outstanding HTTP request and returns the newest recorded source sample available when a request begins. It does not synthesize fresh measurements or recompute counterfactual contract validity. The physical trace, not each replayed timestamp, is the comparison unit.
 
-Under measured response times all four policies produce the same replayed 1.536 requests/s, 951.8 response B/s, 1.304-s p95 delivery age, and 5.3\% repeated-source fraction (Fig.~\ref{fig:livereplay}). This is a \emph{null delivered-resource effect}: different requested rates cannot overcome a shared serial-service bottleneck.
+Under measured response times all four policies produce the same replayed 1.536 requests/s, 951.8 response B/s, 1.304-s p95 delivery age, and 5.3\% repeated-source fraction (Fig.~\ref{fig:liveedge}). This is a \emph{null delivered-resource effect}: different requested rates cannot overcome a shared serial-service bottleneck.
 
-\begin{figure}[t]
+A separate capacity calculation caps the observed offered demand at 1.5, 2, 5, and 10 updates/s while using the measured mean 619.4-B response. At 1.5 updates/s all policies saturate. At a hypothetical 10-updates/s capacity, response-payload demand would be 80.0\%, 72.4\%, and 13.9\% lower than static-high for static-low, AoI-only, and contract-aware, respectively. These are provisioned-capacity bounds, \emph{not} measured bandwidth or energy savings; they do not estimate contract satisfaction at those rates.
+
+\begin{figure*}[t]
 \centering
+\begin{minipage}{0.49\textwidth}\centering
 \safegraphic{figures/trace_replay_policy_comparison.png}
-\caption{Trace-driven replay of all four frozen policies using measured UGV01 source arrivals, response times, and payload sizes. Delivered transport metrics coincide under the serial HTTP bottleneck. These are simulated counterfactual transport quantities, not new physical trials or evidence of service preservation.}
-\label{fig:livereplay}
-\end{figure}
-
-A separate capacity calculation caps the observed offered demand at 1.5, 2, 5, and 10 updates/s while using the measured mean 619.4-B response (Fig.~\ref{fig:capacity}). At 1.5 updates/s all policies saturate. At a hypothetical 10-updates/s capacity, response-payload demand would be 80.0\%, 72.4\%, and 13.9\% lower than static-high for static-low, AoI-only, and contract-aware, respectively. These are provisioned-capacity bounds, \emph{not} measured bandwidth or energy savings; they do not estimate contract satisfaction at those rates.
-
-\begin{figure}[t]
-\centering
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}\centering
 \safegraphic{figures/transport_capacity_sensitivity.png}
-\caption{Capacity sensitivity using each policy's observed offered demand and the measured mean response size. Separation appears only after transport capacity rises above the common measured bottleneck. The higher-capacity points are hypothetical bounds, not observed rover throughput.}
-\label{fig:capacity}
-\end{figure}
+\end{minipage}
+\caption{Edge-policy evidence. Left: trace-driven replay under measured UGV01 source arrivals and response times; the serial HTTP bottleneck collapses all four policies to the same delivered rate. Right: provisioned-capacity sensitivity based on observed offered demand and mean response size. The higher-capacity points are hypothetical bounds, not measured bandwidth, energy savings, or service preservation.}
+\label{fig:liveedge}
+\end{figure*}
 
 The live experiment therefore establishes that the end-to-end stack executes on the physical rover, records observability and policy decisions, and exposes an important edge-systems constraint. It does not establish a causal resource-saving or service-preservation advantage for contract-aware scheduling.
 
 \subsection{Retrospective Position-Only Contract}
 Because GPS position remained available more often than low-speed course, we additionally define a retrospective position-only service with $Q_s=\{x,y\}$. This analysis is separate from the original online position-plus-heading decisions. It applies the same GPS quality, synchronization-history, tolerance, and AoI gates, uses Eq.~\eqref{eq:threestate}, and reports satisfaction only over observable windows.
 
-Across the five paired source traces used for replay, global position observability becomes 1.000. Global satisfaction is only 0.215, however; local position-only satisfaction is 0.010, 0.128, and 0.440 at 1, 5, and 10~s, respectively. Thus removing unavailable heading converts abstentions into valid position judgments but does not make the strict services pass. All four policies still receive identical replay outcomes and approximately 1.536 delivered requests/s because the recorded source and serial HTTP path remain the limiting factors.
-
-\begin{figure}[t]
-\centering
-\safegraphic{figures/position_only_replay.png}
-\caption{Offline position-only contract replay on five measured source traces. Position observability is restored, but the measured serial transport still collapses all four policies to identical delivery and service outcomes. This retrospective service analysis does not rewrite the original online decisions.}
-\label{fig:positiononly}
-\end{figure}
+Across the five paired source traces used for replay, global position observability becomes 1.000. Global satisfaction is only 0.215, however; local position-only satisfaction is 0.010, 0.128, and 0.440 at 1, 5, and 10~s, respectively. Removing unavailable heading therefore converts abstentions into valid position judgments without making the strict services pass. All four policies still receive identical replay outcomes and approximately 1.536 delivered requests/s because the recorded source and serial HTTP path remain the limiting factors.
 
 \section{Discussion}
 \subsection{The Contract Makes Metrics Actionable}
