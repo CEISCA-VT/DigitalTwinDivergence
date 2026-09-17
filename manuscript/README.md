@@ -4,20 +4,43 @@ Main source:
 
 - `main.tex`
 
-The `figures/` directory contains only the twelve image assets referenced by
-the current manuscript. The `supplementary/live_contract/` directory contains the
-machine-readable UGV01 dataset audit and trace-driven communication replay
-used for the live experiment section.
+The main paper is centered on a causal, held-out qualification-and-remediability
+protocol. The `figures/` directory contains vector figures for the cross-sequence
+qualification surface, held-out baselines, paired discrepancy, and frozen-twin
+configuration robustness. The standalone supplement is `supplementary/supplement.tex`.
+The pre-rewrite source is preserved in `main.pre_final_timing_rewrite.tex` and
+`supplementary/supplement.pre_final_timing_rewrite.tex`.
 
-Regenerate the live results from the repository root with:
+Regenerate the primary timing results and manuscript figures from the
+repository root with:
 
 ```powershell
-python -m DigitalTwin.analysis.audit_ugv01_live_contract_dataset
-python -m DigitalTwin.analysis.live_contract_trace_replay
+python -m DigitalTwin.analysis.service_timing_budget_study
+python -m DigitalTwin.analysis.timing_reviewer_checks
+python -m DigitalTwin.analysis.service_timing_robustness
+python -m DigitalTwin.analysis.final_timing_paper_figures
+python -m pytest tests/test_service_timing_robustness.py -q -p no:cacheprovider
 python scripts/audit_paper_package.py
+python scripts/audit_manuscript_syntax.py
 ```
 
-The live experiment has two evidence layers:
+When a LaTeX engine is available, build the paper with:
+
+```powershell
+cd manuscript
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+```
+
+Build the supplement with:
+
+```powershell
+cd manuscript\supplementary
+pdflatex -interaction=nonstopmode -halt-on-error supplement.tex
+pdflatex -interaction=nonstopmode -halt-on-error supplement.tex
+```
+
+The supporting live experiment has two evidence layers:
 
 1. measured hardware traces from 20 UGV01 runs;
 2. trace-driven transport replay and a labeled capacity-sensitivity study.

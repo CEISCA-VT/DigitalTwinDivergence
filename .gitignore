@@ -33,7 +33,7 @@ ugv01_gps_dev/
 **/.download_cache/
 *.zip
 magnet_tfp/
-
+manuscript/
 # ============================================================
 # Generated experiment outputs
 # ============================================================

@@ -1,0 +1,26 @@
+{
+  "schema": "ugv01_capacity_contract_simulation_v2",
+  "repo_root": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence",
+  "dataset": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\public_datasets\\ugv01_live_contract",
+  "capacities_hz": [
+    1.5,
+    2.0,
+    5.0,
+    10.0,
+    20.0
+  ],
+  "policies": [
+    "static-low",
+    "static-high",
+    "aoi-only",
+    "contract-aware"
+  ],
+  "trials": 5,
+  "source_selection": "latest source observation available at request send time",
+  "transport": "one outstanding request; deterministic service time 1/capacity",
+  "history_clock": "original source timestamps; cached responses never become new observations",
+  "freshness": "delivery AoI = completion time - source time; GPS age is advanced by delivery AoI",
+  "contract": "retrospective position-only evaluation with warning and recovery lifecycle",
+  "satisfaction": "both request-weighted and wall-clock time-weighted metrics are reported",
+  "limitation": "the measured approximately 1.5 Hz source is not synthesized into fresh 2/5/10/20 Hz observations"
+}
