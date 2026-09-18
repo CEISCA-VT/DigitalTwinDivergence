@@ -179,8 +179,9 @@ def causal_indices(t, rate, delay_ms, phase=0):
     stride=round(10/rate)
     if not 0<=phase<stride: raise ValueError("Phase must be a native 10-Hz source index within delivery stride")
     src=np.arange(phase,len(t),stride)
-    arrivals=t[src]+delay_ms/1000
-    p=np.searchsorted(arrivals,t,side="right")-1
+    clock_ns=np.rint(np.asarray(t)*1_000_000_000).astype(np.int64)
+    arrivals=clock_ns[src]+int(round(delay_ms*1_000_000))
+    p=np.searchsorted(arrivals,clock_ns,side="right")-1
     idx=np.full(len(t),-1,dtype=int)
     valid=p>=0; idx[valid]=src[p[valid]]
     return idx
@@ -226,9 +227,10 @@ def evaluate_indices(a, service, idx, target=.8, reconstruct=False):
         gp=base.relative(a["gt_east_m"],a["gt_north_m"],a["gt_heading_rad"],i,use)
         pos=np.hypot(rp[0]-gp[0],rp[1]-gp[1])
         heading=np.abs(np.rad2deg(base.wrap(rp[2]-gp[2])))
-    age=t[use]-t[idx[use]]
+    clock_ns=np.rint(t*1_000_000_000).astype(np.int64)
+    age=(clock_ns[use]-clock_ns[idx[use]])/1_000_000_000
     physical=(pos<=service["pos_tol_m"])&(heading<=service["heading_tol_deg"])
-    fresh=age<=service["aoi_limit_s"]+1e-12
+    fresh=age<=service["aoi_limit_s"]
     denom=len(use)
     if not denom:
         return {"eligible":int(eligible.sum()),"observable":0,"physical_satisfaction":np.nan,

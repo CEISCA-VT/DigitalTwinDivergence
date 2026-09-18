@@ -31,7 +31,8 @@ def discrepancy_trace(a, service, rate, delay_ms):
     if horizon:
         use = use[idx[use - horizon] >= 0]
     last = idx[use]
-    age = t[use] - t[last]
+    clock_ns = np.rint(t * 1_000_000_000).astype(np.int64)
+    age = (clock_ns[use] - clock_ns[last]) / 1_000_000_000
     hp = np.hypot(a["estimate_east_m"][use] - a["estimate_east_m"][last],
                   a["estimate_north_m"][use] - a["estimate_north_m"][last])
     hh = np.abs(np.rad2deg(base.wrap(a["estimate_heading_rad"][use] - a["estimate_heading_rad"][last])))

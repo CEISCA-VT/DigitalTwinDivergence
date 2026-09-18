@@ -7,7 +7,7 @@ Rate metrics in this report are derived from finite differences of the aligned p
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | carpet_low_speed | 0.114 | 6.7 | 0.029 | 0.086 | 0.109 | 0.207 | 0.222 | 19.3 | 37.8 |
 | smooth_floor_trapezoid | 0.101 | 17.4 | 0.023 | 0.069 | 0.096 | 0.165 | 0.280 | 46.8 | 64.5 |
-| smooth_floor_square_1p5 | 0.338 | 28.6 | 0.021 | 0.057 | 0.089 | 0.918 | 1.261 | 70.0 | 92.3 |
+| smooth_floor_square_1p5 | 0.338 | 28.6 | 0.017 | 0.050 | 0.077 | 0.918 | 1.261 | 70.0 | 92.3 |
 
 ## Interpretation
 

@@ -111,6 +111,7 @@ def rpe_metrics(
     twin_heading_rad: np.ndarray,
     dt_s: float,
     horizons_s: Iterable[float] = DEFAULT_HORIZONS_S,
+    time_s: np.ndarray | None = None,
 ) -> dict[str, float]:
     """Compute the same SE(2) translational RPE used by the i2Nav evaluator.
 
@@ -120,6 +121,12 @@ def rpe_metrics(
     """
     result: dict[str, float] = {}
     n = len(gt_xy)
+    if time_s is not None:
+        time_s = np.asarray(time_s, dtype=np.float64)
+        if len(time_s) != n:
+            raise ValueError("RPE timestamps and positions have different row counts")
+        # A missing reference interval cannot be treated as a short-horizon pair.
+        gap_prefix = np.r_[0, np.cumsum(np.diff(time_s) > 1.5 * dt_s)]
 
     for horizon_s in horizons_s:
         steps = int(round(float(horizon_s) / float(dt_s)))
@@ -130,17 +137,29 @@ def rpe_metrics(
                 f"RPE horizon {horizon_s:g}s requires {steps + 1} samples; only {n} available"
             )
 
-        gt_rel = _relative_translation(gt_xy, gt_heading_rad, steps)
-        twin_rel = _relative_translation(twin_xy, twin_heading_rad, steps)
+        starts = np.arange(n - steps)
+        valid = np.ones(n - steps, dtype=bool)
+        if time_s is not None:
+            valid &= np.abs(time_s[starts + steps] - time_s[starts] - horizon_s) <= max(0.025, 0.25 * dt_s)
+            valid &= gap_prefix[starts + steps] == gap_prefix[starts]
+
+        label = f"{int(horizon_s) if float(horizon_s).is_integer() else horizon_s:g}s"
+        result[f"RPE_{label}_pairs"] = int(valid.sum())
+        if not valid.any():
+            result[f"RPEp_{label}_m"] = float("nan")
+            result[f"RPEtheta_{label}_MAE_deg"] = float("nan")
+            continue
+
+        gt_rel = _relative_translation(gt_xy, gt_heading_rad, steps)[valid]
+        twin_rel = _relative_translation(twin_xy, twin_heading_rad, steps)[valid]
         trans_error = twin_rel - gt_rel
         trans_rmse = float(np.sqrt(np.mean(np.sum(trans_error * trans_error, axis=1))))
 
-        gt_dtheta = _relative_heading(gt_heading_rad, steps)
-        twin_dtheta = _relative_heading(twin_heading_rad, steps)
+        gt_dtheta = _relative_heading(gt_heading_rad, steps)[valid]
+        twin_dtheta = _relative_heading(twin_heading_rad, steps)[valid]
         rot_error = np.abs(wrap_angle(twin_dtheta - gt_dtheta))
         rot_mae_deg = float(np.degrees(np.mean(rot_error)))
 
-        label = f"{int(horizon_s) if float(horizon_s).is_integer() else horizon_s:g}s"
         result[f"RPEp_{label}_m"] = trans_rmse
         result[f"RPEtheta_{label}_MAE_deg"] = rot_mae_deg
 
@@ -207,6 +226,7 @@ def evaluate_fidelity_frames(
             twin_heading,
             dt_s,
             horizons_s=horizons_s,
+            time_s=time_s,
         )
     )
 

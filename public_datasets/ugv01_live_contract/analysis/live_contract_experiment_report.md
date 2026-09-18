@@ -2,6 +2,9 @@
 
 This report summarizes JSONL logs produced by the live UGV01 service-contract dashboard.
 Unobservable service windows are retained as unobservable; they are not counted as successful contract satisfaction.
+Duration and delivered response rates use the source clock when monotone, falling back to edge arrival time. Request counts include successful responses only.
+Historical contract states and GPS disagreement were recorded before the frame/age corrections; these columns are retained as historical observations, not retroactively validated outcomes.
+The saved AoI is excess over the minimum observed transport/clock offset, not independently verified absolute age.
 
 ## Campaign Status
 
@@ -14,10 +17,10 @@ Unobservable service windows are retained as unobservable; they are not counted 
 
 | Physical condition | Wireless condition | Policy | Runs | Observable | Qualified | Withdrawn | p95 AoI (s) | Bytes/s | Requests/s |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| smooth_floor_mixed_motion | wifi_baseline | aoi-only | 5 | 0.201 | 0.003 | 0.198 | 0.181 | 937.3 | 1.52 |
+| smooth_floor_mixed_motion | wifi_baseline | aoi-only | 5 | 0.201 | 0.003 | 0.198 | 0.181 | 935.8 | 1.52 |
 | smooth_floor_mixed_motion | wifi_baseline | contract-aware | 5 | 0.180 | 0.001 | 0.178 | 0.148 | 948.7 | 1.52 |
 | smooth_floor_mixed_motion | wifi_baseline | static-high | 5 | 0.234 | 0.002 | 0.232 | 0.149 | 942.8 | 1.49 |
-| smooth_floor_mixed_motion | wifi_baseline | static-low | 5 | 0.204 | 0.002 | 0.202 | 0.163 | 915.1 | 1.45 |
+| smooth_floor_mixed_motion | wifi_baseline | static-low | 5 | 0.204 | 0.002 | 0.202 | 0.163 | 886.4 | 1.41 |
 
 ## Per-Service Summary
 

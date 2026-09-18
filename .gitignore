@@ -38,6 +38,7 @@ manuscript/
 # Generated experiment outputs
 # ============================================================
 results/*
+docs/audits/
 !results/ugv01_live_contract_dataset_audit/
 !results/ugv01_live_contract_trace_replay/
 !results/ugv01_live_contract_experiment/

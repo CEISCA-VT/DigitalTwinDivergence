@@ -70,8 +70,9 @@ def relative(x, y, th, i, j):
 def delivered_indices(t, rate, delay_s):
     stride = int(round(10/rate))
     src = np.arange(0, len(t), stride)
-    arrivals = t[src] + delay_s
-    p = np.searchsorted(arrivals, t, side="right") - 1
+    clock_ns = np.rint(np.asarray(t) * 1_000_000_000).astype(np.int64)
+    arrivals = clock_ns[src] + int(round(delay_s * 1_000_000_000))
+    p = np.searchsorted(arrivals, clock_ns, side="right") - 1
     idx = np.full(len(t), -1, int); valid = p >= 0; idx[valid] = src[p[valid]]
     return idx
 
@@ -103,9 +104,11 @@ def evaluate(a, service, rate, delay_ms, start_s=PREFIX_S, end_s=None):
         ep = relative(a["estimate_east_m"],a["estimate_north_m"],a["estimate_heading_rad"],ki,kj)
         pos[use] = np.hypot(ep[0]-gp[0], ep[1]-gp[1])
         head[use] = np.abs(np.rad2deg(wrap(ep[2]-gp[2])))
-    age = np.full(len(t), np.inf); age[use] = t[use]-t[idx[use]]
+    age = np.full(len(t), np.inf)
+    clock_ns = np.rint(t * 1_000_000_000).astype(np.int64)
+    age[use] = (clock_ns[use] - clock_ns[idx[use]]) / 1_000_000_000
     physical = observable & (pos <= service["pos_tol_m"]) & (head <= service["heading_tol_deg"])
-    fresh = observable & (age <= service["aoi_limit_s"]+1e-12)
+    fresh = observable & (age <= service["aoi_limit_s"])
     joint = physical & fresh
     denom = max(1, int(observable.sum()))
     fail_count, fail_s, fail_max = episodes(observable & ~joint)
@@ -452,7 +455,7 @@ def write_four_checks_report(out, matched, pairwise, rem, recovery, literature_p
         lines.append(f"| {r.population} | {r.failure_component} | {int(r.cases)} | {int(r.population_denominator)} | {r.fraction:.1%} |")
     counts=rem.classification.value_counts()
     lines += ["",f"At 2 Hz / 200 ms, {int(counts.get('delivery_remediable',0))} cases fail but pass at ideal delivery, {int(counts.get('persistent_under_ideal',0))} still fail at ideal delivery, and {int(counts.get('already_qualified_degraded',0))} already pass under degraded delivery.",
-      f"The 31 remediable cases and 6 persistent cases therefore do not omit failures: the remaining {int(counts.get('already_qualified_degraded',0))} of 40 cases were not failures to begin with.","",
+      f"Together these account for all {len(rem)} sequence-service cases; {int(counts.get('already_qualified_degraded',0))} were not degraded-delivery failures.","",
       "## 3. Complete case accounting","",
       "`sequence_service_case_ledger.csv` contains one row for each of 10 sequences x 4 services, with degraded, practical, and ideal coverage, physical satisfaction, freshness satisfaction, joint satisfaction, qualification state, observability, and failure-component labels.","",
       "## 4. Literature distinction","",
@@ -500,6 +503,7 @@ def main():
       "aoi_only_score":"service AoI limit minus measured maximum AoI, rounded to 1e-6 s; larger is safer",
       "ideal_delivery":"10 Hz recorded source, zero added delay","degraded":"2 Hz, 200 ms","feasible_improvement":"5 Hz, 50 ms",
       "reconstruction":"causal zero-order hold, no queue, newest arrived source sample","evaluation_clock_hz":10,
+      "clock_comparison":"source and delay timestamps rounded to integer nanoseconds before arrival and freshness comparisons",
       "frame":"saved common local ENU; no alignment","quality_flags":"none in evaluated trajectory files",
       "statistical_unit":"physical sequence; three seeds aggregated within sequence"}
     (OUT/"protocol_manifest.json").write_text(json.dumps(manifest,indent=2,default=list)+"\n",encoding="utf-8")

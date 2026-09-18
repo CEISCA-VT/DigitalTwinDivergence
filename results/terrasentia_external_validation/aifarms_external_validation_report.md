@@ -17,11 +17,11 @@
 
 ## Physics-Only Positional Fidelity
 
-- `ts_2022_06_09_13h16m39s_one_row`: ATE 32.712 m; RPE1/5/10 0.294/1.555/3.423 m; Dp p95/max 39.628/39.783 m.
-- `ts_2022_06_15_11h48m34s_four_rows`: ATE 43.491 m; RPE1/5/10 0.146/1.015/2.538 m; Dp p95/max 66.662/75.945 m.
-- `ts_2022_09_01_11h20m00s_two_random`: ATE 48.836 m; RPE1/5/10 0.240/1.491/3.706 m; Dp p95/max 108.223/122.580 m.
-- `ts_2022_09_01_12h32m56s_double_loop_corridor`: ATE 49.904 m; RPE1/5/10 0.785/4.027/8.260 m; Dp p95/max 98.251/104.712 m.
-- `ts_2022_09_06_12h37m11s_four_rows`: ATE 60.688 m; RPE1/5/10 0.319/1.687/3.522 m; Dp p95/max 92.259/100.119 m.
+- `ts_2022_06_09_13h16m39s_one_row`: ATE 32.712 m; RPE1/5/10 0.283/1.501/3.346 m; Dp p95/max 39.628/39.783 m.
+- `ts_2022_06_15_11h48m34s_four_rows`: ATE 43.491 m; RPE1/5/10 0.112/0.913/2.375 m; Dp p95/max 66.662/75.945 m.
+- `ts_2022_09_01_11h20m00s_two_random`: ATE 48.836 m; RPE1/5/10 0.234/1.477/3.684 m; Dp p95/max 108.223/122.580 m.
+- `ts_2022_09_01_12h32m56s_double_loop_corridor`: ATE 49.904 m; RPE1/5/10 0.786/4.029/8.264 m; Dp p95/max 98.251/104.712 m.
+- `ts_2022_09_06_12h37m11s_four_rows`: ATE 60.688 m; RPE1/5/10 0.307/1.633/3.419 m; Dp p95/max 92.259/100.119 m.
 
 ## Frozen V2 Portability
 
@@ -54,10 +54,5 @@
 
 ## Figures
 
-- `results\aifarms_terrasentia_full_study\ts_2022_06_09_13h16m39s_one_row\representative_trajectory.png`
-- `results\aifarms_terrasentia_full_study\ts_2022_06_15_11h48m34s_four_rows\representative_trajectory.png`
-- `results\aifarms_terrasentia_full_study\ts_2022_09_01_11h20m00s_two_random\representative_trajectory.png`
-- `results\aifarms_terrasentia_full_study\ts_2022_09_01_12h32m56s_double_loop_corridor\representative_trajectory.png`
-- `results\aifarms_terrasentia_full_study\ts_2022_09_06_12h37m11s_four_rows\representative_trajectory.png`
-- `results\aifarms_terrasentia_full_study\local_vs_global_comparison.png`
-- `results\aifarms_terrasentia_full_study\sequence_physics_vs_v2.png`
+- `results\terrasentia_external_validation\local_vs_global_comparison.png`
+- `results\terrasentia_external_validation\sequence_physics_vs_v2.png`

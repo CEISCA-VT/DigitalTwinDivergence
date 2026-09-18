@@ -116,7 +116,13 @@ def audit(dataset: Path, output: Path) -> dict[str, Any]:
         metadata = records[0].get("experiment", {}) if records else {}
         json_schemas.update(str(record.get("schema", "")) for record in records)
         times = [value for point in points if (value := finite(point.get("t"))) is not None]
-        duration = max(times) - min(times) if len(times) > 1 else 0.0
+        source_times = [finite(point.get("source_time_s")) for point in points]
+        if len(source_times) > 1 and all(value is not None for value in source_times) and all(
+            b > a for a, b in zip(source_times, source_times[1:])
+        ):
+            duration = source_times[-1] - source_times[0]
+        else:
+            duration = max(times) - min(times) if len(times) > 1 else 0.0
         monotonic = all(b > a for a, b in zip(times, times[1:]))
         seqs = [int(value) for point in points if (value := finite(point.get("seq"))) is not None]
         seq_gaps = sum(max(0, b - a - 1) for a, b in zip(seqs, seqs[1:]))

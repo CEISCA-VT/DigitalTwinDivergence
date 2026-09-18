@@ -1,7 +1,7 @@
 {
   "schema": "service_timing_budget_v1",
   "status": "retrospective_protocol_frozen_before_outcome_evaluation",
-  "created_from_commit": "d1b859e588c70f7462db67f14005c7f4d69d56b0",
+  "created_from_commit": "e68f6b97641a35614d6f9650ac44577bfe22c3e7",
   "frozen_v2_commit": "6540c01f90f3c1074de0d8dae9964a5276fbbc91",
   "sources": [
     "results\\i2nav_v2_full_loso\\i2nav_v2_full_loso\\replicate_01_base42\\fold_01_building00\\v2_evaluated_trajectory.csv",
@@ -143,6 +143,7 @@
   "feasible_improvement": "5 Hz, 50 ms",
   "reconstruction": "causal zero-order hold, no queue, newest arrived source sample",
   "evaluation_clock_hz": 10,
+  "clock_comparison": "source and delay timestamps rounded to integer nanoseconds before arrival and freshness comparisons",
   "frame": "saved common local ENU; no alignment",
   "quality_flags": "none in evaluated trajectory files",
   "statistical_unit": "physical sequence; three seeds aggregated within sequence"

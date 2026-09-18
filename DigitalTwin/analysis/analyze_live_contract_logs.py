@@ -144,9 +144,23 @@ def _run_row(path: Path, records: list[dict[str, Any]]) -> dict[str, Any]:
     meta = _metadata(records)
     points = [_point(record) for record in records]
     policy = str(records[0].get("policy", meta.get("policy", ""))) if records else ""
-    times = [_finite(point.get("t")) for point in points]
-    times_clean = [value for value in times if value is not None]
-    duration = max(times_clean) - min(times_clean) if len(times_clean) >= 2 else 0.0
+    source_times = [_finite(point.get("source_time_s")) for point in points]
+    if len(source_times) >= 2 and all(value is not None for value in source_times) and all(
+        right > left for left, right in zip(source_times, source_times[1:])
+    ):
+        duration = source_times[-1] - source_times[0]
+        duration_basis = "source clock"
+    else:
+        arrival_times = [_finite(point.get("edge_arrival_time_s")) for point in points]
+        if len(arrival_times) >= 2 and all(value is not None for value in arrival_times) and all(
+            right > left for left, right in zip(arrival_times, arrival_times[1:])
+        ):
+            duration = arrival_times[-1] - arrival_times[0]
+            duration_basis = "edge arrival clock"
+        else:
+            times_clean = [value for point in points if (value := _finite(point.get("t"))) is not None]
+            duration = max(times_clean) - min(times_clean) if len(times_clean) >= 2 else 0.0
+            duration_basis = "reported elapsed time (may truncate long gaps)"
     payload_bytes = [_finite(point.get("payload_bytes")) for point in points]
     payload_clean = [value for value in payload_bytes if value is not None]
     latency = [_finite(point.get("latency_ms")) for point in points]
@@ -181,6 +195,7 @@ def _run_row(path: Path, records: list[dict[str, Any]]) -> dict[str, Any]:
         "policy": policy,
         "records": len(records),
         "duration_s": duration,
+        "duration_basis": duration_basis,
         "request_count": len(points),
         "actual_update_rate_hz": ((len(points) - 1) / duration if duration > 0.0 and len(points) > 1 else None),
         "requested_update_rate_mean_hz": _mean(rates_clean),
@@ -280,6 +295,9 @@ def _write_report(path: Path, run_rows: list[dict[str, Any]], service_rows: list
         "",
         "This report summarizes JSONL logs produced by the live UGV01 service-contract dashboard.",
         "Unobservable service windows are retained as unobservable; they are not counted as successful contract satisfaction.",
+        "Duration and delivered response rates use the source clock when monotone, falling back to edge arrival time. Request counts include successful responses only.",
+        "Historical contract states and GPS disagreement were recorded before the frame/age corrections; these columns are retained as historical observations, not retroactively validated outcomes.",
+        "The saved AoI is excess over the minimum observed transport/clock offset, not independently verified absolute age.",
         "",
         "## Campaign Status",
         "",
@@ -355,7 +373,7 @@ def _write_report(path: Path, run_rows: list[dict[str, Any]], service_rows: list
 
 
 def analyze(input_dir: Path, output_dir: Path) -> dict[str, Any]:
-    logs = sorted(input_dir.glob("*.jsonl"))
+    logs = sorted(input_dir.rglob("*.jsonl"))
     run_rows: list[dict[str, Any]] = []
     service_rows: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []

@@ -200,6 +200,8 @@ class TwinStream:
         self._origin: tuple[float, float] | None = None
         self._gps_translation_offset: tuple[float, float] | None = None
         self._gps_heading_offset_rad: float | None = None
+        self._twin_anchor_xy: tuple[float, float] | None = None
+        self._last_receive_monotonic: float | None = None
         self._clock_offset_s: float | None = None
         self._last_arrival_s: float | None = None
         self._last_source_for_jitter_s: float | None = None
@@ -240,8 +242,14 @@ class TwinStream:
             error = self._error
             running = self._running
             events = list(self._events[-80:])
-            contracts = list(self._latest_contracts)
-            latest_aoi = float(points[-1]["aoi_s"]) if points else None
+            contracts = [dict(item) for item in self._latest_contracts]
+            lag = max(0.0, time.monotonic() - self._last_receive_monotonic) if self._last_receive_monotonic is not None else 0.0
+            latest_aoi = float(points[-1]["aoi_s"]) + lag if points else None
+            for contract in contracts:
+                if latest_aoi is not None and latest_aoi > float(contract["maximum_aoi_s"]):
+                    contract.update(status="unobservable", observable=False, raw_pass=False,
+                                    aoi_s=latest_aoi, freshness_margin_s=float(contract["maximum_aoi_s"]) - latest_aoi,
+                                    reason="telemetry age exceeds service limit")
             policy_decision = self.resource_policy.snapshot(latest_aoi, contracts)
         return {
             "schema": "ugv01_live_twin_stream_v2",
@@ -257,6 +265,7 @@ class TwinStream:
                 "runtime_inputs": "T:147 encoder counts, IMU yaw rate, firmware yaw, timing, optional GPS",
                 "twin_model": "UGV01 deterministic tracked-drive propagation with gyro blending",
                 "reference_note": "live GPS operational reference",
+                "aoi_semantics": "relative excess over minimum observed arrival-source offset; absolute transport age unresolved",
                 "contract_provenance": self.contract_config["provenance"],
                 "experiment": self.experiment_metadata,
             },
@@ -392,6 +401,18 @@ class TwinStream:
             except Exception as exc:
                 with self._lock:
                     self._error = f"{type(exc).__name__}: {exc}"
+                    if self.points and self._last_receive_monotonic is not None:
+                        lag = max(0.0, time.monotonic() - self._last_receive_monotonic)
+                        age = float(self.points[-1]["aoi_s"]) + lag
+                        stale_contracts = [dict(item) for item in self._latest_contracts]
+                        for contract in stale_contracts:
+                            if age > float(contract["maximum_aoi_s"]):
+                                contract.update(status="unobservable", observable=False, raw_pass=False,
+                                                aoi_s=age, reason="telemetry age exceeds service limit")
+                        self._latest_contracts = stale_contracts
+                        event = self.resource_policy.update(self._elapsed_s + lag, age, stale_contracts)
+                        if event is not None:
+                            self._events.append(event)
 
             elapsed = time.monotonic() - started
             time.sleep(max(0.0, period - elapsed))
@@ -470,6 +491,8 @@ class TwinStream:
             self._origin = None
             self._gps_translation_offset = None
             self._gps_heading_offset_rad = None
+            self._twin_anchor_xy = None
+            self._last_receive_monotonic = None
             self._clock_offset_s = None
             self._last_sample_s = None
             self._last_arrival_s = None
@@ -504,10 +527,8 @@ class TwinStream:
         window_span = max(1.0, edge_arrival_s - self._bytes_window[0][0]) if self._bytes_window else 1.0
         bytes_per_s = sum(item[1] for item in self._bytes_window) / window_span
 
-        if self._last_sample_s is None:
-            dt = 0.0
-        else:
-            dt = max(0.0, min(1.0, sample_s - self._last_sample_s))
+        dt = max(0.0, sample_s - self._last_sample_s) if self._last_sample_s is not None else 0.0
+        motion_gap = dt > 1.0
         if self._last_enc is None:
             delta_left = 0
             delta_right = 0
@@ -518,7 +539,8 @@ class TwinStream:
         encoder_v, encoder_omega = self.geometry.ticks_to_control(delta_left, delta_right, dt)
         encoder_v *= self.distance_scale
         imu_omega = math.radians(gyro_z_deg_s)
-        omega = (1.0 - self.gyro_weight) * encoder_omega + self.gyro_weight * imu_omega
+        gyro_weight = 0.0 if motion_gap else self.gyro_weight
+        omega = (1.0 - gyro_weight) * encoder_omega + gyro_weight * imu_omega
         if dt > 0.0:
             self._state = integrate_unicycle(self._state, encoder_v, omega, dt)
             self._elapsed_s += dt
@@ -529,18 +551,14 @@ class TwinStream:
 
             if self._origin is None:
                 self._origin = (lat, lon)
-                self._gps_translation_offset = (float(self._state[0]), float(self._state[1]))
+                self._twin_anchor_xy = (float(self._state[0]), float(self._state[1]))
             gps_x, gps_y = gps_to_local_xy(lat, lon, self._origin[0], self._origin[1])
-            if self._gps_translation_offset is not None:
-                gps_x += self._gps_translation_offset[0]
-                gps_y += self._gps_translation_offset[1]
 
         gps_agreement_m = None
         gps_heading_agreement_deg = None
         gps_heading_rad = None
         twin_global_heading = None
         if gps_x is not None and gps_y is not None:
-            gps_agreement_m = math.hypot(float(self._state[0]) - gps_x, float(self._state[1]) - gps_y)
             if math.isfinite(gps_course_deg) and gps_course_deg >= 0.0 and gps_speed_mps >= 0.30:
                 # NMEA course is clockwise from north. Convert to ENU heading.
                 gps_heading_rad = wrap_angle(math.radians(90.0 - gps_course_deg))
@@ -550,6 +568,18 @@ class TwinStream:
                 gps_heading_agreement_deg = abs(
                     math.degrees(wrap_angle(twin_global_heading - gps_heading_rad))
                 )
+
+        common_frame_valid = self._gps_heading_offset_rad is not None and self._twin_anchor_xy is not None
+        twin_x, twin_y = float(self._state[0]), float(self._state[1])
+        if common_frame_valid:
+            dx = twin_x - self._twin_anchor_xy[0]
+            dy = twin_y - self._twin_anchor_xy[1]
+            c = math.cos(self._gps_heading_offset_rad)
+            s = math.sin(self._gps_heading_offset_rad)
+            twin_x, twin_y = c * dx - s * dy, s * dx + c * dy
+            if gps_x is not None and gps_y is not None:
+                gps_agreement_m = math.hypot(twin_x - gps_x, twin_y - gps_y)
+            twin_global_heading = wrap_angle(float(self._state[2]) + self._gps_heading_offset_rad)
 
         packet_gap = 0 if self._last_seq is None else max(0, seq - self._last_seq - 1)
         yaw_disagreement = abs(encoder_omega - imu_omega)
@@ -561,8 +591,11 @@ class TwinStream:
             "source_time_s": sample_s,
             "edge_arrival_time_s": edge_arrival_s,
             "seq": seq,
-            "twin_x": float(self._state[0]),
-            "twin_y": float(self._state[1]),
+            "twin_x": twin_x,
+            "twin_y": twin_y,
+            "twin_local_x": float(self._state[0]),
+            "twin_local_y": float(self._state[1]),
+            "common_frame_valid": common_frame_valid,
             "twin_theta": float(self._state[2]),
             "gps_x": gps_x,
             "gps_y": gps_y,
@@ -573,6 +606,7 @@ class TwinStream:
             "twin_global_theta": twin_global_heading,
             "gps_age_s": gps_age_s,
             "aoi_s": aoi_s,
+            "aoi_basis": "relative_minimum_offset",
             "clock_offset_s": self._clock_offset_s,
             "arrival_jitter_ms": self._arrival_jitter_s * 1000.0,
             "gps_agreement_m": gps_agreement_m,
@@ -590,6 +624,7 @@ class TwinStream:
             "bytes_per_s": bytes_per_s,
             "packet_gap": packet_gap,
             "stale": _boolean(row, "stale_packet") or dt == 0.0,
+            "motion_gap_s": dt if motion_gap else 0.0,
             "queue_depth": _integer(row, "queue_depth", 0),
             "enc_left": enc_left,
             "enc_right": enc_right,
@@ -608,12 +643,15 @@ class TwinStream:
             and gps_age_s <= float(quality["maximum_gps_age_s"])
             and gps_heading_rad is not None
             and twin_global_heading is not None
+            and common_frame_valid
+            and not motion_gap
         )
 
         self._last_sample_s = sample_s
         self._last_enc = (enc_left, enc_right)
         self._last_seq = seq
         with self._lock:
+            self._last_receive_monotonic = time.monotonic()
             self.points.append(point)
             if len(self.points) > self.max_points:
                 self.points = self.points[-self.max_points :]

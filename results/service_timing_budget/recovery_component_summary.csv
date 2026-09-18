@@ -1,5 +1,3 @@
 population,failure_component,cases,population_denominator,fraction
-delivery_remediable,physical_only,21,31,0.6774193548387096
-delivery_remediable,physical_and_freshness,10,31,0.3225806451612903
-practical_recoveries,physical_only,18,28,0.6428571428571429
-practical_recoveries,physical_and_freshness,10,28,0.35714285714285715
+delivery_remediable,physical_only,30,30,1.0
+practical_recoveries,physical_only,27,27,1.0

@@ -17,9 +17,9 @@
 ## Frozen V2 macro position-service validity
 
 - global: sequence-mean grid-average RTK-position validity 0.083 (median 0.086).
-- local 1 s: sequence-mean grid-average RTK-position validity 0.778 (median 0.806).
-- local 5 s: sequence-mean grid-average RTK-position validity 0.418 (median 0.451).
-- local 10 s: sequence-mean grid-average RTK-position validity 0.223 (median 0.246).
+- local 1 s: sequence-mean grid-average RTK-position validity 0.779 (median 0.806).
+- local 5 s: sequence-mean grid-average RTK-position validity 0.421 (median 0.454).
+- local 10 s: sequence-mean grid-average RTK-position validity 0.230 (median 0.274).
 
 ## Claim boundary
 

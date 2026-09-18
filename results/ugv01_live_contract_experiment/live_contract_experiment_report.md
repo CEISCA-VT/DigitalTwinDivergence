@@ -2,6 +2,9 @@
 
 This report summarizes JSONL logs produced by the live UGV01 service-contract dashboard.
 Unobservable service windows are retained as unobservable; they are not counted as successful contract satisfaction.
+Duration and delivered response rates use the source clock when monotone, falling back to edge arrival time. Request counts include successful responses only.
+Historical contract states and GPS disagreement were recorded before the frame/age corrections; these columns are retained as historical observations, not retroactively validated outcomes.
+The saved AoI is excess over the minimum observed transport/clock offset, not independently verified absolute age.
 
 ## Campaign Status
 
@@ -14,7 +17,7 @@ Unobservable service windows are retained as unobservable; they are not counted 
 
 | Physical condition | Wireless condition | Policy | Runs | Observable | Qualified | Withdrawn | p95 AoI (s) | Bytes/s | Requests/s |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-|  |  | contract-aware | 1 | 0.000 | 0.000 | 0.000 | 0.184 | 4501.0 | 2.61 |
+|  |  | contract-aware | 1 | 0.000 | 0.000 | 0.000 | 0.184 | 1116.6 | 0.65 |
 
 ## Per-Service Summary
 

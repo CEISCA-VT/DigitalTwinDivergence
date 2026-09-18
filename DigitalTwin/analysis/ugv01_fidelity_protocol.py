@@ -100,7 +100,7 @@ def _derived_rate_metrics(frame: pd.DataFrame, timeseries: pd.DataFrame) -> dict
     iomega = np.cumsum(domega * dt[valid])
 
     # Keep the evaluator's time-series output and add explicit UGV01 labels.
-    timeseries.loc[1:, "derived_Dv_mps"] = np.abs(twin_speed)
+    timeseries.loc[1:, "derived_Dv_mps"] = np.abs(dv)
     timeseries.loc[1:, "derived_Domega_radps"] = np.abs(domega)
     timeseries.loc[1:, "derived_Iomega_deg"] = np.rad2deg(iomega)
     return {
@@ -209,6 +209,7 @@ def write_report(profiles: list[dict[str, object]], output: Path) -> None:
         "# UGV01 Exact Fidelity-Protocol Comparison",
         "",
         "Core pose and RPE metrics were computed by `DigitalTwin.analysis.i2nav_fidelity_evaluator.evaluate_fidelity_frames` with 1/5/10 s horizons.",
+        "RPE pairs must match the requested elapsed horizon and remain inside a continuous reference segment; long pose gaps are excluded. Pair counts are in `ugv01_fidelity_profiles.csv`.",
         "Rate metrics in this report are derived from finite differences of the aligned physical and twin poses because these AprilTag artifacts do not contain the original prediction trace.",
         "",
         "| Condition | ATE (m) | Heading MAE (deg) | RPE1 (m) | RPE5 (m) | RPE10 (m) | Dp p95 (m) | Dp max (m) | Dtheta p95 (deg) | Dtheta max (deg) |",

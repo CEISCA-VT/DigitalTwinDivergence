@@ -109,7 +109,7 @@ def mechanism():
     ax2.bar_label(bars)
     ax2.set_ylim(0, 35)
     ax2.set_ylabel("Sequence-service cases")
-    ax2.set_title("31 + 6 + 3 = 40 cases", fontsize=9)
+    ax2.set_title(f"{counts[0]} + {counts[1]} + {counts[2]} = {sum(counts)} cases", fontsize=9)
     ax2.tick_params(axis="x", labelrotation=20)
     ax2.grid(axis="y", alpha=.2)
     save(fig, "held_state_mechanism_and_remediability")

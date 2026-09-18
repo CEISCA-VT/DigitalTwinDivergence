@@ -49,8 +49,14 @@ def read_trace(path: Path) -> list[dict]:
 def replay(points: list[dict], policy_name: str, config: dict) -> dict:
     """Run an on-demand cached-source model with one serial request at a time."""
     policy = ResourcePolicy(policy_name, config)
-    t0 = float(points[0]["t"])
-    source_times = [float(point["t"]) - t0 for point in points]
+    source_clock = [float(point.get("source_time_s", math.nan)) for point in points]
+    if all(math.isfinite(value) for value in source_clock) and all(
+        right > left for left, right in zip(source_clock, source_clock[1:])
+    ):
+        source_times = [value - source_clock[0] for value in source_clock]
+    else:
+        t0 = float(points[0]["t"])
+        source_times = [float(point["t"]) - t0 for point in points]
     horizon = source_times[-1]
     send = 0.0
     index = 0

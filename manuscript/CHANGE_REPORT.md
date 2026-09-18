@@ -6,10 +6,10 @@ The paper now presents a causal, held-out qualification-and-remediability protoc
 
 ## Verified headline values
 
-- At the nominal 30% pooled acceptance target, the surface accepted 226/800 cells and falsely qualified 10/226 (4.4%); service identity alone accepted 200/800 and falsely qualified 82/200 (41.0%).
-- The paired physical-sequence bootstrap false-qualification difference (surface minus identity) is -36.6 percentage points, 95% interval [-45.4, -26.8]. Achieved acceptance differs by 3.25 points. This is **approximately matched and pooled**, not a per-service superiority result.
-- Secondary references: AoI-only 53/222 (23.9%); adapted kinematic staleness 103/241 (42.7%); motion logistic 66/235 (28.1%). Per-service accepted counts differ substantially. Only two surface-versus-logistic per-service comparisons are near matched, and both paired intervals cross zero.
-- Degraded/ideal case accounting is 31 delivery-remediable, six persistent under ideal available delivery, three already qualified under degraded delivery. The practical 5-Hz/50-ms sampled configuration restores 28/31. These are 40 service cases on **ten physical sequences**.
+- At the nominal 30% pooled acceptance target, the surface accepted 235/800 cells and falsely qualified 5/235 (2.1%); service identity alone accepted 200/800 and falsely qualified 75/200 (37.5%).
+- The paired physical-sequence bootstrap false-qualification difference (surface minus identity) is -35.4 percentage points, 95% interval [-44.4, -25.1]. Achieved acceptance differs by 4.375 points. This is **approximately matched and pooled**, not a per-service superiority result.
+- Secondary references: AoI-only 60/250 (24.0%); adapted kinematic staleness 97/242 (40.1%); motion logistic 56/235 (23.8%). Per-service accepted counts differ substantially. Only two surface-versus-logistic per-service comparisons are near matched, and both paired intervals cross zero.
+- Degraded/ideal case accounting is 30 delivery-remediable, six persistent under ideal available delivery, four already qualified under degraded delivery. The practical 5-Hz/50-ms sampled configuration restores 27/30. These are 40 service cases on **ten physical sequences**. All remediable degraded failures are physical-discrepancy-only under the evaluated freshness requirement.
 - Fixed physics has 23 remediable, 16 persistent, and one already-qualified case. Both configurations show the delivery-induced/persistent distinction; all ten fixed-physics global cases are persistent versus six for V2.
 - At phase zero, 5-Hz/0-ms and 5-Hz/50-ms represented histories differ in all 30 V2 runs. The 25- and 50-ms nominal delays alias on the saved 10-Hz clock, so the paper does not claim a separately resolved 50-ms delay effect.
 

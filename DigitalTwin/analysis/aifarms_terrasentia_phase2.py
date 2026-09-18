@@ -305,7 +305,7 @@ def build_aligned(frames: dict[str, pd.DataFrame], grid: np.ndarray) -> tuple[pd
         [
             ref["pose.pose.position.x"].to_numpy(float),
             ref["pose.pose.position.y"].to_numpy(float),
-            ref_yaw,
+            np.unwrap(ref_yaw),
             ref["twist.twist.linear.x"].to_numpy(float),
             ref["twist.twist.angular.z"].to_numpy(float),
         ]

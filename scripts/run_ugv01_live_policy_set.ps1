@@ -1,4 +1,4 @@
-"""
+<#
 run with this
 powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1 `
 >>     -RoverUrl "http://10.0.0.171/js" `
@@ -10,7 +10,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run_ugv01_live_policy_set.ps1
 >>     -MotionSpeed "slow" `
 >>     -RestSeconds 15 `
 >>     -Open
-"""
+#>
 
 param(
     [string]$RoverUrl = "http://10.0.0.171/js",

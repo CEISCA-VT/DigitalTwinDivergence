@@ -9,7 +9,7 @@ The dataset is structurally complete and suitable for demonstrating a live UGV01
 - Balanced matrix: 4 policies x 5 trials = 20 runs.
 - Complete video/telemetry/JSONL triplets: 20/20.
 - JSONL parse errors: 0.
-- JSONL records: 2702 across 29.9 minutes of live traces.
+- JSONL records: 2702 across 30.1 minutes of live traces.
 - Total unexplained sequence gaps: 7 (0.258% of expected sequence steps).
 - Distinct telemetry schemas: 1; distinct JSON record schemas: 1.
 - Duplicate file-content groups across trial assets: 0.
@@ -20,12 +20,12 @@ The dataset is structurally complete and suitable for demonstrating a live UGV01
 
 | Policy | Runs | Requested rate (Hz) | Delivered rate (Hz) | Bytes/s | p95 AoI (s) | Observable | Qualified | Withdrawn |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| aoi-only | 5 | 2.77 | 1.52 | 937.3 | 0.181 | 0.201 | 0.003 | 0.198 |
+| aoi-only | 5 | 2.77 | 1.52 | 935.8 | 0.181 | 0.201 | 0.003 | 0.198 |
 | contract-aware | 5 | 8.61 | 1.52 | 948.7 | 0.148 | 0.180 | 0.001 | 0.178 |
 | static-high | 5 | 10.00 | 1.49 | 942.8 | 0.149 | 0.234 | 0.002 | 0.232 |
-| static-low | 5 | 2.00 | 1.45 | 915.1 | 0.163 | 0.204 | 0.002 | 0.202 |
+| static-low | 5 | 2.00 | 1.41 | 886.4 | 0.163 | 0.204 | 0.002 | 0.202 |
 
-Requested policy rates differ strongly, but the mean delivered-rate spread is only 0.066 Hz. The rover/HTTP stream therefore acted as the bottleneck and did not realize the requested 2/5/10 Hz policy actions.
+Requested policy rates differ strongly, but the mean delivered-rate spread is only 0.111 Hz. The rover/HTTP stream therefore acted as the bottleneck and did not realize the requested 2/5/10 Hz policy actions.
 
 ## Service Observability
 

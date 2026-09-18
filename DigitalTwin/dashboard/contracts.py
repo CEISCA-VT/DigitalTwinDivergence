@@ -207,6 +207,8 @@ class ContractEngine:
         return base
 
     def _reference_quality(self, point: dict[str, object], *, require_heading: bool = True) -> tuple[bool, str]:
+        if point.get("common_frame_valid") is False:
+            return False, "GPS and twin frame alignment unavailable"
         if not point.get("gps_valid"):
             return False, "GPS fix unavailable"
         if int(point.get("satellites", 0)) < int(self.config["reference_quality"]["minimum_satellites"]):

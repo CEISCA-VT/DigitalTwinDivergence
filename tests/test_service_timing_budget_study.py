@@ -38,6 +38,17 @@ def test_startup_horizon_and_separate_contract_components():
     assert r["eligible_samples"] < len(a["time_s"])
 
 
+def test_saved_clock_roundoff_does_not_add_a_delivery_tick():
+    a = trace(12009)
+    a["time_s"] = np.arange(12009, dtype=float) * .1 + 1e-12 * np.sin(np.arange(12009))
+    idx = delivered_indices(a["time_s"], 2, .2)
+    ideal = np.searchsorted(np.arange(0, len(idx), 5) + 2, np.arange(len(idx)), side="right") - 1
+    sources = np.arange(0, len(idx), 5)
+    expected = np.where(ideal >= 0, sources[np.maximum(ideal, 0)], -1)
+    assert np.array_equal(idx, expected)
+    assert evaluate(a, SERVICES[0], 2, 200)["freshness_satisfaction"] == 1.0
+
+
 def test_zero_acceptance_is_undefined_error():
     pred=pd.DataFrame([{"sequence":"a","method":"m","score":0.0,"actual_qualified":1},
                        {"sequence":"b","method":"m","score":0.0,"actual_qualified":0}])

@@ -68,7 +68,7 @@ playground00,local_10s,already_qualified_degraded,1,1,1,frozen_v2
 playground00,local_1s,delivery_remediable,1,0,1,frozen_v2
 playground00,local_5s,delivery_remediable,1,0,1,frozen_v2
 street00,global,already_qualified_degraded,1,1,1,frozen_v2
-street00,local_10s,delivery_remediable,1,0,1,frozen_v2
+street00,local_10s,already_qualified_degraded,1,1,1,frozen_v2
 street00,local_1s,delivery_remediable,1,0,1,frozen_v2
 street00,local_5s,delivery_remediable,1,0,1,frozen_v2
 street01,global,delivery_remediable,1,0,1,frozen_v2
