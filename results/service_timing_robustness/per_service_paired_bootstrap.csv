@@ -1,0 +1,17 @@
+service,method,target_acceptance,matched,surface_accepted,comparator_accepted,difference,ci_low,ci_high
+global,aoi_only,0.3,False,0,40,,,
+global,kinematic_staleness,0.3,False,0,146,,,
+global,motion_logistic,0.3,False,0,36,,,
+global,service_identity_only,0.3,False,0,0,,,
+local_10s,aoi_only,0.3,False,82,142,,,
+local_10s,kinematic_staleness,0.3,False,82,39,,,
+local_10s,motion_logistic,0.3,True,82,75,-0.09902439024390244,-0.3054584826762246,0.12941176470588237
+local_10s,service_identity_only,0.3,False,82,200,,,
+local_1s,aoi_only,0.3,False,90,0,,,
+local_1s,kinematic_staleness,0.3,False,90,28,,,
+local_1s,motion_logistic,0.3,False,90,68,,,
+local_1s,service_identity_only,0.3,False,90,0,,,
+local_5s,aoi_only,0.3,False,54,40,,,
+local_5s,kinematic_staleness,0.3,False,54,28,,,
+local_5s,motion_logistic,0.3,True,54,56,-0.21164021164021163,-0.43828264758497315,0.08078817733990148
+local_5s,service_identity_only,0.3,False,54,0,,,

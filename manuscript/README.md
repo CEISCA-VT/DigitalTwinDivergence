@@ -3,6 +3,10 @@
 Main source:
 
 - `main.tex`
+- `research_compendium.tex`: expanded drafting reference with methodology,
+  all major completed experiment families, figure discussions, evidence-status
+  registry, and an extended conclusion. It is intentionally not a submission
+  manuscript; retain negative results and provenance labels when drawing from it.
 
 The main paper is centered on a causal, held-out qualification-and-remediability
 protocol. The `figures/` directory contains vector figures for the cross-sequence
@@ -39,6 +43,16 @@ cd manuscript\supplementary
 pdflatex -interaction=nonstopmode -halt-on-error supplement.tex
 pdflatex -interaction=nonstopmode -halt-on-error supplement.tex
 ```
+
+Build the expanded drafting compendium separately from `manuscript/`:
+
+```powershell
+pdflatex -interaction=nonstopmode -halt-on-error research_compendium.tex
+pdflatex -interaction=nonstopmode -halt-on-error research_compendium.tex
+```
+
+The local static audit checks all three TeX sources and referenced assets, but
+it does not substitute for compiling or page-by-page PDF inspection.
 
 The supporting live experiment has two evidence layers:
 

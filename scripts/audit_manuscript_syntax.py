@@ -6,7 +6,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1] / "manuscript"
-SOURCES = [ROOT / "main.tex", ROOT / "supplementary/supplement.tex"]
+SOURCES = [ROOT / "main.tex", ROOT / "supplementary/supplement.tex",
+           ROOT / "research_compendium.tex"]
 
 
 def strip_comments(source: str) -> str:
@@ -59,7 +60,7 @@ def check_source(path: Path) -> list[str]:
     for label in re.findall(r"\\(?:ref|eqref)\{([^{}]+)\}", source):
         if label not in labels:
             issues.append(f"undefined local reference {label}")
-    if path.name == "main.tex":
+    if path.name in ("main.tex", "research_compendium.tex"):
         bibkeys = set(re.findall(r"\\bibitem(?:\[[^]]*\])?\{([^{}]+)\}", source))
         for group in re.findall(r"\\cite\{([^{}]+)\}", source):
             for key in group.split(","):

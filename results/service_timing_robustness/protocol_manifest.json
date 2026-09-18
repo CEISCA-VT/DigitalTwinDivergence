@@ -1,0 +1,47 @@
+{
+  "schema": "service_timing_robustness_v1",
+  "primary_unchanged": true,
+  "physical_sequences": 10,
+  "v2_seeds_per_sequence": 3,
+  "requirements": [
+    0.7,
+    0.8,
+    0.9
+  ],
+  "acceptance_targets": [
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5
+  ],
+  "rates_hz": [
+    10.0,
+    5.0,
+    2.0,
+    1.0
+  ],
+  "delays_ms": [
+    0,
+    25,
+    50,
+    100,
+    200
+  ],
+  "phase_policy": "native 10-Hz sample indices within each delivery stride; no sub-sample interpolation",
+  "receiver": "ZOH versus last-delivered constant-turn arc using corrected_v_mps and corrected_omega_radps",
+  "alternate_configuration": "deterministic fixed_v5, one trajectory per sequence; paired sensitivity only",
+  "fixed_sources": {
+    "building00": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\building00\\fixed_v5_estimate_traj.txt",
+    "building01": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\building01\\fixed_v5_estimate_traj.txt",
+    "building02": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\building02\\fixed_v5_estimate_traj.txt",
+    "parking00": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\parking00\\fixed_v5_estimate_traj.txt",
+    "parking01": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\parking01\\fixed_v5_estimate_traj.txt",
+    "parking02": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\parking02\\fixed_v5_estimate_traj.txt",
+    "playground00": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\playground00\\fixed_v5_estimate_traj.txt",
+    "street00": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\street00\\fixed_v5_estimate_traj.txt",
+    "street01": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\street01\\fixed_v5_estimate_traj.txt",
+    "street02": "results\\i2nav_final_model_study\\phase1_official_fixed_v5\\street02\\fixed_v5_estimate_traj.txt"
+  },
+  "inference_unit": "physical sequence; seeds and phase variants nested"
+}
