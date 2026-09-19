@@ -59,6 +59,12 @@ Interpretation boundaries:
 - Threshold curves vary one threshold family at a time; they show robustness
   and dependence of the ledger, not application-independent tolerances.
 
+For OS-level Linux delivery emulation over the same precomputed states, use the
+isolated `tc netem` harness documented in
+[`linux_netem_delivery_study.md`](linux_netem_delivery_study.md). This records
+actual UDP arrival timestamps and does not modify the host's physical network
+interface.
+
 ## 4. Evidence freeze
 
 Do not freeze headline counts until the nested manifest is complete and the
