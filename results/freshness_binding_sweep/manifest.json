@@ -1,0 +1,68 @@
+{
+  "schema": "freshness_binding_sweep_v1",
+  "conditions": [
+    {
+      "name": "ideal_10hz",
+      "rate_hz": 10.0,
+      "delay_ms": 0.0,
+      "jitter_sd_ms": 0.0,
+      "loss_probability": 0.0,
+      "burst_period_s": null,
+      "burst_duration_s": 0.0
+    },
+    {
+      "name": "nominal_5hz",
+      "rate_hz": 5.0,
+      "delay_ms": 50.0,
+      "jitter_sd_ms": 20.0,
+      "loss_probability": 0.01,
+      "burst_period_s": null,
+      "burst_duration_s": 0.0
+    },
+    {
+      "name": "degraded_2hz",
+      "rate_hz": 2.0,
+      "delay_ms": 200.0,
+      "jitter_sd_ms": 50.0,
+      "loss_probability": 0.05,
+      "burst_period_s": null,
+      "burst_duration_s": 0.0
+    },
+    {
+      "name": "stress_1hz",
+      "rate_hz": 1.0,
+      "delay_ms": 300.0,
+      "jitter_sd_ms": 100.0,
+      "loss_probability": 0.1,
+      "burst_period_s": null,
+      "burst_duration_s": 0.0
+    },
+    {
+      "name": "burst_5hz_1s_every_8s",
+      "rate_hz": 5.0,
+      "delay_ms": 50.0,
+      "jitter_sd_ms": 20.0,
+      "loss_probability": 0.01,
+      "burst_period_s": 8.0,
+      "burst_duration_s": 1.0
+    },
+    {
+      "name": "burst_2hz_2s_every_10s",
+      "rate_hz": 2.0,
+      "delay_ms": 200.0,
+      "jitter_sd_ms": 50.0,
+      "loss_probability": 0.05,
+      "burst_period_s": 10.0,
+      "burst_duration_s": 2.0
+    }
+  ],
+  "aoi_limits_s": [
+    null,
+    0.5,
+    0.3,
+    0.2
+  ],
+  "target_satisfaction": 0.8,
+  "minimum_coverage": 0.95,
+  "status": "sensitivity analysis over frozen V2 saved states"
+}
