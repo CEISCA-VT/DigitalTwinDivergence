@@ -1,0 +1,265 @@
+{
+  "schema": "verified_kaggle_trajectory_bank_v1",
+  "study": "causal_derivative",
+  "status": "complete",
+  "ready_for_evidence_analysis": true,
+  "repository_commits": [
+    "6f91f5dae834ac55dfebf3abae76beba7379ff2c"
+  ],
+  "expected_total_tasks": 30,
+  "ledger_tasks_seen": 30,
+  "verified_trajectories": 30,
+  "missing_shards": [],
+  "missing_tasks": [],
+  "problems": [],
+  "archives": [
+    {
+      "path": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "shard_index": 0,
+      "tasks": 30,
+      "total_tasks": 30
+    }
+  ],
+  "trajectories": [
+    {
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_building00\\v2_evaluated_trajectory.csv",
+      "sha256": "9f19b1f318aedd25a465df8876eea6218aae7e6d2ab9f410b725ec28309b080f",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_01_building00/run_manifest.json"
+    },
+    {
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_building00\\v2_evaluated_trajectory.csv",
+      "sha256": "d5f57807fafd4d1894ae6de3049ad0b103c564453a7eef5d6536bdd64ccf6985",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_01_building00/run_manifest.json"
+    },
+    {
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_building00\\v2_evaluated_trajectory.csv",
+      "sha256": "1558009de858d3501edfb2ff351f5ed5bad99c6bcfb30963f9d2c92025943c91",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_01_building00/run_manifest.json"
+    },
+    {
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_building01\\v2_evaluated_trajectory.csv",
+      "sha256": "7f7e25412b815363bb20d5156367b69765644e4d56979325c83e6ef46a4c32bd",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_02_building01/run_manifest.json"
+    },
+    {
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_building01\\v2_evaluated_trajectory.csv",
+      "sha256": "6f68d7dd2f93f306657aac37ae560e68d62568509bf267be737463d5a626d7bf",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_02_building01/run_manifest.json"
+    },
+    {
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_building01\\v2_evaluated_trajectory.csv",
+      "sha256": "f5a245bcac9d4bf79f63a86860b37c71d512c0964881fe03acbc8f537a628568",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_02_building01/run_manifest.json"
+    },
+    {
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_building02\\v2_evaluated_trajectory.csv",
+      "sha256": "5a812935a4ac078f35c9f977ac4d3b13b64a3639c1985750ca443ce1bb6f701e",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_03_building02/run_manifest.json"
+    },
+    {
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_building02\\v2_evaluated_trajectory.csv",
+      "sha256": "ba88d5fa645ea274f8c114431d5463eb6389d6aaa64292ac7e6383a57b43aad0",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_03_building02/run_manifest.json"
+    },
+    {
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_building02\\v2_evaluated_trajectory.csv",
+      "sha256": "b457ade827449cfbc3896a5423f9dcca79aae4b691afe1633b76ffa3ccbb7634",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_03_building02/run_manifest.json"
+    },
+    {
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_parking00\\v2_evaluated_trajectory.csv",
+      "sha256": "fc7dce792b58c413a68b2ccfffbaa0004736ee4cccbbe8ae94388c5b8bda6bad",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_04_parking00/run_manifest.json"
+    },
+    {
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_parking00\\v2_evaluated_trajectory.csv",
+      "sha256": "01ed2d15007208866dad360e3b2ac31242b4a7678e58f44e58dae39c21c71d29",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_04_parking00/run_manifest.json"
+    },
+    {
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_parking00\\v2_evaluated_trajectory.csv",
+      "sha256": "cf8a0ed77b5b6a9707f5d0dd240bd45cb5571191278d073f6dcae9f7f06f7092",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_04_parking00/run_manifest.json"
+    },
+    {
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_parking01\\v2_evaluated_trajectory.csv",
+      "sha256": "2813ab726a78995461613227ce73327a0f7fb3fe3bffb7bc602f5023ef979062",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_05_parking01/run_manifest.json"
+    },
+    {
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_parking01\\v2_evaluated_trajectory.csv",
+      "sha256": "77f13222ad768676cf41d3ca1ae657f77f75a0edf3fb159c86d89caea28056d0",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_05_parking01/run_manifest.json"
+    },
+    {
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_parking01\\v2_evaluated_trajectory.csv",
+      "sha256": "0fbb3ad0e793c1edfe9e930849f100e46e274da7847da02c130b7c13e44c4b97",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_05_parking01/run_manifest.json"
+    },
+    {
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_parking02\\v2_evaluated_trajectory.csv",
+      "sha256": "4bf2d34999d207da84d8a12c405f5fd1d51711d8447966c379d76b0d9b7a475f",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_06_parking02/run_manifest.json"
+    },
+    {
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_parking02\\v2_evaluated_trajectory.csv",
+      "sha256": "5ab8852e22664f85d64ea8312ca194577197b42711bb8bce32fa864dc65c6e36",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_06_parking02/run_manifest.json"
+    },
+    {
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_parking02\\v2_evaluated_trajectory.csv",
+      "sha256": "10cf9e3a526b9101aa7500781a4c47f4893c7ee03704aad0f393624208052f25",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_06_parking02/run_manifest.json"
+    },
+    {
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_playground00\\v2_evaluated_trajectory.csv",
+      "sha256": "309a1a868562d5f3abe3b481f1af67e5f7ccc154bc1042a503766b29d9a775ec",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_07_playground00/run_manifest.json"
+    },
+    {
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_playground00\\v2_evaluated_trajectory.csv",
+      "sha256": "6acadce5017519748b28eb9f22e21880d610c8f0bc8b3d67093f3fbbd280cdc7",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_07_playground00/run_manifest.json"
+    },
+    {
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_playground00\\v2_evaluated_trajectory.csv",
+      "sha256": "bc454b0fbd078fd0cf31db5bad825e6a1627eebf16797b39f7aaaa9ce37a7697",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_07_playground00/run_manifest.json"
+    },
+    {
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_street00\\v2_evaluated_trajectory.csv",
+      "sha256": "4724b8e6332106c6f0ca0833c51d23f83c06dd4dc335aa9795192235c571a9fd",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_08_street00/run_manifest.json"
+    },
+    {
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_street00\\v2_evaluated_trajectory.csv",
+      "sha256": "e45305d990b4b8b7a4023fd60721ad71c370b62f2e26f329c65b55e8f2b16f04",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_08_street00/run_manifest.json"
+    },
+    {
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_street00\\v2_evaluated_trajectory.csv",
+      "sha256": "ffb914f43281a9356afdb23d93ae78cfc963c9fc9f9284d40afdd8bb012e474a",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_08_street00/run_manifest.json"
+    },
+    {
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_street01\\v2_evaluated_trajectory.csv",
+      "sha256": "195dd98f2abe42545648b7d3140541b5ad33054dbd16fe2c5b3bfceeba9b8132",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_09_street01/run_manifest.json"
+    },
+    {
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_street01\\v2_evaluated_trajectory.csv",
+      "sha256": "e4cd861089c65019a9a7535edc51f446f18720a8057cde148c3df0b205104f3b",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_09_street01/run_manifest.json"
+    },
+    {
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_street01\\v2_evaluated_trajectory.csv",
+      "sha256": "9ebdc2539a4f0df79a41d2a03bb5bbb659db0fd4b946b5ff5c3390b4f5d8970d",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_09_street01/run_manifest.json"
+    },
+    {
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_1042\\fold_street02\\v2_evaluated_trajectory.csv",
+      "sha256": "9cefc2e8e2335e397b3b1ab9f0fa20f4911b556c38e2c48f65464284f59232eb",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_02_base1042/fold_10_street02/run_manifest.json"
+    },
+    {
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_2042\\fold_street02\\v2_evaluated_trajectory.csv",
+      "sha256": "e049991de7f6f83288be9097c58d4124c61af9a3c9a28b9bdf0cd4189c45d053",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_03_base2042/fold_10_street02/run_manifest.json"
+    },
+    {
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results\\causal_derivative_loso\\trajectory_bank\\replicate_seed_42\\fold_street02\\v2_evaluated_trajectory.csv",
+      "sha256": "fa4714f36066aa6a06b6963a835122b73ce0ab08bf71210e0a4994fadb4eec9d",
+      "archive": "C:\\Users\\shrey\\Downloads\\i2nav_v2_causal_derivative_shard_00_of_01.zip",
+      "v2_manifest_member": "i2nav_v2_causal_derivative_loso/v2/replicate_01_base42/fold_10_street02/run_manifest.json"
+    }
+  ]
+}

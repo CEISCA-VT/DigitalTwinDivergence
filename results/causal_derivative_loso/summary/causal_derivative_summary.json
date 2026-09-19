@@ -1,0 +1,16 @@
+{
+  "schema": "causal_derivative_summary_v1",
+  "archive": "i2nav_v2_causal_derivative_shard_00_of_01.zip",
+  "archive_commit": "6f91f5dae834ac55dfebf3abae76beba7379ff2c",
+  "verified_runs": 30,
+  "physical_sequences": 10,
+  "seeds_per_sequence": 3,
+  "derivative_mode": "causal_backward",
+  "ledger_counts": {
+    "delivery_remediable": 28,
+    "persistent_under_ideal": 8,
+    "already_qualified_degraded": 4
+  },
+  "practical_recoveries": 26,
+  "practical_recovery_denominator": 28
+}

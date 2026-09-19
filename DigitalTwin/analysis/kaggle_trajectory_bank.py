@@ -118,7 +118,8 @@ def merge_archives(study: str, inputs: list[Path], output: Path) -> dict:
                             problems.append(f"{path}: missing unique numerical causality preflight")
                             continue
                         preflight = json.loads(archive.read(preflight_names[0]))
-                        if not preflight.get("passed", False):
+                        preflight_passed = preflight.get("passed") is True or preflight.get("status") == "PASS"
+                        if not preflight_passed:
                             problems.append(f"{path}: numerical causality preflight did not pass")
                             continue
                     commit = audit.get("commit") or ledger.get("commit")
