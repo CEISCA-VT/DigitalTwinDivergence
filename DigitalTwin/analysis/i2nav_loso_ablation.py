@@ -314,6 +314,7 @@ def set_seed(
 def build_fold_split(
     test_sequence: str,
     validation_count: int,
+    excluded_sequence: str | None = None,
 ) -> tuple[
     list[str],
     list[str],
@@ -345,7 +346,15 @@ def build_fold_split(
             "validation_count must be >= 1"
         )
 
-    if validation_count >= len(SEQUENCES) - 1:
+    if excluded_sequence == test_sequence:
+        raise ValueError("Additional excluded sequence must differ from test sequence")
+
+    if excluded_sequence is not None and excluded_sequence not in SEQUENCES:
+        raise ValueError(f"Unknown additional excluded sequence: {excluded_sequence}")
+
+    eligible_count = len(SEQUENCES) - 1 - int(excluded_sequence is not None)
+
+    if validation_count >= eligible_count:
         raise ValueError(
             "Too many validation sequences."
         )
@@ -370,7 +379,7 @@ def build_fold_split(
 
         offset += 1
 
-        if candidate == test_sequence:
+        if candidate == test_sequence or candidate == excluded_sequence:
             continue
 
         validation.append(
@@ -383,6 +392,7 @@ def build_fold_split(
         in SEQUENCES
         if (
             sequence != test_sequence
+            and sequence != excluded_sequence
             and sequence not in validation
         )
     ]
@@ -391,6 +401,29 @@ def build_fold_split(
         training,
         validation,
     )
+
+
+def causal_backward_features(
+    speed: np.ndarray,
+    omega: np.ndarray,
+    grid: np.ndarray,
+) -> np.ndarray:
+    """Canonical six inputs with derivatives using current and prior samples only."""
+    speed = np.asarray(speed, dtype=np.float64)
+    omega = np.asarray(omega, dtype=np.float64)
+    grid = np.asarray(grid, dtype=np.float64)
+    dt = np.diff(grid)
+    if len(speed) != len(omega) or len(speed) != len(grid) or len(grid) < 2:
+        raise ValueError("Causal feature inputs must have equal length >= 2")
+    if np.any(~np.isfinite(dt)) or np.any(dt <= 0):
+        raise ValueError("Feature grid must be finite and strictly increasing")
+    acceleration = np.zeros_like(speed)
+    yaw_acceleration = np.zeros_like(omega)
+    acceleration[1:] = np.diff(speed) / dt
+    yaw_acceleration[1:] = np.diff(omega) / dt
+    return np.column_stack(
+        [speed, omega, acceleration, yaw_acceleration, np.abs(omega), np.abs(acceleration)]
+    ).astype(np.float32)
 
 
 # ===========================================================================
@@ -3548,6 +3581,23 @@ def parse_args() -> argparse.Namespace:
         default=2,
     )
 
+    parser.add_argument(
+        "--additional-excluded-sequence",
+        choices=SEQUENCES,
+        default=None,
+        help=(
+            "Optional outer qualification sequence excluded from training, "
+            "normalization, validation, and checkpoint selection."
+        ),
+    )
+
+    parser.add_argument(
+        "--feature-derivative-mode",
+        choices=("centered", "causal_backward"),
+        default="centered",
+        help="Derivative convention for trusted fast inputs.",
+    )
+
     # -----------------------------------------------------------------------
     # Sampling / GRU
     # -----------------------------------------------------------------------
@@ -3932,6 +3982,10 @@ def main() -> int:
 
     args = parse_args()
 
+    if args.feature_derivative_mode == "causal_backward":
+        from DigitalTwin.analysis import i2nav_gru_dualhead as feature_module
+        feature_module.build_features = causal_backward_features
+
     set_seed(
         args.seed
     )
@@ -4107,6 +4161,8 @@ def main() -> int:
             test_name,
 
             args.validation_count,
+
+            args.additional_excluded_sequence,
         )
 
         fold_splits.append(
@@ -4116,6 +4172,12 @@ def main() -> int:
 
                 "test":
                     test_name,
+
+                "additional_excluded_sequence":
+                    args.additional_excluded_sequence,
+
+                "feature_derivative_mode":
+                    args.feature_derivative_mode,
 
                 "validation":
                     validation_names,

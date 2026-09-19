@@ -52,6 +52,7 @@ def heldout():
     d = d[np.isclose(d.target_acceptance, .3)].set_index("method")
     identity = pd.read_csv(ROBUST / "identity_nested_overall.csv")
     identity = identity[np.isclose(identity.target_acceptance, .3)].sort_values("sequence")
+    assert len(identity) == 10 and identity.sequence.nunique() == 10
     # The identity interval uses the same ten-sequence pooled-ratio bootstrap unit.
     rng = np.random.default_rng(397)
     ix = rng.integers(0, len(identity), size=(5000, len(identity)))
@@ -66,7 +67,9 @@ def heldout():
     fig, ax = plt.subplots(figsize=(7.1, 3.55), constrained_layout=True)
     for y, (key, color) in enumerate(zip(keys, colors)):
         if key == "service_identity_only":
-            accepted, false, lower, upper = 200, 82, lo, hi
+            accepted = int(identity.accepted.sum())
+            false = int(identity.false_qualified.sum())
+            lower, upper = lo, hi
         else:
             row = d.loc[key]
             accepted, false = int(row.accepted), int(row.false_qualified)

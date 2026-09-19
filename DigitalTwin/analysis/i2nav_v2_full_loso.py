@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import importlib
 import json
 import math
@@ -410,6 +411,54 @@ def build_slow_bias_target(sequence: Any, samples: int) -> np.ndarray:
     true_dw = np.asarray(sequence.target_corrections[:, 1], dtype=np.float64)
     target = rolling_mean(true_dw, samples)
     return np.clip(target, -SLOW_BIAS_LIMIT, SLOW_BIAS_LIMIT).astype(np.float32)
+
+
+def causal_backward_features(
+    speed: np.ndarray, omega: np.ndarray, grid: np.ndarray
+) -> np.ndarray:
+    """Match the six V2 inputs while using only current and earlier samples."""
+    speed = np.asarray(speed, dtype=np.float64)
+    omega = np.asarray(omega, dtype=np.float64)
+    grid = np.asarray(grid, dtype=np.float64)
+    dt = np.diff(grid)
+    if len(speed) != len(omega) or len(speed) != len(grid) or len(grid) < 2:
+        raise ValueError("Causal feature inputs must have equal length >= 2")
+    if np.any(~np.isfinite(dt)) or np.any(dt <= 0):
+        raise ValueError("Feature grid must be finite and strictly increasing")
+    acceleration = np.zeros_like(speed)
+    yaw_acceleration = np.zeros_like(omega)
+    acceleration[1:] = np.diff(speed) / dt
+    yaw_acceleration[1:] = np.diff(omega) / dt
+    return np.column_stack(
+        [speed, omega, acceleration, yaw_acceleration, np.abs(omega), np.abs(acceleration)]
+    ).astype(np.float32)
+
+
+def restricted_fold_split(
+    test_sequence: str, validation_count: int, excluded_sequence: str | None
+) -> tuple[list[str], list[str]]:
+    """Deterministic split with an optional upstream outer-sequence exclusion."""
+    if excluded_sequence is None:
+        return original.build_fold_split(test_sequence, validation_count)
+    if excluded_sequence == test_sequence:
+        raise ValueError("Additional excluded sequence must differ from test sequence")
+    if excluded_sequence not in original.SEQUENCES:
+        raise ValueError(f"Unknown additional excluded sequence: {excluded_sequence}")
+    eligible = [
+        name for name in original.SEQUENCES
+        if name not in {test_sequence, excluded_sequence}
+    ]
+    if validation_count < 1 or validation_count >= len(eligible):
+        raise ValueError("Invalid validation count for restricted fold")
+    test_index = original.SEQUENCES.index(test_sequence)
+    ordered = []
+    for offset in range(1, len(original.SEQUENCES) + 1):
+        candidate = original.SEQUENCES[(test_index + offset) % len(original.SEQUENCES)]
+        if candidate in eligible and candidate not in ordered:
+            ordered.append(candidate)
+    validation = ordered[:validation_count]
+    training = [name for name in original.SEQUENCES if name in eligible and name not in validation]
+    return training, validation
 
 
 # ---------------------------------------------------------------------------
@@ -977,11 +1026,19 @@ def run_one(args: argparse.Namespace) -> Path:
 
     data_root = args.root.resolve()
     frozen_source = args.frozen_v1_dir.resolve()
+    direct_v1_checkpoint = args.v1_checkpoint.resolve() if args.v1_checkpoint else None
+    direct_v1_results = args.v1_results_csv.resolve() if args.v1_results_csv else None
     output_root = args.output_dir.resolve()
     if not data_root.exists():
         raise FileNotFoundError(f"i2Nav root not found: {data_root}")
     if not frozen_source.exists():
         raise FileNotFoundError(f"Frozen V1 directory not found: {frozen_source}")
+    if (direct_v1_checkpoint is None) != (direct_v1_results is None):
+        raise ValueError("--v1-checkpoint and --v1-results-csv must be supplied together")
+    if direct_v1_checkpoint is not None and not direct_v1_checkpoint.is_file():
+        raise FileNotFoundError(direct_v1_checkpoint)
+    if direct_v1_results is not None and not direct_v1_results.is_file():
+        raise FileNotFoundError(direct_v1_results)
 
     defaults = base.original_default_args(original)
     RATE = float(defaults.rate_hz)
@@ -1001,6 +1058,7 @@ def run_one(args: argparse.Namespace) -> Path:
     DEVICE = torch.device(args.device)
 
     test_name = args.test_sequence
+    excluded_name = args.additional_excluded_sequence
     base_seed = int(args.base_seed)
     replicate = SEED_TO_REPLICATE[base_seed]
     fold_index = original.SEQUENCES.index(test_name)
@@ -1030,6 +1088,15 @@ def run_one(args: argparse.Namespace) -> Path:
         "repo_commit": commit,
         "repo_dirty": dirty,
         "test_sequence": test_name,
+        "additional_excluded_sequence": excluded_name,
+        "feature_derivative_mode": args.feature_derivative_mode,
+        "v1_checkpoint_source": (
+            str(direct_v1_checkpoint) if direct_v1_checkpoint else "frozen_v1_manifest"
+        ),
+        "v1_checkpoint_sha256": (
+            hashlib.sha256(direct_v1_checkpoint.read_bytes()).hexdigest()
+            if direct_v1_checkpoint else None
+        ),
         "fold": fold_number,
         "replicate": replicate,
         "base_seed": base_seed,
@@ -1071,15 +1138,22 @@ def run_one(args: argparse.Namespace) -> Path:
     print(f"repo_commit={commit} dirty={dirty}")
     print("=" * 88, flush=True)
 
+    if args.feature_derivative_mode == "causal_backward":
+        from DigitalTwin.analysis import i2nav_gru_dualhead as feature_module
+        feature_module.build_features = causal_backward_features
     prepared = prepare_all_sequences(data_root, defaults)
     canonical, slow_features_raw, slow_bias_targets = build_all_canonical(prepared, data_root)
 
-    training_names, validation_names = original.build_fold_split(
-        test_name, int(defaults.validation_count)
+    training_names, validation_names = restricted_fold_split(
+        test_name, int(defaults.validation_count), excluded_name
     )
     print("Train      :", training_names)
     print("Validation :", validation_names)
     print("Test       :", test_name)
+    print("Extra excl.:", excluded_name)
+    print("Derivatives:", args.feature_derivative_mode)
+    if excluded_name in set(training_names + validation_names + [test_name]):
+        raise RuntimeError("Additional excluded sequence leaked into a model-development split")
 
     fast_mean, fast_std = base.feature_normalization(prepared, training_names)
     slow_mean, slow_std = slow_feature_normalization(slow_features_raw, training_names)
@@ -1186,37 +1260,58 @@ def run_one(args: argparse.Namespace) -> Path:
     prediction_trace_path = run_dir / "v2_prediction_trace.csv"
     save_prediction_trace(prediction_trace_path, test_sequence, test_cache, prediction)
 
-    with frozen_v1_runtime_copy(frozen_source) as frozen_runtime:
-        manifest_lookup = base.frozen_manifest_lookup(frozen_runtime)
-        metric_lookup = base.frozen_metric_lookup(frozen_runtime)
-        if len(metric_lookup) != 30:
-            raise RuntimeError(f"Expected 30 frozen V1 metric rows; found {len(metric_lookup)}")
-        frozen_key = (replicate, test_name)
-        if frozen_key not in manifest_lookup or frozen_key not in metric_lookup:
-            raise RuntimeError(f"Frozen V1 evidence missing {frozen_key}")
-
+    if direct_v1_checkpoint is not None:
         alphas = base.frozen_v1_alphas(
             original,
             test_sequence,
-            frozen_runtime,
-            manifest_lookup[frozen_key],
+            direct_v1_checkpoint.parent,
+            {"frozen_checkpoint": direct_v1_checkpoint.name},
             DEVICE,
             int(defaults.eval_batch_size),
         )
-        trajectory_path = run_dir / "v2_evaluated_trajectory.csv"
-        evaluation = original.evaluate_predictions(
-            fold=fold_number,
-            method="v2_slow_additive",
-            sequence=test_sequence,
-            training_names=training_names,
-            validation_names=validation_names,
-            corrections=prediction["corrections"],
-            alphas=alphas,
-            args=defaults,
-            trajectory_path=trajectory_path,
-        )
-        metrics = vars(evaluation)
-        v1 = metric_lookup[frozen_key]
+        v1_table = pd.read_csv(direct_v1_results)
+        v1_rows = v1_table[
+            (v1_table["test_sequence"] == test_name)
+            & (v1_table["method"] == "gru_dual")
+            & (v1_table["status"] == "ok")
+        ]
+        if len(v1_rows) != 1:
+            raise RuntimeError(
+                f"Expected one direct V1 metric row for {test_name}; found {len(v1_rows)}"
+            )
+        v1 = v1_rows.iloc[0].to_dict()
+    else:
+        with frozen_v1_runtime_copy(frozen_source) as frozen_runtime:
+            manifest_lookup = base.frozen_manifest_lookup(frozen_runtime)
+            metric_lookup = base.frozen_metric_lookup(frozen_runtime)
+            if len(metric_lookup) != 30:
+                raise RuntimeError(f"Expected 30 frozen V1 metric rows; found {len(metric_lookup)}")
+            frozen_key = (replicate, test_name)
+            if frozen_key not in manifest_lookup or frozen_key not in metric_lookup:
+                raise RuntimeError(f"Frozen V1 evidence missing {frozen_key}")
+            alphas = base.frozen_v1_alphas(
+                original,
+                test_sequence,
+                frozen_runtime,
+                manifest_lookup[frozen_key],
+                DEVICE,
+                int(defaults.eval_batch_size),
+            )
+            v1 = metric_lookup[frozen_key]
+
+    trajectory_path = run_dir / "v2_evaluated_trajectory.csv"
+    evaluation = original.evaluate_predictions(
+        fold=fold_number,
+        method="v2_slow_additive",
+        sequence=test_sequence,
+        training_names=training_names,
+        validation_names=validation_names,
+        corrections=prediction["corrections"],
+        alphas=alphas,
+        args=defaults,
+        trajectory_path=trajectory_path,
+    )
+    metrics = vars(evaluation)
 
     diagnostic = post30_yaw_diagnostics(test_sequence, test_cache, prediction)
 
@@ -1337,6 +1432,33 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--test-sequence", required=True)
     parser.add_argument("--base-seed", type=int, required=True)
+    parser.add_argument(
+        "--additional-excluded-sequence",
+        choices=list(original.SEQUENCES),
+        default=None,
+        help=(
+            "Optional outer qualification sequence to exclude from training, "
+            "normalization, validation, and checkpoint selection."
+        ),
+    )
+    parser.add_argument(
+        "--feature-derivative-mode",
+        choices=("centered", "causal_backward"),
+        default="centered",
+        help="Derivative convention for the six fast V2 inputs; default preserves frozen V2.",
+    )
+    parser.add_argument(
+        "--v1-checkpoint",
+        type=Path,
+        default=None,
+        help="Optional directly trained V1 gru_dual checkpoint for this split.",
+    )
+    parser.add_argument(
+        "--v1-results-csv",
+        type=Path,
+        default=None,
+        help="Metrics CSV produced alongside --v1-checkpoint.",
+    )
     parser.add_argument("--device", default="cuda")
     parser.add_argument(
         "--overwrite",
