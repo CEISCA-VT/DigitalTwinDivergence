@@ -19,6 +19,16 @@ fi
 
 cd "${REPO_DIR}"
 
+ENV_SETUP="${ENV_SETUP:-}"
+if [[ -n "${ENV_SETUP}" ]]; then
+    if [[ ! -f "${ENV_SETUP}" ]]; then
+        echo "ENV_SETUP was provided but does not exist: ${ENV_SETUP}" >&2
+        exit 2
+    fi
+    # shellcheck disable=SC1090
+    source "${ENV_SETUP}"
+fi
+
 PYTHON_BIN="${PYTHON_BIN:-python}"
 DATASET_ROOT="${DATASET_ROOT:-${REPO_DIR}/public_datasets/im2nav}"
 FROZEN_V1_DIR="${FROZEN_V1_DIR:-${REPO_DIR}/results/i2nav_v1_frozen}"
@@ -32,6 +42,9 @@ echo "Python: ${PYTHON_BIN}"
 echo "Dataset: ${DATASET_ROOT}"
 echo "Output: ${OUTPUT_DIR}"
 echo "Workers: ${NUM_WORKERS}"
+echo "ENV_SETUP: ${ENV_SETUP:-<none>}"
+command -v "${PYTHON_BIN}" || true
+"${PYTHON_BIN}" -c "import sys; print('python_executable', sys.executable); print('python_version', sys.version)"
 nvidia-smi || true
 
 "${PYTHON_BIN}" -c "import torch; assert torch.cuda.is_available(), 'CUDA is unavailable'; print('torch', torch.__version__, 'GPU', torch.cuda.get_device_name(0))"

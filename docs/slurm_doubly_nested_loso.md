@@ -33,6 +33,76 @@ The default request is one GPU, eight CPUs, 64 GB RAM, and seven days. Override
 partition, account, time, memory, or GPU syntax on the `sbatch` command if your
 cluster requires different values.
 
+## Python environment on Falcon
+
+The Slurm job must run with a Python environment that can import CUDA-enabled
+PyTorch. A failed job with:
+
+```text
+ModuleNotFoundError: No module named 'torch'
+```
+
+means the batch job used the system Python instead of the project environment.
+
+First inspect what Falcon exposes:
+
+```bash
+module spider python
+module spider conda
+module spider miniforge
+module spider mamba
+```
+
+If a conda/miniforge module exists, create the environment once from the repo:
+
+```bash
+module load <the-python-or-conda-module-shown-by-module-spider>
+conda env create -f environment.yml
+conda activate digitaltwin-a30
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
+
+Then submit with the exact Python from that environment:
+
+```bash
+PYTHON_BIN="$(which python)" bash scripts/slurm/submit_doubly_nested_loso.sh --partition=a30_normal_q --qos=fal_a30_normal_base
+```
+
+If conda is not available, create a local virtual environment once:
+
+```bash
+python3 -m venv "$HOME/.venvs/digitaltwin-a30"
+source "$HOME/.venvs/digitaltwin-a30/bin/activate"
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install --index-url https://download.pytorch.org/whl/cu118 "torch==2.5.1"
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
+
+Then submit with:
+
+```bash
+PYTHON_BIN="$HOME/.venvs/digitaltwin-a30/bin/python" bash scripts/slurm/submit_doubly_nested_loso.sh --partition=a30_normal_q --qos=fal_a30_normal_base
+```
+
+The batch script also supports an optional setup file if your cluster requires
+module loads inside the batch allocation:
+
+```bash
+cat > scripts/slurm/falcon_env.sh <<'EOF'
+module load <module-name-if-needed>
+source "$HOME/.venvs/digitaltwin-a30/bin/activate"
+EOF
+
+ENV_SETUP="$PWD/scripts/slurm/falcon_env.sh" PYTHON_BIN=python bash scripts/slurm/submit_doubly_nested_loso.sh --partition=a30_normal_q --qos=fal_a30_normal_base
+```
+
+Do a cheap GPU import check before submitting the week-scale job:
+
+```bash
+srun --partition=a30_normal_q --qos=fal_a30_normal_base --gres=gpu:1 --time=00:05:00 "$HOME/.venvs/digitaltwin-a30/bin/python" -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+```
+
 Use the submission helper so the queued job is pinned to the exact current
 commit:
 
