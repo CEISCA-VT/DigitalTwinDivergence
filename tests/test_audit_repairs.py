@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 
 from DigitalTwin.analysis.i2nav_fidelity_evaluator import evaluate_fidelity_frames
+from DigitalTwin.analysis.i2nav_loso_ablation import build_fold_split as build_v1_fold_split
+from DigitalTwin.analysis.i2nav_v2_full_loso import causal_backward_features, restricted_fold_split
 from DigitalTwin.analysis.ugv01_fidelity_protocol import _derived_rate_metrics
 from DigitalTwin.dashboard.server import TwinStream
 
@@ -25,6 +27,29 @@ def test_rpe_excludes_pairs_crossing_reference_gap():
     metrics = _derived_rate_metrics(frame, series)
     assert metrics["Dv_derived_RMSE_mps"] == 0.0
     assert np.nanmax(series["derived_Dv_mps"]) == 0.0
+
+
+def test_restricted_fold_excludes_outer_sequence_everywhere():
+    training, validation = restricted_fold_split("parking02", 2, "parking01")
+    assert "parking02" not in training + validation
+    assert "parking01" not in training + validation
+    assert len(training) == 6
+    assert len(validation) == 2
+    v1_training, v1_validation = build_v1_fold_split("parking02", 2, "parking01")
+    assert (v1_training, v1_validation) == (training, validation)
+
+
+def test_causal_backward_features_do_not_use_next_sample():
+    grid = np.arange(5, dtype=float) * 0.1
+    speed = np.zeros(5)
+    omega = np.zeros(5)
+    before = causal_backward_features(speed, omega, grid)
+    speed[-1] = 1.0
+    omega[-1] = 2.0
+    after = causal_backward_features(speed, omega, grid)
+    np.testing.assert_allclose(after[:-1], before[:-1])
+    assert after[-1, 2] == 10.0
+    assert after[-1, 3] == 20.0
 
 
 def test_live_stream_rotates_position_into_gps_frame_and_keeps_elapsed_time(tmp_path, monkeypatch):

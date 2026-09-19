@@ -147,6 +147,14 @@ def write_csv(path: Path | str, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
+def sha256_file(path: Path | str) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def repo_root() -> Path:
     # .../DigitalTwin/analysis/i2nav_v2_full_loso.py -> repository root
     return Path(__file__).resolve().parents[2]
@@ -1094,8 +1102,13 @@ def run_one(args: argparse.Namespace) -> Path:
             str(direct_v1_checkpoint) if direct_v1_checkpoint else "frozen_v1_manifest"
         ),
         "v1_checkpoint_sha256": (
-            hashlib.sha256(direct_v1_checkpoint.read_bytes()).hexdigest()
-            if direct_v1_checkpoint else None
+            sha256_file(direct_v1_checkpoint) if direct_v1_checkpoint else None
+        ),
+        "v1_results_source": (
+            str(direct_v1_results) if direct_v1_results else "frozen_v1_manifest"
+        ),
+        "v1_results_sha256": (
+            sha256_file(direct_v1_results) if direct_v1_results else None
         ),
         "fold": fold_number,
         "replicate": replicate,
@@ -1154,6 +1167,16 @@ def run_one(args: argparse.Namespace) -> Path:
     print("Derivatives:", args.feature_derivative_mode)
     if excluded_name in set(training_names + validation_names + [test_name]):
         raise RuntimeError("Additional excluded sequence leaked into a model-development split")
+
+    manifest["split_provenance"] = {
+        "training_sequences": list(training_names),
+        "validation_sequences": list(validation_names),
+        "normalization_fit_sequences": list(training_names),
+        "checkpoint_selection_sequences": list(validation_names),
+        "excluded_test_sequence": test_name,
+        "additional_excluded_sequence": excluded_name,
+    }
+    write_json(run_dir / "run_manifest.json", manifest)
 
     fast_mean, fast_std = base.feature_normalization(prepared, training_names)
     slow_mean, slow_std = slow_feature_normalization(slow_features_raw, training_names)
@@ -1366,6 +1389,8 @@ def run_one(args: argparse.Namespace) -> Path:
     manifest["status"] = "complete"
     manifest["training_names"] = list(training_names)
     manifest["validation_names"] = list(validation_names)
+    manifest["normalization_fit_sequences"] = list(training_names)
+    manifest["checkpoint_selection_sequences"] = list(validation_names)
     manifest["training_seconds"] = training_seconds
     manifest["best_validation_loss"] = float(best_val)
     manifest["artifacts"] = {
@@ -1378,6 +1403,15 @@ def run_one(args: argparse.Namespace) -> Path:
         "run_summary": "run_summary.json",
     }
     write_json(run_dir / "run_manifest.json", manifest)
+    trajectory_sha256 = sha256_file(trajectory_path)
+    checkpoint_sha256 = sha256_file(run_dir / "v2_slow_additive_yaw.pt")
+    manifest["artifacts_sha256"] = {
+        "v2_checkpoint": checkpoint_sha256,
+        "evaluated_trajectory": trajectory_sha256,
+        "prediction_trace": sha256_file(prediction_trace_path),
+        "run_summary": sha256_file(run_dir / "run_summary.json"),
+    }
+    write_json(run_dir / "run_manifest.json", manifest)
     write_json(
         complete_marker,
         {
@@ -1387,6 +1421,8 @@ def run_one(args: argparse.Namespace) -> Path:
             "replicate": replicate,
             "base_seed": base_seed,
             "actual_v2_seed": actual_seed,
+            "v2_checkpoint_sha256": checkpoint_sha256,
+            "evaluated_trajectory_sha256": trajectory_sha256,
         },
     )
 

@@ -4184,6 +4184,12 @@ def main() -> int:
 
                 "train":
                     training_names,
+
+                "normalization_fit_sequences":
+                    training_names,
+
+                "checkpoint_selection_sequences":
+                    validation_names,
             }
         )
 
