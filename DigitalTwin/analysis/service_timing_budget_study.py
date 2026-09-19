@@ -116,6 +116,10 @@ def evaluate(a, service, rate, delay_ms, start_s=PREFIX_S, end_s=None):
             "physical_satisfaction":float(physical.sum()/denom), "freshness_satisfaction":float(fresh.sum()/denom),
             "joint_satisfaction":float(joint.sum()/denom), "failure_episodes":fail_count,
             "failure_duration_s":fail_s, "max_failure_episode_s":fail_max,
+            "mean_position_discrepancy_m":float(np.mean(pos[observable])) if observable.any() else np.nan,
+            "p95_position_discrepancy_m":float(np.quantile(pos[observable],.95)) if observable.any() else np.nan,
+            "mean_heading_discrepancy_deg":float(np.mean(head[observable])) if observable.any() else np.nan,
+            "p95_heading_discrepancy_deg":float(np.quantile(head[observable],.95)) if observable.any() else np.nan,
             "mean_aoi_s":float(np.mean(age[observable])) if observable.any() else np.nan,
             "max_aoi_s":float(np.max(age[observable])) if observable.any() else np.nan,
             "eligible_samples":int(eligible.sum()), "observable_samples":int(observable.sum())}
@@ -152,6 +156,9 @@ def sequence_rows(runs):
     metrics=["coverage","physical_satisfaction","freshness_satisfaction","joint_satisfaction","failure_duration_s","max_failure_episode_s",
              "mean_aoi_s","max_aoi_s","calibration_coverage","calibration_physical_satisfaction",
              "calibration_freshness_satisfaction","calibration_joint_satisfaction"]+NUMERIC_FEATURES[6:]
+    metrics += [name for name in ("mean_position_discrepancy_m","p95_position_discrepancy_m",
+                                  "mean_heading_discrepancy_deg","p95_heading_discrepancy_deg")
+                if name in runs.columns]
     d=runs.groupby(keys,as_index=False)[metrics].mean()
     d["qualified"]=((d.coverage>=MIN_COVERAGE)&(d.physical_satisfaction>=TARGET)&
                     (d.freshness_satisfaction>=TARGET)&(d.joint_satisfaction>=TARGET)).astype(int)
@@ -312,8 +319,19 @@ def remediability(seq,pred):
              "ideal_failure_component":_failure_component(ir),
              "practical_failure_component":_failure_component(fr)}
         for prefix,r in (("degraded",dr),("ideal",ir),("practical",fr)):
-            for metric in ("coverage","physical_satisfaction","freshness_satisfaction","joint_satisfaction"):
+            for metric in ("coverage","physical_satisfaction","freshness_satisfaction","joint_satisfaction",
+                           "mean_position_discrepancy_m","p95_position_discrepancy_m",
+                           "mean_heading_discrepancy_deg","p95_heading_discrepancy_deg"):
+                if metric not in r.index:
+                    continue
                 row[f"{prefix}_{metric}"]=float(r[metric])
+        if "degraded_mean_position_discrepancy_m" in row:
+            row["held_minus_ideal_mean_position_m"] = (
+                row["degraded_mean_position_discrepancy_m"] - row["ideal_mean_position_discrepancy_m"]
+            )
+            row["held_minus_ideal_mean_heading_deg"] = (
+                row["degraded_mean_heading_discrepancy_deg"] - row["ideal_mean_heading_discrepancy_deg"]
+            )
         rows.append(row)
     out=pd.DataFrame(rows)
     # Any non-ideal qualification when ideal fails is recorded explicitly.
