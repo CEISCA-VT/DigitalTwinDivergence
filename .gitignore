@@ -34,6 +34,18 @@ ugv01_gps_dev/
 *.zip
 magnet_tfp/
 manuscript/
+!manuscript/
+manuscript/*
+!manuscript/research_compendium.tex
+!manuscript/figures/
+manuscript/figures/*
+!manuscript/figures/v1_v2_local_vs_global_clean.png
+!manuscript/figures/local_vs_global_fidelity.png
+!manuscript/figures/benign_envelope_by_condition.png
+!manuscript/figures/loso_envelope_coverage.png
+!manuscript/figures/official_benchmark_results.png
+!manuscript/figures/magnet_horizon_component_counterexample.png
+!manuscript/figures/threshold_curve_ledger.png
 # ============================================================
 # Generated experiment outputs
 # ============================================================
