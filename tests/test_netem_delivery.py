@@ -1,9 +1,11 @@
 import hashlib
 import json
+from pathlib import Path
 
 import pandas as pd
 import numpy as np
 
+from DigitalTwin.analysis import netem_delivery_replay as netem_replay
 from DigitalTwin.analysis.netem_delivery_replay import discover_trajectory_sources, measured_delivery
 from DigitalTwin.analysis.netem_transport import summarize_capture
 
@@ -96,3 +98,25 @@ def test_nested_bank_source_selection_uses_only_verified_outer_tests(tmp_path):
     sources = discover_trajectory_sources(manifest)
     assert len(sources) == 30
     assert {source["sequence"] for source in sources} == {f"sequence_{i}" for i in range(10)}
+
+
+def test_capture_discovery_accepts_repo_relative_root(tmp_path, monkeypatch):
+    capture_dir = tmp_path / "captures" / "ideal" / "replicate_01"
+    capture_dir.mkdir(parents=True)
+    (capture_dir / "capture_manifest.json").write_text(
+        json.dumps({"condition": "ideal"}), encoding="utf-8"
+    )
+    pd.DataFrame(
+        {
+            "packet_id": [0],
+            "received": [True],
+            "measured_delay_ms": [0.5],
+        }
+    ).to_csv(capture_dir / "packet_delivery_ledger.csv", index=False)
+
+    monkeypatch.setattr(netem_replay, "ROOT", tmp_path)
+    monkeypatch.setattr(netem_replay, "REQUIRED_CONDITIONS", {"ideal"})
+    captures = netem_replay.discover_captures(Path("captures"))
+
+    assert len(captures) == 1
+    assert captures[0][0]["condition"] == "ideal"

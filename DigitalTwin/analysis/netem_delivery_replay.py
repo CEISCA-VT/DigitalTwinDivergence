@@ -70,7 +70,17 @@ def discover_trajectory_sources(bank_manifest: Path | None = None) -> list[dict]
     return sources
 
 
+def _repo_relative(path: Path) -> str:
+    resolved = path.resolve()
+    try:
+        return str(resolved.relative_to(ROOT))
+    except ValueError:
+        return str(resolved)
+
+
 def discover_captures(root: Path) -> list[tuple[dict, pd.DataFrame, Path]]:
+    if not root.is_absolute():
+        root = ROOT / root
     captures = []
     for manifest_path in sorted(root.glob("*/replicate_*/capture_manifest.json")):
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -140,7 +150,7 @@ def run(capture_root: Path, output: Path, bank_manifest: Path | None = None) -> 
         condition = manifest["condition"]
         rate_hz = float(manifest["requested_rate_hz"])
         transport_replicate = int(manifest["transport_replicate"])
-        capture_sources.append({**manifest, "packet_ledger": str(ledger_path.relative_to(ROOT))})
+        capture_sources.append({**manifest, "packet_ledger": _repo_relative(ledger_path)})
         for source in sources:
             path = source["path"]
             data = base.load(path)

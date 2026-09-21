@@ -9,7 +9,7 @@
 \maketitle
 
 \begin{abstract}
-This compendium documents experiments on physical--virtual fidelity in sensor-lightweight digital twins. The work begins with a mobile-robot twin driven by wheel and inertial measurements, separates short-horizon trajectory agreement from accumulated global synchronization, and studies how benign operating condition changes the fidelity profile. It then defines service-relative contracts over required quantities, horizons, physical tolerances, freshness limits, and observability. Experiments use ten i2Nav robot sequences with three model seeds, three AprilTag-referenced UGV01 recordings, five TerraSentia agricultural-robot sequences, twenty UGV01 live telemetry traces, and thermal and process datasets. Completed evidence shows that low finite-horizon relative error can coexist with large global divergence; persistent yaw mismatch is associated with accumulated heading and position error; fidelity distributions vary with operating condition; and sampled delivery can change whether an already-computed twin state satisfies a service without changing the model. A complete doubly nested i2Nav study verifies 300 training-to-evaluation pipelines and excludes each outer test sequence from the checkpoints, normalization, validation, and checkpoint selection used to construct its qualification-training evidence. At a common 25\% target acceptance, the resulting empirical service surface falsely qualifies 4/200 accepted cells (2.0\%), compared with 75/200 (37.5\%) for service identity, 28/160 (17.5\%) for AoI-only, 30/200 (15.0\%) for a common score, and 55/199 (27.6\%) for motion logistic regression. The clean bank preserves the 30 delivery-remediable, six persistent, and four already-qualified sequence--service partition. Although freshness is inactive for the remediable cases at the original 2-Hz/200-ms operating point, a dedicated replay with 0.2--0.3-s AoI limits, random loss, and periodic outages produces 308 sequence--service--condition cases in which freshness fails alone or jointly with physical discrepancy. A position-only UGV01 replay independently yields five already-qualified, three delivery-remediable, and four persistent run--service cases under a source-rate-compatible protocol. A completed 30-run causal-derivative LOSO sensitivity removes future-sample dependence from derivative-bearing features. Its service-level structure remains similar, but its trajectory errors increase, making it a causal-provenance repair and negative accuracy result rather than a model improvement. TerraSentia independently reproduces local--global dissociation, while a five-fold platform-calibrated physics study improves macro ATE only modestly and does not improve its contract ledger. Linux network emulation remains the outstanding delivery experiment.
+This compendium documents experiments on physical--virtual fidelity in sensor-lightweight digital twins. The work begins with a mobile-robot twin driven by wheel and inertial measurements, separates short-horizon trajectory agreement from accumulated global synchronization, and studies how benign operating condition changes the fidelity profile. It then defines service-relative contracts over required quantities, horizons, physical tolerances, freshness limits, and observability. Experiments use ten i2Nav robot sequences with three model seeds, three AprilTag-referenced UGV01 recordings, five TerraSentia agricultural-robot sequences, twenty UGV01 live telemetry traces, and thermal and process datasets. Completed evidence shows that low finite-horizon relative error can coexist with large global divergence; persistent yaw mismatch is associated with accumulated heading and position error; fidelity distributions vary with operating condition; and sampled delivery can change whether an already-computed twin state satisfies a service without changing the model. A complete doubly nested i2Nav study verifies 300 training-to-evaluation pipelines and excludes each outer test sequence from the checkpoints, normalization, validation, and checkpoint selection used to construct its qualification-training evidence. At a common 25\% target acceptance, the resulting empirical service surface falsely qualifies 4/200 accepted cells (2.0\%), compared with 75/200 (37.5\%) for service identity, 28/160 (17.5\%) for AoI-only, 30/200 (15.0\%) for a common score, and 55/199 (27.6\%) for motion logistic regression. The clean bank preserves the 30 delivery-remediable, six persistent, and four already-qualified sequence--service partition. Although freshness is inactive for the remediable cases at the original 2-Hz/200-ms operating point, a dedicated replay with 0.2--0.3-s AoI limits, random loss, and periodic outages produces 308 sequence--service--condition cases in which freshness fails alone or jointly with physical discrepancy. A position-only UGV01 replay independently yields five already-qualified, three delivery-remediable, and four persistent run--service cases under a source-rate-compatible protocol. A completed 30-run causal-derivative LOSO sensitivity removes future-sample dependence from derivative-bearing features. Its service-level structure remains similar, but its trajectory errors increase, making it a causal-provenance repair and negative accuracy result rather than a model improvement. TerraSentia independently reproduces local--global dissociation, while a five-fold platform-calibrated physics study improves macro ATE only modestly and does not improve its contract ledger. Finally, twelve 180-s Linux \texttt{tc netem} traces measure OS-level UDP delivery under four rate, delay, jitter, and loss conditions. Replaying those measured arrivals over the clean frozen bank produces 32 delivery-remediable, six persistent, and two already-qualified sequence--service cases; practical delivery restores 27 cases.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -47,55 +47,200 @@ Wheel--inertial odometry and learned residual correction motivate the sensor-lig
 Thermal and process datasets test whether the component--horizon--tolerance representation remains meaningful outside robot pose. MAGNET is used for target-aligned thermal forecast fidelity, with forecast target offsets kept distinct from unverified forecast issue or arrival time \cite{wilsdon2023magnet}.
 
 \section{Framework and Methodology}
-\subsection{Twin state and physical reference}
-Let the physical reference and twin state be
-\begin{equation}
-\mathbf{x}_{P}(t)=[x_P,y_P,\theta_P,v_P,\omega_P]^\top,\qquad
-\mathbf{x}_{T}(t)=[x_T,y_T,\theta_T,v_T,\omega_T]^\top .
-\end{equation}
-The evaluated source of $\mathbf{x}_{P}$ depends on the experiment: i2Nav ground truth, AprilTag pose, TerraSentia RTK position, or another documented physical/reference stream. A fused estimate is labeled as a diagnostic reference rather than independent ground truth.
+\subsection{Framework scope and separation of concerns}
+The framework separates three objects that are often conflated. The first is \emph{model fidelity}: disagreement between a physical system and the state generated by a frozen twin. The second is \emph{delivery freshness}: the age of the newest twin state available to a receiver. The third is \emph{service qualification}: whether the delivered state is sufficiently accurate, fresh, and observable for one declared use. A model can be inaccurate despite ideal delivery, and an accurate source trajectory can be unusable after sparse or delayed delivery. Qualification therefore does not certify the twin universally; it evaluates one twin, service, operating context, reference, and delivery condition.
 
-\subsection{Componentwise fidelity}
-Global position and heading disagreement are
+All fidelity quantities remain componentwise and retain physical units. Position error in meters is not added to heading error in degrees, and neither is merged with age in seconds. This avoids an arbitrary weighted scalar whose interpretation changes with unit conversion. The service contract performs the decision only after the individual dimensions have been compared with explicit service tolerances.
+
+\subsection{Physical state, source state, and receiver-held state}
+Let the time-aligned physical reference and source twin state be
+\begin{equation}
+\mathbf{x}_{P}(t)=
+[x_P,y_P,\theta_P,v_P,\omega_P]^\top,
+\qquad
+\mathbf{x}_{T}(t)=
+[x_T,y_T,\theta_T,v_T,\omega_T]^\top .
+\end{equation}
+The source of $\mathbf{x}_{P}$ is experiment-specific and is always recorded: i2Nav navigation ground truth, AprilTag pose, TerraSentia RTK position, or another documented reference. A fused estimator is called a diagnostic reference rather than independent ground truth. Unsupported components are omitted rather than inferred merely to complete the vector.
+
+The twin produces source state $i$ at source time $\tau_i$. A delivery mechanism assigns arrival time $a_i$ or drops the state. At evaluation time $t_k$, the causal receiver exposes
+\begin{equation}
+i^*(k)=\arg\max_{i:\,a_i\le t_k}\tau_i,
+\qquad
+\widetilde{\mathbf{x}}_T(t_k)=\mathbf{x}_T(\tau_{i^*(k)}).
+\end{equation}
+If no state has arrived, $i^*(k)$ is undefined and any service requiring the twin state is unobservable. The state age is
+\begin{equation}
+A_k=\operatorname{AoI}(t_k)=t_k-\tau_{i^*(k)}.
+\end{equation}
+The timestamp remains the original source timestamp when a cached state is held. Re-reading or displaying the same state cannot make it fresh. Arrival time controls availability; source time controls age and the physical instant represented by the delivered state.
+
+\subsection{Global, local, and rate-domain fidelity}
+For source-trajectory characterization without delivery degradation, global position and heading disagreement are
 \begin{align}
 D_p(t)&=\left\|\mathbf{p}_T(t)-\mathbf{p}_P(t)\right\|_2,\\
-D_\theta(t)&=\left|\operatorname{wrap}\!\left(\theta_T(t)-\theta_P(t)\right)\right|.
+D_\theta(t)&=\left|\operatorname{wrap}\!\left(\theta_T(t)-\theta_P(t)\right)\right|,
 \end{align}
-Rate disagreement uses $D_v(t)=|v_T-v_P|$ and $D_\omega(t)=|\omega_T-\omega_P|$. Finite-horizon relative pose error at horizon $h$ compares physical and virtual motion increments over $[t,t+h]$. Reported horizons are 1, 5, and 10 s where trajectory duration and reference continuity support them. ATE, heading MAE, percentile and maximum divergence, persistent signed yaw residual, and accumulated yaw residual $I_\omega$ provide complementary summaries. Meters, degrees, meters per second, and radians per second remain separate dimensions.
+where $\mathbf{p}=[x,y]^\top$ and $\operatorname{wrap}(\cdot)$ maps angular error to $[-\pi,\pi)$. Rate disagreement is retained separately:
+\begin{equation}
+D_v(t)=|v_T(t)-v_P(t)|,
+\qquad
+D_\omega(t)=|\omega_T(t)-\omega_P(t)|.
+\end{equation}
+Absolute trajectory error is $\operatorname{ATE}=\sqrt{N^{-1}\sum_k D_p(t_k)^2}$, and heading MAE is the mean wrapped absolute heading error. Mean, p95, and maximum disagreement describe central, tail, and worst observed behavior without declaring a universal failure threshold.
+
+Local fidelity asks a different question: whether the twin reproduces physical motion over a finite interval even if the global poses have drifted apart. Define the planar relative-motion operator
+\begin{equation}
+\mathcal{R}\!\left(\mathbf{x}(t_a),\mathbf{x}(t_b)\right)=
+\begin{bmatrix}
+\mathbf{R}[-\theta(t_a)]\,[\mathbf{p}(t_b)-\mathbf{p}(t_a)]\\
+\operatorname{wrap}[\theta(t_b)-\theta(t_a)]
+\end{bmatrix},
+\end{equation}
+where $\mathbf{R}$ rotates the displacement into the start-pose frame. Source-level RPE at horizon $h$ compares $\mathcal{R}(\mathbf{x}_P(t-h),\mathbf{x}_P(t))$ with $\mathcal{R}(\mathbf{x}_T(t-h),\mathbf{x}_T(t))$. Under sampled delivery, the twin increment instead uses the states held at the two evaluation endpoints:
+\begin{equation}
+\widetilde{\mathbf{e}}_{\mathrm{rel}}(t_k;h)=
+\mathcal{R}\!\left(
+\mathbf{x}_T(\tau_{i^*(k-h)}),
+\mathbf{x}_T(\tau_{i^*(k)})
+\right)
+-
+\mathcal{R}\!\left(
+\mathbf{x}_P(t_k-h),\mathbf{x}_P(t_k)
+\right).
+\end{equation}
+Its translational norm and wrapped rotational component define local position and heading discrepancy. By contrast, a delivered global service compares $\widetilde{\mathbf{x}}_T(t_k)$ with the current physical reference $\mathbf{x}_P(t_k)$. This construction is why sparse delivery can alter both age and delivered-state discrepancy without changing the stored source trajectory.
+
+RPE$_1$, RPE$_5$, and RPE$_{10}$ are computed only when both endpoints and the intervening reference support are valid. Persistent signed yaw mismatch and its accumulation are
+\begin{align}
+\overline e_\omega&=\frac{1}{T}\int_0^T[\omega_T(t)-\omega_P(t)]dt,\\
+I_\omega(t)&=\int_0^t[\omega_T(\tau)-\omega_P(\tau)]d\tau.
+\end{align}
+These quantities test the proposed mechanism from small persistent rate bias to accumulated heading and position divergence. Timestamp correlations are descriptive because adjacent samples share dynamics and integration history.
 
 \subsection{Condition-dependent benign characterization}
-For benign hypothesis $H_0$ and operating context $c$,
+Let $D(t)$ denote the supported vector of componentwise discrepancies and let $c$ denote measurable benign operating context. Under benign hypothesis $H_0$,
 \begin{equation}
 D(t)\mid H_0,c \sim P_{\mathrm{benign}}(D\mid c).
 \end{equation}
-The descriptive componentwise percentile set is
+Context can include speed, acceleration, turning intensity, curvature, wheel--IMU disagreement, and elapsed-time regime. Bins are frozen from context variables before comparing fidelity outcomes. For component $j$, the empirical conditional quantile is $Q_q[D_j\mid H_0,c]$, and the descriptive componentwise set is
 \begin{equation}
 \mathcal{E}_{\mathrm{benign}}^{(q)}(c)=
-\left\{D:\ D_j\le Q_q[D_j\mid H_0,c]\ \text{for every supported component }j\right\}.
+\left\{D:\ D_j\le Q_q[D_j\mid H_0,c],\ \forall j\in J(c)\right\},
 \end{equation}
-The $q=0.95$ summaries characterize the observed benign data; exceeding them does not by itself imply an attack, anomaly, failure, or loss of trust.
+where $J(c)$ contains only dimensions supported in that context. The corresponding reusable application-specific coverage function is
+\begin{equation}
+\rho_j(c;\delta_j)=
+P\!\left(D_j\le\delta_j\mid H_0,c\right).
+\end{equation}
+No universal tolerance $\delta_j$ is inferred from a benign percentile. In particular, exceeding the empirical p95 means only that an observation is uncommon relative to the characterized benign data; it does not by itself imply attack, anomaly, failure, or untrustworthiness.
 
-\subsection{Service-relative contract}
-A service $s$ is specified by required components $Q_s$, horizon $h_s$, component tolerances $\boldsymbol{\delta}_s$, freshness limit $\Delta_s$, satisfaction requirement $\rho_s$, and observability rule. For an observable delivered state at evaluation time $t_k$,
+\subsection{Formal service contract}
+A service is represented by
+\begin{equation}
+\mathcal{C}_s=
+\left(Q_s,h_s,\boldsymbol{\delta}_s,\Delta_s,
+\rho_s,\gamma_s,\mathcal{O}_s\right),
+\end{equation}
+where $Q_s$ is the set of required fidelity components, $h_s$ is the global or finite-motion horizon, $\boldsymbol{\delta}_s$ contains component tolerances, $\Delta_s$ is the maximum state age, $\rho_s$ is the required observable-sample satisfaction, $\gamma_s$ is minimum observable coverage, and $\mathcal{O}_s$ specifies required reference, history, and finite data.
+
+Let $E_{s,k}$ indicate that sample $k$ is eligible by the evaluation schedule and required history, and let $O_{s,k}$ indicate that every quantity needed by $\mathcal{O}_s$ is available. For an observable sample, define component margins and freshness margin
+\begin{equation}
+m_{s,j,k}=\delta_{s,j}-D_j(t_k;h_s),
+\qquad
+m^A_{s,k}=\Delta_s-A_k.
+\end{equation}
+Positive margin means that the corresponding requirement is met. The physical, freshness, and joint indicators are
+\begin{align}
+P_{s,k}&=\mathbb{I}[m_{s,j,k}\ge0,\ \forall j\in Q_s],\\
+F_{s,k}&=\mathbb{I}[m^A_{s,k}\ge0],\\
+J_{s,k}&=P_{s,k}F_{s,k}.
+\end{align}
+The three-valued sample decision is
 \begin{equation}
 V_{s,k}=
-\mathbb{I}\!\left[
-D_j(t_k;h_s)\le\delta_{s,j}\ \forall j\in Q_s
-\ \land\ 
-\operatorname{AoI}_k\le\Delta_s
+\begin{cases}
+\varnothing, & O_{s,k}=0,\\
+1, & O_{s,k}=1\ \text{and}\ J_{s,k}=1,\\
+0, & O_{s,k}=1\ \text{and}\ J_{s,k}=0.
+\end{cases}
+\end{equation}
+Thus abstention is part of the output space. Missing heading, insufficient horizon history, a reference gap, or absence of any delivered state cannot be converted into an unsupported pass or fail.
+
+\subsection{Coverage, satisfaction, and qualification}
+For an evaluation set $K_s$, observable coverage is
+\begin{equation}
+C_s=
+\frac{\sum_{k\in K_s}E_{s,k}O_{s,k}}
+{\sum_{k\in K_s}E_{s,k}}.
+\end{equation}
+Let $N_s^{\mathrm{obs}}=\sum E_{s,k}O_{s,k}$. Conditional on observability, the physical, freshness, and joint satisfaction fractions are
+\begin{equation}
+S_s^P=\frac{\sum E_{s,k}O_{s,k}P_{s,k}}{N_s^{\mathrm{obs}}},\quad
+S_s^F=\frac{\sum E_{s,k}O_{s,k}F_{s,k}}{N_s^{\mathrm{obs}}},\quad
+S_s^J=\frac{\sum E_{s,k}O_{s,k}J_{s,k}}{N_s^{\mathrm{obs}}}.
+\end{equation}
+The implemented run-level qualification rule is
+\begin{equation}
+q_s=\mathbb{I}\!\left[
+C_s\ge\gamma_s\ \land\
+S_s^P\ge\rho_s\ \land\
+S_s^F\ge\rho_s\ \land\
+S_s^J\ge\rho_s
 \right].
 \end{equation}
-If the required reference quantity is unavailable, $V_{s,k}=\varnothing$. The aggregate service state is computed only over eligible observable samples. Thus pass, fail, and unobservable are distinct outcomes.
+The separate $S_s^P$ and $S_s^F$ terms are retained even though joint satisfaction is the strict conjunction, because they identify whether a failed contract is physically limited, freshness limited, or both. Failure duration and maximum contiguous failure episode are additional temporal summaries; they do not create independent experimental replicates.
 
-\subsection{Delivery replay and remediability}
-Saved source states are released according to a specified source rate, delay, jitter, loss process, and receiver rule. A case that fails under degraded delivery but passes under ideal available delivery is delivery-remediable. A case that still fails under ideal delivery has persistent model discrepancy. A case already passing under degraded delivery is already qualified. Newer delivery can change the discrepancy of a held state at evaluation time, but it does not alter the frozen model trajectory.
+\subsection{Delivery operator and receiver semantics}
+A delivery condition $d=(r,L,J,\ell)$ specifies requested source rate $r$, nominal delay $L$, jitter process $J$, and packet-loss process $\ell$. Source-rate selection is causal and does not interpolate a new state. Packets are ordered by measured or generated arrival time, and at each evaluation instant the receiver selects the arrived packet with the greatest source timestamp. This protects against an older late packet replacing a newer state. The ideal condition represents the best available source delivery, not a perfect model or perfect reference.
 
-\subsection{Statistical hierarchy}
-The hierarchy is
-\[
-\text{timestamps}\subset\text{seed run}\subset\text{physical sequence}\subset\text{dataset}.
-\]
-Metrics are computed within a seed run, seeds are aggregated within a physical sequence, and physical sequences are used for dataset-level inference. Bootstrap and sign-flip procedures resample or flip at the physical-sequence level.
+Delivery replay acts only on state availability:
+\begin{equation}
+\{\mathbf{x}_T(\tau_i)\}_{i=1}^{N}
+\xrightarrow{\ d\ }
+\{\widetilde{\mathbf{x}}_T(t_k),A_k\}_{k=1}^{K}.
+\end{equation}
+Model weights, propagation, and the saved source trajectory remain fixed. Consequently, an improvement under fresher delivery is a communication-side recovery of an already-computed state, not model recalibration or corrected physical dynamics.
+
+\subsection{Cross-sequence qualification surface and selective risk}
+For an outer physical sequence $u$, a qualification score for service $s$ and delivery condition $d$ is estimated from the other physical sequences:
+\begin{equation}
+\widehat p_{-u}(s,d)=
+\frac{1}{|\mathcal{U}\setminus\{u\}|}
+\sum_{v\ne u}q_{v,s,d}.
+\end{equation}
+In the doubly nested construction, the checkpoints generating these qualification-training trajectories exclude both outer sequence $u$ and trajectory target $v$ from all applicable training, normalization, validation, and checkpoint-selection stages. A cutoff is selected inside the training fold to approach a declared acceptance target and is then frozen for $u$. The empirical surface is a cross-sequence decision score, not a calibrated probability of safety.
+
+For accepted set $\mathcal{A}_\eta=\{(u,s,d):z_{u,s,d}\ge\eta\}$, achieved acceptance and false-qualification selective risk are
+\begin{align}
+\operatorname{Coverage}(\eta)&=\frac{|\mathcal{A}_\eta|}{|\mathcal{G}|},\\
+\operatorname{Risk}(\eta)&=
+\frac{\sum_{g\in\mathcal{A}_\eta}\mathbb{I}[q_g=0]}
+{|\mathcal{A}_\eta|},
+\end{align}
+where $\mathcal{G}$ is the evaluated sequence--service--delivery grid. Comparators are evaluated at matched or explicitly reported achieved acceptance. Pooled risk is never described as a win within every individual service, and zero accepted cells for a service is reported rather than treated as zero risk.
+
+\subsection{Remediability ledger}
+For each physical sequence and service, let $q_s^{D}$, $q_s^{P}$, and $q_s^{I}$ denote qualification under degraded, practical, and ideal delivery. Each observable case is placed in exactly one principal class:
+\begin{align}
+\text{already qualified}:&\quad q_s^{D}=1,\\
+\text{delivery-remediable}:&\quad q_s^{D}=0,\ q_s^{I}=1,\\
+\text{persistent}:&\quad q_s^{I}=0.
+\end{align}
+Practical recovery is assessed only for remediable cases through $q_s^{P}$. Cases lacking minimum coverage are reported as unresolved or unobservable rather than forced into the partition. Within failed observable cases, the pair $(S_s^P,S_s^F)$ separates physical-only, freshness-only, and joint failure. This ledger answers whether a better delivery regime can repair the service decision; it does not claim that delivery repairs the underlying model.
+
+\subsection{Statistical hierarchy and permissible inference}
+The primary hierarchy is
+\begin{equation}
+\text{timestamps}
+\subset
+\text{model/transport replicate}
+\subset
+\text{physical sequence}
+\subset
+\text{dataset}.
+\end{equation}
+Metrics are first computed within a model-seed or transport run. Replicates are aggregated within the corresponding physical sequence, and physical sequences are the units for dataset-level comparisons, bootstrap intervals, and sign-flip tests. Timestamps may define within-run distributions and mechanism plots, but are not treated as independent physical trials. Services, delivery cells, thresholds, source phases, and transport repetitions likewise do not increase the number of independent physical sequences. Cross-dataset results establish structural portability only to the extent supported by each dataset's reference, sensor provenance, and model-instantiation protocol.
 
 \section{Detailed Experimental Methodology}
 \subsection{End-to-end study organization}
@@ -166,7 +311,7 @@ Earlier learned-process-noise and dual-head $Q$ studies are separate development
 \subsection{LOSO splitting, normalization, and seeds}
 The completed frozen study uses ten outer test sequences and base seeds 42, 1042, and 2042. For each ordinary LOSO fold, the test sequence is excluded from training, train-only feature normalization, target scaling, and validation-only checkpoint selection. Feature means, standard deviations, target limits, split membership, seed, checkpoint, training history, and evaluated trajectory are stored with each run. The 30 runs are never treated as 30 independent robots: the three seeds are summarized within each physical sequence before cross-sequence inference.
 
-The later qualification-surface fit creates a second stage. In the historical bank, the outer sequence's qualification labels were excluded from surface fitting, but that outer sequence could appear upstream in checkpoints that generated some of the other nine trajectories. The completed doubly nested design in Appendix~\ref{app:pending} repairs this dependence: for outer sequence $u$, the outer-test checkpoint excludes $u$, and each qualification-training checkpoint for target $v$ excludes both $u$ and $v$ throughout training, normalization fitting, validation, and checkpoint selection.
+The later qualification-surface fit creates a second stage. In the historical bank, the outer sequence's qualification labels were excluded from surface fitting, but that outer sequence could appear upstream in checkpoints that generated some of the other nine trajectories. The completed doubly nested design in Appendix~\ref{app:provenance-network} repairs this dependence: for outer sequence $u$, the outer-test checkpoint excludes $u$, and each qualification-training checkpoint for target $v$ excludes both $u$ and $v$ throughout training, normalization fitting, validation, and checkpoint selection.
 
 \subsection{Trajectory synchronization and fidelity calculation}
 Reference and twin samples are associated on a common timestamp grid. Internal i2Nav evaluation uses saved aligned timestamps without spatial registration. ATE is the root mean square of $D_p(t)$. Heading MAE uses wrapped angular differences. Tail summaries report p95 and maximum values of $D_p$ and $D_\theta$.
@@ -215,7 +360,7 @@ The source trajectory is the recorded 10-Hz frozen virtual-state stream. Request
 
 Source and delay timestamps are converted to integer nanoseconds before arrival and AoI comparisons. The first 30 s provides causal motion context and is excluded from scored suffixes; local services also require their full horizon. The ideal condition is the available 10-Hz source with zero added delay, degraded delivery is 2 Hz/200 ms, and the prespecified practical condition is 5 Hz/50 ms.
 
-The deterministic delivery extension adds seeded Gaussian delay jitter truncated at zero and deterministic packet loss, then reports requested and realized rate, delay distribution, loss, and service outcomes. Linux \texttt{netem} will replace software-generated arrivals with measured kernel-network arrival traces but will still operate over precomputed source states.
+The deterministic delivery extension adds seeded Gaussian delay jitter truncated at zero and deterministic packet loss, then reports requested and realized rate, delay distribution, loss, and service outcomes. The complementary Linux \texttt{tc netem} experiment transmits timestamped UDP datagrams through a virtual Ethernet pair and isolated network namespace, records monotonic send and arrival times, and replays the measured kernel-network arrival traces over the same precomputed source states. In both experiments, the receiver selects the newest source timestamp among packets that have arrived by each 10-Hz evaluation instant.
 
 \subsection{Cross-sequence qualification and comparator protocol}
 For outer qualification-test sequence $u$, the historical empirical score for service $s$, rate $r$, and delay $\delta$ is
@@ -572,8 +717,8 @@ The following figures document earlier analysis stages. They are retained to pre
 \caption{Legacy three-method matched-acceptance figure retained as an analysis-history artifact.}
 \end{figure}
 
-\section{Provenance Repairs and Pending Network Emulation}
-\label{app:pending}
+\section{Provenance Repairs and Measured Network Emulation}
+\label{app:provenance-network}
 \subsection{Doubly nested LOSO}
 The corrected two-stage design defines an outer qualification-test sequence $u$. The checkpoint generating $u$ excludes $u$. Every qualification-training trajectory for another target sequence $v$ is generated by a checkpoint that excludes both $u$ and $v$ from training, normalization fitting, validation, and checkpoint selection as applicable. The complete design has 10 outer sequences, 3 seeds, and 10 trajectories per outer fold, totaling 300 V1-to-V2 pipelines.
 
@@ -612,9 +757,27 @@ Accordingly, causal retraining strengthens the methodological credibility of the
 \end{figure}
 
 \subsection{Linux netem}
-The Linux experiment sends identifiers for precomputed frozen states through an isolated virtual Ethernet pair and network namespace shaped by \texttt{tc netem}. It records monotonic send and arrival times, packet loss, realized delay, and requested versus realized rate. The planned full run uses four delivery conditions, three 180-s transport repetitions, and applies each measured trace to the existing physical-sequence trajectories. Transport repetitions quantify network variability and do not increase the number of physical sequences.
+The completed Linux experiment sends timestamped UDP datagrams through an isolated virtual Ethernet pair and network namespace shaped by \texttt{tc netem}. Linux \texttt{CLOCK\_MONOTONIC} timestamps record send and arrival time on one host. Four delivery conditions were each captured in three independent 180-s transport repetitions, giving 12 measured traces. The traces were then applied to the 30 doubly nested outer-test trajectories. Model seeds and transport repetitions remain nested within each of the ten physical sequences; they are not counted as additional physical replicates. When a physical trajectory required more packets than a 180-s capture contained, the measured trace pattern repeated, as declared in the replay manifest.
 
-This experiment has not been run. Its intended result is OS-level emulated delivery over precomputed states. It will not be described as live inference, measured energy savings, or a safety experiment. The current deterministic delay/jitter/loss replay in the preceding appendix is a separate completed software emulation.
+\begin{table}[ht]
+\centering
+\caption{Measured Linux \texttt{tc netem} transport conditions. Realized values are means over three 180-s captures; delay p95 is the mean of replicate-level p95 values.}
+\label{tab:netem-transport}
+\begin{tabular}{lrrrr}
+\toprule
+Condition & Requested (Hz) & Realized (Hz) & Loss (\%) & Delay p95 (ms) \\
+\midrule
+Ideal & 10 & 10.000 & 0.000 & 1.4 \\
+Practical & 5 & 4.946 & 1.074 & 97.9 \\
+Degraded & 2 & 1.896 & 5.185 & 307.4 \\
+Stress & 1 & 0.896 & 10.370 & 475.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The measured-arrival replay yields 32/40 delivery-remediable sequence--service cases, 6/40 cases that remain unqualified under ideal delivery, and 2/40 cases already qualified under degraded delivery. Practical delivery restores 27 of the 32 remediable cases. Relative to the deterministic software replay (32/6/2 with 29 practical restorations), the overall partition is unchanged while two fewer cases are restored by practical measured delivery. This agreement supports the remediability taxonomy under an OS-level packet path while also showing that modeled delivery does not reproduce every measured-arrival decision.
+
+The scope remains precise: this is OS-level delivery emulation over precomputed frozen states. It is not live twin inference, a measured communication- or energy-savings experiment, or a safety experiment. The capture manifests preserve configured and realized transport parameters, packet ledgers, \texttt{tc qdisc} records and hashes, repository commit, platform, and clock provenance.
 
 \section{Artifact Registry}
 \begin{longtable}{p{.37\linewidth}p{.18\linewidth}p{.35\linewidth}}
@@ -634,6 +797,7 @@ Artifact root & Evidence type & Contents \\
 \path{service_timing_robustness} & Sensitivity & Receiver, phase, and fixed-physics comparisons. \\
 \path{lookahead_as_delay_sensitivity} & Sensitivity & 100-ms feature-availability penalty. \\
 \path{deterministic_delivery_replay} & Software emulation & Delay, jitter, loss, realized rates, and ledger. \\
+\path{netem_delivery} & OS-level delivery emulation & Twelve measured Linux \texttt{tc netem} UDP traces and replay over the clean frozen trajectory bank. \\
 \path{service_threshold_curve_ledger} & Sensitivity & Tolerance, satisfaction, and freshness curves. \\
 \path{freshness_binding_sweep} & Delivery sensitivity & Tight common AoI limits, burst outages, realized transport, and failure-component counts. \\
 \path{e1_e2_service_contract_publication} & Cross-platform & Metric rank inversions and TerraSentia contracts. \\
@@ -684,7 +848,7 @@ Service contracts provide a common representation for physical discrepancy, fres
 
 The physical and external experiments define the boundaries of the result. UGV01 AprilTag data support accurate same-run asset-specific calibration but show poor transfer to two frozen holdouts; those same holdouts make the position-only ledger informative by separating delivery-remediable from physically persistent cases. TerraSentia independently exhibits low finite-horizon error alongside 34--68-m global ATE. Its deterministic LOSO calibration reduces macro ATE by 5.72\% and RPE$_{10}$ by 5.94\%, but reaches the speed-scale bound in every fold and leaves all calibrated contract cases persistent. It therefore supports local--global and evaluator portability claims, not successful model portability. The live UGV01 traces demonstrate a transport bottleneck that collapses requested policy rates. MAGNET, FreeTwinEV, and TU Wien SNG support structural contract portability, while MAGNET lacks the timing provenance required for causal delivery analysis.
 
-The causal-derivative study is complete and shows that the service-level remediability structure is reasonably robust to eliminating centered-gradient lookahead, despite substantially worse trajectory fidelity after retraining. The doubly nested bank and its corrected comparator analysis are also complete. The remaining planned computational experiment is Linux \texttt{netem}, which will replace software-generated arrival patterns with measured OS-level delay and loss traces while retaining the same precomputed-state scope.
+The causal-derivative study is complete and shows that the service-level remediability structure is reasonably robust to eliminating centered-gradient lookahead, despite substantially worse trajectory fidelity after retraining. The doubly nested bank and its corrected comparator analysis are also complete. Linux \texttt{tc netem} adds measured OS-level arrival traces: its 32/6/2 partition matches deterministic emulation, while practical delivery restores 27 rather than 29 remediable cases. This closes the planned network-emulation experiment without changing the evidence boundary from replay over precomputed states to live inference.
 
 \begin{thebibliography}{99}
 \bibitem{jones2020} D. Jones \emph{et al.}, Characterising the Digital Twin: A systematic literature review, \emph{CIRP Journal of Manufacturing Science and Technology}, vol. 29, pp. 36--52, 2020, doi: 10.1016/j.cirpj.2020.02.002.
