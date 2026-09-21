@@ -1,0 +1,4 @@
+run_id,rows,duration_s,median_rate_hz,p95_gap_s,max_gap_s,requested_rates_supported,run1_high_rate_diagnostic,reference_gap_rule_effect,ledger_eligibility
+aug29_run1_153555_elevation_fitted,1664,164.638700,10.100906,0.099001,0.099001,"10;5;2;1",true,no gaps exceed 0.75 s,eligible
+aug29_run2_160114_elevation_baseline,624,308.388553,2.020179,0.495006,0.495006,"2;1",false,no gaps exceed 0.75 s,eligible at common 2/1 Hz only
+aug29_run3_161516_elevation_baseline,635,315.305673,2.020262,0.494985,0.989971,"2;1",false,exclude windows crossing the 0.990 s gap,eligible at common 2/1 Hz with gap exclusion

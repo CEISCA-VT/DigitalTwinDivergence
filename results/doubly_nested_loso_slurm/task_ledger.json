@@ -1,0 +1,2429 @@
+{
+  "schema": "doubly_nested_loso_single_shard_ledger_v1",
+  "repository_commit": "8a363b0446f9fd2353993e794cd3672fe29c86b6",
+  "repository_dirty_at_start": false,
+  "total_tasks": 300,
+  "selected_tasks": 300,
+  "base_seeds": [
+    42,
+    1042,
+    2042
+  ],
+  "outer_sequences": [
+    "building00",
+    "building01",
+    "building02",
+    "parking00",
+    "parking01",
+    "parking02",
+    "playground00",
+    "street00",
+    "street01",
+    "street02"
+  ],
+  "start_task": 0,
+  "stop_task": null,
+  "max_tasks": null,
+  "tasks": [
+    {
+      "outer": "building00",
+      "role": "outer_test",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-building00__role-outer_test__target-building00__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "outer_test",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-building00__role-outer_test__target-building00__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "outer_test",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-building00__role-outer_test__target-building00__seed-2042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-building01__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-building01__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-building01__seed-2042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-building02__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-building02__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-building02__seed-2042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-parking00__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-parking00__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-parking00__seed-2042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-parking01__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-parking01__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-parking01__seed-2042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-parking02__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-parking02__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-parking02__seed-2042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-playground00__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-playground00__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-playground00__seed-2042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-street00__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-street00__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-street00__seed-2042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-street01__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-street01__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-street01__seed-2042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-street02__seed-42"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-street02__seed-1042"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": "building00",
+      "task_id": "outer-building00__role-qualification_train__target-street02__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "outer_test",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-building01__role-outer_test__target-building01__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "outer_test",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-building01__role-outer_test__target-building01__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "outer_test",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-building01__role-outer_test__target-building01__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-building00__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-building00__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-building00__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-building02__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-building02__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-building02__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-parking00__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-parking00__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-parking00__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-parking01__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-parking01__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-parking01__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-parking02__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-parking02__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-parking02__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-playground00__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-playground00__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-playground00__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-street00__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-street00__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-street00__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-street01__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-street01__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-street01__seed-2042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-street02__seed-42"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-street02__seed-1042"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": "building01",
+      "task_id": "outer-building01__role-qualification_train__target-street02__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "outer_test",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-building02__role-outer_test__target-building02__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "outer_test",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-building02__role-outer_test__target-building02__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "outer_test",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-building02__role-outer_test__target-building02__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-building00__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-building00__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-building00__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-building01__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-building01__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-building01__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-parking00__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-parking00__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-parking00__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-parking01__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-parking01__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-parking01__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-parking02__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-parking02__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-parking02__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-playground00__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-playground00__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-playground00__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-street00__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-street00__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-street00__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-street01__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-street01__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-street01__seed-2042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-street02__seed-42"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-street02__seed-1042"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": "building02",
+      "task_id": "outer-building02__role-qualification_train__target-street02__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "outer_test",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-parking00__role-outer_test__target-parking00__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "outer_test",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-parking00__role-outer_test__target-parking00__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "outer_test",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-parking00__role-outer_test__target-parking00__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-building00__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-building00__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-building00__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-building01__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-building01__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-building01__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-building02__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-building02__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-building02__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-parking01__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-parking01__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-parking01__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-parking02__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-parking02__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-parking02__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-playground00__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-playground00__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-playground00__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-street00__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-street00__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-street00__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-street01__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-street01__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-street01__seed-2042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-street02__seed-42"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-street02__seed-1042"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": "parking00",
+      "task_id": "outer-parking00__role-qualification_train__target-street02__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "outer_test",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-parking01__role-outer_test__target-parking01__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "outer_test",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-parking01__role-outer_test__target-parking01__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "outer_test",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-parking01__role-outer_test__target-parking01__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-building00__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-building00__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-building00__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-building01__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-building01__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-building01__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-building02__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-building02__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-building02__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-parking00__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-parking00__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-parking00__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-parking02__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-parking02__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-parking02__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-playground00__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-playground00__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-playground00__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-street00__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-street00__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-street00__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-street01__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-street01__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-street01__seed-2042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-street02__seed-42"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-street02__seed-1042"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": "parking01",
+      "task_id": "outer-parking01__role-qualification_train__target-street02__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "outer_test",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-parking02__role-outer_test__target-parking02__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "outer_test",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-parking02__role-outer_test__target-parking02__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "outer_test",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-parking02__role-outer_test__target-parking02__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-building00__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-building00__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-building00__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-building01__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-building01__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-building01__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-building02__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-building02__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-building02__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-parking00__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-parking00__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-parking00__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-parking01__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-parking01__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-parking01__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-playground00__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-playground00__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-playground00__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-street00__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-street00__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-street00__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-street01__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-street01__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-street01__seed-2042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-street02__seed-42"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-street02__seed-1042"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": "parking02",
+      "task_id": "outer-parking02__role-qualification_train__target-street02__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "outer_test",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-playground00__role-outer_test__target-playground00__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "outer_test",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-playground00__role-outer_test__target-playground00__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "outer_test",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-playground00__role-outer_test__target-playground00__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-building00__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-building00__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-building00__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-building01__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-building01__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-building01__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-building02__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-building02__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-building02__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-parking00__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-parking00__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-parking00__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-parking01__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-parking01__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-parking01__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-parking02__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-parking02__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-parking02__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-street00__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-street00__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-street00__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-street01__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-street01__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-street01__seed-2042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-street02__seed-42"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-street02__seed-1042"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": "playground00",
+      "task_id": "outer-playground00__role-qualification_train__target-street02__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "outer_test",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-street00__role-outer_test__target-street00__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "outer_test",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-street00__role-outer_test__target-street00__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "outer_test",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-street00__role-outer_test__target-street00__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-building00__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-building00__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-building00__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-building01__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-building01__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-building01__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-building02__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-building02__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-building02__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-parking00__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-parking00__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-parking00__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-parking01__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-parking01__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-parking01__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-parking02__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-parking02__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-parking02__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-playground00__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-playground00__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-playground00__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-street01__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-street01__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-street01__seed-2042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-street02__seed-42"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-street02__seed-1042"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": "street00",
+      "task_id": "outer-street00__role-qualification_train__target-street02__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "outer_test",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-street01__role-outer_test__target-street01__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "outer_test",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-street01__role-outer_test__target-street01__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "outer_test",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-street01__role-outer_test__target-street01__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-building00__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-building00__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-building00__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-building01__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-building01__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-building01__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-building02__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-building02__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-building02__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-parking00__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-parking00__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-parking00__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-parking01__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-parking01__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-parking01__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-parking02__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-parking02__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-parking02__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-playground00__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-playground00__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-playground00__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-street00__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-street00__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-street00__seed-2042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-street02__seed-42"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-street02__seed-1042"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": "street01",
+      "task_id": "outer-street01__role-qualification_train__target-street02__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "outer_test",
+      "target": "street02",
+      "seed": 42,
+      "extra_excluded": null,
+      "task_id": "outer-street02__role-outer_test__target-street02__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "outer_test",
+      "target": "street02",
+      "seed": 1042,
+      "extra_excluded": null,
+      "task_id": "outer-street02__role-outer_test__target-street02__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "outer_test",
+      "target": "street02",
+      "seed": 2042,
+      "extra_excluded": null,
+      "task_id": "outer-street02__role-outer_test__target-street02__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-building00__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-building00__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-building00__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-building01__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-building01__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-building01__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-building02__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-building02__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-building02__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-parking00__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-parking00__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-parking00__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-parking01__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-parking01__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-parking01__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-parking02__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-parking02__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-parking02__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-playground00__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-playground00__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-playground00__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-street00__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-street00__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-street00__seed-2042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-street01__seed-42"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-street01__seed-1042"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "extra_excluded": "street02",
+      "task_id": "outer-street02__role-qualification_train__target-street01__seed-2042"
+    }
+  ]
+}

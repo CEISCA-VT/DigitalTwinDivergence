@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -16,6 +17,57 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CAPTURE_ROOT = ROOT / "results/netem_delivery/captures"
 DEFAULT_OUTPUT = ROOT / "results/netem_delivery/evidence"
 REQUIRED_CONDITIONS = {"ideal", "practical", "degraded"}
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def discover_trajectory_sources(bank_manifest: Path | None = None) -> list[dict]:
+    if bank_manifest is None:
+        return [
+            {
+                "sequence": path.parent.name.split("_", 2)[-1],
+                "model_replicate": path.parent.parent.name,
+                "path": path,
+            }
+            for path in base.discover()
+        ]
+
+    payload = json.loads(bank_manifest.read_text(encoding="utf-8"))
+    if payload.get("status") != "complete" or not payload.get("ready_for_evidence_analysis"):
+        raise RuntimeError(f"trajectory bank is not complete and analysis-ready: {bank_manifest}")
+    rows = [row for row in payload.get("trajectories", []) if row.get("role") == "outer_test"]
+    if len(rows) != 30:
+        raise RuntimeError(f"expected 30 doubly nested outer-test trajectories, found {len(rows)}")
+
+    sources = []
+    seen = set()
+    for row in rows:
+        path = Path(row["trajectory"])
+        if not path.is_absolute():
+            path = ROOT / path
+        key = (str(row["outer"]), int(row["seed"]))
+        if key in seen:
+            raise RuntimeError(f"duplicate outer-sequence/seed trajectory: {key}")
+        seen.add(key)
+        if not path.is_file():
+            raise FileNotFoundError(f"trajectory listed by bank manifest is missing: {path}")
+        expected_hash = row.get("sha256")
+        if expected_hash and _sha256(path) != expected_hash:
+            raise RuntimeError(f"trajectory hash mismatch: {path}")
+        sources.append(
+            {
+                "sequence": str(row["outer"]),
+                "model_replicate": f"seed_{int(row['seed'])}",
+                "path": path,
+            }
+        )
+    return sources
 
 
 def discover_captures(root: Path) -> list[tuple[dict, pd.DataFrame, Path]]:
@@ -78,9 +130,9 @@ def measured_delivery(t: np.ndarray, ledger: pd.DataFrame, rate_hz: float) -> tu
     return delivered, stats
 
 
-def run(capture_root: Path, output: Path) -> None:
+def run(capture_root: Path, output: Path, bank_manifest: Path | None = None) -> None:
     captures = discover_captures(capture_root)
-    paths = base.discover()
+    sources = discover_trajectory_sources(bank_manifest)
     run_rows: list[dict] = []
     transport_rows: list[dict] = []
     capture_sources: list[dict] = []
@@ -89,10 +141,11 @@ def run(capture_root: Path, output: Path) -> None:
         rate_hz = float(manifest["requested_rate_hz"])
         transport_replicate = int(manifest["transport_replicate"])
         capture_sources.append({**manifest, "packet_ledger": str(ledger_path.relative_to(ROOT))})
-        for path in paths:
+        for source in sources:
+            path = source["path"]
             data = base.load(path)
-            sequence = path.parent.name.split("_", 2)[-1]
-            model_replicate = path.parent.parent.name
+            sequence = source["sequence"]
+            model_replicate = source["model_replicate"]
             delivered, stats = measured_delivery(data["time_s"], ledger, rate_hz)
             transport_rows.append(
                 {
@@ -148,6 +201,7 @@ def run(capture_root: Path, output: Path) -> None:
         "trace_application": "captured packet delay/loss pattern repeats only when a frozen trajectory requests more packets than the capture contains",
         "inference_hierarchy": "timestamps within model and transport replicates within physical sequence; physical sequence is the primary unit",
         "physical_sequences": int(per_sequence.sequence.nunique()),
+        "trajectory_source": str(bank_manifest) if bank_manifest else str(base.SOURCE),
         "model_replicates": int(per_run.model_replicate.nunique()),
         "transport_replicates": int(per_run.transport_replicate.nunique()),
         "delivery_remediable": int(counts.get("delivery_remediable", 0)),
@@ -183,8 +237,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--capture-root", type=Path, default=DEFAULT_CAPTURE_ROOT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--bank-manifest",
+        type=Path,
+        help="Completed doubly nested merged_manifest.json; only its 30 outer-test trajectories are replayed.",
+    )
     args = parser.parse_args()
-    run(args.capture_root, args.output)
+    run(args.capture_root, args.output, args.bank_manifest)
 
 
 if __name__ == "__main__":

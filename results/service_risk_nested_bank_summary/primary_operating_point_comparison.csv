@@ -1,0 +1,6 @@
+scope,service,method,target_acceptance,accepted_count,condition_count,false_qualified_count,achieved_acceptance,selective_risk,selective_risk_ci_low,selective_risk_ci_high,n_physical_sequences
+pooled,all,aoi_only,0.25,160,800,28,0.2,0.175,0.05625,0.3125,10
+pooled,all,common,0.25,200,800,30,0.25,0.15,0.075,0.225,10
+pooled,all,motion_logistic,0.25,199,800,55,0.24875,0.2763819095477386,0.0,0.4890965732087227,10
+pooled,all,service_empirical,0.25,200,800,4,0.25,0.02,0.0,0.0485436893203883,10
+pooled,all,service_identity_only,0.25,200,800,75,0.25,0.375,0.26,0.495,10

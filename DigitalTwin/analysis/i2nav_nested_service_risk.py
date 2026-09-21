@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse, json, math, re, sys
+import argparse, json, math, re, shutil, sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,6 +23,129 @@ FORBIDDEN_TOKENS=("gt_","ground_truth","reference_","local_position_error","loca
 
 
 def load_json(p:Path): return json.loads(p.read_text(encoding='utf-8'))
+
+
+def _plain_table(df: pd.DataFrame) -> str:
+    if df.empty:
+        return "(empty)"
+    return df.to_string(index=False)
+
+
+def run_nested_bank_comparator_summary(window_table: Path, out: Path) -> bool:
+    """Summarize comparator evidence already computed from a nested trajectory bank.
+
+    The historical service-risk script operates on per-window rows with
+    ``start_time_s``. The corrected doubly nested bank produces response-surface
+    tables plus matched-acceptance comparator outputs. When those files are
+    supplied, summarize them directly instead of pretending the aggregate rows
+    are timestamped windows.
+    """
+    sample = pd.read_csv(window_table, nrows=5)
+    if "start_time_s" in sample.columns:
+        return False
+    required = {"sequence", "service", "rate_hz", "delay_ms", "qualified"}
+    if not required.issubset(sample.columns):
+        return False
+
+    evidence_root = window_table.parent
+    summary_path = evidence_root / "risk_coverage_summary.csv"
+    per_sequence_path = evidence_root / "matched_acceptance_per_sequence.csv"
+    pairwise_path = evidence_root / "matched_acceptance_pairwise_bootstrap.csv"
+    ledger_path = evidence_root / "sequence_service_case_ledger.csv"
+    missing = [p for p in [summary_path, per_sequence_path, pairwise_path, ledger_path] if not p.exists()]
+    if missing:
+        raise FileNotFoundError(
+            "Nested response-surface input requires completed service_evidence_from_bank outputs; "
+            f"missing: {[str(p) for p in missing]}"
+        )
+
+    out.mkdir(parents=True, exist_ok=True)
+    summary = pd.read_csv(summary_path)
+    per_sequence = pd.read_csv(per_sequence_path)
+    pairwise = pd.read_csv(pairwise_path)
+    ledger = pd.read_csv(ledger_path)
+
+    shutil.copy2(summary_path, out / "risk_coverage_summary.csv")
+    shutil.copy2(per_sequence_path, out / "matched_acceptance_per_sequence.csv")
+    shutil.copy2(pairwise_path, out / "matched_acceptance_pairwise_bootstrap.csv")
+    shutil.copy2(ledger_path, out / "sequence_service_case_ledger.csv")
+    fig = evidence_root / "risk_coverage_curves.png"
+    if fig.exists():
+        shutil.copy2(fig, out / "risk_coverage_curves.png")
+
+    pooled = summary[(summary["scope"] == "pooled") & (summary["service"] == "all")].copy()
+    rows = []
+    for target, group in pooled.groupby("target_acceptance"):
+        empirical = group[group["method"] == "service_empirical"]
+        if empirical.empty:
+            continue
+        emp = empirical.iloc[0]
+        for _, row in group.iterrows():
+            rows.append({
+                "target_acceptance": float(target),
+                "method": row["method"],
+                "accepted_count": int(row["accepted_count"]),
+                "condition_count": int(row["condition_count"]),
+                "false_qualified_count": int(row["false_qualified_count"]),
+                "achieved_acceptance": float(row["achieved_acceptance"]),
+                "selective_risk": float(row["selective_risk"]) if pd.notna(row["selective_risk"]) else np.nan,
+                "empirical_surface_selective_risk": float(emp["selective_risk"]) if pd.notna(emp["selective_risk"]) else np.nan,
+                "risk_minus_empirical": (
+                    float(row["selective_risk"]) - float(emp["selective_risk"])
+                    if pd.notna(row["selective_risk"]) and pd.notna(emp["selective_risk"])
+                    else np.nan
+                ),
+            })
+    pd.DataFrame(rows).to_csv(out / "pooled_method_comparison.csv", index=False)
+
+    ledger_counts = ledger["classification"].value_counts().rename_axis("classification").reset_index(name="cases")
+    ledger_counts.to_csv(out / "remediability_counts.csv", index=False)
+
+    target = 0.25
+    target_rows = pooled[np.isclose(pooled["target_acceptance"], target)].copy()
+    if target_rows.empty:
+        target_rows = pooled.sort_values("target_acceptance").groupby("method", as_index=False).head(1)
+    target_rows.to_csv(out / "primary_operating_point_comparison.csv", index=False)
+
+    report = [
+        "# Nested-Bank Service-Risk Comparator Summary",
+        "",
+        "This run detected a corrected doubly nested response-surface table rather than a per-window service-risk table.",
+        "Therefore it summarizes the matched-acceptance comparator outputs produced by `service_evidence_from_bank`.",
+        "No timestamp-level context model is refit in this compatibility path.",
+        "",
+        "## Primary Matched-Acceptance Rows",
+        "",
+        _plain_table(target_rows),
+        "",
+        "## Remediability Ledger",
+        "",
+        _plain_table(ledger_counts),
+        "",
+        "## Files",
+        "",
+        "- `risk_coverage_summary.csv`",
+        "- `matched_acceptance_per_sequence.csv`",
+        "- `matched_acceptance_pairwise_bootstrap.csv`",
+        "- `pooled_method_comparison.csv`",
+        "- `primary_operating_point_comparison.csv`",
+        "- `sequence_service_case_ledger.csv`",
+    ]
+    (out / "service_risk_report.md").write_text("\n".join(report) + "\n", encoding="utf-8")
+
+    manifest = {
+        "analysis": "nested_bank_service_risk_comparator_summary",
+        "generated_utc": datetime.now(timezone.utc).isoformat(),
+        "context_mode": "nested_response_surface_summary",
+        "source_window_table": str(window_table),
+        "source_risk_summary": str(summary_path),
+        "status": "complete",
+        "note": "Aggregate nested-bank comparator summary; per-window causal logistic refit is not applicable to this input schema.",
+    }
+    (out / "analysis_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    print("Nested-bank comparator summary complete.")
+    print("Report:", out / "service_risk_report.md")
+    return True
 
 
 def verify_prior_freeze(cfg):
@@ -308,6 +431,8 @@ def main():
     cfg=load_json(Path(args.config)); out=Path(args.out); out.mkdir(parents=True,exist_ok=True)
     verify_prior_freeze(cfg)
     wpath=locate_window_table(args.window_table); w=pd.read_csv(wpath)
+    if run_nested_bank_comparator_summary(wpath, out):
+        return
     if sorted(w.sequence.unique())!=sorted(EXPECTED_SEQUENCES): raise RuntimeError('Window table does not contain exactly the ten expected physical sequences.')
     # verify strongest frozen service contrast before any modeling
     sig=pd.read_csv('results/service_relative_fidelity/parking00_vs_parking02_verification.csv') if Path('results/service_relative_fidelity/parking00_vs_parking02_verification.csv').exists() else None

@@ -1,0 +1,37 @@
+{
+  "schema": "terrasentia_loso_calibrated_physics_v1",
+  "input_root": "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\results\\terrasentia_external_validation",
+  "output": "results\\terrasentia_loso_calibrated_physics",
+  "held_out_sequences": [
+    "ts_2022_06_09_13h16m39s_one_row",
+    "ts_2022_06_15_11h48m34s_four_rows",
+    "ts_2022_09_01_11h20m00s_two_random",
+    "ts_2022_09_01_12h32m56s_double_loop_corridor",
+    "ts_2022_09_06_12h37m11s_four_rows"
+  ],
+  "all_sequences": [
+    "ts_2022_06_09_13h16m39s_one_row",
+    "ts_2022_06_15_11h48m34s_four_rows",
+    "ts_2022_09_01_11h20m00s_two_random",
+    "ts_2022_09_01_12h32m56s_double_loop_corridor",
+    "ts_2022_09_06_12h37m11s_four_rows"
+  ],
+  "parameter_bounds": [
+    [
+      0.8,
+      1.2
+    ],
+    [
+      0.8,
+      1.2
+    ],
+    [
+      -0.02,
+      0.02
+    ]
+  ],
+  "primary_reference": "RTK position",
+  "secondary_reference": "dataset fused-EKF heading",
+  "no_held_out_calibration": true,
+  "no_gpu_required": true
+}

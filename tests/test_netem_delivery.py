@@ -1,7 +1,10 @@
+import hashlib
+import json
+
 import pandas as pd
 import numpy as np
 
-from DigitalTwin.analysis.netem_delivery_replay import measured_delivery
+from DigitalTwin.analysis.netem_delivery_replay import discover_trajectory_sources, measured_delivery
 from DigitalTwin.analysis.netem_transport import summarize_capture
 
 
@@ -54,3 +57,42 @@ def test_measured_trace_replay_uses_captured_loss_and_delay():
     assert stats["lost_packets"] == 3
     assert np.isclose(stats["delay_p50_ms"], 50.0)
     assert np.all((delivered < len(time_s)) & (delivered >= -1))
+
+
+def test_nested_bank_source_selection_uses_only_verified_outer_tests(tmp_path):
+    trajectories = []
+    for index in range(30):
+        path = tmp_path / f"trajectory_{index}.csv"
+        path.write_text("time_s\n0\n", encoding="utf-8")
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        trajectories.append(
+            {
+                "outer": f"sequence_{index // 3}",
+                "role": "outer_test",
+                "seed": (42, 1042, 2042)[index % 3],
+                "trajectory": str(path),
+                "sha256": digest,
+            }
+        )
+    trajectories.append(
+        {
+            "outer": "sequence_0",
+            "role": "qualification_train",
+            "seed": 42,
+            "trajectory": "not_used.csv",
+        }
+    )
+    manifest = tmp_path / "merged_manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "ready_for_evidence_analysis": True,
+                "trajectories": trajectories,
+            }
+        ),
+        encoding="utf-8",
+    )
+    sources = discover_trajectory_sources(manifest)
+    assert len(sources) == 30
+    assert {source["sequence"] for source in sources} == {f"sequence_{i}" for i in range(10)}

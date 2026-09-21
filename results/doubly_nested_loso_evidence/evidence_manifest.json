@@ -1,0 +1,65 @@
+{
+  "schema": "trajectory_bank_service_evidence_v1",
+  "source_manifest": "results\\doubly_nested_loso_slurm\\merged_manifest.json",
+  "source_manifest_sha256": "c78cd9f118f120d7a26fed47b4b327bad205c1d1a9ec5b733bea910423602b26",
+  "source_study": "doubly_nested",
+  "physical_sequences": 10,
+  "sequence_service_cases": 40,
+  "remediability_counts": {
+    "delivery_remediable": 30,
+    "persistent_under_ideal": 6,
+    "already_qualified_degraded": 4
+  },
+  "services": [
+    {
+      "service": "local_1s",
+      "family": "local",
+      "horizon_s": 1.0,
+      "pos_tol_m": 0.1,
+      "heading_tol_deg": 2.0,
+      "aoi_limit_s": 0.6
+    },
+    {
+      "service": "local_5s",
+      "family": "local",
+      "horizon_s": 5.0,
+      "pos_tol_m": 0.2,
+      "heading_tol_deg": 5.0,
+      "aoi_limit_s": 1.0
+    },
+    {
+      "service": "local_10s",
+      "family": "local",
+      "horizon_s": 10.0,
+      "pos_tol_m": 0.5,
+      "heading_tol_deg": 10.0,
+      "aoi_limit_s": 1.5
+    },
+    {
+      "service": "global",
+      "family": "global",
+      "horizon_s": 0.0,
+      "pos_tol_m": 1.0,
+      "heading_tol_deg": 5.0,
+      "aoi_limit_s": 1.0
+    }
+  ],
+  "rates_hz": [
+    10.0,
+    5.0,
+    2.0,
+    1.0
+  ],
+  "delays_ms": [
+    0,
+    25,
+    50,
+    100,
+    200
+  ],
+  "target_satisfaction": 0.8,
+  "minimum_coverage": 0.95,
+  "operating_point_selection": "inner leave-one-sequence-out within each outer fold; outer-test labels excluded",
+  "statistical_unit": "physical sequence; seeds aggregated within sequence",
+  "status": "complete"
+}

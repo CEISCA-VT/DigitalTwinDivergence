@@ -1,0 +1,72 @@
+{
+  "schema": "ugv01_position_ledger_protocol_v1",
+  "status": "FROZEN_BEFORE_LEDGER_COMPUTATION",
+  "scope": "retrospective position-only delivery replay on three August 29 UGV01 AprilTag-referenced runs",
+  "provenance_note": "The tolerances are informed by the previously completed UGV01 physical-fidelity characterization. This is not a prospectively blinded protocol, but its definitions are frozen before computing the ledger outcomes.",
+  "dataset_root": "public_datasets/UGV01_physical",
+  "runs": [
+    "aug29_run1_153555_elevation_fitted",
+    "aug29_run2_160114_elevation_baseline",
+    "aug29_run3_161516_elevation_baseline"
+  ],
+  "reference": {
+    "primary": "AprilTag/ChArUco elevation-corrected planar position",
+    "heading_used_for_qualification": false,
+    "maximum_permitted_reference_gap_s": 0.75,
+    "gap_rule": "A service sample or relative-motion pair is excluded when its required reference interval crosses an adjacent aligned-reference gap greater than 0.75 s.",
+    "denominator": "Only temporally observable samples or complete relative-motion pairs surviving the reference-gap rule."
+  },
+  "services": [
+    {
+      "service": "local_1s",
+      "horizon_s": 1.0,
+      "position_tolerance_m": 0.10,
+      "aoi_limit_s": 0.60,
+      "rationale": "10 cm short-horizon tracking requirement for low-speed indoor motion."
+    },
+    {
+      "service": "local_5s",
+      "horizon_s": 5.0,
+      "position_tolerance_m": 0.25,
+      "aoi_limit_s": 1.00,
+      "rationale": "25 cm medium-horizon tolerance, approximately one rover-body-scale displacement."
+    },
+    {
+      "service": "local_10s",
+      "horizon_s": 10.0,
+      "position_tolerance_m": 0.50,
+      "aoi_limit_s": 1.50,
+      "rationale": "50 cm preview tolerance for accumulated low-speed relative-motion error."
+    },
+    {
+      "service": "global",
+      "horizon_s": 0.0,
+      "position_tolerance_m": 0.50,
+      "aoi_limit_s": 1.00,
+      "rationale": "50 cm global synchronization tolerance within the 2.0 m by 1.5 m reference area."
+    }
+  ],
+  "qualification": {
+    "minimum_observable_fraction": 0.80,
+    "minimum_physical_satisfaction": 0.80,
+    "minimum_freshness_satisfaction": 0.80,
+    "minimum_joint_satisfaction": 0.80,
+    "states": ["qualified", "not_qualified", "unobservable"]
+  },
+  "delivery_replay": {
+    "common_supported_rates_hz": [2.0, 1.0],
+    "common_delays_ms": [0, 50, 200],
+    "primary_degraded_setting": {"rate_hz": 1.0, "delay_ms": 200},
+    "primary_ideal_setting": {"rate_hz": 2.0, "delay_ms": 0},
+    "run1_diagnostic_rates_hz": [10.0, 5.0],
+    "run1_diagnostic_only": true,
+    "no_upsampling_claim": true
+  },
+  "ledger_categories": {
+    "already_qualified": "qualified under both primary degraded and primary ideal delivery",
+    "delivery_remediable": "not qualified under degraded delivery but qualified under ideal delivery",
+    "persistent": "not qualified even under ideal delivery",
+    "degradation_induced": "qualified under degraded delivery but not under ideal delivery; treated as an implementation/audit warning"
+  },
+  "claim_boundary": "This analysis tests whether the remediability taxonomy computes on a second physical platform. Three runs do not support population-level rates, cross-surface claims, or online resource-savings claims."
+}

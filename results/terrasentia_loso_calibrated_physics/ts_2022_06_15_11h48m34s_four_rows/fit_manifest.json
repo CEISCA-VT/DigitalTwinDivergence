@@ -1,0 +1,31 @@
+{
+  "held_out_sequence": "ts_2022_06_15_11h48m34s_four_rows",
+  "training_sequences": "ts_2022_06_09_13h16m39s_one_row;ts_2022_09_01_11h20m00s_two_random;ts_2022_09_01_12h32m56s_double_loop_corridor;ts_2022_09_06_12h37m11s_four_rows",
+  "held_out_excluded_from_fit": true,
+  "speed_scale": 0.8000000000190924,
+  "yaw_scale": 0.8849845355560704,
+  "yaw_bias_radps": 0.0022077530469968853,
+  "optimizer": "scipy.optimize.minimize/Powell",
+  "objective": "mean sequence-balanced Huber loss of RTK position error normalized by max(path_length,10m)",
+  "initial": [
+    1.0,
+    1.0,
+    0.0
+  ],
+  "bounds": [
+    [
+      0.8,
+      1.2
+    ],
+    [
+      0.8,
+      1.2
+    ],
+    [
+      -0.02,
+      0.02
+    ]
+  ],
+  "objective_value": 0.01846984686783113,
+  "evaluations": 455
+}

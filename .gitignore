@@ -46,6 +46,16 @@ manuscript/figures/*
 !manuscript/figures/official_benchmark_results.png
 !manuscript/figures/magnet_horizon_component_counterexample.png
 !manuscript/figures/threshold_curve_ledger.png
+!manuscript/figures/causal_vs_centered_fidelity.png
+!manuscript/figures/causal_parking_local_global_inversion.png
+!manuscript/figures/doubly_nested_risk_coverage_curves.png
+!manuscript/figures/freshness_failure_components.png
+!manuscript/figures/matched_acceptance_false_qualification.pdf
+!manuscript/figures/terrasentia_loso_calibrated_physics.png
+!manuscript/figures/timing_qualification_regions.pdf
+!manuscript/figures/ugv01_position_remediability.png
+!manuscript/figures/ugv01_rpe_vs_global_fidelity.png
+*.tar.gz
 # ============================================================
 # Generated experiment outputs
 # ============================================================
@@ -60,6 +70,29 @@ docs/audits/
 !results/ugv01_live_position_contract/
 !results/ugv01_contract_parameter_study/
 !results/e1_rank_inference/
+!results/causal_derivative_loso/
+results/causal_derivative_loso/*
+!results/causal_derivative_loso/merged_manifest.json
+!results/causal_derivative_loso/trajectory_bank_audit.md
+!results/causal_derivative_loso/summary/
+results/causal_derivative_loso/summary/*
+!results/causal_derivative_loso/summary/causal_derivative_per_sequence.csv
+!results/causal_derivative_loso/summary/causal_derivative_report.md
+!results/causal_derivative_loso/summary/causal_derivative_summary.json
+!results/causal_derivative_loso/summary/causal_sequence_service_ledger.csv
+!results/causal_derivative_loso/summary/causal_vs_centered_fidelity.csv
+!results/causal_derivative_loso/summary/causal_vs_centered_fidelity.png
+!results/doubly_nested_loso_evidence/
+!results/service_risk_nested_bank_summary/
+!results/doubly_nested_loso_slurm/
+results/doubly_nested_loso_slurm/*
+!results/doubly_nested_loso_slurm/full_audit.json
+!results/doubly_nested_loso_slurm/merged_manifest.json
+!results/doubly_nested_loso_slurm/task_ledger.json
+!results/doubly_nested_loso_slurm/task_status.json
+!results/terrasentia_loso_calibrated_physics/
+!results/ugv01_position_ledger/
+!results/causal_derivative_loso/summary/causal_parking_local_global_inversion.png
 live_contract_trials/
 # Original V1 training-output directory outside results
 i2nav_dual_10fold_3seed_results/

@@ -1,0 +1,15 @@
+{
+  "schema": "ugv01_position_remediability_ledger_v1",
+  "protocol": "docs\\protocols\\ugv01_position_ledger_protocol.json",
+  "protocol_status": "FROZEN_BEFORE_LEDGER_COMPUTATION",
+  "n_runs": 3,
+  "n_services": 4,
+  "n_cases": 12,
+  "category_counts": {
+    "already_qualified": 5,
+    "delivery_remediable": 3,
+    "persistent": 4
+  },
+  "common_source_rate_ceiling_hz": 2.0,
+  "high_rate_rows_excluded_from_ledger": true
+}

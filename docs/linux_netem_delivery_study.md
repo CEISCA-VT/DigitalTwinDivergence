@@ -14,8 +14,9 @@ experiment.
 - Ubuntu or another Linux distribution with `iproute2` (`ip` and `tc`)
 - `sudo` access or equivalent `CAP_NET_ADMIN`
 - Python 3.10+ and this repository's `requirements.txt`
-- The 30 frozen V2 trajectories under
-  `results/i2nav_v2_full_loso/i2nav_v2_full_loso/`
+- For combined capture and replay: either the 30 frozen V2 trajectories under
+  `results/i2nav_v2_full_loso/i2nav_v2_full_loso/`, or the completed doubly
+  nested bank and its `merged_manifest.json`
 
 Falcon compute nodes normally do not grant `sudo`; use a local Linux machine or
 VM where you control the network namespace. The GPU is not used.
@@ -39,14 +40,17 @@ git pull
 source .venv/bin/activate
 ```
 
-Confirm that the frozen trajectories exist:
+The cleanest workflow is to capture network traces in the VM, copy only the
+small capture directory back, and replay it locally against the audited doubly
+nested bank. This avoids copying the 3.8-GB training bank into the VM.
 
-```bash
-find results/i2nav_v2_full_loso/i2nav_v2_full_loso -name v2_evaluated_trajectory.csv | wc -l
+Confirm the local doubly nested bank before starting the VM capture:
+
+```powershell
+python -c "from pathlib import Path; from DigitalTwin.analysis.netem_delivery_replay import discover_trajectory_sources; print(len(discover_trajectory_sources(Path(r'results\doubly_nested_loso_slurm\merged_manifest.json'))))"
 ```
 
-The count must be `30`. If the generated trajectories are not stored in Git,
-copy the frozen result directory to the exact path above before running.
+The count must be `30`.
 
 ## Preflight
 
@@ -57,13 +61,13 @@ tc -V
 ip -Version
 ```
 
-## Full recommended run
+## Full recommended capture in the Linux VM
 
 Three 180-second transport repetitions for all four conditions take about 36
 minutes plus a few minutes of idle timeout and analysis:
 
 ```bash
-bash scripts/linux/run_netem_delivery_study.sh --duration-s 180 --repetitions 3
+bash scripts/linux/run_netem_delivery_study.sh --duration-s 180 --repetitions 3 --capture-only
 ```
 
 The script may prompt once for the `sudo` password. It creates an isolated
@@ -76,11 +80,22 @@ route.
 Run this first if the VM setup is new:
 
 ```bash
-bash scripts/linux/run_netem_delivery_study.sh --duration-s 10 --repetitions 1 --output results/netem_delivery_smoke
+bash scripts/linux/run_netem_delivery_study.sh --duration-s 10 --repetitions 1 --capture-only --output results/netem_delivery_smoke
 ```
 
 The smoke test validates plumbing only. Do not report its ledger as the paper
 result because a ten-second transport trace is too short.
+
+After the full capture, copy `results/netem_delivery/captures/` back into the
+same path in the Windows checkout and run:
+
+```powershell
+python -m DigitalTwin.analysis.netem_delivery_replay --capture-root results\netem_delivery\captures --bank-manifest results\doubly_nested_loso_slurm\merged_manifest.json --output results\netem_delivery\evidence
+```
+
+This verifies trajectory hashes and replays only the 30 doubly nested
+outer-test trajectories. The 270 qualification-training trajectories are not
+used by the netem ledger.
 
 ## Outputs
 

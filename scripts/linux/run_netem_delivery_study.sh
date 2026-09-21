@@ -8,10 +8,12 @@ DURATION_S=180
 REPETITIONS=3
 PAYLOAD_BYTES=1024
 PORT=18767
+CAPTURE_ONLY=0
+BANK_MANIFEST=""
 
 usage() {
   printf '%s\n' \
-    "Usage: $0 [--output DIR] [--duration-s N] [--repetitions N] [--python PATH]" \
+    "Usage: $0 [--output DIR] [--duration-s N] [--repetitions N] [--python PATH] [--capture-only]" \
     "" \
     "Captures ideal/practical/degraded/stress UDP delivery through Linux tc netem," \
     "then evaluates the measured traces over the frozen trajectory bank."
@@ -24,6 +26,8 @@ while [[ $# -gt 0 ]]; do
     --repetitions) REPETITIONS="$2"; shift 2 ;;
     --python) PYTHON_BIN="$(realpath "$2")"; shift 2 ;;
     --payload-bytes) PAYLOAD_BYTES="$2"; shift 2 ;;
+    --bank-manifest) BANK_MANIFEST="$(realpath "$2")"; shift 2 ;;
+    --capture-only) CAPTURE_ONLY=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) printf 'Unknown argument: %s\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
@@ -73,7 +77,13 @@ SUDO_KEEPALIVE_PID=$!
 
 cd "$REPO_ROOT"
 "$PYTHON_BIN" -c "import numpy, pandas; import DigitalTwin.analysis.netem_transport"
-"$PYTHON_BIN" -c "from DigitalTwin.analysis import service_timing_budget_study as s; paths=s.discover(); print(f'Frozen trajectory preflight: {len(paths)} trajectories')"
+if [[ "$CAPTURE_ONLY" -eq 0 ]]; then
+  if [[ -n "$BANK_MANIFEST" ]]; then
+    "$PYTHON_BIN" -c "from pathlib import Path; from DigitalTwin.analysis.netem_delivery_replay import discover_trajectory_sources; p=Path(r'$BANK_MANIFEST'); print(f'Nested outer-test trajectory preflight: {len(discover_trajectory_sources(p))} trajectories')"
+  else
+    "$PYTHON_BIN" -c "from DigitalTwin.analysis import service_timing_budget_study as s; paths=s.discover(); print(f'Frozen trajectory preflight: {len(paths)} trajectories')"
+  fi
+fi
 
 sudo ip netns add "$NS_NAME"
 sudo ip link add "$HOST_IF" type veth peer name "$NS_IF"
@@ -138,8 +148,20 @@ for replicate in $(seq 1 "$REPETITIONS"); do
   done
 done
 
-"$PYTHON_BIN" -m DigitalTwin.analysis.netem_delivery_replay \
-  --capture-root "$OUTPUT_ROOT/captures" \
-  --output "$OUTPUT_ROOT/evidence"
+if [[ "$CAPTURE_ONLY" -eq 0 ]]; then
+  replay_args=(
+    -m DigitalTwin.analysis.netem_delivery_replay
+    --capture-root "$OUTPUT_ROOT/captures"
+    --output "$OUTPUT_ROOT/evidence"
+  )
+  if [[ -n "$BANK_MANIFEST" ]]; then
+    replay_args+=(--bank-manifest "$BANK_MANIFEST")
+  fi
+  "$PYTHON_BIN" "${replay_args[@]}"
+fi
 
-printf '\nCompleted. Review:\n  %s\n' "$OUTPUT_ROOT/evidence/netem_delivery_summary.md"
+if [[ "$CAPTURE_ONLY" -eq 1 ]]; then
+  printf '\nCapture complete. Copy this directory back to the analysis machine:\n  %s\n' "$OUTPUT_ROOT/captures"
+else
+  printf '\nCompleted. Review:\n  %s\n' "$OUTPUT_ROOT/evidence/netem_delivery_summary.md"
+fi

@@ -1,0 +1,13 @@
+run_id,service,degraded_state,ideal_state,degraded_physical_failure,degraded_freshness_failure,ideal_physical_failure,ideal_freshness_failure,degraded_joint_satisfaction,ideal_joint_satisfaction,category
+aug29_run1_153555_elevation_fitted,global,qualified,qualified,False,False,False,False,0.8001204093919325,1.0,already_qualified
+aug29_run1_153555_elevation_fitted,local_10s,qualified,qualified,False,False,False,False,1.0,1.0,already_qualified
+aug29_run1_153555_elevation_fitted,local_1s,not_qualified,qualified,False,True,False,False,0.4003634161114476,1.0,delivery_remediable
+aug29_run1_153555_elevation_fitted,local_5s,not_qualified,qualified,False,False,False,False,0.7745341614906832,0.9683818970861748,delivery_remediable
+aug29_run2_160114_elevation_baseline,global,qualified,qualified,False,False,False,False,0.956661316211878,0.9599358974358975,already_qualified
+aug29_run2_160114_elevation_baseline,local_10s,qualified,qualified,False,False,False,False,0.8971807628524047,0.8973509933774835,already_qualified
+aug29_run2_160114_elevation_baseline,local_1s,not_qualified,qualified,False,True,False,False,0.500805152979066,1.0,delivery_remediable
+aug29_run2_160114_elevation_baseline,local_5s,qualified,qualified,False,False,False,False,0.8776508972267537,0.8762214983713354,already_qualified
+aug29_run3_161516_elevation_baseline,global,not_qualified,not_qualified,True,False,True,False,0.5914826498422713,0.5968503937007874,persistent
+aug29_run3_161516_elevation_baseline,local_10s,not_qualified,not_qualified,True,False,True,False,0.7581818181818182,0.7693693693693694,persistent
+aug29_run3_161516_elevation_baseline,local_1s,not_qualified,not_qualified,True,True,True,False,0.39389067524115756,0.7719298245614035,persistent
+aug29_run3_161516_elevation_baseline,local_5s,not_qualified,not_qualified,True,False,True,False,0.688135593220339,0.6386554621848739,persistent

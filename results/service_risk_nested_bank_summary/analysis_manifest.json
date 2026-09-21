@@ -1,0 +1,9 @@
+{
+  "analysis": "nested_bank_service_risk_comparator_summary",
+  "generated_utc": "2026-09-21T16:08:59.508880+00:00",
+  "context_mode": "nested_response_surface_summary",
+  "source_window_table": "results\\doubly_nested_loso_evidence\\per_run_response_surface.csv",
+  "source_risk_summary": "results\\doubly_nested_loso_evidence\\risk_coverage_summary.csv",
+  "status": "complete",
+  "note": "Aggregate nested-bank comparator summary; per-window causal logistic refit is not applicable to this input schema."
+}

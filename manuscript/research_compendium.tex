@@ -9,7 +9,7 @@
 \maketitle
 
 \begin{abstract}
-This compendium documents experiments on physical--virtual fidelity in sensor-lightweight digital twins. The work begins with a mobile-robot twin driven by wheel and inertial measurements, separates short-horizon trajectory agreement from accumulated global synchronization, and studies how benign operating condition changes the fidelity profile. It then defines service-relative contracts over required quantities, horizons, physical tolerances, freshness limits, and observability. Experiments use ten i2Nav robot sequences with three frozen-model seeds, AprilTag-referenced UGV01 recordings, five TerraSentia agricultural-robot sequences, twenty UGV01 live telemetry traces, and thermal and process datasets. Completed evidence shows that low finite-horizon relative error can coexist with large global divergence; persistent yaw mismatch is associated with accumulated heading and position error; fidelity distributions vary with turning, acceleration, curvature, wheel--IMU disagreement, and elapsed time; and sampled delivery can change whether an already-computed twin state satisfies a service without changing the underlying model. Negative findings include weak transfer of a frozen i2Nav model to TerraSentia, poor cross-run transfer of a same-run UGV01 calibration, transport-rate collapse in the live UGV01 prototype, and unavailable causal timing provenance in MAGNET. Doubly nested leave-one-sequence-out training, causal-derivative retraining, and Linux network emulation are documented separately as incomplete experiments and are not included in completed-result claims.
+This compendium documents experiments on physical--virtual fidelity in sensor-lightweight digital twins. The work begins with a mobile-robot twin driven by wheel and inertial measurements, separates short-horizon trajectory agreement from accumulated global synchronization, and studies how benign operating condition changes the fidelity profile. It then defines service-relative contracts over required quantities, horizons, physical tolerances, freshness limits, and observability. Experiments use ten i2Nav robot sequences with three model seeds, three AprilTag-referenced UGV01 recordings, five TerraSentia agricultural-robot sequences, twenty UGV01 live telemetry traces, and thermal and process datasets. Completed evidence shows that low finite-horizon relative error can coexist with large global divergence; persistent yaw mismatch is associated with accumulated heading and position error; fidelity distributions vary with operating condition; and sampled delivery can change whether an already-computed twin state satisfies a service without changing the model. A complete doubly nested i2Nav study verifies 300 training-to-evaluation pipelines and excludes each outer test sequence from the checkpoints, normalization, validation, and checkpoint selection used to construct its qualification-training evidence. At a common 25\% target acceptance, the resulting empirical service surface falsely qualifies 4/200 accepted cells (2.0\%), compared with 75/200 (37.5\%) for service identity, 28/160 (17.5\%) for AoI-only, 30/200 (15.0\%) for a common score, and 55/199 (27.6\%) for motion logistic regression. The clean bank preserves the 30 delivery-remediable, six persistent, and four already-qualified sequence--service partition. Although freshness is inactive for the remediable cases at the original 2-Hz/200-ms operating point, a dedicated replay with 0.2--0.3-s AoI limits, random loss, and periodic outages produces 308 sequence--service--condition cases in which freshness fails alone or jointly with physical discrepancy. A position-only UGV01 replay independently yields five already-qualified, three delivery-remediable, and four persistent run--service cases under a source-rate-compatible protocol. A completed 30-run causal-derivative LOSO sensitivity removes future-sample dependence from derivative-bearing features. Its service-level structure remains similar, but its trajectory errors increase, making it a causal-provenance repair and negative accuracy result rather than a model improvement. TerraSentia independently reproduces local--global dissociation, while a five-fold platform-calibrated physics study improves macro ATE only modestly and does not improve its contract ledger. Linux network emulation remains the outstanding delivery experiment.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -29,8 +29,10 @@ The completed work provides the following contributions:
 \item A componentwise fidelity framework that keeps local relative-pose error, global physical--virtual divergence, rate disagreement, and accumulated residuals in their physical units rather than collapsing them into one weighted score.
 \item An empirical demonstration that local and global fidelity can rank the same physical sequences differently, together with a measurable yaw-divergence pathway from persistent rate mismatch to heading and position divergence.
 \item A condition-dependent benign fidelity characterization based on speed, acceleration, turning, curvature, wheel--IMU disagreement, and elapsed time, including leave-one-sequence-out stability analysis.
-\item A service contract that joins physical discrepancy, freshness, and observability and distinguishes delivery-remediable cases from persistent model discrepancy.
+\item A service contract that joins physical discrepancy, freshness, and observability and distinguishes delivery-remediable cases from persistent model discrepancy, including a non-degenerate position-only UGV01 replication under rates supported by the saved physical stream.
 \item A multi-source experimental record covering i2Nav, UGV01, TerraSentia, MAGNET, FreeTwinEV, and TU Wien SNG, with independent-reference, fused-reference, replay, simulation, and negative results explicitly separated.
+\item A completed causal-feature sensitivity showing that the parking local/global inversion and service-remediability taxonomy survive backward-difference retraining, while absolute trajectory fidelity degrades.
+\item A fully audited doubly nested qualification study comprising 300 pipelines, with outer-sequence exclusion propagated through model training, normalization, validation, checkpoint selection, qualification fitting, and final evaluation.
 \end{enumerate}
 
 \section{Related Work}
@@ -135,7 +137,7 @@ Each i2Nav sequence is converted to a common 10-Hz clock. Odometer speed and IMU
 
 The canonical state uses a local ENU/FLU-style planar representation internally. Heading is unwrapped for interpolation and wrapped only for angular differences. Evaluation trajectories retain their common physical frame; no post-hoc spatial alignment is applied in the internal fidelity analysis. The official i2Nav benchmark uses its separately verified NED/TUM conversion and SE(3) alignment protocol.
 
-Acceleration and yaw acceleration in the completed frozen bank were constructed with centered numerical gradients. This can require the next 10-Hz sample, corresponding to a 100-ms feature-availability boundary. The completed lookahead-as-delay study accounts for that boundary in delivery replay. The separate causal-derivative experiment recomputes features with backward differences and retrains the model; it is incomplete.
+Acceleration and yaw acceleration in the original frozen bank were constructed with centered numerical gradients. This can require the next 10-Hz sample, corresponding to a 100-ms feature-availability boundary. The completed lookahead-as-delay study accounts for that boundary in delivery replay. A separate completed sensitivity recomputes every derivative-bearing feature with backward differences, sets the first derivative sample to zero, numerically verifies that perturbing a future sample cannot alter earlier features, and retrains all 30 ordinary LOSO runs. This causal bank is analyzed separately because changing feature construction changes both training and the resulting trajectories.
 
 \subsection{Frozen V2 model and propagation}
 The frozen model separates fast motion correction from persistent yaw correction. The fast branch consumes a 20-sample, 2-s window of the six canonical features. It uses a two-layer GRU with 64 hidden units, 0.1 inter-layer dropout, and layer normalization. Two bounded linear heads predict
@@ -164,7 +166,7 @@ Earlier learned-process-noise and dual-head $Q$ studies are separate development
 \subsection{LOSO splitting, normalization, and seeds}
 The completed frozen study uses ten outer test sequences and base seeds 42, 1042, and 2042. For each ordinary LOSO fold, the test sequence is excluded from training, train-only feature normalization, target scaling, and validation-only checkpoint selection. Feature means, standard deviations, target limits, split membership, seed, checkpoint, training history, and evaluated trajectory are stored with each run. The 30 runs are never treated as 30 independent robots: the three seeds are summarized within each physical sequence before cross-sequence inference.
 
-The later qualification-surface fit creates a second stage. In the historical bank, the outer sequence's qualification labels are excluded from surface fitting, but that outer sequence may have appeared upstream in checkpoints that generated some of the other nine trajectories. This distinction motivates the incomplete doubly nested design described in Appendix~\ref{app:pending}.
+The later qualification-surface fit creates a second stage. In the historical bank, the outer sequence's qualification labels were excluded from surface fitting, but that outer sequence could appear upstream in checkpoints that generated some of the other nine trajectories. The completed doubly nested design in Appendix~\ref{app:pending} repairs this dependence: for outer sequence $u$, the outer-test checkpoint excludes $u$, and each qualification-training checkpoint for target $v$ excludes both $u$ and $v$ throughout training, normalization fitting, validation, and checkpoint selection.
 
 \subsection{Trajectory synchronization and fidelity calculation}
 Reference and twin samples are associated on a common timestamp grid. Internal i2Nav evaluation uses saved aligned timestamps without spatial registration. ATE is the root mean square of $D_p(t)$. Heading MAE uses wrapped angular differences. Tail summaries report p95 and maximum values of $D_p$ and $D_\theta$.
@@ -235,12 +237,19 @@ Each of the ten sequences and four services is assigned exactly one state at the
 \end{align}
 Physical-only, freshness-only, combined, and unobservable failure components are retained in the 40-row case ledger. Practical recovery is evaluated only inside the remediable subset. One-factor-at-a-time sweeps vary physical tolerance, satisfaction requirement, and freshness limit while all other contract fields remain frozen.
 
+\subsection{Freshness-binding sensitivity protocol}
+The baseline service definitions use different AoI limits by service, so freshness need not bind at every nominal operating point. A dedicated sensitivity therefore replays the frozen 10-Hz V2 state streams under common AoI limits of 0.5, 0.3, and 0.2 s, in addition to the original limits. Six deterministic-seed delivery conditions are evaluated: ideal 10 Hz; nominal 5 Hz with 50-ms mean delay, 20-ms jitter, and 1\% independent loss; degraded 2 Hz with 200-ms delay, 50-ms jitter, and 5\% loss; stress 1 Hz with 300-ms delay, 100-ms jitter, and 10\% loss; the nominal 5-Hz condition with a 1-s outage every 8 s; and the degraded 2-Hz condition with a 2-s outage every 10 s. Requested and realized rates, loss, burst loss, and p95 delay are recorded for every physical sequence and model seed.
+
+For each sequence, service, delivery condition, and AoI setting, failure is decomposed into none, physical-only, freshness-only, or physical-and-freshness. Seeds are aggregated within sequence before reporting sequence--service--condition counts. This is a saved-state delivery sensitivity, not measured network transport, and its tighter common AoI limits are stress-test requirements rather than application-independent thresholds.
+
 \subsection{UGV01 AprilTag physical-reference protocol}
 The phone camera is calibrated with ChArUco footage. Fixed AprilTags define the measured planar world frame, and tag 0 is centered on the rover. Video detections are transformed into $x_{\mathrm{GT}},y_{\mathrm{GT}},\theta_{\mathrm{GT}}$. Direct detections are retained; bounded continuity recovery is used only under the documented quadrilateral geometry and gap limits. Fidelity pairs crossing unsupported reference gaps are rejected.
 
 Telemetry and video are synchronized by full-motion activity correlation because the recorded development footage lacks a hardware sync pulse. For the principal carpet run, the estimated video-minus-telemetry offset is 20.000 s, correlation is approximately 0.933, and estimated synchronization uncertainty is 0.025 s. Stationary camera/reference jitter is 0.0014-m RMSE and 0.0039-m p95. Only 28.1\% of the repaired evaluation samples are direct tag decodes, so recovered-track and geometry uncertainty remain part of interpretation.
 
 Instantiation stages are evaluated on identical accepted windows: nominal geometry where available, the deterministic UGV01 frame/sensor adapter, carpet-specific distance and asymmetric track-width calibration, and the full repaired fitted trajectory. The fitted parameters are distance scale 0.975, clockwise effective width 0.200 m, counterclockwise width 0.190 m, and gyro weight 0.20. Separate August 29 recordings are evaluated with these parameters frozen.
+
+The subsequent position-only UGV01 ledger uses a separate frozen protocol. Its services require 0.10 m over 1 s, 0.25 m over 5 s, 0.50 m over 10 s, and 0.50 m for global synchronization, with satisfaction requirement 0.80. These platform-scaled tolerances were documented after the earlier UGV01 fidelity characterization but before ledger computation; the exercise is retrospective rather than prospectively blinded. The aligned calibration run supports 10/5/2/1-Hz replay, whereas the two holdouts support only 2/1 Hz. The common primary comparison is therefore 1 Hz/200 ms degraded delivery against 2 Hz/0 ms ideal delivery. The 10/5-Hz rows are retained only as a run-1 diagnostic and never pooled with the holdouts. Samples or relative-motion pairs crossing an adjacent reference gap greater than 0.75 s are excluded from the observable denominator. Local position discrepancy compares world-frame displacement vectors so heading is not reintroduced into a position-only contract.
 
 \subsection{TerraSentia deterministic adapter and external evaluation}
 TerraSentia preprocessing uses \texttt{bag\_timestamp\_ns}/$10^9$ as the common clock and resamples to the frozen 10-Hz V2 grid with deterministic maximum-gap rules. Valid RTK latitude/longitude samples are converted to local ENU using only the initial valid origin; no trajectory-wide alignment or RTK-derived tuning is applied. Left and right motor-side means provide nominal forward speed and the kinematic yaw proxy
@@ -250,6 +259,8 @@ TerraSentia preprocessing uses \texttt{bag\_timestamp\_ns}/$10^9$ as the common 
 where 0.26 m is the metadata-supported track width. This is a no-slip skid-steer proxy rather than an exact body yaw measurement.
 
 The adapter constructs the same direct, derivative, disagreement, and slow-window features expected by frozen V2. It applies the stored i2Nav training mean and standard deviation without target-domain refitting. GPS, RTK, dataset EKF, and all reference quantities are excluded from V2 input. All 30 frozen i2Nav checkpoints run independently; predictions are not averaged into a new ensemble. Primary metrics use valid RTK position. Dataset fused-EKF heading and twist support only secondary yaw-accumulation and oracle-decomposition diagnostics.
+
+A separate five-fold deterministic calibration study fits forward-speed scale, yaw-rate scale, and yaw bias on four physical sequences and evaluates the untouched fifth. Bounds and the sequence-balanced robust RTK-position objective are fixed across folds. This is platform-specific physics calibration, not learned-V2 retraining. The held-out sequence is excluded from parameter fitting; fused heading supplies only the initial propagation orientation and remains a secondary reference. Position-service replay uses the same component--horizon representation, but the calibration result is interpreted as negative if contract qualification does not improve.
 
 Before fidelity analysis, each sequence is checked for raw stream count, aligned duration, synchronization gaps, RTK horizontal accuracy and validity, motor/reference speed agreement, wheel--IMU yaw agreement, and frozen-feature range shift. The four propagation combinations motor+IMU, reference-speed+IMU, motor+reference-yaw, and reference-speed+reference-yaw are mechanism diagnostics; only motor+IMU is the deployable nominal physics baseline.
 
@@ -276,7 +287,7 @@ The doubly nested and causal-derivative importers verify archive integrity, repo
 \appendices
 
 \section{Experimental Record and Evidence Classes}
-The appendices distinguish: (i) independent physical-reference evaluation, (ii) protocol-compatible benchmark scoring, (iii) replay or simulation over saved trajectories, (iv) fused-reference diagnostics, (v) model-development studies, and (vi) incomplete experiments. Numerical results are reported under the protocol that generated them; aligned benchmark errors are not substituted for unaligned physical--virtual synchronization errors.
+The appendices distinguish: (i) independent physical-reference evaluation, (ii) protocol-compatible benchmark scoring, (iii) replay or simulation over saved trajectories, (iv) fused-reference diagnostics, (v) model-development studies, and (vi) pending experiments. Numerical results are reported under the protocol that generated them; aligned benchmark errors are not substituted for unaligned physical--virtual synchronization errors.
 
 \section{Frozen i2Nav Model Development and LOSO Evaluation}
 The frozen i2Nav study contains ten physical sequences and three seeds per sequence. V2 corrects a physics trajectory using learned fast and slow residual terms while retaining an explicit propagation model. The completed 30-run LOSO bank reports V1 and V2 internal fidelity. V2 changes macro ATE from 2.834 to 2.398 m ($-15.38\%$), heading MAE from $3.336^\circ$ to $2.569^\circ$ ($-22.99\%$), RPE$_5$ from 0.1670 to 0.1603 m ($-4.00\%$), and RPE$_{10}$ from 0.2714 to 0.2532 m ($-6.70\%$). RPE$_1$ changes from 0.0606 to 0.0611 m ($+0.87\%$). V2 improves 6/10 sequences for ATE, 8/10 for heading, 7/10 for RPE$_1$, 9/10 for RPE$_5$, and 8/10 for RPE$_{10}$.
@@ -293,6 +304,8 @@ Across the ten i2Nav sequences, parking02 is the largest-divergence case: ATE 11
 
 At sequence level, persistent yaw mismatch and accumulated yaw residual have Pearson/Spearman associations 0.974/0.952. Heading divergence and position divergence have associations 0.988/0.952. The direct $I_\omega$--heading-divergence association is weaker (Pearson 0.381, Spearman $-0.030$), so the chain is a measured pathway rather than a universal monotonic law.
 
+The parking00/parking02 ordering reversal survives causal-backward retraining. Under causal features, parking00 has ATE 2.124 m, $D_p$ p95 3.521 m, and heading MAE $0.840^\circ$, whereas parking02 has 16.207 m, 32.218 m, and $24.030^\circ$. The local ordering reverses: parking02 has RPE$_1$/RPE$_5$/RPE$_{10}$ of 0.020/0.064/0.119 m, all lower than parking00's 0.161/0.373/0.526 m. At ideal 10-Hz delivery, parking02 also has greater physical satisfaction for each finite-horizon service, while parking00 has greater global-service satisfaction. The central local-versus-global claim therefore does not depend on centered-gradient lookahead.
+
 \begin{figure}[ht]\centering
 \includegraphics[width=.78\linewidth]{figures/e1_parking_full_grid_inversion.png}
 \caption{parking00 and parking02 exchange ordering between global synchronization and finite-horizon local services over the prespecified tolerance grid.}
@@ -306,6 +319,11 @@ At sequence level, persistent yaw mismatch and accumulated yaw residual have Pea
 \begin{figure}[ht]\centering
 \includegraphics[width=.80\linewidth]{figures/local_vs_global_fidelity.png}
 \caption{All-sequence comparison of finite-horizon local error and accumulated global physical--virtual divergence.}
+\end{figure}
+
+\begin{figure}[ht]\centering
+\includegraphics[width=.86\linewidth]{figures/causal_parking_local_global_inversion.png}
+\caption{The parking00/parking02 local--global ordering reversal after causal-backward feature construction and retraining.}
 \end{figure}
 
 \section{Condition-Dependent Fidelity}
@@ -366,13 +384,20 @@ On the saved 10-Hz state clock, nominal 25- and 50-ms delays select identical re
 \end{figure}
 
 \section{Qualification Transfer and Comparator Checks}
-The qualification-label holdout fits a cell-specific empirical surface on nine sequences and evaluates the remaining sequence. At the reported pooled operating point, the empirical surface accepts 235/800 cells and falsely qualifies 5/235 (2.1\%). Service identity accepts 200/800 and falsely qualifies 75/200 (37.5\%). The sequence-bootstrap difference is $-35.4$ percentage points with interval $[-44.4,-25.1]$. AoI-only has 60 false qualifications among 250 accepted cells, adapted kinematic staleness 97/242, and motion logistic 56/235. The empirical-versus-logistic paired interval crosses zero.
+The primary result now uses a complete doubly nested design. For each outer test sequence $u$, its test checkpoint excludes $u$, while every qualification-training trajectory for target $v$ is produced by a checkpoint that excludes both $u$ and $v$. The full audit verifies 300/300 pipelines from one repository commit, including training, normalization-fit, validation, checkpoint-selection, checkpoint-hash, result-source, and trajectory-hash provenance. Qualification operating points are selected within the other nine physical sequences; the outer sequence supplies only the final test labels.
 
-These numbers are historical qualification-label-held-out results. They do not provide end-to-end outer-sequence exclusion because checkpoints used to generate some of the other nine qualification trajectories could include the outer sequence upstream. The doubly nested experiment in Appendix~\ref{app:pending} is designed to replace these counts.
+At a common 25\% target acceptance, the empirical service surface accepts 200/800 cells and falsely qualifies 4/200 (2.0\%; physical-sequence bootstrap interval 0--4.85\%). Service identity accepts 200/800 and falsely qualifies 75/200 (37.5\%; interval 26.0--49.5\%). AoI-only accepts 160/800 with 28/160 false qualifications (17.5\%), the common score accepts 200/800 with 30/200 (15.0\%), and motion logistic regression accepts 199/800 with 55/199 (27.6\%). These are pooled matched-target results rather than wins within every service: the empirical surface accepts no global cells at this operating point, and comparator acceptance can differ because tied scores prevent exact target coverage.
+
+The superseded qualification-label-only analysis accepted 235/800 cells with 5/235 false qualifications for the empirical surface and 75/200 for service identity. It remains useful as an analysis-history sensitivity, but its checkpoints for the nine qualification trajectories were not guaranteed to exclude the outer sequence upstream and it is not the primary evidential result.
+
+\begin{figure}[ht]\centering
+\includegraphics[width=.88\linewidth]{figures/doubly_nested_risk_coverage_curves.png}
+\caption{Doubly nested pooled selective risk versus achieved acceptance. Operating points are selected without outer-test labels, and physical sequences, rather than cells, are the resampling units.}
+\end{figure}
 
 \begin{figure}[ht]\centering
 \includegraphics[width=.84\linewidth]{figures/heldout_qualification_comparison.pdf}
-\caption{Historical pooled qualification operating points with physical-sequence bootstrap intervals and explicit false/accepted denominators.}
+\caption{Superseded qualification-label-only operating points, retained to document the pre-repair analysis.}
 \end{figure}
 
 \begin{figure}[ht]\centering
@@ -386,9 +411,13 @@ These numbers are historical qualification-label-held-out results. They do not p
 \end{figure}
 
 \section{Remediability Ledger and Frozen-Configuration Sensitivity}
-At 2 Hz/200 ms, the historical 40-case ledger contains 30 delivery-remediable, six persistent, and four already-qualified sequence--service cases. The predeclared 5-Hz/50-ms sampled configuration restores 27/30 remediable cases. All 30 remediable cases are discrepancy-only at this operating point because the evaluated freshness requirement is met. Requirements 0.70, 0.80, and 0.90 yield partitions 17/5/18, 30/6/4, and 29/9/2, respectively.
+At 2 Hz/200 ms, the doubly nested 40-case ledger contains 30 delivery-remediable, six persistent, and four already-qualified sequence--service cases. It exactly preserves the earlier partition despite repairing the upstream qualification overlap. The earlier predeclared 5-Hz/50-ms analysis restored 27/30 remediable cases; that intervention count remains a saved-state timing sensitivity rather than a newly refitted doubly nested comparator. All 30 remediable cases are discrepancy-only at the original operating point because the evaluated freshness requirement is met. Historical requirement sweeps at 0.70, 0.80, and 0.90 yielded partitions 17/5/18, 30/6/4, and 29/9/2, respectively.
+
+The discrepancy-only statement is specific to the original service limits and operating point; it is not evidence that freshness is generally inactive. In the dedicated binding sweep, the 0.2- and 0.3-s common AoI settings produce 308 sequence--service--condition cases with freshness-only or physical-and-freshness failure. At 0.2 s, nominal 5-Hz delivery produces 19 freshness-only and nine joint failures, while its 1-s-every-8-s burst variant produces five freshness-only and 35 joint failures. Degraded 2-Hz delivery produces two freshness-only and 38 joint failures. At 0.3 s, degraded 2-Hz delivery still produces two freshness-only and 38 joint failures; the 1-Hz stress and 2-Hz burst-outage conditions each produce 40 joint failures. Ideal 10-Hz delivery produces 34 cases with neither component failing and six physical-only persistent cases at both tight limits. Thus the contract exposes a genuine freshness regime when requirements and delivery conditions make age consequential, while retaining physically persistent cases that fresher delivery cannot repair.
 
 A deterministic fixed-physics alternate yields 23 remediable, 16 persistent, and one already-qualified case. V2 leaves six persistent cases rather than 16 and is the only one of the two configurations with global cases that become remediable. The exact partition is therefore model- and threshold-dependent, while the distinction between delivery and model discrepancy remains computable.
+
+The independently retrained causal-backward bank yields 28 remediable, eight persistent, and four already-qualified cases, and the practical intervention restores 26/28 remediable cases. Relative to 30/6/4 and 27/30 for centered derivatives, two cases become persistent, but the dominant classification and practical-recovery conclusion remain. These causal counts are an ordinary-LOSO sensitivity and do not repair the separate two-stage qualification-surface overlap.
 
 \begin{figure}[ht]\centering
 \includegraphics[width=.88\linewidth]{figures/held_state_mechanism_and_remediability.pdf}
@@ -409,6 +438,8 @@ A deterministic fixed-physics alternate yields 23 remediable, 16 persistent, and
 \subsection{Centered-gradient lookahead as delay}
 The centered-gradient implementation can require the next 10-Hz sensor sample. A predeclared 100-ms availability penalty was therefore added to every saved-state replay condition. The case partition changes from 30/6/4 to 31/6/3; only 1/40 sequence--service classifications changes. This is a latency sensitivity on existing trajectories, not a replacement for causal-feature retraining.
 
+The completed causal-backward retraining supplies that complementary test. It verifies feature causality directly and reproduces the main local/global and remediability phenomena, but with materially larger trajectory errors. Together, the two experiments separate the timing effect of delayed feature availability from the model effect of changing and retraining the feature construction.
+
 \subsection{Deterministic delay, jitter, and loss replay}
 Deterministic replay over saved states realizes 10.001 Hz with zero loss for the ideal condition, 4.951 Hz with 0.987\% loss and mean p95 delay 82.8 ms for the practical condition, 1.900 Hz with 4.992\% loss and mean p95 delay 282.1 ms for the degraded condition, and 0.900 Hz with 9.991\% loss and mean p95 delay 463.6 ms for the stress condition. The emulated ledger is 32 remediable, six persistent, and two already qualified; the practical emulated condition restores 29 cases. This is deterministic delivery emulation, not measured network transport.
 
@@ -418,6 +449,11 @@ One-factor-at-a-time sweeps use physical-tolerance multipliers 0.5--2.0, satisfa
 \begin{figure}[ht]\centering
 \includegraphics[width=.86\linewidth]{figures/threshold_curve_ledger.png}
 \caption{Sequence-level remediability partition under physical-tolerance, satisfaction, and freshness-limit sweeps.}
+\end{figure}
+
+\begin{figure}[ht]\centering
+\includegraphics[width=.88\linewidth]{figures/freshness_failure_components.png}
+\caption{Freshness-binding sensitivity under common AoI limits and stochastic or bursty delivery. Counts distinguish freshness-only, physical-only, joint, and no-failure sequence--service--condition cases.}
 \end{figure}
 
 \begin{figure}[ht]\centering
@@ -432,6 +468,8 @@ Frozen transfer to two August 29 holdouts is weak. Calibration-run ATE/heading M
 
 Descriptive carpet, smooth-trapezoid, and smooth-square runs have ATE 0.114/0.101/0.338 m, heading MAE $6.7/17.4/28.6^\circ$, and corrected RPE$_1$ 0.029/0.023/0.017 m. The square contains a 20.935-s physical-reference gap; horizon pairs crossing it are excluded. Its corrected RPE$_5$/RPE$_{10}$ are 0.050/0.077 m while $D_p$ p95 is 0.918 m.
 
+The frozen position-only replay contains 12 cases from three August 29 runs and four services. Under the common source-supported comparison of 1 Hz/200 ms against 2 Hz/0 ms, the ledger contains five already-qualified, three delivery-remediable, and four persistent cases; no case is unobservable or degradation-induced. Two remediable local-1-s cases are freshness-limited. The third remediable case has acceptable physical and freshness marginals but joint satisfaction below 0.80 under degraded delivery, demonstrating why the conjunction must be evaluated directly. All four persistent cases arise on the weakest frozen holdout and retain physical-discrepancy failure under ideal delivery. Thus the taxonomy is non-degenerate on a second physical platform, but the 12 cases are nested within only three physical runs and do not estimate population-level category rates.
+
 \begin{figure}[ht]\centering
 \includegraphics[width=.84\linewidth]{figures/ugv01_rpe_vs_global_fidelity.png}
 \caption{UGV01 finite-horizon RPE versus global ATE and $D_p$ p95 after reference-gap exclusion.}
@@ -442,6 +480,11 @@ Descriptive carpet, smooth-trapezoid, and smooth-square runs have ATE 0.114/0.10
 \caption{UGV01 calibration recording and two frozen-parameter holdouts.}
 \end{figure}
 
+\begin{figure}[ht]\centering
+\includegraphics[width=.88\linewidth]{figures/ugv01_position_remediability.png}
+\caption{Position-only UGV01 ledger under the source-compatible 1-Hz/200-ms degraded and 2-Hz/0-ms ideal delivery settings. The left panel reports the 5/3/4 partition; the right panel shows mean joint satisfaction across the three runs.}
+\end{figure}
+
 \section{TerraSentia External Platform}
 Five TerraSentia sequences use valid RTK position as the primary positional reference. Dataset-provided fused EKF heading is used only for diagnostics. The deterministic adapter uses bag timestamps, local ENU conversion from the initial valid RTK origin, motor-side means, a nominal 0.26-m skid-steer yaw proxy, IMU yaw rate, and frozen i2Nav normalization.
 
@@ -449,9 +492,16 @@ Nominal-physics ATE spans 32.712--60.688 m and frozen-V2 median ATE spans 32.525
 
 The unchanged position-service grid is nondegenerate on all five sequences. Frozen-V2 grid-average validity is 0.779, 0.421, 0.230, and 0.083 for local 1-s, local 5-s, local 10-s, and global position services. This demonstrates evaluator and contract portability; it does not demonstrate frozen-model portability.
 
+The additional five-fold platform-calibrated physics study also gives a mixed result. Relative to nominal physics, sequence-macro ATE changes from 47.126 to 44.430 m ($-5.72\%$), RPE$_1$ from 0.344 to 0.342 m ($-0.83\%$), RPE$_5$ from 1.911 to 1.835 m ($-3.96\%$), RPE$_{10}$ from 4.218 to 3.967 m ($-5.94\%$), and $D_p$ p95 from 81.005 to 73.011 m ($-9.87\%$). ATE improves on three of five held-out sequences, while RPE$_{10}$ improves on all five. Nevertheless, every fold pushes the speed scale to its lower bound of 0.80, suggesting confounding between translation scale and yaw accumulation rather than stable physical identification. The calibrated position ledger is persistent in all 20 sequence--service cases, compared with 17 persistent and three delivery-remediable cases for nominal physics. The defensible conclusion is therefore that TerraSentia reproduces local--global dissociation and supports evaluator portability, but simple three-parameter calibration does not establish a portable high-fidelity twin or a useful remediability partition.
+
 \begin{figure}[ht]\centering
 \includegraphics[width=.82\linewidth]{figures/E1_E2_cross_platform_position_contracts.png}
 \caption{Position-contract feasibility across i2Nav and TerraSentia under the unchanged contract representation.}
+\end{figure}
+
+\begin{figure}[ht]\centering
+\includegraphics[width=.88\linewidth]{figures/terrasentia_loso_calibrated_physics.png}
+\caption{Held-out TerraSentia local--global fidelity and nominal-versus-calibrated physics. Short-horizon errors remain much smaller than accumulated ATE, while calibration provides only modest and inconsistent global improvement.}
 \end{figure}
 
 \section{UGV01 Live Telemetry and Trace Replay}
@@ -522,17 +572,44 @@ The following figures document earlier analysis stages. They are retained to pre
 \caption{Legacy three-method matched-acceptance figure retained as an analysis-history artifact.}
 \end{figure}
 
-\section{Incomplete Experiments: Doubly Nested LOSO, Causal Features, and Linux Netem}
+\section{Provenance Repairs and Pending Network Emulation}
 \label{app:pending}
 \subsection{Doubly nested LOSO}
 The corrected two-stage design defines an outer qualification-test sequence $u$. The checkpoint generating $u$ excludes $u$. Every qualification-training trajectory for another target sequence $v$ is generated by a checkpoint that excludes both $u$ and $v$ from training, normalization fitting, validation, and checkpoint selection as applicable. The complete design has 10 outer sequences, 3 seeds, and 10 trajectories per outer fold, totaling 300 V1-to-V2 pipelines.
 
-The supplied archive \path{i2nav_doubly_nested_full10_shard_00_of_60.zip} is one of 60 shards. Its audit passes five tasks at repository commit \texttt{6f91f5d}, all for seed 42. It includes outer-test trajectories for building00, building02, parking01, playground00, and street01 with recorded split provenance and SHA-256 hashes. This shard is complete, but the full experiment is not: 59 shards and the aggregate trajectory-bank audit remain outstanding. No corrected qualification surface, comparator result, or remediability ledger is inferred from this partial shard.
+The completed bank contains all 300 expected trajectories from repository commit \texttt{8a363b0}: 30 outer-test trajectories and 270 qualification-training trajectories. The aggregate audit reports no missing or contaminated tasks and records SHA-256 hashes for checkpoints, V1 result sources, and exported V2 trajectories. The corrected evidence analysis covers ten physical sequences, four services, and 800 delivery cells. It yields 4/200 false qualifications for the empirical surface at the 25\% target-acceptance point and preserves the 30/6/4 remediability partition. This closes the previously disclosed two-stage upstream-overlap gap for the primary qualification comparison.
 
 \subsection{Causal-derivative LOSO}
 The causal-feature experiment replaces centered derivatives with backward derivatives and includes a numerical no-lookahead preflight. It contains 30 ordinary LOSO tasks and tests whether causal feature construction changes the frozen-model conclusions. It does not repair the two-stage qualification split by itself.
 
-The supplied archive \path{i2nav_v2_causal_derivative_shard_00_of_06.zip} is one of six shards. Its audit passes five seed-42 tasks for building00, building02, parking01, playground00, and street01 at commit \texttt{6f91f5d}. Five shards and aggregate analysis remain outstanding. The existing 100-ms lookahead-as-delay sensitivity remains the only completed lookahead result until the full causal bank is merged.
+The complete one-shard archive contains all 30 trajectories: ten held-out physical sequences and seeds 42, 1042, and 2042. The importer verified ZIP integrity, the no-lookahead preflight, LOSO split exclusions, normalization-fit and checkpoint-selection provenance, V1 checkpoint and result hashes, V2 manifest linkage, and every trajectory hash at commit \texttt{6f91f5d}. The resulting bank therefore closes the centered-gradient causal-provenance gap for this sensitivity experiment.
+
+The repair does not improve accuracy. Sequence-macro ATE increases from 2.398~m for the centered-gradient bank to 3.882~m for causal backward differences (61.9\% higher), and heading MAE increases from $2.569^\circ$ to $3.845^\circ$ (49.7\% higher). RPE$_1$, RPE$_5$, and RPE$_{10}$ increase from 0.061, 0.160, and 0.253~m to 0.150, 0.371, and 0.562~m, respectively. The service ledger nevertheless remains structurally similar: 28 delivery-remediable, eight persistent, and four already-qualified cases, with the 5-Hz/50-ms intervention restoring 26/28 remediable cases. The corresponding centered-gradient values are 30/6/4 and 27/30. Thus the distinction between delivery-remediable and persistent discrepancy survives causal feature construction, although two cases move from remediable to persistent and the causal model is materially less accurate.
+
+\begin{table}[ht]\centering
+\caption{Status of principal conclusions under causal-backward retraining.}
+\begin{tabular}{p{.30\linewidth}p{.44\linewidth}p{.16\linewidth}}
+\toprule
+Conclusion & Causal evidence & Status \\
+\midrule
+Local and global fidelity differ & parking02 remains substantially better locally and worse globally than parking00 & Replicated \\
+Delivery-remediable and persistent cases coexist & Ledger changes from 30/6/4 to 28/8/4 & Replicated with count shift \\
+Practical sampled delivery restores most remediable cases & 26/28 restored, versus 27/30 originally & Replicated \\
+Centered-feature accuracy level & ATE, heading MAE, and all RPE horizons worsen & Not robust \\
+Condition-dependent fidelity and benign envelopes & Not recomputed on the causal trajectory bank & Unresolved \\
+Persistent-yaw association chain & Required causal-bank mechanism tables were not recomputed & Unresolved \\
+Historical qualification comparators & Causal ordinary LOSO does not repair two-stage upstream overlap & Not replaced \\
+UGV01, TerraSentia, and cross-domain findings & These use separate data paths and do not depend on i2Nav derivative construction & Unaffected \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Accordingly, causal retraining strengthens the methodological credibility of the local/global and remediability claims while weakening any claim that the reported centered-gradient accuracy is implementation-invariant. The causal experiment should not be used to imply that every condition, envelope, mechanism, benchmark, or qualification-comparator result has been reproduced.
+
+\begin{figure}[ht]\centering
+\includegraphics[width=.88\linewidth]{figures/causal_vs_centered_fidelity.png}
+\caption{Sequence-macro fidelity for the original centered-gradient and retrained causal-backward LOSO banks. Lower is better. Causal feature construction removes lookahead but does not improve accuracy.}
+\end{figure}
 
 \subsection{Linux netem}
 The Linux experiment sends identifiers for precomputed frozen states through an isolated virtual Ethernet pair and network namespace shaped by \texttt{tc netem}. It records monotonic send and arrival times, packet loss, realized delay, and requested versus realized rate. The planned full run uses four delivery conditions, three 180-s transport repetitions, and applies each measured trace to the existing physical-sequence trajectories. Transport repetitions quantify network variability and do not increase the number of physical sequences.
@@ -558,17 +635,20 @@ Artifact root & Evidence type & Contents \\
 \path{lookahead_as_delay_sensitivity} & Sensitivity & 100-ms feature-availability penalty. \\
 \path{deterministic_delivery_replay} & Software emulation & Delay, jitter, loss, realized rates, and ledger. \\
 \path{service_threshold_curve_ledger} & Sensitivity & Tolerance, satisfaction, and freshness curves. \\
+\path{freshness_binding_sweep} & Delivery sensitivity & Tight common AoI limits, burst outages, realized transport, and failure-component counts. \\
 \path{e1_e2_service_contract_publication} & Cross-platform & Metric rank inversions and TerraSentia contracts. \\
 \path{e1_rank_inference} & Statistical audit & Dependence-aware local/global rank analysis. \\
 \path{service_relative_fidelity} & Negative study & Condition-aware monitor versus unconditional support. \\
 \path{service_risk_estimator_nested_loso} & Negative study & Causal service-risk estimator and no-go checks. \\
 \path{ugv01_physical_instantiation} & Physical reference & AprilTag calibration, conditions, and holdouts. \\
 \path{ugv01_contract_parameter_study} & Parameter study & Track-width interval and cross-run contract sensitivity. \\
+\path{ugv01_position_ledger} & Physical replay & Frozen position-only protocol, source-rate audit, and 5/3/4 remediability ledger. \\
 \path{ugv01_live_position_contract} & Observability sensitivity & Position-only GPS contract replay. \\
 \path{ugv01_live_contract_experiment} & Prototype & Initial single-run live dashboard experiment. \\
 \path{ugv01_live_contract_dataset_audit} & Live traces & Twenty-run telemetry/video/JSONL audit. \\
 \path{ugv01_live_contract_trace_replay} & Trace replay & Serial transport and capacity sensitivity. \\
 \path{terrasentia_external_validation} & External platform & Five RTK-referenced sequences and 30 checkpoints. \\
+\path{terrasentia_loso_calibrated_physics} & External calibration & Five-fold deterministic physics calibration, held-out fidelity, and negative contract ledger. \\
 \path{aifarms_terrasentia_phase2} & Adapter audit & Timestamp, feature, frame, and oracle diagnostics. \\
 \path{terrasentia_timing_diagnostic} & Timing diagnostic & External-platform saved-state timing checks. \\
 \path{cross_domain_contract_generalization} & Cross-domain & MAGNET, FreeTwinEV, and TU Wien SNG. \\
@@ -592,19 +672,19 @@ Artifact root & Evidence type & Contents \\
 \path{replicate_01_base42}, \path{replicate_02_base1042}, and \path{replicate_03_base2042} & Historical output & Earlier per-seed generated results. \\
 \path{publication_hardening}, \path{result_freeze_audit}, and \path{results_quality_review} & Evidence audit & Numerical, provenance, and claim consistency checks. \\
 \path{frozen_result_manifest} and \path{manuscript_results_dossier} & Packaging & Result registry and document-support artifacts. \\
-\path{doubly_nested_loso} & Incomplete & Partial imported-bank placeholder; no aggregate result. \\
-\path{causal_derivative_loso} & Incomplete & Partial imported-bank placeholder; no aggregate result. \\
+\path{doubly_nested_loso_slurm}, \path{doubly_nested_loso_evidence}, and \path{service_risk_nested_bank_summary} & Completed primary evidence & Audited 300-pipeline bank, corrected qualification surface, selective-risk curves, comparators, and 30/6/4 ledger. \\
+\path{causal_derivative_loso} & Completed sensitivity & Verified 30-run causal bank, fidelity comparison, and 28/8/4 service ledger. \\
 \bottomrule
 \end{longtable}
 
 \section*{Conclusion}
-The experiments establish that digital-twin fidelity is multidimensional, horizon-dependent, condition-dependent, and service-relative. Short-horizon trajectory agreement does not guarantee global synchronization. In the i2Nav study, persistent yaw mismatch is strongly associated with accumulated yaw residual, and heading divergence is strongly associated with position divergence. Condition variables change both local and global fidelity distributions, while difficult parking sequences dominate global position and heading tails.
+The experiments establish that digital-twin fidelity is multidimensional, horizon-dependent, condition-dependent, and service-relative. Short-horizon trajectory agreement does not guarantee global synchronization. The completed causal-backward sensitivity confirms this distinction: parking02 remains much better than parking00 at 1-, 5-, and 10-s relative motion while being much worse in ATE, heading, and $D_p$ p95. In the original frozen bank, persistent yaw mismatch is strongly associated with accumulated yaw residual, and heading divergence is strongly associated with position divergence. Condition variables change both local and global fidelity distributions, while difficult parking sequences dominate global position and heading tails; these latter condition and mechanism analyses have not yet been recomputed on the causal bank.
 
-Service contracts provide a common representation for physical discrepancy, freshness, and observability. Saved-state replay shows how a newer delivered state can restore qualification without changing the model, while persistent cases remain unqualified under ideal delivery. The historical timing and comparator counts remain qualification-label-held-out results until the complete doubly nested trajectory bank is available. The 100-ms lookahead sensitivity, deterministic delay/jitter/loss replay, and threshold curves quantify how the ledger changes under explicit timing and requirement perturbations.
+Service contracts provide a common representation for physical discrepancy, freshness, and observability. Saved-state replay shows how a newer delivered state can restore qualification without changing the model, while persistent cases remain unqualified under ideal delivery. The fully nested analysis removes the primary qualification-provenance ambiguity: at 25\% target acceptance, its empirical surface has 2.0\% pooled selective risk, compared with 37.5\% for service identity, 17.5\% for AoI-only, 15.0\% for a common score, and 27.6\% for motion logistic regression. This pooled result is not a within-every-service victory, and no global cells are accepted by the empirical surface at that operating point. Freshness is inactive for the remediable cases under the original 2-Hz/200-ms service limits, but it becomes binding under tighter 0.2--0.3-s limits and stochastic or periodic outages: 308 sequence--service--condition cases exhibit freshness-only or joint physical-and-freshness failure. The source-rate-compatible UGV01 replay yields five already-qualified, three delivery-remediable, and four persistent cases. Its small three-run sample supports second-platform applicability of the taxonomy, not population-level rates or online resource savings. The 100-ms lookahead sensitivity, deterministic delay/jitter/loss replay, binding sweep, and threshold curves quantify how the ledger changes under explicit timing and requirement perturbations.
 
-The physical and external experiments define the boundaries of the result. UGV01 AprilTag data support accurate same-run asset-specific calibration but show poor transfer to two frozen holdouts. TerraSentia supports evaluator and contract portability while showing weak frozen-model portability and unresolved sensor provenance. The live UGV01 traces demonstrate a transport bottleneck that collapses requested policy rates. MAGNET, FreeTwinEV, and TU Wien SNG support structural contract portability, while MAGNET lacks the timing provenance required for causal delivery analysis.
+The physical and external experiments define the boundaries of the result. UGV01 AprilTag data support accurate same-run asset-specific calibration but show poor transfer to two frozen holdouts; those same holdouts make the position-only ledger informative by separating delivery-remediable from physically persistent cases. TerraSentia independently exhibits low finite-horizon error alongside 34--68-m global ATE. Its deterministic LOSO calibration reduces macro ATE by 5.72\% and RPE$_{10}$ by 5.94\%, but reaches the speed-scale bound in every fold and leaves all calibrated contract cases persistent. It therefore supports local--global and evaluator portability claims, not successful model portability. The live UGV01 traces demonstrate a transport bottleneck that collapses requested policy rates. MAGNET, FreeTwinEV, and TU Wien SNG support structural contract portability, while MAGNET lacks the timing provenance required for causal delivery analysis.
 
-The remaining computational work is explicit: merge all 60 doubly nested shards, merge all six causal-derivative shards, rerun service evidence only after both banks pass provenance audits, and execute the Linux \texttt{netem} transport study. Until those experiments finish, partial archives are provenance evidence rather than aggregate experimental results.
+The causal-derivative study is complete and shows that the service-level remediability structure is reasonably robust to eliminating centered-gradient lookahead, despite substantially worse trajectory fidelity after retraining. The doubly nested bank and its corrected comparator analysis are also complete. The remaining planned computational experiment is Linux \texttt{netem}, which will replace software-generated arrival patterns with measured OS-level delay and loss traces while retaining the same precomputed-state scope.
 
 \begin{thebibliography}{99}
 \bibitem{jones2020} D. Jones \emph{et al.}, Characterising the Digital Twin: A systematic literature review, \emph{CIRP Journal of Manufacturing Science and Technology}, vol. 29, pp. 36--52, 2020, doi: 10.1016/j.cirpj.2020.02.002.

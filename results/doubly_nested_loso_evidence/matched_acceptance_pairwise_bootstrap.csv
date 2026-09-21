@@ -1,0 +1,16 @@
+scope,service,target_acceptance,first_method,second_method,first_accepted,second_accepted,selective_risk_difference_first_minus_second,ci_low,ci_high,n_physical_sequences
+pooled,all,0.3,service_empirical,service_identity_only,226,200,-0.3573008849557522,-0.45456521739130434,-0.25542294520547965,10
+pooled,all,0.3,service_empirical,aoi_only,226,250,-0.2223008849557522,-0.33358160604550735,-0.108,10
+pooled,all,0.3,service_empirical,motion_logistic,226,237,-0.21858780478697584,-0.43617197828344073,0.03111111111111111,10
+within_service,global,0.3,service_empirical,service_identity_only,0,0,,,,10
+within_service,global,0.3,service_empirical,aoi_only,0,50,,,,10
+within_service,global,0.3,service_empirical,motion_logistic,0,58,,,,10
+within_service,local_10s,0.3,service_empirical,service_identity_only,53,0,,,,10
+within_service,local_10s,0.3,service_empirical,aoi_only,53,50,0.05660377358490566,0.0,0.15254237288135594,10
+within_service,local_10s,0.3,service_empirical,motion_logistic,53,57,-0.1188348229063224,-0.32439206609633187,0.15254237288135594,10
+within_service,local_1s,0.3,service_empirical,service_identity_only,97,0,,,,10
+within_service,local_1s,0.3,service_empirical,aoi_only,97,50,0.010309278350515464,0.0,0.030927835051546393,10
+within_service,local_1s,0.3,service_empirical,motion_logistic,97,57,-0.1475854584915898,-0.313953488372093,0.030303030303030304,10
+within_service,local_5s,0.3,service_empirical,service_identity_only,50,0,,,,10
+within_service,local_5s,0.3,service_empirical,aoi_only,50,50,0.0,0.0,0.0,10
+within_service,local_5s,0.3,service_empirical,motion_logistic,50,56,-0.23214285714285715,-0.43679956896551725,0.0,10
