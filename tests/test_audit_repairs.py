@@ -4,8 +4,13 @@ import numpy as np
 import pandas as pd
 
 from DigitalTwin.analysis.i2nav_fidelity_evaluator import evaluate_fidelity_frames
+from DigitalTwin.analysis.i2nav_loso_ablation import causal_backward_features as v1_causal_backward_features
 from DigitalTwin.analysis.i2nav_loso_ablation import build_fold_split as build_v1_fold_split
-from DigitalTwin.analysis.i2nav_v2_full_loso import causal_backward_features, restricted_fold_split
+from DigitalTwin.analysis.i2nav_v2_full_loso import (
+    build_slow_sensor_features,
+    causal_backward_features,
+    restricted_fold_split,
+)
 from DigitalTwin.analysis.ugv01_fidelity_protocol import _derived_rate_metrics
 from DigitalTwin.dashboard.server import TwinStream
 
@@ -50,6 +55,39 @@ def test_causal_backward_features_do_not_use_next_sample():
     np.testing.assert_allclose(after[:-1], before[:-1])
     assert after[-1, 2] == 10.0
     assert after[-1, 3] == 20.0
+
+
+def test_both_model_feature_builders_are_causal_and_define_first_sample():
+    grid = np.arange(8, dtype=float) * 0.1
+    speed = np.linspace(0.0, 0.7, len(grid))
+    omega = np.linspace(-0.2, 0.5, len(grid))
+    for builder in (v1_causal_backward_features, causal_backward_features):
+        before = builder(speed, omega, grid)
+        changed_speed = speed.copy()
+        changed_omega = omega.copy()
+        changed_speed[6:] += 2.0
+        changed_omega[6:] -= 3.0
+        after = builder(changed_speed, changed_omega, grid)
+        np.testing.assert_allclose(after[:6], before[:6])
+        np.testing.assert_allclose(before[0, 2:4], 0.0)
+        assert np.isfinite(before).all()
+
+
+def test_v2_slow_sensor_windows_do_not_use_future_samples():
+    size = 400
+    signals = {
+        "imu_yaw_radps": np.linspace(0.0, 1.0, size),
+        "wheel_yaw_radps": np.linspace(0.1, 0.9, size),
+        "yaw_disagreement_radps": np.linspace(-0.1, 0.1, size),
+        "yaw_disagreement_normalized": np.linspace(-0.2, 0.2, size),
+        "odo_forward_mps": np.linspace(0.0, 1.0, size),
+    }
+    before = build_slow_sensor_features(signals, samples=20)
+    changed = {key: values.copy() for key, values in signals.items()}
+    for values in changed.values():
+        values[250:] += 10.0
+    after = build_slow_sensor_features(changed, samples=20)
+    np.testing.assert_allclose(after[:250], before[:250], equal_nan=True)
 
 
 def test_live_stream_rotates_position_into_gps_frame_and_keeps_elapsed_time(tmp_path, monkeypatch):

@@ -30,6 +30,28 @@ def _source_path(value: str) -> Path:
     return path if path.is_absolute() else ROOT / path
 
 
+def validate_bank_sources(manifest: dict) -> None:
+    entries = manifest["trajectories"]
+    if len(entries) != manifest.get("expected_total_tasks"):
+        raise RuntimeError("Trajectory count does not match the bank manifest")
+    if manifest.get("feature_derivative_mode") == "causal_backward":
+        if manifest.get("causal_no_lookahead_preflight", {}).get("passed") is not True:
+            raise RuntimeError("Causal bank lacks a passing no-lookahead preflight")
+    identities = set()
+    for entry in entries:
+        identity = (entry.get("outer"), entry.get("role"), entry["target"], entry["seed"])
+        if identity in identities:
+            raise RuntimeError(f"Duplicate bank trajectory: {identity}")
+        identities.add(identity)
+        path = _source_path(entry["trajectory"])
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+        if digest.hexdigest() != entry.get("sha256"):
+            raise RuntimeError(f"Trajectory hash mismatch: {path}")
+
+
 def _scores(train: pd.DataFrame, test: pd.DataFrame) -> pd.DataFrame:
     common = train.groupby(["rate_hz", "delay_ms"]).qualified.mean()
     empirical = train.groupby(["service", "rate_hz", "delay_ms"]).qualified.mean()
@@ -192,13 +214,13 @@ def _remediability(sequences: pd.DataFrame) -> pd.DataFrame:
     return pd.concat(rows, ignore_index=True)
 
 
-def _pairwise_risk(per: pd.DataFrame, target: float = .30) -> pd.DataFrame:
+def _pairwise_risk(per: pd.DataFrame, target: float = .25) -> pd.DataFrame:
     rng = np.random.default_rng(20260919)
     rows = []
     chosen = per[np.isclose(per.target_acceptance, target)]
     for (scope, service), block in chosen.groupby(["scope", "service"]):
         reference = block[block.method == "service_empirical"].set_index("heldout_sequence").sort_index()
-        for comparator in ("service_identity_only", "aoi_only", "motion_logistic"):
+        for comparator in ("service_identity_only", "aoi_only", "common", "motion_logistic"):
             other = block[block.method == comparator].set_index("heldout_sequence").reindex(reference.index)
             sequences = list(reference.index)
             differences = []
@@ -232,6 +254,19 @@ def _plot_risk(summary: pd.DataFrame, path: Path) -> None:
     for method, group in pooled.groupby("method"):
         group = group.sort_values("achieved_acceptance")
         ax.plot(group.achieved_acceptance, group.selective_risk, marker="o", label=method.replace("_", " "))
+    ax.axvline(0.25, color="0.25", linestyle="--", linewidth=1.2, label="reported 25% point")
+    selected = pooled[
+        (pooled.method == "service_empirical")
+        & np.isclose(pooled.target_acceptance.astype(float), 0.25)
+    ]
+    if not selected.empty:
+        row = selected.iloc[0]
+        ax.scatter([row.achieved_acceptance], [row.selective_risk], s=110,
+                   facecolors="none", edgecolors="black", linewidths=1.6, zorder=5)
+        label = f"{int(row.false_qualified_count)}/{int(row.accepted_count)} ({100 * row.selective_risk:.1f}%)"
+        ax.annotate(label, (row.achieved_acceptance, row.selective_risk),
+                    xytext=(10, 12), textcoords="offset points", fontsize=8,
+                    arrowprops={"arrowstyle": "-", "color": "0.25", "lw": 0.8})
     ax.set(xlabel="Held-out acceptance", ylabel="False qualification / accepted cells",
            title="Qualification risk-coverage on corrected trajectory bank")
     ax.grid(alpha=.25)
@@ -241,10 +276,16 @@ def _plot_risk(summary: pd.DataFrame, path: Path) -> None:
     plt.close(fig)
 
 
-def run(manifest_path: Path, output: Path) -> None:
+def run(manifest_path: Path, output: Path, expected_derivative_mode: str | None = None) -> None:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not manifest.get("ready_for_evidence_analysis"):
         raise RuntimeError(f"Trajectory bank is not complete and clean: {manifest_path}")
+    derivative_mode = manifest.get("feature_derivative_mode", "centered")
+    if expected_derivative_mode and derivative_mode != expected_derivative_mode:
+        raise RuntimeError(
+            f"Expected {expected_derivative_mode!r} trajectories, found {derivative_mode!r}"
+        )
+    validate_bank_sources(manifest)
     output.mkdir(parents=True, exist_ok=True)
     runs, sequences, predictions = build_nested_tables(manifest)
     runs.to_csv(output / "per_run_response_surface.csv", index=False)
@@ -262,6 +303,8 @@ def run(manifest_path: Path, output: Path) -> None:
         "schema": "trajectory_bank_service_evidence_v1", "source_manifest": str(manifest_path),
         "source_manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
         "source_study": manifest["study"], "physical_sequences": int(predictions.sequence.nunique()),
+        "feature_derivative_mode": derivative_mode,
+        "source_state_availability_assumption": manifest.get("source_state_availability_assumption"),
         "sequence_service_cases": len(ledger), "remediability_counts": counts,
         "services": base.SERVICES, "rates_hz": base.RATES, "delays_ms": base.DELAYS_MS,
         "target_satisfaction": base.TARGET, "minimum_coverage": base.MIN_COVERAGE,
@@ -277,8 +320,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--bank-manifest", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--expected-feature-derivative-mode", choices=("centered", "causal_backward"))
     args = parser.parse_args()
-    run(args.bank_manifest, args.output)
+    run(args.bank_manifest, args.output, args.expected_feature_derivative_mode)
 
 
 if __name__ == "__main__":

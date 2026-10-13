@@ -24,6 +24,7 @@ SEQUENCES = (
     "parking02", "playground00", "street00", "street01", "street02",
 )
 DEFAULT_SEEDS = (42, 1042, 2042)
+DERIVATIVE_MODES = ("centered", "causal_backward")
 V1_RUNNER = "DigitalTwin.analysis.i2nav_loso_ablation"
 V2_RUNNER = "DigitalTwin.analysis.i2nav_v2_full_loso"
 
@@ -58,6 +59,60 @@ def write_json(path: Path, payload) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     temporary.replace(path)
+
+
+def causal_feature_preflight() -> dict:
+    import numpy as np
+
+    from DigitalTwin.analysis.i2nav_loso_ablation import (
+        causal_backward_features as v1_features,
+    )
+    from DigitalTwin.analysis.i2nav_v2_full_loso import (
+        build_slow_sensor_features,
+        causal_backward_features as v2_features,
+    )
+
+    grid = np.arange(8, dtype=np.float64) * 0.1
+    speed = np.linspace(0.0, 0.7, len(grid))
+    yaw = np.linspace(-0.2, 0.5, len(grid))
+    feature_checks = {}
+    for name, builder in (("v1", v1_features), ("v2_fast", v2_features)):
+        original = builder(speed, yaw, grid)
+        changed_speed, changed_yaw = speed.copy(), yaw.copy()
+        changed_speed[6:] += 2.0
+        changed_yaw[6:] -= 3.0
+        perturbed = builder(changed_speed, changed_yaw, grid)
+        feature_checks[name] = bool(
+            np.allclose(original[:6], perturbed[:6])
+            and np.allclose(original[0, 2:4], 0.0)
+            and np.isfinite(original).all()
+        )
+
+    count = 400
+    signals = {
+        "imu_yaw_radps": np.linspace(0.0, 1.0, count),
+        "wheel_yaw_radps": np.linspace(0.1, 0.9, count),
+        "yaw_disagreement_radps": np.linspace(-0.1, 0.1, count),
+        "yaw_disagreement_normalized": np.linspace(-0.2, 0.2, count),
+        "odo_forward_mps": np.linspace(0.0, 1.0, count),
+    }
+    original = build_slow_sensor_features(signals, samples=20)
+    perturbed_signals = {key: values.copy() for key, values in signals.items()}
+    for values in perturbed_signals.values():
+        values[250:] += 10.0
+    perturbed = build_slow_sensor_features(perturbed_signals, samples=20)
+    feature_checks["v2_trailing_sensor_windows"] = bool(
+        np.allclose(original[:250], perturbed[:250], equal_nan=True)
+    )
+    return {
+        "schema": "causal_feature_preflight_v1",
+        "status": "PASS" if all(feature_checks.values()) else "FAIL",
+        "passed": all(feature_checks.values()),
+        "derivative_mode": "causal_backward",
+        "checks": feature_checks,
+        "first_sample_derivative_rule": "forward and yaw acceleration are initialized to zero at the first grid sample",
+        "future_perturbation_rule": "changing samples from index 6 onward leaves features through index 5 unchanged",
+    }
 
 
 def portable_path(path: Path) -> str:
@@ -113,6 +168,7 @@ def commands(args: argparse.Namespace, task: Task) -> tuple[list[str], list[str]
         "--output-dir", str(paths["v1"]), "--folds", task.target,
         "--methods", "gru_dual", "--save-trajectories", "--seed", str(task.seed),
         "--device", args.device, "--num-workers", str(args.num_workers),
+        "--feature-derivative-mode", args.feature_derivative_mode,
     ]
     v2 = [
         args.python, "-m", V2_RUNNER, "--root", str(args.dataset_root),
@@ -120,6 +176,8 @@ def commands(args: argparse.Namespace, task: Task) -> tuple[list[str], list[str]
         "--test-sequence", task.target, "--base-seed", str(task.seed),
         "--device", args.device, "--v1-checkpoint", str(paths["v1_checkpoint"]),
         "--v1-results-csv", str(paths["v1_results"]),
+        "--feature-derivative-mode", args.feature_derivative_mode,
+        "--overwrite",
     ]
     if task.extra_excluded:
         v1.extend(("--additional-excluded-sequence", task.extra_excluded))
@@ -127,15 +185,17 @@ def commands(args: argparse.Namespace, task: Task) -> tuple[list[str], list[str]
     return v1, v2
 
 
-def v1_complete(paths: dict[str, Path], task: Task) -> bool:
+def v1_complete(paths: dict[str, Path], task: Task, derivative_mode: str) -> bool:
     if not all(paths[name].is_file() for name in ("v1_checkpoint", "v1_results", "v1_split")):
         return False
     try:
         split_rows = read_json(paths["v1_split"])
-        if len(split_rows) != 1 or split_rows[0].get("test") != task.target:
+        if (len(split_rows) != 1 or split_rows[0].get("test") != task.target
+                or split_rows[0].get("feature_derivative_mode", "centered") != derivative_mode):
             return False
         with paths["v1_results"].open(newline="", encoding="utf-8") as stream:
             return any(row.get("method") == "gru_dual" and row.get("status") == "ok"
+                       and row.get("test_sequence", row.get("test")) == task.target
                        for row in csv.DictReader(stream))
     except (OSError, ValueError, KeyError, json.JSONDecodeError):
         return False
@@ -153,7 +213,7 @@ def v2_manifests(paths: dict[str, Path], task: Task) -> list[tuple[Path, dict]]:
     return found
 
 
-def v2_complete(paths: dict[str, Path], task: Task) -> bool:
+def v2_complete(paths: dict[str, Path], task: Task, derivative_mode: str) -> bool:
     matches = v2_manifests(paths, task)
     if len(matches) != 1:
         return False
@@ -163,21 +223,53 @@ def v2_complete(paths: dict[str, Path], task: Task) -> bool:
         "v2_evaluated_trajectory.csv", "v2_prediction_trace.csv",
         "fidelity_profile.json", "fidelity_timeseries.csv",
     )
-    return (all(path.with_name(name).is_file() for name in required)
+    if not (all(path.with_name(name).is_file() for name in required)
             and manifest.get("status") == "complete"
+            and manifest.get("feature_derivative_mode", "centered") == derivative_mode
             and Path(manifest.get("v1_checkpoint_source", "")).resolve() == paths["v1_checkpoint"].resolve()
-            and Path(manifest.get("v1_results_source", "")).resolve() == paths["v1_results"].resolve())
+            and Path(manifest.get("v1_results_source", "")).resolve() == paths["v1_results"].resolve()):
+        return False
+    try:
+        marker = read_json(path.with_name("RUN_COMPLETE.json"))
+        hashes = manifest.get("artifacts_sha256", {})
+        artifacts = {
+            "v2_checkpoint": "v2_slow_additive_yaw.pt",
+            "evaluated_trajectory": "v2_evaluated_trajectory.csv",
+            "prediction_trace": "v2_prediction_trace.csv",
+            "run_summary": "run_summary.json",
+        }
+        return (
+            manifest.get("test_sequence") == task.target
+            and marker.get("status") == "complete"
+            and marker.get("test_sequence") == task.target
+            and marker.get("base_seed") == task.seed
+            and marker.get("repo_commit") == manifest.get("repo_commit")
+            and manifest.get("v1_checkpoint_sha256") == sha256_file(paths["v1_checkpoint"])
+            and manifest.get("v1_results_sha256") == sha256_file(paths["v1_results"])
+            and all(hashes.get(key) == sha256_file(path.with_name(name))
+                    for key, name in artifacts.items())
+            and marker.get("v2_checkpoint_sha256") == hashes.get("v2_checkpoint")
+            and marker.get("evaluated_trajectory_sha256") == hashes.get("evaluated_trajectory")
+        )
+    except (OSError, ValueError, TypeError):
+        return False
 
 
-def audit_task(output: Path, task: Task, expected_commit: str) -> dict:
+def audit_task(output: Path, task: Task, expected_commit: str, derivative_mode: str) -> dict:
     paths = task_paths(output, task)
-    if not v1_complete(paths, task):
+    if not v1_complete(paths, task, derivative_mode):
         raise RuntimeError(f"Incomplete V1 artifacts for {task.task_id}")
+    if not v2_complete(paths, task, derivative_mode):
+        raise RuntimeError(f"Incomplete or inconsistent V2 artifacts for {task.task_id}")
     split = read_json(paths["v1_split"])[0]
+    if split.get("feature_derivative_mode", "centered") != derivative_mode:
+        raise RuntimeError(f"V1 derivative mode mismatch for {task.task_id}")
     used = set(split["train"]) | set(split["validation"])
     excluded = {task.target} | ({task.extra_excluded} if task.extra_excluded else set())
     if used & excluded:
         raise RuntimeError(f"V1 exclusion failure for {task.task_id}: {sorted(used & excluded)}")
+    if used != set(SEQUENCES) - excluded or set(split["train"]) & set(split["validation"]):
+        raise RuntimeError(f"V1 split coverage failure for {task.task_id}")
     if set(split.get("normalization_fit_sequences", [])) != set(split["train"]):
         raise RuntimeError(f"V1 normalization provenance failure for {task.task_id}")
     if set(split.get("checkpoint_selection_sequences", [])) != set(split["validation"]):
@@ -186,11 +278,20 @@ def audit_task(output: Path, task: Task, expected_commit: str) -> dict:
     if len(matches) != 1:
         raise RuntimeError(f"Expected one V2 manifest for {task.task_id}; found {len(matches)}")
     manifest_path, manifest = matches[0]
+    if manifest.get("feature_derivative_mode", "centered") != derivative_mode:
+        raise RuntimeError(f"V2 derivative mode mismatch for {task.task_id}")
+    if derivative_mode == "causal_backward":
+        preflight_path = output / "causal_no_lookahead_preflight.json"
+        if not preflight_path.is_file() or read_json(preflight_path).get("passed") is not True:
+            raise RuntimeError("Causal no-lookahead preflight is missing or failed")
     if manifest.get("repo_commit") != expected_commit:
         raise RuntimeError(f"V2 commit mismatch for {task.task_id}")
     v2_used = set(manifest.get("training_names", [])) | set(manifest.get("validation_names", []))
     if v2_used & excluded:
         raise RuntimeError(f"V2 exclusion failure for {task.task_id}: {sorted(v2_used & excluded)}")
+    if (set(manifest.get("training_names", [])) != set(split["train"])
+            or set(manifest.get("validation_names", [])) != set(split["validation"])):
+        raise RuntimeError(f"V1/V2 split mismatch for {task.task_id}")
     if set(manifest.get("normalization_fit_sequences", [])) != set(manifest.get("training_names", [])):
         raise RuntimeError(f"V2 normalization provenance failure for {task.task_id}")
     if set(manifest.get("checkpoint_selection_sequences", [])) != set(manifest.get("validation_names", [])):
@@ -205,6 +306,7 @@ def audit_task(output: Path, task: Task, expected_commit: str) -> dict:
         raise RuntimeError(f"V2 trajectory hash mismatch for {task.task_id}")
     return {
         **asdict(task), "task_id": task.task_id, "status": "PASS",
+        "feature_derivative_mode": derivative_mode,
         "v1_split": str(paths["v1_split"].relative_to(output)),
         "v1_checkpoint_sha256": checkpoint_hash, "v1_results_sha256": results_hash,
         "v2_manifest": str(manifest_path.relative_to(output)),
@@ -222,7 +324,10 @@ def validate_inputs(args: argparse.Namespace) -> None:
         raise FileNotFoundError(f"Missing i2Nav sequence directories: {missing}")
     if not (args.frozen_v1_dir / "FROZEN_MANIFEST.json").is_file():
         raise FileNotFoundError(f"Missing frozen V1 manifest: {args.frozen_v1_dir / 'FROZEN_MANIFEST.json'}")
-    for runner, option in ((V1_RUNNER, "--additional-excluded-sequence"), (V2_RUNNER, "--v1-checkpoint")):
+    for runner, option in ((V1_RUNNER, "--additional-excluded-sequence"),
+                           (V2_RUNNER, "--v1-checkpoint"),
+                           (V1_RUNNER, "--feature-derivative-mode"),
+                           (V2_RUNNER, "--feature-derivative-mode")):
         help_text = subprocess.run([args.python, "-m", runner, "--help"], cwd=REPO,
                                    check=True, capture_output=True, text=True).stdout
         if option not in help_text:
@@ -230,25 +335,77 @@ def validate_inputs(args: argparse.Namespace) -> None:
 
 
 def selected_tasks(tasks: list[Task], start: int, stop: int | None, max_tasks: int | None) -> list[Task]:
+    if start < 0 or (stop is not None and stop <= start) or (max_tasks is not None and max_tasks <= 0):
+        raise ValueError("Task selection requires start >= 0, stop > start, and max-tasks > 0")
     selected = tasks[start:stop]
+    if not selected:
+        raise ValueError("Task selection is empty")
     return selected[:max_tasks] if max_tasks is not None else selected
+
+
+def validate_output_mode(output: Path, derivative_mode: str) -> None:
+    for name in ("task_ledger.json", "merged_manifest.json"):
+        path = output / name
+        if path.is_file() and read_json(path).get("feature_derivative_mode", "centered") != derivative_mode:
+            raise RuntimeError(f"Existing {path} belongs to a different derivative mode; use a new output directory")
+    for pattern in ("fold_splits.json", "run_manifest.json"):
+        for path in output.rglob(pattern):
+            rows = read_json(path)
+            rows = rows if isinstance(rows, list) else [rows]
+            if any(row.get("feature_derivative_mode", "centered") != derivative_mode for row in rows):
+                raise RuntimeError(f"Existing {path} belongs to a different derivative mode; use a new output directory")
 
 
 def run(args: argparse.Namespace) -> None:
     args.dataset_root = args.dataset_root.resolve()
     args.frozen_v1_dir = args.frozen_v1_dir.resolve()
+    if args.output_dir is None:
+        name = "doubly_nested_causal_loso_slurm" if args.feature_derivative_mode == "causal_backward" else "doubly_nested_loso_slurm"
+        args.output_dir = REPO / "results" / name
     args.output_dir = args.output_dir.resolve()
+    if len(set(args.seeds)) != len(args.seeds) or len(set(args.outer_sequences)) != len(args.outer_sequences):
+        raise ValueError("Seeds and outer sequences must be unique")
+    tasks = build_tasks(tuple(args.seeds), tuple(args.outer_sequences))
+    active = selected_tasks(tasks, args.start_task, args.stop_task, args.max_tasks)
+    validate_output_mode(args.output_dir, args.feature_derivative_mode)
     validate_inputs(args)
     commit, dirty = repository_state()
     if args.expected_commit and commit != args.expected_commit:
         raise RuntimeError(f"Repository commit {commit} does not match --expected-commit {args.expected_commit}")
     if dirty and not args.allow_dirty:
         raise RuntimeError("Tracked repository files are modified; commit them or pass --allow-dirty for a dry run")
-    tasks = build_tasks(tuple(args.seeds), tuple(args.outer_sequences))
-    active = selected_tasks(tasks, args.start_task, args.stop_task, args.max_tasks)
+    config_path = args.output_dir / "run_config.json"
+    run_config = {
+        "schema": "doubly_nested_loso_run_config_v2",
+        "repository_commit": commit,
+        "feature_derivative_mode": args.feature_derivative_mode,
+        "dataset_root": str(args.dataset_root),
+        "frozen_v1_dir": str(args.frozen_v1_dir),
+        "seeds": args.seeds,
+        "outer_sequences": args.outer_sequences,
+        "source_state_availability_assumption": (
+            "causal feature construction uses current and earlier samples; replay timestamps each saved state at its source-grid time before configured network delay; inference computation latency is not measured"
+            if args.feature_derivative_mode == "causal_backward" else
+            "saved precomputed states are timestamped at their source-grid time; centered derivative lookahead is not represented unless separately added as delivery delay"
+        ),
+    }
+    if config_path.exists():
+        previous = read_json(config_path)
+        for key in ("repository_commit", "feature_derivative_mode", "dataset_root", "frozen_v1_dir", "seeds", "outer_sequences"):
+            if previous.get(key) != run_config[key]:
+                raise RuntimeError(f"Existing output directory has incompatible run configuration ({key}); use a new output directory")
+    else:
+        write_json(config_path, run_config)
+    preflight = None
+    if args.feature_derivative_mode == "causal_backward":
+        preflight = causal_feature_preflight()
+        write_json(args.output_dir / "causal_no_lookahead_preflight.json", preflight)
+        if not preflight["passed"]:
+            raise RuntimeError("Causal feature preflight failed; see causal_no_lookahead_preflight.json")
     args.output_dir.mkdir(parents=True, exist_ok=True)
     ledger = {
         "schema": "doubly_nested_loso_single_shard_ledger_v1", "repository_commit": commit,
+        "feature_derivative_mode": args.feature_derivative_mode,
         "repository_dirty_at_start": dirty, "total_tasks": len(tasks), "selected_tasks": len(active),
         "base_seeds": args.seeds, "outer_sequences": args.outer_sequences,
         "start_task": args.start_task, "stop_task": args.stop_task, "max_tasks": args.max_tasks,
@@ -276,7 +433,7 @@ def run(args: argparse.Namespace) -> None:
         print(f"[{number}/{len(active)}] {task.task_id}", flush=True)
         v1_command, v2_command = commands(args, task)
         task_started = time.time()
-        if not v1_complete(paths, task):
+        if not v1_complete(paths, task, args.feature_derivative_mode):
             with paths["log"].open("a", encoding="utf-8") as log:
                 result = subprocess.run(v1_command, cwd=REPO, env=environment, text=True,
                                         stdout=log, stderr=subprocess.STDOUT)
@@ -284,7 +441,7 @@ def run(args: argparse.Namespace) -> None:
                 raise RuntimeError(f"V1 failed for {task.task_id}; inspect {paths['log']}")
         else:
             print("  V1 already complete", flush=True)
-        if not v2_complete(paths, task):
+        if not v2_complete(paths, task, args.feature_derivative_mode):
             with paths["log"].open("a", encoding="utf-8") as log:
                 result = subprocess.run(v2_command, cwd=REPO, env=environment, text=True,
                                         stdout=log, stderr=subprocess.STDOUT)
@@ -292,7 +449,7 @@ def run(args: argparse.Namespace) -> None:
                 raise RuntimeError(f"V2 failed for {task.task_id}; inspect {paths['log']}")
         else:
             print("  V2 already complete", flush=True)
-        audit = audit_task(args.output_dir, task, commit)
+        audit = audit_task(args.output_dir, task, commit, args.feature_derivative_mode)
         statuses[task.task_id] = {**audit, "elapsed_s": time.time() - task_started}
         write_json(status_path, {"schema": "doubly_nested_loso_task_status_v1",
                                  "repository_commit": commit, "tasks": list(statuses.values())})
@@ -300,14 +457,16 @@ def run(args: argparse.Namespace) -> None:
     audited = []
     for task in tasks:
         paths = task_paths(args.output_dir, task)
-        if v2_complete(paths, task):
-            audited.append(audit_task(args.output_dir, task, commit))
+        if v2_complete(paths, task, args.feature_derivative_mode):
+            audited.append(audit_task(args.output_dir, task, commit, args.feature_derivative_mode))
     complete = len(audited) == len(tasks)
     full_design = (set(args.outer_sequences) == set(SEQUENCES)
                    and tuple(args.seeds) == DEFAULT_SEEDS)
     ready = complete and full_design
     write_json(args.output_dir / "full_audit.json", {
         "schema": "doubly_nested_loso_full_audit_v1", "repository_commit": commit,
+        "feature_derivative_mode": args.feature_derivative_mode,
+        "causal_no_lookahead_preflight": preflight,
         "complete": complete, "full_10_sequence_3_seed_design": full_design,
         "verified_tasks": len(audited), "expected_tasks": len(tasks), "rows": audited,
     })
@@ -315,6 +474,9 @@ def run(args: argparse.Namespace) -> None:
                     | {"sha256": row["v2_trajectory_sha256"]} for row in audited]
     write_json(args.output_dir / "merged_manifest.json", {
         "schema": "verified_kaggle_trajectory_bank_v1", "study": "doubly_nested",
+        "feature_derivative_mode": args.feature_derivative_mode,
+        "source_state_availability_assumption": run_config["source_state_availability_assumption"],
+        "causal_no_lookahead_preflight": preflight,
         "status": "complete" if ready else ("subset_complete" if complete else "incomplete"),
         "ready_for_evidence_analysis": ready,
         "repository_commits": [commit], "expected_total_tasks": len(tasks),
@@ -329,10 +491,12 @@ def parser() -> argparse.ArgumentParser:
     command = argparse.ArgumentParser(description=__doc__)
     command.add_argument("--dataset-root", type=Path, default=REPO / "public_datasets/im2nav")
     command.add_argument("--frozen-v1-dir", type=Path, default=REPO / "results/i2nav_v1_frozen")
-    command.add_argument("--output-dir", type=Path, default=REPO / "results/doubly_nested_loso_slurm")
-    command.add_argument("--seeds", type=int, nargs="+", default=list(DEFAULT_SEEDS))
+    command.add_argument("--output-dir", type=Path, help="Defaults to a separate centered or causal bank directory.")
+    command.add_argument("--seeds", type=int, nargs="+", choices=DEFAULT_SEEDS, default=list(DEFAULT_SEEDS))
     command.add_argument("--outer-sequences", nargs="+", choices=SEQUENCES, default=list(SEQUENCES))
     command.add_argument("--device", choices=("auto", "cuda", "cpu"), default="cuda")
+    command.add_argument("--feature-derivative-mode", choices=DERIVATIVE_MODES, default="centered",
+                         help="Use causal_backward in both V1 and V2 for a causal nested study.")
     command.add_argument("--num-workers", type=int, default=4)
     command.add_argument("--python", default=sys.executable)
     command.add_argument("--expected-commit")
