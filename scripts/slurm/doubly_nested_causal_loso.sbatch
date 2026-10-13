@@ -78,7 +78,7 @@ if [[ -n "${RUN_STOP_TASK:-}" ]]; then
     RUN_ARGS+=(--stop-task "${RUN_STOP_TASK}")
 fi
 
-srun "${PYTHON_BIN}" -m DigitalTwin.analysis.run_doubly_nested_loso "${RUN_ARGS[@]}"
+srun --cpu-bind=none "${PYTHON_BIN}" -m DigitalTwin.analysis.run_doubly_nested_loso "${RUN_ARGS[@]}"
 
 if "${PYTHON_BIN}" -c "import json,sys; m=json.load(open(sys.argv[1])); sys.exit(0 if m.get('ready_for_evidence_analysis') else 1)" \
     "${OUTPUT_DIR}/merged_manifest.json"; then
