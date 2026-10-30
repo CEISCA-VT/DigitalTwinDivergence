@@ -1,0 +1,241 @@
+bank,sequence,network_delay_ms,availability_lag_samples,postprefix_seconds,service_group,best_periodic_transmissions,solver_status,solver_message,solve_seconds,objective_lower_bound,mip_gap,transmissions,status,effective_rate_hz,transmission_reduction_vs_best_periodic
+centered,building00,0,1,1170.9,local_1s,5855.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1112956999568268,3421.0,0.0,3421.0,optimal_block_family,2.9216841745665727,0.4157130657557643
+centered,building00,0,1,1170.9,local_5s,11709.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1283726999536156,8761.0,0.0,8761.0,optimal_block_family,7.48227858911948,0.2517721410880519
+centered,building00,0,1,1170.9,local_10s,11709.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0337149000260978,6291.0,0.0,6291.0,optimal_block_family,5.372790161414296,0.4627209838585703
+centered,building00,0,1,1170.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building00,0,1,1170.9,local_1s+local_5s+local_10s,11709.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1693864000262692,8760.999999999367,0.0,8761.0,optimal_block_family,7.48227858911948,0.2517721410880519
+centered,building00,0,1,1170.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building00,200,3,1170.9,local_1s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building00,200,3,1170.9,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building00,200,3,1170.9,local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building00,200,3,1170.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building00,200,3,1170.9,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building00,200,3,1170.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building01,0,1,1338.9,local_1s,6695.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0813496999908238,4238.0,0.0,4238.0,optimal_block_family,3.1652849353947268,0.3669902912621359
+centered,building01,0,1,1338.9,local_5s,13389.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2125878999941051,7454.999999999993,0.0,7455.0,optimal_block_family,5.568003585032489,0.443199641496751
+centered,building01,0,1,1338.9,local_10s,6695.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1175007000565528,4575.0,0.0,4575.0,optimal_block_family,3.4169840914183283,0.3166542195668409
+centered,building01,0,1,1338.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building01,0,1,1338.9,local_1s+local_5s+local_10s,13389.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2424376999260857,7454.999999999962,0.0,7455.0,optimal_block_family,5.568003585032489,0.443199641496751
+centered,building01,0,1,1338.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building01,200,3,1338.9,local_1s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building01,200,3,1338.9,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building01,200,3,1338.9,local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building01,200,3,1338.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building01,200,3,1338.9,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building01,200,3,1338.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building02,0,1,1841.4,local_1s,9207.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.6044003999559209,3732.0,0.0,3732.0,optimal_block_family,2.026718800912349,0.5946562398175301
+centered,building02,0,1,1841.4,local_5s,9207.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.6431388999335468,6751.999999999997,0.0,6752.0,optimal_block_family,3.666775279678505,0.2666449440642989
+centered,building02,0,1,1841.4,local_10s,9207.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0757388999918475,4602.0,0.0,4602.0,optimal_block_family,2.499185402411209,0.5001629195177582
+centered,building02,0,1,1841.4,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building02,0,1,1841.4,local_1s+local_5s+local_10s,9207.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.6422495000297204,6751.999999999996,0.0,6752.0,optimal_block_family,3.666775279678505,0.2666449440642989
+centered,building02,0,1,1841.4,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building02,200,3,1841.4,local_1s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0786572999786585,,,,infeasible_block_family,,
+centered,building02,200,3,1841.4,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building02,200,3,1841.4,local_10s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0638327000197023,,,,infeasible_block_family,,
+centered,building02,200,3,1841.4,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building02,200,3,1841.4,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,building02,200,3,1841.4,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking00,0,1,1110.9,local_1s,5555.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.3722025998868048,2760.999999999987,0.0,2761.0,optimal_block_family,2.485372220721937,0.502970297029703
+centered,parking00,0,1,1110.9,local_5s,5555.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1113653000211343,4631.0,0.0,4631.0,optimal_block_family,4.168692051489782,0.1663366336633663
+centered,parking00,0,1,1110.9,local_10s,5555.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1059563000453636,3271.0,0.0,3271.0,optimal_block_family,2.9444594472949857,0.4111611161116112
+centered,parking00,0,1,1110.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking00,0,1,1110.9,local_1s+local_5s+local_10s,5555.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.105238200048916,4631.0,0.0,4631.0,optimal_block_family,4.168692051489782,0.1663366336633663
+centered,parking00,0,1,1110.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking00,200,3,1110.9,local_1s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking00,200,3,1110.9,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking00,200,3,1110.9,local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking00,200,3,1110.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking00,200,3,1110.9,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking00,200,3,1110.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking01,0,1,1029.9,local_1s,2060.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1697623000945896,1919.9999999999372,0.0,1920.0,optimal_block_family,1.864258665889892,0.0679611650485436
+centered,parking01,0,1,1029.9,local_5s,5150.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1795645999955013,2439.999999999985,0.0,2440.0,optimal_block_family,2.3691620545684047,0.5262135922330098
+centered,parking01,0,1,1029.9,local_10s,2060.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0425230000400915,1860.0,0.0,1860.0,optimal_block_family,1.806000582580833,0.0970873786407766
+centered,parking01,0,1,1029.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking01,0,1,1029.9,local_1s+local_5s+local_10s,5150.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1749676000326872,2440.0,0.0,2440.0,optimal_block_family,2.3691620545684047,0.5262135922330098
+centered,parking01,0,1,1029.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking01,200,3,1029.9,local_1s,10299.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.3809976000338793,5499.999999999919,0.0,5500.0,optimal_block_family,5.34032430333042,0.4659675696669579
+centered,parking01,200,3,1029.9,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking01,200,3,1029.9,local_10s,10299.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2263615999836474,5649.999999998883,0.0,5650.0,optimal_block_family,5.485969511603067,0.4514030488396932
+centered,parking01,200,3,1029.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking01,200,3,1029.9,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking01,200,3,1029.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking02,0,1,1226.9,local_1s,2454.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.071201300015673,2454.0,0.0,2454.0,optimal_block_family,2.0001630124704537,0.0
+centered,parking02,0,1,1226.9,local_5s,6135.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2325469000497833,2754.0,0.0,2754.0,optimal_block_family,2.2446817181514382,0.5511002444987775
+centered,parking02,0,1,1226.9,local_10s,2454.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1545932999579236,2113.999999999999,0.0,2114.0,optimal_block_family,1.7230418126986713,0.1385493072534637
+centered,parking02,0,1,1226.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking02,0,1,1226.9,local_1s+local_5s+local_10s,6135.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.4900809999089688,2763.9999999999254,0.0,2764.0,optimal_block_family,2.252832341674138,0.5494702526487367
+centered,parking02,0,1,1226.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking02,200,3,1226.9,local_1s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0496916000265628,,,,infeasible_block_family,,
+centered,parking02,200,3,1226.9,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking02,200,3,1226.9,local_10s,12269.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.14423810003791,6134.999999999833,0.0,6135.0,optimal_block_family,5.000407531176134,0.4999592468823864
+centered,parking02,200,3,1226.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking02,200,3,1226.9,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,parking02,200,3,1226.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,playground00,0,1,1296.3,local_1s,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0371081000193953,2553.0,0.0,2553.0,optimal_block_family,1.969451515852812,0.0154261473197069
+centered,playground00,0,1,1296.3,local_5s,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1951567999785766,2057.0,0.0,2057.0,optimal_block_family,1.5868240376456069,0.2067103740840725
+centered,playground00,0,1,1296.3,local_10s,1297.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0385098999831825,1297.0000000000027,0.0,1297.0,optimal_block_family,1.0005399984571473,0.0
+centered,playground00,0,1,1296.3,global,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0440408000722527,1717.0,0.0,1717.0,optimal_block_family,1.3245390727455064,0.3378326263015812
+centered,playground00,0,1,1296.3,local_1s+local_5s+local_10s,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0414124999660998,2553.0,0.0,2553.0,optimal_block_family,1.969451515852812,0.0154261473197069
+centered,playground00,0,1,1296.3,local_1s+local_5s+local_10s+global,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.051982499891892,2553.0,0.0,2553.0,optimal_block_family,1.969451515852812,0.0154261473197069
+centered,playground00,200,3,1296.3,local_1s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0448962999507784,,,,infeasible_block_family,,
+centered,playground00,200,3,1296.3,local_5s,6482.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2910385999130085,5422.999999999975,0.0,5423.0,optimal_block_family,4.1834451901566,0.1633755013884603
+centered,playground00,200,3,1296.3,local_10s,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2816304999869317,2217.0,0.0,2217.0,optimal_block_family,1.7102522564221243,0.1450057848052448
+centered,playground00,200,3,1296.3,global,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1169686999637633,2483.0,0.0,2483.0,optimal_block_family,1.9154516701380853,0.0424219051291939
+centered,playground00,200,3,1296.3,local_1s+local_5s+local_10s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0596193000674247,,,,infeasible_block_family,,
+centered,playground00,200,3,1296.3,local_1s+local_5s+local_10s+global,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0573157999897375,,,,infeasible_block_family,,
+centered,street00,0,1,1343.8,local_1s,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0567664999980479,2478.0,0.0,2478.0,optimal_block_family,1.8440244083941064,0.078125
+centered,street00,0,1,1343.8,local_5s,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0477772000012919,2094.0,0.0,2094.0,optimal_block_family,1.5582675993451407,0.2209821428571429
+centered,street00,0,1,1343.8,local_10s,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0518461999017745,1674.0,0.0,1674.0,optimal_block_family,1.2457210894478346,0.3772321428571429
+centered,street00,0,1,1343.8,global,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0411703999852761,1694.0,0.0,1694.0,optimal_block_family,1.2606042565858016,0.3697916666666666
+centered,street00,0,1,1343.8,local_1s+local_5s+local_10s,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),36.69496569992043,2483.9999999971346,0.0,2484.0,optimal_block_family,1.8484893585354965,0.0758928571428571
+centered,street00,0,1,1343.8,local_1s+local_5s+local_10s+global,2688.0,1.0,Time limit reached. (HiGHS Status 13: Time limit reached),60.02432540000882,2480.0,0.0016103059572044579,2484.0,feasible_solver_limit,1.8484893585354965,0.0758928571428571
+centered,street00,200,3,1343.8,local_1s,6719.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.4339544000104069,6708.0,0.0,6708.0,optimal_block_family,4.991814258074118,0.0016371483851763
+centered,street00,200,3,1343.8,local_5s,6719.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2726472000358626,6388.0,0.0,6388.0,optimal_block_family,4.753683583866647,0.0492632832266706
+centered,street00,200,3,1343.8,local_10s,6719.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2740424999501556,3254.0,0.0,3254.0,optimal_block_family,2.4214912933472243,0.5157017413305551
+centered,street00,200,3,1343.8,global,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),1.4782146000070495,2483.9999999999773,0.0,2484.0,optimal_block_family,1.8484893585354965,0.0758928571428571
+centered,street00,200,3,1343.8,local_1s+local_5s+local_10s,6719.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),2.230066900025122,6708.0,0.0,6708.0,optimal_block_family,4.991814258074118,0.0016371483851763
+centered,street00,200,3,1343.8,local_1s+local_5s+local_10s+global,6719.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),2.162856499897316,6708.0,0.0,6708.0,optimal_block_family,4.991814258074118,0.0016371483851763
+centered,street01,0,1,1218.3,local_1s,6092.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0823066000593826,2857.0,0.0,2857.0,optimal_block_family,2.3450710005745714,0.5310242941562705
+centered,street01,0,1,1218.3,local_5s,6092.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1587463000323623,3558.9999999999964,0.0,3559.0,optimal_block_family,2.9212837560535174,0.4157912015758371
+centered,street01,0,1,1218.3,local_10s,2437.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2874854999827221,1958.9999999999984,0.0,1959.0,optimal_block_family,1.6079783304604778,0.1961427985227739
+centered,street01,0,1,1218.3,global,2437.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0830891000805422,1959.0,0.0,1959.0,optimal_block_family,1.6079783304604778,0.1961427985227739
+centered,street01,0,1,1218.3,local_1s+local_5s+local_10s,6092.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2082571999635547,3558.999999999907,0.0,3559.0,optimal_block_family,2.9212837560535174,0.4157912015758371
+centered,street01,0,1,1218.3,local_1s+local_5s+local_10s+global,6092.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1951873999787494,3558.9999999999936,0.0,3559.0,optimal_block_family,2.9212837560535174,0.4157912015758371
+centered,street01,200,3,1218.3,local_1s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0476646000752225,,,,infeasible_block_family,,
+centered,street01,200,3,1218.3,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,street01,200,3,1218.3,local_10s,12183.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1408799999626353,5619.0,0.0,5619.0,optimal_block_family,4.612164491504556,0.5387835508495444
+centered,street01,200,3,1218.3,global,6092.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.114217400085181,3677.0,0.0,3677.0,optimal_block_family,3.018140031191004,0.3964215364412344
+centered,street01,200,3,1218.3,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,street01,200,3,1218.3,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,street02,0,1,1349.9,local_1s,6750.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),1.4846328999847174,3809.999999980734,0.0,3810.0,optimal_block_family,2.822431291206756,0.4355555555555556
+centered,street02,0,1,1349.9,local_5s,6750.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.3801667999941855,4299.999999999999,0.0,4300.0,optimal_block_family,3.1854211423068373,0.3629629629629629
+centered,street02,0,1,1349.9,local_10s,2700.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0860531999496743,2320.0,0.0,2320.0,optimal_block_family,1.7186458256167123,0.1407407407407407
+centered,street02,0,1,1349.9,global,6750.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2805041999090463,2669.999999999996,0.0,2670.0,optimal_block_family,1.977924290688199,0.6044444444444445
+centered,street02,0,1,1349.9,local_1s+local_5s+local_10s,6750.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.6945311999879777,4309.999999999998,0.0,4310.0,optimal_block_family,3.192829098451737,0.3614814814814815
+centered,street02,0,1,1349.9,local_1s+local_5s+local_10s+global,6750.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.6270184000022709,4309.999999999992,0.0,4310.0,optimal_block_family,3.192829098451737,0.3614814814814815
+centered,street02,200,3,1349.9,local_1s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,street02,200,3,1349.9,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,street02,200,3,1349.9,local_10s,13499.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.118373499950394,7490.0,0.0,7490.0,optimal_block_family,5.548559152529816,0.4451440847470183
+centered,street02,200,3,1349.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,street02,200,3,1349.9,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+centered,street02,200,3,1349.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building00,0,0,1170.9,local_1s,5855.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0931536999996751,2371.0,0.0,2371.0,optimal_block_family,2.0249380818174054,0.5950469684030744
+causal,building00,0,0,1170.9,local_5s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0401308999862521,,,,infeasible_block_family,,
+causal,building00,0,0,1170.9,local_10s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0301736000692471,,,,infeasible_block_family,,
+causal,building00,0,0,1170.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building00,0,0,1170.9,local_1s+local_5s+local_10s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0481171000283211,,,,infeasible_block_family,,
+causal,building00,0,0,1170.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building00,200,2,1170.9,local_1s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0414890999672934,,,,infeasible_block_family,,
+causal,building00,200,2,1170.9,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building00,200,2,1170.9,local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building00,200,2,1170.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building00,200,2,1170.9,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building00,200,2,1170.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building01,0,0,1338.9,local_1s,6695.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0863666000077501,2918.0,0.0,2918.0,optimal_block_family,2.17940100082157,0.564152352501867
+causal,building01,0,0,1338.9,local_5s,6695.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1497928000753745,6068.0,0.0,6068.0,optimal_block_family,4.532078571962058,0.0936519790888722
+causal,building01,0,0,1338.9,local_10s,6695.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2774115999927744,4737.999999999917,0.0,4738.0,optimal_block_family,3.5387258197027407,0.2923076923076922
+causal,building01,0,0,1338.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building01,0,0,1338.9,local_1s+local_5s+local_10s,6695.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.18173209996894,6067.999999998644,0.0,6068.0,optimal_block_family,4.532078571962058,0.0936519790888722
+causal,building01,0,0,1338.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building01,200,2,1338.9,local_1s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0558921999763697,,,,infeasible_block_family,,
+causal,building01,200,2,1338.9,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building01,200,2,1338.9,local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building01,200,2,1338.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building01,200,2,1338.9,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building01,200,2,1338.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building02,0,0,1841.4,local_1s,3683.0,1.0,Time limit reached. (HiGHS Status 13: Time limit reached),60.03242219996173,3347.0,0.0014916467758463057,3352.0,feasible_solver_limit,1.8203540784185945,0.08987238664132502
+causal,building02,0,0,1841.4,local_5s,9207.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.5825984999537468,4641.9999999997335,0.0,4642.0,optimal_block_family,2.5209080047789723,0.4958183990442055
+causal,building02,0,0,1841.4,local_10s,3683.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1931792000541463,3391.9999999999877,0.0,3392.0,optimal_block_family,1.8420766807863584,0.0790116752647298
+causal,building02,0,0,1841.4,global,9207.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0690089999698102,3922.0,0.0,3922.0,optimal_block_family,2.1299011621592268,0.5740197675681546
+causal,building02,0,0,1841.4,local_1s+local_5s+local_10s,9207.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.6388115000445396,4641.9999999998345,0.0,4642.0,optimal_block_family,2.5209080047789723,0.4958183990442055
+causal,building02,0,0,1841.4,local_1s+local_5s+local_10s+global,9207.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.9166753999888896,4941.999999999748,0.0,4942.0,optimal_block_family,2.6838275225372,0.46323449549256
+causal,building02,200,2,1841.4,local_1s,9207.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1015345000196248,7823.0,0.0,7823.0,optimal_block_family,4.248397958075377,0.1503204083849245
+causal,building02,200,2,1841.4,local_5s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0770785000640899,,,,infeasible_block_family,,
+causal,building02,200,2,1841.4,local_10s,18414.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),1.5313048000680285,9982.0,0.0,9982.0,optimal_block_family,5.42087542087542,0.4579124579124579
+causal,building02,200,2,1841.4,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,building02,200,2,1841.4,local_1s+local_5s+local_10s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0876368000172078,,,,infeasible_block_family,,
+causal,building02,200,2,1841.4,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking00,0,0,1110.9,local_1s,2222.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),1.0847565999720246,2090.9999999998954,0.0,2091.0,optimal_block_family,1.8822576289495003,0.0589558955895589
+causal,parking00,0,0,1110.9,local_5s,5555.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2276072999229654,2960.999999999364,0.0,2961.0,optimal_block_family,2.665406427221172,0.4669666966696669
+causal,parking00,0,0,1110.9,local_10s,2222.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0368721999693661,2211.0,0.0,2211.0,optimal_block_family,1.9902781528490407,0.0049504950495049
+causal,parking00,0,0,1110.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking00,0,0,1110.9,local_1s+local_5s+local_10s,5555.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2609969000332057,2960.999999999976,0.0,2961.0,optimal_block_family,2.665406427221172,0.4669666966696669
+causal,parking00,0,0,1110.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking00,200,2,1110.9,local_1s,11109.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0893958000233396,7402.0,0.0,7402.0,optimal_block_family,6.663065982536682,0.3336934017463318
+causal,parking00,200,2,1110.9,local_5s,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking00,200,2,1110.9,local_10s,11109.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0461575000081211,7071.0,0.0,7071.0,optimal_block_family,6.365109370780448,0.3634890629219551
+causal,parking00,200,2,1110.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking00,200,2,1110.9,local_1s+local_5s+local_10s,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking00,200,2,1110.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking01,0,0,1029.9,local_1s,2060.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1452644999371841,1749.9999999999995,0.0,1750.0,optimal_block_family,1.6991940965142245,0.1504854368932039
+causal,parking01,0,0,1029.9,local_5s,2060.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.5528898000484332,1710.0,0.0,1710.0,optimal_block_family,1.6603553743081851,0.1699029126213592
+causal,parking01,0,0,1029.9,local_10s,2060.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0765924999723211,1400.0,0.0,1400.0,optimal_block_family,1.3593552772113795,0.3203883495145631
+causal,parking01,0,0,1029.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking01,0,0,1029.9,local_1s+local_5s+local_10s,2060.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2021798999048769,1749.9999999999966,0.0,1750.0,optimal_block_family,1.6991940965142245,0.1504854368932039
+causal,parking01,0,0,1029.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking01,200,2,1029.9,local_1s,5150.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.7437081000534818,3109.999999999914,0.0,3110.0,optimal_block_family,3.019710651519565,0.3961165048543689
+causal,parking01,200,2,1029.9,local_5s,5150.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.185845399973914,4799.0,0.0,4799.0,optimal_block_family,4.659675696669579,0.0681553398058252
+causal,parking01,200,2,1029.9,local_10s,5150.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1532862000167369,2989.999999999998,0.0,2990.0,optimal_block_family,2.9031944849014466,0.4194174757281553
+causal,parking01,200,2,1029.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking01,200,2,1029.9,local_1s+local_5s+local_10s,5150.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.3054670999990776,4799.000000000001,0.0,4799.0,optimal_block_family,4.659675696669579,0.0681553398058252
+causal,parking01,200,2,1029.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking02,0,0,1226.9,local_1s,2454.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0738967000506818,2207.0,0.0,2207.0,optimal_block_family,1.7988426114597766,0.1006519967400163
+causal,parking02,0,0,1226.9,local_5s,2454.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.7338973999721929,1994.0,0.0,1994.0,optimal_block_family,1.6252343304262775,0.1874490627546862
+causal,parking02,0,0,1226.9,local_10s,2454.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1008644000394269,1693.9999999999995,0.0,1694.0,optimal_block_family,1.380715624745293,0.3096984515077424
+causal,parking02,0,0,1226.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking02,0,0,1226.9,local_1s+local_5s+local_10s,2454.0,1.0,Time limit reached. (HiGHS Status 13: Time limit reached),60.01406349998433,2208.0,0.002710027099131275,2214.0,feasible_solver_limit,1.8045480479256661,0.097799511002445
+causal,parking02,0,0,1226.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking02,200,2,1226.9,local_1s,6135.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0589243000140413,5375.0,0.0,5375.0,optimal_block_family,4.380960143450974,0.123879380603097
+causal,parking02,200,2,1226.9,local_5s,12269.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.9105523000471294,5935.0,0.0,5935.0,optimal_block_family,4.8373950607221445,0.5162604939277855
+causal,parking02,200,2,1226.9,local_10s,6135.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0416031000204384,3305.0,0.0,3305.0,optimal_block_family,2.69378107425218,0.4612876935615322
+causal,parking02,200,2,1226.9,global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,parking02,200,2,1226.9,local_1s+local_5s+local_10s,12269.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1638394999317824,5935.0,0.0,5935.0,optimal_block_family,4.8373950607221445,0.5162604939277855
+causal,parking02,200,2,1226.9,local_1s+local_5s+local_10s+global,,,,,,,,certified_infeasible_bounded_age_class,,
+causal,playground00,0,0,1296.3,local_1s,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),5.165877599967644,2276.999999999696,0.0,2277.0,optimal_block_family,1.7565378384633188,0.1218665638256845
+causal,playground00,0,0,1296.3,local_5s,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.4958044000668451,1696.9999999999957,0.0,1697.0,optimal_block_family,1.3091105453984415,0.3455456999614346
+causal,playground00,0,0,1296.3,local_10s,1297.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0340459999861195,1297.0,0.0,1297.0,optimal_block_family,1.0005399984571473,0.0
+causal,playground00,0,0,1296.3,global,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2046718000201508,1426.9999999993345,0.0,1427.0,optimal_block_family,1.100825426213068,0.4496721943694562
+causal,playground00,0,0,1296.3,local_1s+local_5s+local_10s,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),1.4053191000130028,2276.999999999919,0.0,2277.0,optimal_block_family,1.7565378384633188,0.1218665638256845
+causal,playground00,0,0,1296.3,local_1s+local_5s+local_10s+global,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),3.306826899992302,2276.999999999941,0.0,2277.0,optimal_block_family,1.7565378384633188,0.1218665638256845
+causal,playground00,200,2,1296.3,local_1s,6482.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),1.4834432000061497,5292.999999999867,0.0,5293.0,optimal_block_family,4.083159762400679,0.18343103980253
+causal,playground00,200,2,1296.3,local_5s,6482.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1855925000272691,3462.999999999996,0.0,3463.0,optimal_block_family,2.671449510144257,0.4657513113236655
+causal,playground00,200,2,1296.3,local_10s,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.5341899999184534,1856.9999999998597,0.0,1857.0,optimal_block_family,1.4325387641749596,0.283841110682607
+causal,playground00,200,2,1296.3,global,2593.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2118619000539183,2016.999999999999,0.0,2017.0,optimal_block_family,1.5559669829514773,0.2221365214037793
+causal,playground00,200,2,1296.3,local_1s+local_5s+local_10s,6482.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.829725099960342,5292.999999999904,0.0,5293.0,optimal_block_family,4.083159762400679,0.18343103980253
+causal,playground00,200,2,1296.3,local_1s+local_5s+local_10s+global,6482.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),4.222589199896902,5292.999999991033,0.0,5293.0,optimal_block_family,4.083159762400679,0.18343103980253
+causal,street00,0,0,1343.8,local_1s,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.3501946999458596,2268.0,0.0,2268.0,optimal_block_family,1.6877511534454532,0.15625
+causal,street00,0,0,1343.8,local_5s,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1770653000567108,1753.9999999999968,0.0,1754.0,optimal_block_family,1.3052537579997023,0.3474702380952381
+causal,street00,0,0,1343.8,local_10s,1344.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0488287000916898,1344.0000000000005,0.0,1344.0,optimal_block_family,1.0001488316713798,0.0
+causal,street00,0,0,1343.8,global,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.8233922999352217,1423.9999999999577,0.0,1424.0,optimal_block_family,1.0596815002232476,0.4702380952380952
+causal,street00,0,0,1343.8,local_1s+local_5s+local_10s,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.7519573000026867,2267.9999999999995,0.0,2268.0,optimal_block_family,1.6877511534454532,0.15625
+causal,street00,0,0,1343.8,local_1s+local_5s+local_10s+global,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.56049790000543,2267.9999999999995,0.0,2268.0,optimal_block_family,1.6877511534454532,0.15625
+causal,street00,200,2,1343.8,local_1s,6719.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0566391999600455,3378.0,0.0,3378.0,optimal_block_family,2.51376692960262,0.4972466140794761
+causal,street00,200,2,1343.8,local_5s,6719.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.4488758000079542,3908.0,0.0,3908.0,optimal_block_family,2.908170858758744,0.4183658282482512
+causal,street00,200,2,1343.8,local_10s,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1811264000134542,2363.9999999999936,0.0,2364.0,optimal_block_family,1.7591903557076949,0.1205357142857143
+causal,street00,200,2,1343.8,global,2688.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0427570000756531,2064.0,0.0,2064.0,optimal_block_family,1.5359428486381903,0.2321428571428571
+causal,street00,200,2,1343.8,local_1s+local_5s+local_10s,6719.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.4769586999900639,3908.0,0.0,3908.0,optimal_block_family,2.908170858758744,0.4183658282482512
+causal,street00,200,2,1343.8,local_1s+local_5s+local_10s+global,6719.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.3926607000175863,3907.9999999999823,0.0,3908.0,optimal_block_family,2.908170858758744,0.4183658282482512
+causal,street01,0,0,1218.3,local_1s,2437.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),7.35635680006817,2246.999999997494,0.0,2247.0,optimal_block_family,1.8443733070672248,0.0779647107098892
+causal,street01,0,0,1218.3,local_5s,2437.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0582879000576213,2289.0,0.0,2289.0,optimal_block_family,1.8788475744890425,0.0607304062371768
+causal,street01,0,0,1218.3,local_10s,2437.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0449655000120401,1489.0,0.0,1489.0,optimal_block_family,1.2221948616925224,0.3890028723840788
+causal,street01,0,0,1218.3,global,2437.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),1.1610312999691814,1678.9999999999293,0.0,1679.0,optimal_block_family,1.378149880981696,0.3110381616741896
+causal,street01,0,0,1218.3,local_1s+local_5s+local_10s,2437.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.165881699998863,2289.0,0.0,2289.0,optimal_block_family,1.8788475744890425,0.0607304062371768
+causal,street01,0,0,1218.3,local_1s+local_5s+local_10s+global,2437.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1611548999790102,2288.999999999999,0.0,2289.0,optimal_block_family,1.8788475744890425,0.0607304062371768
+causal,street01,200,2,1218.3,local_1s,6092.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1580385999986902,5926.999999999994,0.0,5927.0,optimal_block_family,4.864975785931216,0.0270847012475377
+causal,street01,200,2,1218.3,local_5s,12183.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.3569106999784708,8116.99999999954,0.0,8117.0,optimal_block_family,6.6625625872116885,0.3337437412788311
+causal,street01,200,2,1218.3,local_10s,6092.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0443368999985978,2999.0,0.0,2999.0,optimal_block_family,2.4616268570959536,0.507715036112935
+causal,street01,200,2,1218.3,global,6092.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0448399999877437,2579.0,0.0,2579.0,optimal_block_family,2.1168841828777807,0.5766579120157584
+causal,street01,200,2,1218.3,local_1s+local_5s+local_10s,12183.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.4888065999839455,8116.999999998341,0.0,8117.0,optimal_block_family,6.6625625872116885,0.3337437412788311
+causal,street01,200,2,1218.3,local_1s+local_5s+local_10s+global,12183.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.3814901999430731,8116.999999999783,0.0,8117.0,optimal_block_family,6.6625625872116885,0.3337437412788311
+causal,street02,0,0,1349.9,local_1s,2700.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1516584999626502,2609.9999999999995,0.0,2610.0,optimal_block_family,1.9334765538188008,0.0333333333333333
+causal,street02,0,0,1349.9,local_5s,2700.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.30200030002743,2639.999999999557,0.0,2640.0,optimal_block_family,1.9557004222535,0.0222222222222222
+causal,street02,0,0,1349.9,local_10s,2700.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.1118707000277936,1760.0,0.0,1760.0,optimal_block_family,1.3038002815023335,0.3481481481481481
+causal,street02,0,0,1349.9,global,2700.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0505054999375715,2110.0,0.0,2110.0,optimal_block_family,1.5630787465738205,0.2185185185185185
+causal,street02,0,0,1349.9,local_1s+local_5s+local_10s,2700.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2416628999635577,2639.999999999999,0.0,2640.0,optimal_block_family,1.9557004222535,0.0222222222222222
+causal,street02,0,0,1349.9,local_1s+local_5s+local_10s+global,2700.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.2498033000156283,2640.0,0.0,2640.0,optimal_block_family,1.9557004222535,0.0222222222222222
+causal,street02,200,2,1349.9,local_1s,13499.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0454491999698802,9399.0,0.0,9399.0,optimal_block_family,6.962737980591155,0.3037262019408845
+causal,street02,200,2,1349.9,local_5s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.038516900036484,,,,infeasible_block_family,,
+causal,street02,200,2,1349.9,local_10s,6750.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0896743000485003,3690.0,0.0,3690.0,optimal_block_family,2.7335358174679603,0.4533333333333333
+causal,street02,200,2,1349.9,global,6750.0,0.0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.0730724999448284,3720.0,0.0,3720.0,optimal_block_family,2.7557596859026594,0.4488888888888889
+causal,street02,200,2,1349.9,local_1s+local_5s+local_10s,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0618619000306353,,,,infeasible_block_family,,
+causal,street02,200,2,1349.9,local_1s+local_5s+local_10s+global,,2.0,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),0.0585091999964788,,,,infeasible_block_family,,

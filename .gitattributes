@@ -1,2 +1,17 @@
 *.sh text eol=lf
 *.sbatch text eol=lf
+
+# Preserve the bytes used by the delivery-feasibility provenance audit.
+/DigitalTwin/analysis/delivery_feasibility.py text eol=lf
+/DigitalTwin/analysis/service_timing_budget_study.py text eol=lf
+/scripts/audit_delivery_feasibility.py text eol=lf
+/scripts/compare_delivery_greedy.py text eol=lf
+/scripts/plot_delivery_feasibility.py text eol=lf
+/scripts/refine_delivery_feasibility.py text eol=lf
+/tests/test_delivery_feasibility.py text eol=lf
+/docs/delivery_feasibility_protocol.md text eol=lf
+/manuscript/main.tex text eol=lf
+/results/delivery_feasibility/**/*.csv text eol=crlf
+/results/delivery_feasibility/*.json text eol=crlf
+/results/delivery_feasibility/report.md text eol=crlf
+/results/delivery_feasibility/assessment.md text eol=lf
