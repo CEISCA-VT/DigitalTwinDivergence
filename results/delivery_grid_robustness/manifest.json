@@ -1,0 +1,36 @@
+{
+  "status": "complete",
+  "input_hashes": {
+    "results\\doubly_nested_loso_evidence\\per_sequence_response_surface.csv": "8d6081f09abda537bf0c78e9bfd06b08dd0db1164b974fc0e1e04adf89878d77",
+    "results\\doubly_nested_loso_evidence\\evidence_manifest.json": "ba803a076e411bef816b37e7831ba2b97d5844cf91b5a49bdd262f4c50a8f889",
+    "results\\structured_qualification_baselines\\centered\\predictions.csv": "ed879894afb809c3cc064c6e0ec7d659f015e4be0be89ed4d858411c1c6e58b1",
+    "results\\doubly_nested_causal_loso_slurm\\service_evidence\\per_sequence_response_surface.csv": "3992219bd60ac055ab9240905f5a5d939741fe8ae5734a2d25f16aae76f00c81",
+    "results\\doubly_nested_causal_loso_slurm\\service_evidence\\evidence_manifest.json": "9797eee10f5eb75e74e30dafff8be5c48cf34190678b6bae3bc6ababa89d8a9c",
+    "results\\structured_qualification_baselines\\causal\\predictions.csv": "cc57363034acb89dbbead57b1d750f024c6712c4257999fb4dbf225861f05c76"
+  },
+  "code_hashes": {
+    "scripts\\check_delivery_grid_robustness.py": "0d84dc744925c582762b0801dc1b803378daa5bb32f78646b7e8ab3e3fe09e63",
+    "scripts\\compare_structured_qualification.py": "a15c3150252cf3c95dc3798b2b0ead95898b591f70f244ae6a84e783d6a37234",
+    "scripts\\compare_surface_alternatives.py": "b8ee3895a42041bd5571c65ba55c56d72e67f7491224ba2a55a557690c7a1101",
+    "DigitalTwin\\analysis\\service_evidence_from_bank.py": "5ee22b59bb668686fac31981a74a980b2d0cca3dfe52b5e3d0ff42caaa3612e1",
+    "DigitalTwin\\analysis\\service_timing_budget_study.py": "62472777121119fd36a39e464ab1ba575b2e0ab795ac0e43349497c7d42ce31c"
+  },
+  "python": "3.13.3",
+  "sklearn": "1.7.0",
+  "full_grid_reproduced": true,
+  "maximum_full_score_difference": {
+    "centered": 7.022160630754115e-13,
+    "causal": 3.297362383136715e-13
+  },
+  "bootstrap": "5000 recording resamples; existing operating-point function; paired changes seed 20261030",
+  "main_representative_delay_ms": 50,
+  "sensitivity_representatives_ms": [
+    25,
+    50,
+    100
+  ],
+  "full_heldout_cells": 800,
+  "reduced_heldout_cells": 480,
+  "fitting": "Refit all seven rules on the selected grid. Inner LOSO acceptance-only cutoffs, ties retained; outer outcomes excluded.",
+  "no_twin_retraining": true
+}

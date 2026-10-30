@@ -1,356 +1,1252 @@
 \documentclass[journal]{IEEEtran}
-
 \usepackage{amsmath,amssymb}
-\usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{array}
-\usepackage{cite}
-\usepackage{url}
-\usepackage{balance}
+\usepackage{graphicx,booktabs,array,multirow,cite,url}
+\usepackage[caption=false,font=footnotesize]{subfig}
 \usepackage[hidelinks]{hyperref}
-
-\newcommand{\safegraphic}[2][\linewidth]{%
-  \IfFileExists{#2}{\includegraphics[width=#1]{#2}}{%
-    \fbox{\parbox[c][1.15in][c]{0.92\linewidth}{\centering\scriptsize
-      Missing figure:\\[-1mm]\detokenize{#2}}}%
-  }%
+\usepackage{xcolor}
+\usepackage{microtype}
+\linespread{0.95}
+\setlength{\textfloatsep}{2pt plus 1pt minus 1pt}
+\setlength{\floatsep}{1pt plus 1pt minus 1pt}
+\setlength{\intextsep}{2pt plus 1pt minus 1pt}
+\setlength{\dbltextfloatsep}{2pt plus 1pt minus 1pt}
+\setlength{\dblfloatsep}{1pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{2pt}
+\setlength{\belowcaptionskip}{0pt}
+\AtBeginDocument{%
+  \setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}%
+  \setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}%
+  \setlength{\abovedisplayshortskip}{3pt plus 1pt minus 1pt}%
+  \setlength{\belowdisplayshortskip}{4pt plus 1pt minus 1pt}%
 }
-
-\title{Cross-Sequence Service Qualification and Delivery Remediability for Frozen IoT Digital Twins}
-
-\author{Shreyas Udaya%
-\thanks{S. Udaya is with the Bradley Department of Electrical and Computer Engineering, Virginia Tech, Blacksburg, VA, USA.}%
-}
-
+\newcommand{\safegraphic}[2][\linewidth]{\IfFileExists{#2}{\includegraphics[width=#1,height=2.1in,keepaspectratio]{#2}}{\fbox{\parbox[c][0.85in][c]{0.94\linewidth}{\centering\scriptsize Figure asset not bundled: \detokenize{#2}}}}}
+\title{Digital Twin Fidelity for Networked IoT Services}
+\author{Shreyas Udaya, Aiden Wiehn, Sreya Viswanadha, Leyla Nazhandali}
 \begin{document}
 \maketitle
 
 \begin{abstract}
-An IoT digital twin may support one service while failing another because services require different quantities, horizons, discrepancy limits, and freshness. We present a held-out qualification-and-remediability protocol for delivery of frozen virtual states. Thirty saved trajectories from ten i2Nav physical sequences are replayed over sampled delivery configurations. A cross-sequence qualification surface estimates, from nine sequences, whether each service and delivery cell qualifies on the tenth. After correcting saved-clock arrival boundaries, the surface falsely qualifies 5/235 accepted conditions (2.1\%) versus 75/200 (37.5\%) for a service-identity-only baseline at a target acceptance of 30\%. The paired physical-sequence bootstrap difference is $-35.4$ percentage points (95\% interval $-44.4$ to $-25.1$); achieved acceptance differs by 4.375 points, so this is an approximately matched pooled comparison, not a per-service win. AoI-only, adapted kinematic staleness, and motion-conditioned logistic regression are secondary comparisons. Paired replay finds 30 of 40 sequence--service cases delivery-remediable, six persistent, and four already qualified under degraded delivery; the practical 5-Hz/50-ms configuration restores 27 of 30. All remediable degraded failures at this operating point are discrepancy-only under the evaluated freshness limits. The distinction also appears with a frozen fixed-physics twin. Results characterize qualification transfer and delivery remediability, not an optimal scheduler, safety guarantee, model repair, or measured resource saving.
+Digital twins provide virtual representations of physical assets for
+monitoring and decision support in Internet of Things systems. Their
+practicality depends on whether the information available to a service
+meets its accuracy and freshness requirements, not only on the quality
+of estimates at their source. We present a service-relative fidelity
+framework that evaluates the state held by a receiver against declared
+physical-error limits, time horizons, age bounds, and evidence requirements.
+It reports qualified, unqualified, or unobservable outcomes. A paired
+delivery-remediability test holds the source estimates fixed and changes
+their delivery to determine whether improved communication restores a
+failed service. A complementary held-out procedure uses prior recordings
+to screen service--delivery regimes. Across ten i2Nav sequences, practical
+delivery restored 27 of 30 cases classified as delivery-remediable. At a
+25\% requested acceptance, the held-out surface produced four false
+qualifications among 200 accepted cases (2.0\%) with precomputed centered features;
+a separately trained past-only backward-difference bank produced 19 among 168
+(11.3\%). These results show why source accuracy and age compliance alone
+do not establish receiver-side adequacy, and how a paired delivery test
+can identify when changing delivery restores a service outcome. Evaluation
+also includes measured Linux network-emulation traces, component comparisons,
+and supporting robot and thermal-twin studies.
 \end{abstract}
 
 \begin{IEEEkeywords}
-digital twin, Internet of Things, service qualification, delivery remediability, age of information, physical--virtual fidelity, mobile robot
+Digital twins, Internet of Things, edge computing, information
+freshness, Age of Information, service qualification, networked
+systems, fidelity evaluation.
 \end{IEEEkeywords}
 
 \section{Introduction}
-\IEEEPARstart{D}{igital} twins support monitoring, prediction, and cyber--physical decisions only while their virtual state remains adequate for the service that consumes it. This adequacy is not fully described by an update rate or by one model-centric error. A short-horizon motion service, a global asset tracker, and a geofence can require different quantities, horizons, discrepancy limits, and source ages \cite{dtc,jones2020,shao2023,nist8620}. A twin can consequently remain locally useful while accumulated drift invalidates global synchronization.
+\label{sec:introduction}
+Industrial Internet of Things (IIoT) systems connect physical assets to edge and cloud services that monitor their operation and support decisions. In these systems, a digital twin is useful only when the information available to a consuming service is accurate and recent enough for its task. This requirement is increasingly relevant as robots and other connected machines become more capable and widely deployed. The International Federation of Robotics reports five million industrial robots operating in factories in 2025 and growing investment in virtual environments for robotics \cite{ifr2026robots}, illustrating the expanding connected-automation setting in which reliable physical-to-digital information matters.
 
-Freshness research provides principled age metrics and scheduling formulations. Age of Incorrect Information (AoII) weights the time for which an estimate is wrong \cite{maatouk2023}; Query AoI evaluates freshness when information is requested \cite{chiariotti2022}. Digital-twin synchronization has been formulated as stochastic control balancing update and prediction-bias costs \cite{tanmatta2024}, and as budget allocation for fidelity-aware edge queries \cite{li2025sync}. Recent predictive synchronization combines uncertainty forecasts and drift monitoring to reduce traffic while maintaining prediction quality \cite{wanigarathna2026}. These works decide when or what to update under modeled costs, queries, staleness, or predictive uncertainty. They do not directly answer an empirical qualification question: for a frozen physical--virtual model and a specified service, which delivered rate-delay conditions remain supported on an unseen physical sequence, and which observed failures can fresher delivery actually resolve?
+A robot digital twin produces estimates of the physical robot's state, such as position, heading, or speed. In an IIoT deployment, these estimates may be sent from an on-robot or edge-side twin to a service running on an edge server, cloud platform, or another connected system. We call the destination that receives and uses the estimates the \emph{receiver}, and the consuming application the \emph{service}. The receiver can use only information that has arrived, which may be older than the twin's latest estimate.
 
-This paper addresses that question with three linked contributions:
+Whether a received state is useful depends on the service. A service that evaluates recent motion may tolerate some accumulated error in absolute position, while a service that needs the robot's current location may not. Conversely, a state may be accurate for the time it represents but too old to support a time-sensitive decision. A single trajectory-accuracy value therefore cannot, by itself, establish whether the information at the receiver is suitable for every service.
+
+This distinction matters when diagnosing a service failure. If the source estimates meet the service's physical-error requirements but arrive too late, improved delivery may help. If the service still fails under the best tested delivery, delivery changes alone have not restored it. Missing reference measurements, poor synchronization, or inadequate data quality can also make the outcome unobservable. Keeping these outcomes separate shows what the evidence supports and which intervention is relevant.
+
+Prior work has developed methods for measuring digital-twin fidelity,
+trajectory error, and information freshness. The question addressed here
+is whether the state that has reached a receiver is sufficiently accurate
+and recent for the service that will use it. Mu{\~n}oz et al. use trace
+alignment to assess physical–digital correspondence \cite{munoz2024trace};
+Yates et al. survey Age of Information in networked systems
+\cite{yates2021aoi}.
+
+We address this question with a service-relative evaluation framework. Each service declares the state quantities it needs, the time horizon over which they are evaluated, acceptable physical discrepancy, a maximum state age, and the evidence required for evaluation. The framework reports whether observable cases meet both the physical and freshness requirements, and marks cases with insufficient evidence as \emph{unobservable}. It also builds a qualification surface from prior physical sequences to screen service--delivery regimes for consideration; the surface is an offline guide, not a per-state accuracy check.
+
+We then use a paired delivery-remediability analysis. For each recorded source trajectory, we keep the twin estimates fixed and evaluate receiver-held states under degraded, practical, and ideal-available delivery. A case is delivery-remediable when it fails under degraded delivery but qualifies under ideal-available delivery; a case that fails under both is persistent under this comparison. Cases that pass even under degraded delivery are already qualified. Because the source trajectory is fixed, differences between these outcomes reflect the tested delivery conditions.
+
+We evaluate the framework primarily on ten physical sequences from the i2Nav dataset \cite{tang2025i2nav}.
+At the 25\% requested-acceptance operating point, the surface produced four false qualifications among 200 accepted cases (2.0\%) with precomputed centered features and 19 among 168 (11.3\%) with separately trained past-only features. The centered-feature surface accepted no global-service cases at this point. In the paired delivery analysis, practical saved-state replay restored 27 of the 30 delivery-remediable cases. We also replay measured UDP packet arrivals from a Linux virtual network interface shaped with \texttt{tc netem}, and apply the ledger to position-reference data from UGV01.
+The contributions of this work are as follows:
 \begin{enumerate}
-    \item \textbf{Service-relative qualification.} We define pass, fail, and unobservable outcomes from required quantities, horizon, componentwise physical discrepancy, context, and information age. Satisfaction is always reported with observability.
-    \item \textbf{Cross-sequence qualification surface.} We causally replay 30 frozen trajectories from ten i2Nav physical sequences over 20 delivery conditions. The qualification frequency of each service--delivery cell is learned without the held-out physical sequence. A service-identity-only baseline tests whether delivery-cell information adds value beyond service difficulty.
-    \item \textbf{Delivery-remediability.} Paired replay distinguishes held-state discrepancy from discrepancy persistent under available 10-Hz zero-added-delay delivery. We account for restored, persistent, and already-qualified cases, then repeat the distinction with a documented frozen fixed-physics twin.
+    \setlength{\itemsep}{0pt}
+    \setlength{\parsep}{0pt}
+    \setlength{\topsep}{2pt}
+    \item We develop a service-relative digital twin fidelity framework that evaluates the state available to a network receiver against a service's physical-error, freshness, and evidence requirements. The framework distinguishes qualified, unqualified, and unobservable outcomes without collapsing position error, heading error, and state age into a single score.
+
+    \item We introduce a paired delivery-remediability analysis that holds the source twin and its recorded estimates fixed while changing delivery conditions. This identifies whether improved delivery restores a failed service or whether it remains unqualified under the tested ideal-available delivery.
+
+    \item We evaluate service qualification across held-out physical sequences and demonstrate the framework with sampled delivery, measured Linux \texttt{tc netem} packet traces, and a position-only UGV01 study.
 \end{enumerate}
-
-At approximately matched pooled acceptance, the surface falsely qualifies 5/235 accepted conditions versus 75/200 for service identity alone. This supports value beyond knowing which service is generally easier; it does not establish a matched within-service win because the identity score is tied across a service's cells. AoI-only remains a freshness reference, while the adapted kinematic and logistic comparisons do not establish superiority over their source methods. Of 30 delivery-remediable sequence--service cases, all fail discrepancy while meeting the freshness-fraction requirement at the degraded operating point; a practical sampled configuration restores 27. We do not claim an optimal scheduler, safety guarantee, model repair, communication saving, or localization state of the art.
-
 \section{Related Work}
-\subsection{Fidelity and Intended Use}
-Digital-twin credibility research treats fidelity, validation, synchronization, and uncertainty as use-dependent concerns \cite{jones2020,shao2023,nist8620}. Objective-dependent fidelity \cite{kober2023}, multidimensional evaluation \cite{zhang2025}, trace alignment \cite{munoz2024}, and robot-twin validation measures \cite{bergs2025} all motivate evaluating more than one undifferentiated score. We retain established trajectory errors; the added object is an explicit service qualification and its evidence boundary.
+\label{sec:related_work}
 
-\subsection{Freshness and Synchronization}
-AoII models semantic incorrectness over time \cite{maatouk2023}, whereas Query AoI optimizes freshness at pull-based query instants \cite{chiariotti2022}. Tan and Matta formulate DT synchronization as a stochastic control problem and derive state-independent, state-dependent, approximate, and full-information policies for an unreliable production system \cite{tanmatta2024}. Li \emph{et al.} allocate a constrained synchronization budget across objects and evaluate fidelity-aware queries using state staleness and query cost \cite{li2025sync}. Wanigarathna \emph{et al.} use GRU quantile forecasts, coverage checks, and KL-divergence monitoring to switch between predictive and direct synchronization \cite{wanigarathna2026}.
+Digital-twin evaluation builds on verification, validation, and
+model-credibility research. These approaches assess a digital representation
+against its physical counterpart and the use it is intended to support
+\cite{jones2020characterising,shao2023credibility,bitencourt2025vv}.
+This matters because aggregate resemblance alone does not establish that
+a twin's reported state is adequate for the decisions made by consuming
+applications.
 
-Our study does not replace these scheduling or freshness formulations. In particular, our adapted kinematic-staleness comparator is not a reproduction of Li \emph{et al.}'s multi-object, budget-constrained method \cite{li2025sync}. The contribution is a held-out qualification-and-remediability protocol combining componentwise physical discrepancy, explicit service requirements, observability, causal delivery replay, and paired delivery contrasts. No single ingredient is claimed as new, and we do not claim superiority over general fidelity-aware synchronization methods.
+Prior research has developed methods for comparing physical and virtual
+behavior. Su \emph{et al.} characterize digital-twin identicality using
+properties including trueness, precision, completeness, and latency
+\cite{su2023identicality}. Mu{\~n}oz \emph{et al.} use trace alignment to
+compare physical and digital executions \cite{munoz2024trace}. For mobile robots,
+absolute and relative pose error metrics summarize global trajectory
+error and local motion error, respectively \cite{sturm2012rgbd}. These
+approaches provide important ways to assess model behavior. Our work asks
+a related but distinct receiver-side question: does the state that has
+actually arrived satisfy the requirements of the specified service?
 
-\subsection{Mobile-Robot Twin Evidence}
-Robot DTs support experimentation, runtime verification, navigation, and control \cite{ding2021,yang2025,betzer2024}. Wheel--inertial methods provide a sensor-lightweight state representation but remain vulnerable to slip and accumulated heading error \cite{brossard2019,jiang2025,zhou2025ynet}. i2Nav supplies the frozen primary trajectories and independent held-out sequences used here \cite{tang2025}. TerraSentia and the UGV01 experiments are retained as supporting portability and asset-specific boundary evidence \cite{cuaran2024}.
+This question also connects digital twin evaluation to information
+freshness in networked systems. Age of Information (AoI) measures how
+long it has been since the freshest available update was generated
+\cite{kaul2012realtime,yates2021aoi}. Extensions consider the
+application level usefulness of information or its freshness when a
+query is made \cite{maatouk2023aoii,chiariotti2022query}. Research on
+digital twin synchronization similarly studies how update and
+communication decisions affect the relationship between physical and
+virtual states \cite{tan2024synchronization,li2025budget}. Together,
+these studies establish that delivery rate, delay, and update timing
+affect the value of a networked twin. The receiver's information,
+however, can be fresh but physically inaccurate, or physically accurate
+at generation but too old when used.
 
-\section{Service Contracts and Qualification Semantics}
-Let $z_{p,q}(t)$ and $z_{T,q}(t)$ denote physical and twin values for quantity $q$, with application-appropriate discrepancy
-\begin{equation}
-D_q(t)=d_q\!\left(z_{p,q}(t),z_{T,q}(t)\right).
-\label{eq:discrepancy}
-\end{equation}
-For service $s$, define the engineering contract
-\begin{equation}
-\mathcal{C}_s=(Q_s,H_s,\boldsymbol{\tau}_s,C_s,A_s),
-\label{eq:contract}
-\end{equation}
-where $Q_s$ is the required quantity set, $H_s$ the horizon, $\boldsymbol{\tau}_s$ componentwise discrepancy limits, $C_s$ the applicable context, and $A_s$ the maximum represented-state age.
+Selective prediction research provides another useful foundation: a
+system should withhold a decision when the available evidence is
+insufficient \cite{elyaniv2010selective,geifman2019selectivenet}.
+Accordingly, we report qualification with coverage and mark missing
+reference or synchronization evidence as unobservable. In this
+work, the empirical qualification surface estimates whether a
+service-delivery regime is supported on a held-out physical sequence
+using evidence from other sequences, providing an offline basis for comparing candidate delivery regimes for a service.
 
-Let $O_{s,k}$ indicate whether window $W_k$ contains the required reference quantities, history, synchronization, and quality evidence. The outcome is
+Building on these foundations, this paper connects receiver-side service
+qualification with a controlled assessment of delivery remediability.
+The evaluator reconstructs the state available to a service, checks its
+physical discrepancy and freshness against declared requirements, and
+retains an unobservable outcome when required evidence is missing.
+Holding the generated source trajectory fixed across delivery histories
+then identifies which failed cases qualify when delivery improves.
+A held-out analysis tests whether evidence from prior recordings can
+screen service--delivery settings for an unseen recording. The contribution
+is this combined evaluation procedure and its experimental evidence,
+with the historical surface providing an interpretable screening rule.
+\section{Service-Relative Fidelity Evaluation Framework}
+\label{sec:methodology}
+
+We consider a mobile robot, a digital twin that estimates its state, an IoT communication path, and services that consume the state available at a remote receiver. The methodology distinguishes the state generated by the source twin from the state actually held by the receiver. This distinction allows physical-model error, communication-induced degradation, and insufficient evidence to be evaluated separately.
+
+Let the physical reference state at time $t$ be $\mathbf{x}_{P}(t)$ and the source-twin estimate generated with timestamp $\tau_i$ be $\widehat{\mathbf{x}}_{T}(\tau_i)$. For the mobile robot experiments, the state may contain planar position $\mathbf{p}$, heading $\theta$, forward velocity $v$, and angular velocity $\omega$. Each service uses only the quantities required by its application. The physical reference is treated as a documented measurement system rather than error-free ground truth, and its supported quantities, uncertainty, timing, and valid intervals are reported for each dataset.
+
+Throughout a delivery comparison, the source model and estimated trajectory are frozen; changing delivery changes which source states reach the receiver and when they arrive.
+
+\subsection{Receiver-Held State and Discrepancy}
+
+A delivery condition $d$ specifies the update rate, communication delay, jitter, and packet loss. Source state $i$ has timestamp $\tau_i$, becomes available after sensing and computation at time $b_i$, and arrives at the receiver at time $a_i^{(d)}$. A lost packet is represented by $a_i^{(d)}=\infty$, and causality requires
 \begin{equation}
-V_{s,k}=\begin{cases}
-1, & O_{s,k}=1\ \text{and all limits pass},\\
-0, & O_{s,k}=1\ \text{and at least one limit fails},\\
-\varnothing, & O_{s,k}=0.
-\end{cases}
-\label{eq:threestate}
+a_i^{(d)}\geq b_i.
 \end{equation}
-For observable windows,
+
+At receiver time $t$, the receiver selects the arrived packet containing the newest source timestamp:
 \begin{equation}
-V_{s,k}=\mathbb{I}\!\left[g_{q,H_s}(W_k)\le\tau_{s,q}\ \forall q\in Q_s,
-c_k\in C_s,\ \mathrm{AoI}_k\le A_s\right],
-\label{eq:windowvalidity}
+i_d^{*}(t)
+=
+\underset{i:a_i^{(d)}\leq t}{\arg\max}\;\tau_i.
 \end{equation}
-where $g_{q,H_s}$ is the service-specific discrepancy summary and
+The receiver-held state and its age are then
 \begin{equation}
-\mathrm{AoI}(t)=t-t_{\mathrm{src}}^{\mathrm{newest\ represented}}.
+\widetilde{\mathbf{x}}_{T}^{(d)}(t)
+=
+\widehat{\mathbf{x}}_{T}\!\left(\tau_{i_d^{*}(t)}\right),
+\qquad
+A_d(t)=t-\tau_{i_d^{*}(t)}.
+\label{eq:receiver_state_age}
 \end{equation}
-Run-level satisfaction and observability are
+Both quantities are unavailable if no packet has arrived. The receiver applies zero-order hold without extrapolation. Consequently, an older packet arriving late cannot replace a newer held state, and reading a cached state does not reset its age.
+
+Source time and availability time are kept distinct. This is important when an estimator uses features, such as centered derivatives, that represent time $\tau_i$ but require later samples before becoming available. Any resulting computation or look-ahead delay must therefore be included in $b_i$ or evaluated through a separate causal implementation.
+
+For a required quantity $q$, discrepancy under delivery condition $d$ is measured in its physical units:
+\begin{equation}
+D_q^{(d)}(t)
+=
+d_q\!\left(
+x_{P,q}(t),
+\widetilde{x}_{T,q}^{(d)}(t)
+\right).
+\end{equation}
+For example, planar-position and heading discrepancies are
 \begin{align}
-S_s&=\frac{\sum_k\mathbb{I}[V_{s,k}=1]}{\sum_k\mathbb{I}[V_{s,k}\in\{0,1\}]},\\
-\Omega_s&=\frac{1}{N_s}\sum_{k=1}^{N_s}O_{s,k}.
+D_p^{(d)}(t)
+&=
+\left\|
+\mathbf{p}_{P}(t)
+-
+\widetilde{\mathbf{p}}_{T}^{(d)}(t)
+\right\|_2,\\
+D_{\theta}^{(d)}(t)
+&=
+\left|
+\operatorname{wrap}\!\left(
+\theta_{P}(t)
+-
+\widetilde{\theta}_{T}^{(d)}(t)
+\right)
+\right|.
 \end{align}
-An unobservable window is an abstention, not a pass or failure. A violation withdraws only the affected service claim; it does not establish that the entire twin is unusable or unsafe.
 
-For planar robot motion, synchronized position and heading discrepancies are
+Global services use the discrepancy at the evaluation time. A local service with horizon $H_s$ instead evaluates relative motion over the completed interval $[t_k-H_s,t_k]$:
+\begin{equation}
+D_{q,H_s}^{(d)}(t_k)
+=
+d_q\!\left(
+\Delta_{H_s}x_{P,q}(t_k),
+\Delta_{H_s}\widetilde{x}_{T,q}^{(d)}(t_k)
+\right),
+\end{equation}
+where $\Delta_{H_s}$ denotes the change between the two interval endpoints. Thus, both global and local services are evaluated using the states actually available to the receiver.
+
+\subsection{Service Qualification}
+
+A service contract is defined as
+\begin{equation}
+\mathcal{C}_s=
+\left(
+Q_s,H_s,\boldsymbol{\delta}_s,\Delta_s,
+\eta_s,\gamma_s,\mathcal{O}_s
+\right),
+\end{equation}
+where $Q_s$ is the set of required quantities, $H_s$ is the evaluation horizon, $\boldsymbol{\delta}_s$ contains the permitted physical discrepancies, and $\Delta_s$ is the maximum state age. The parameters $\eta_s\in(0,1]$ and $\gamma_s\in(0,1]$ specify the required satisfaction fraction and minimum observable fraction, respectively. The rule $\mathcal{O}_s$ defines the evidence needed to evaluate the contract.
+
+Position, heading, and freshness limits remain in meters, angular units, and seconds, respectively. They are not combined through arbitrary weights into a single fidelity score.
+At each evaluation time, a sample is observable if the reference,
+receiver-held state, synchronization, history, and quality data required
+by the service are available. A sample lacking this evidence lowers the
+observable fraction but is excluded from the satisfaction fractions rather
+than counted as a physical or freshness failure. For each observable
+sample, the evaluator
+checks whether the physical discrepancy is within every applicable
+service tolerance and whether the receiver-held state is within the
+service's maximum age. The sample passes jointly only when both checks
+pass.
+
+For a run, physical, freshness, and joint satisfaction
+($S_s^P$, $S_s^F$, and $S_s^J$) are the fractions of observable samples
+passing the physical check, freshness check, and both checks together,
+respectively. The observable fraction, $\Omega_s$, is the fraction of
+all evaluation samples for which the required evidence is available.
+Satisfaction is undefined if no sample is observable. For a global
+service, physical discrepancy is evaluated at the current time; for a
+finite-horizon service, it is evaluated over the completed service
+interval.
+A run is qualified when at least $\gamma_s$ of its evaluation samples
+are observable and at least $\eta_s$ of its observable samples pass
+both the physical-error and freshness checks. It is unqualified when
+the observability requirement is met but the joint pass fraction is
+below $\eta_s$. If observability falls below $\gamma_s$, the result is
+unobservable; it is not counted as either a pass or a failure.
+
+Because a sample passes jointly only when it passes both individual
+checks, joint satisfaction cannot exceed physical or freshness
+satisfaction. We report all three fractions to show which requirement
+is associated with a failure, although qualification is determined by
+the joint fraction and the observability requirement.
+
+\subsection{Held-Out Qualification and Remediability}
+To test whether qualification transfers to an unseen physical sequence, we
+use the other nine sequences to score each service--delivery setting. The
+score is the fraction of those sequences that qualified under that
+setting. We select the acceptance cutoff using cross-fitted scores from
+the nine development sequences: each sequence is scored using the other
+eight, so it does not score itself. We choose the cutoff whose
+development-set acceptance is closest to the target, keeping cases with
+equal scores together. The selected cutoff is then frozen and applied
+to the held-out sequence.
+
+We apply this threshold unchanged to the held-out sequence, so its achieved acceptance need not equal the target. For example, at a 25 \% target, AoI-only accepts 160/800 held-out cells (20 \%), while motion logistic accepts 199/800 (24.9 \%). Their different score distributions and ties explain the different counts. The score is an empirical transfer statistic, not a calibrated probability of safety.
+
+Performance is summarized by acceptance coverage and false-qualification risk:
+\begin{equation}
+R_{\mathrm{FQ}}
+=
+\frac{
+\#\{\text{accepted held-out cases that fail}\}
+}{
+\#\{\text{accepted held-out cases}\}
+}.
+\end{equation}
+Coverage and risk are reported together so each method's error rate can be interpreted alongside the fraction of cases it accepts. Statistical resampling uses physical sequences as the independent units, with timestamps and seeds retained within each sequence.
+
+Finally, a remediability ledger determines whether delivery improvement can restore a failed service while the source twin remains fixed. Each observable sequence-service case is evaluated under degraded ($D$), practical ($P$), and ideal-available ($I$) delivery. The ideal condition forwards the full recorded source stream without added communication impairment.
+
+Cases with $q_s^{(d)}=\varnothing$ under any tested delivery condition are excluded from the ledger and reported separately as unobservable. Among the remaining observable sequence-service pairs, categories are assigned in the following fixed precedence order so that each case receives exactly one label:
 \begin{align}
-D_p(t)&=\sqrt{(x_p-x_T)^2+(y_p-y_T)^2},\\
-D_\theta(t)&=|\operatorname{wrap}(\theta_p-\theta_T)|.
-\end{align}
-Local services use relative $SE(2)$ motion over $H_s\in\{1,5,10\}$~s; the global service compares synchronized pose. Thus local relative-pose error (RPE) and global absolute trajectory error (ATE) remain complementary measurements rather than competing definitions.
+\text{already qualified:}\quad
+&q_s^{D}=1,\\
+\text{delivery-remediable:}\quad
+&q_s^{D}\neq 1,\quad q_s^{I}=1,\\
+\text{persistent:}\quad
+&q_s^{D}\neq 1,\quad q_s^{I}\neq 1
+\end{align}.
+The practical condition shows how many delivery-remediable cases are restored by the tested intermediate delivery setting.
 
-\section{Frozen Twin, Data, and Causal Replay}
-\subsection{Frozen Prediction Source}
-The primary source is the completed i2Nav full leave-one-sequence-out (LOSO) evaluation: ten physical sequences, three frozen V2 seeds per held-out sequence, and 30 saved 10-Hz trajectories. The sensor-lightweight twin propagates corrected odometry speed and IMU yaw rate. No twin retraining, checkpoint selection, alignment, interpolation, or outcome-dependent calibration is performed in this study. Physical and virtual trajectories already share a local ENU frame. Source files and hashes are recorded in the protocol manifest.
+For interpretation, failed cases are additionally labeled as physical-only, freshness-only, both-marginal, or joint-only failures using $S_s^{P}$, $S_s^{F}$, and $S_s^{J}$. Failure components are defined from the run-level satisfaction fractions,
+using the contract threshold $\eta_s$. A \emph{both-marginal failure}
+occurs when $S_s^P<\eta_s$ and $S_s^F<\eta_s$. A
+\emph{joint-only failure} occurs when both marginal requirements pass,
+$S_s^P\geq\eta_s$ and $S_s^F\geq\eta_s$, but the joint requirement
+fails, $S_s^J<\eta_s$. The latter can occur because the samples that
+satisfy the physical requirement are not necessarily the same samples
+that satisfy the freshness requirement. Delivery-remediable cases show that improved delivery lets the receiver use states in the frozen source stream to meet the contract; persistent cases remain unqualified under the tested ideal-available condition.
+\section{Experimental Setup}
+\label{sec:exp_setup}
 
-Seeds are first aggregated within physical sequence. The statistical hierarchy is
+The experiments ask whether the state available to a receiver meets a
+service's requirements, and whether changing delivery changes that outcome.
+We keep each recorded source trajectory fixed, reconstruct the state held
+by the receiver under each delivery condition, and compare it with the
+physical reference using the service contract. This paired design isolates
+delivery effects from changes to the source twin.
+
+The robot setting makes this distinction visible. Position and heading can
+support services with different time needs: one service may assess recent
+motion, while another needs a reliable current pose. Errors in speed and
+turning can also accumulate over time, so a trajectory that represents
+short-term motion well may still have substantial global position error.
+The study uses this setting to test whether service-specific evaluation
+reveals differences that one trajectory-wide score would hide.
+
+\subsection{Data, Twin, and Service Contracts}
+
+The primary study uses ten physical sequences from i2Nav
+\cite{tang2025i2nav}: building00, building01, building02, parking00,
+parking01, parking02, playground00, street00, street01, and street02.
+The prepared records provide synchronized wheel/odometry and inertial
+inputs, together with a physical-reference trajectory. The recordings span
+the building, parking, playground, and street sequence categories indicated
+by their names. Multiple physical sequences allow us to test transfer to a
+recording excluded from the corresponding qualification fit.
+
+The reference has distinct roles. It provides supervised targets during
+training, initializes the first pose, and supports retrospective fidelity
+evaluation. It is not an input to the learned V2 predictor. In the evaluated
+EKF replay, quality-gated GNSS measurements are used as filter updates;
+the state is not repeatedly reset to ground truth. Thus, GNSS is not a
+learned-model feature, but it can affect the propagated EKF trajectory.
+Reference and twin are compared on a common 10-Hz clock in a local ENU-style
+planar frame, without post-hoc spatial registration. Heading is unwrapped
+for interpolation and wrapped when angular differences are calculated.
+
+The source model is Twin V2, a sensor-based motion estimator. It corrects
+wheel/odometry forward speed and IMU yaw rate, then propagates planar pose.
+The fast branch is a two-layer Gated Recurrent Unit (GRU) with 64 hidden
+units, 0.10 inter-layer dropout, and a 20-sample (2-s) history. Its six
+features are odometer speed, IMU yaw rate, odometer acceleration, IMU yaw
+acceleration, absolute yaw rate, and absolute odometer acceleration. The
+slow branch is a two-layer, 32-unit tanh network using 16 rolling statistics
+over the previous 300 samples (30~s): mean, standard deviation, RMS, and
+mean magnitude of IMU yaw and wheel yaw; mean, standard deviation, and RMS
+of wheel--IMU yaw disagreement; mean and standard deviation of normalized
+disagreement; and mean, standard deviation, and mean magnitude of forward
+speed. The slow yaw correction is held at zero until its full history is
+available.
+The twin predicts bounded corrections to odometer speed and IMU yaw rate:
 \begin{equation}
-\text{timestamp}\subset\text{seed run}\subset\text{physical sequence}\subset\text{dataset}.
+\begin{aligned}
+v_{T,k} &= v_{\mathrm{odo},k}+0.15\tanh(z_{v,k}),\\
+\omega_{T,k} &= \omega_{\mathrm{imu},k}
+ +0.020\tanh(z_{\omega,k})
+ +0.005\tanh(z_{\mathrm{slow},k}).
+\end{aligned}
+\label{eq:twin_bounded_corrections}
 \end{equation}
-The ten physical sequences are the independent units for uncertainty; replay cells and timestamps are not treated as independent physical experiments.
+The coefficients limit the speed correction to 0.15~m/s and the fast
+and slow yaw corrections to 0.020 and 0.005~rad/s, respectively.
+Using the corrected speed and yaw rate, the twin propagates planar
+position and heading every 0.1~s by midpoint integration.
+Training targets are reference-derived forward speed minus odometer speed
+and reference-derived yaw rate minus IMU yaw rate. The slow target is the
+training-only causal 30-s mean of the yaw correction; the fast yaw target
+is the remaining correction. The frozen objective combines point-correction,
+propagated-trajectory, persistent signed-yaw, slow-target, fast-target,
+correction-magnitude, correction-mean, and slow-smoothness losses, with
+weights \(1.0, 0.50, 1.0, 0.75, 0.25, 0.01, 0.25,\) and \(0.05\),
+respectively. Training uses AdamW with learning rate \(10^{-3}\), weight
+decay \(10^{-5}\), at most 25 epochs, early-stopping patience 5, batch size
+8, and training/validation strides of 50/100 samples. Normalization is
+fitted on training sequences, and validation sequences select checkpoints.
+These settings define the source trajectories evaluated by the
+service-relative framework.
 
-\subsection{Frozen Services and Delivery Grid}
-Table~\ref{tab:protocol} defines the complete primary protocol. The tolerances are illustrative engineering sensitivity settings, not certified deployment limits. A sequence--service--delivery condition qualifies only when $\Omega_s\ge0.95$ and physical, freshness, and joint satisfaction each reach 0.80.
-
-\begin{table*}[t]
-\caption{Frozen qualification protocol and causal delivery semantics. Ideal delivery is ideal only with respect to the available source stream; it does not remove twin-model error.}
-\label{tab:protocol}
-\centering\scriptsize
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{p{0.15\textwidth}p{0.17\textwidth}p{0.12\textwidth}p{0.18\textwidth}p{0.29\textwidth}}
-\toprule
-Item & Values & Unit/count & Provenance & Interpretation \\
-\midrule
-Physical sequences & 10 sequences, 3 seeds each & $n=10$ & frozen full LOSO & seeds aggregated within sequence \\
-Services & local 1/5/10 s; global & 4 & existing contracts & relative motion versus synchronized pose \\
-Position limits & 0.1/0.2/0.5/1.0 & m & existing sensitivity settings & service order: 1/5/10 s/global \\
-Heading limits & 2/5/10/5 & degree & existing sensitivity settings & componentwise, not weighted \\
-AoI limits & 0.6/1.0/1.5/1.0 & s & existing sensitivity settings & service order as above \\
-Delivery grid & 10, 5, 2, 1; delay 0, 25, 50, 100, 200 & Hz; ms & frozen protocol & 20 nominal cells per service; 25/50-ms histories alias \\
-Qualification & $S_{\rm phys},S_{\rm fresh},S_{\rm joint}\ge0.80$; $\Omega\ge0.95$ & -- & frozen protocol & pass/fail/unobservable retained \\
-Degraded/practical/ideal & 2 Hz/200 ms; 5 Hz/50 ms; 10 Hz/0 ms & -- & predeclared contrasts & paired delivery-remediability test \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-\subsection{Causal Delivery Replay}
-For source times $t_i$, rate reduction deterministically subsamples the recorded 10-Hz virtual stream. Added delay $\delta$ gives arrival time $a_i=t_i+\delta$. Source, arrival, and evaluation times are compared after rounding to integer nanoseconds so equivalent saved-clock ticks are treated identically. At evaluation time $t$, the represented state is the newest source sample satisfying $a_i\le t$. It is held by zero-order hold and retains its original source time. No queue is modeled and cached evidence does not become a fresh observation. The saved V2 states were precomputed with centered-gradient sensor features, which can depend on the next sensor sample; the experiment does not measure that feature-availability latency and therefore establishes sampled-delivery causality over precomputed states, not fully causal online source generation.
-
-Local windows require their complete history. A 30-s prefix supplies sensor-only motion summaries and is excluded from scoring; the remaining suffix supplies outcomes. Each physical sequence therefore contributes $4$ services $\times20$ timing cells, or 80 conditions. Across ten sequences, the matched-acceptance comparison contains 800 evaluable conditions nested within ten physical units.
-
-\section{Cross-Sequence Qualification Surface and Comparators}
-\subsection{Cross-Sequence Qualification Surface}
-For outer held-out sequence $u$, the empirical score for service $s$, rate $r$, and delay $\delta$ is
-\begin{equation}
-\widehat p_{-u}(s,r,\delta)=\frac{1}{9}\sum_{v\ne u}
-\mathbb{I}[\text{condition }(s,r,\delta)\text{ qualifies on }v].
-\label{eq:empiricalbudget}
-\end{equation}
-This estimates transfer frequency from the other physical sequences without using outcomes from $u$. It preserves separate service surfaces and does not impose a monotone boundary; empirical global-service surfaces contain small nonmonotonicities. The surface is a descriptive held-out estimator, not a learned scheduler or a universal timing law.
-
-\subsection{Comparators}
-The \emph{service-identity-only} score is the qualification frequency of service $s$ among the nine outer-training physical sequences, independent of rate and delay. It therefore knows which service is generally easier but cannot distinguish delivery cells within that service. The \emph{AoI-only} score is freshness headroom $A_s-\max\mathrm{AoI}$ and ignores physical discrepancy. The adapted \emph{kinematic-staleness} score is a secondary literature-informed reference using motion and age, not a reproduction of Li \emph{et al.}'s constrained multi-object method \cite{li2025sync}. The \emph{motion-conditioned logistic} comparator receives service requirements, rate/delay, and speed, yaw-rate, acceleration, and turning summaries from the held-out sequence's sensor-only prefix. It receives no target-reference discrepancy. It is class-weighted logistic regression with standardized numeric features and one-hot service identity, trained on the other outer sequences. A common service-agnostic surface is retained only in supplementary outputs.
-
-\subsection{Approximately Matched Acceptance}
-A shared numerical score cutoff would be unfair because the five scores have different scales. For each outer fold and method, inner LOSO predictions from the nine outer-training sequences select the cutoff whose training acceptance is closest to 30\%; conservative higher cutoffs resolve ties. The cutoff is frozen and applied to the outer sequence. Selection uses acceptance only, not outer-sequence qualification labels. Achieved acceptance spans 25.0--31.25\% across methods, so the comparison is approximately rather than exactly matched. The service-identity score has only one value per service; its ties can force all-or-none acceptance of that service's cells. Nominal 10\% and 50\% targets do not furnish valid matched-risk evidence for all methods and are reserved for supplementary diagnostics.
-
-False qualification is
-\begin{equation}
-\mathrm{FQ}=\frac{\#\{\text{accepted conditions that actually fail}\}}
-{\#\{\text{accepted conditions}\}}.
-\end{equation}
-Every numerator is reported with its accepted-condition denominator. Confidence intervals resample the ten physical sequences with replacement, preserving all within-sequence cells and method pairing. Paired method differences are computed inside each bootstrap draw; significance is not inferred from separate marginal intervals.
-
-\section{Qualification, Held-State Discrepancy, and Remediability}
-\subsection{Cross-Sequence Qualification Surfaces}
-Figure~\ref{fig:timingregions} shows the fraction of ten held-out sequences that qualify at each cell. Local 1-s service qualification is broad at 5--10~Hz but collapses at 1~Hz; the global service remains difficult even under 10-Hz delivery because delivery cannot remove accumulated model mismatch. All evaluated primary cells meet the observability support criterion, so no unresolved cell is hidden in the figure.
-
-\begin{figure*}[t]
-\centering
-\safegraphic[0.88\textwidth]{figures/cross_sequence_qualification_surfaces.pdf}
-\caption{Cross-sequence qualification outcomes. Each cell is the fraction of ten held-out physical sequences meeting coverage, physical-discrepancy, freshness, and joint-satisfaction requirements after three seeds are aggregated within sequence. The 25-ms column is omitted because its represented-state histories alias with 50 ms on the saved 10-Hz clock; no continuous-time delay boundary is inferred. These are descriptive outcomes, not predictor outputs.}
-\label{fig:timingregions}
-\end{figure*}
-
-Under ideal delivery, mean joint satisfaction across sequences is 0.985, 0.949, 0.960, and 0.503 for local 1-s, local 5-s, local 10-s, and global services. At 2~Hz/200~ms it is 0.712, 0.657, 0.730, and 0.445. Corrected age comparisons show 1.000 mean freshness satisfaction for all four services at this degraded point; the remaining degradation is physical disagreement. The global service exposes a persistent-model component that freshness alone cannot remove.
-
-\subsection{Held-Out Approximately Matched-Acceptance Comparison}
-Table~\ref{tab:matched} gives pooled numerators and denominators; intervals resample physical sequences. At the nominal 30\% target, the cross-sequence qualification surface accepts 235/800 cells and falsely qualifies 5/235 (2.1\%). The service-identity-only baseline accepts 200/800 and falsely qualifies 75/200 (37.5\%). The paired pooled difference, surface minus identity, is $-35.4$ percentage points (95\% sequence-bootstrap interval $-44.4$ to $-25.1$). Achieved acceptance differs by 4.375 points, so this is approximately rather than exactly matched. Across services, qualification frequency of the specific rate--delay cell transfers substantially better to a held-out physical sequence than service identity alone.
+All four services use the same position-and-heading stream from Twin V2,
+but ask different questions of it. The local services assess motion over
+1, 5, or 10 seconds, while global pose assesses current position and
+heading. Keeping the twin and its inputs fixed makes this a controlled
+comparison of service requirements. Table~\ref{tab:exp_services} lists
+each service's horizon, physical tolerances, and maximum state age. All
+contracts require physical, freshness, and joint satisfaction of at least
+$\eta_s=0.80$, with an observable fraction of at least $\gamma_s=0.95$.
 
 \begin{table}[t]
-\caption{Pooled held-out comparison at nested-LOSO operating points targeting 30\% acceptance. All methods have 800 candidate cells; CI is a 95\% physical-sequence bootstrap interval. Achieved acceptance is not identical.}
-\label{tab:matched}
-\centering\scriptsize
-\setlength{\tabcolsep}{2.2pt}
-\begin{tabular}{@{}p{0.29\columnwidth}rrp{0.28\columnwidth}@{}}
+\centering
+\caption{Service contract parameters used in the primary i2Nav evaluation. All contracts require $\eta_s=0.80$ satisfaction and $\gamma_s=0.95$ observability.}
+\label{tab:exp_services}
+\small
+\begin{tabular}{lrrrr}
 \toprule
-Method & Accept. & False/accept. & FQ (95\% CI) \\
+Service & Horizon & Position & Heading & Max. age\\
+ & (s) & (m) & (deg) & (s)\\
 \midrule
-Cross-sequence surface & 235 & 5/235 & 2.1\% [0.0, 5.6] \\
-Service identity only & 200 & 75/200 & 37.5\% [26.0, 49.5] \\
-AoI-only & 250 & 60/250 & 24.0\% [11.6, 36.4] \\
-Kinematic staleness & 242 & 97/242 & 40.1\% [22.2, 57.7] \\
-Motion-conditioned logistic & 235 & 56/235 & 23.8\% [0.0, 45.7] \\
+Local 1-s motion  & 1 & 0.10 & 2  & 0.6\\
+Local 5-s motion  & 5 & 0.20 & 5  & 1.0\\
+Local 10-s motion & 10 & 0.50 & 10 & 1.5\\
+Global pose       & current & 1.00 & 5 & 1.0\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\subsection{Receiver Evaluation and Remediability}
+
+The primary replay crosses source-state selection rates of 1, 2, 5, and
+10~Hz with added delays of 0, 25, 50, 100, and 200~ms. Rate reduction
+selects existing states from the saved 10-Hz stream; it does not interpolate
+or create states. At each 10-Hz evaluation time, the receiver holds the
+arrived state with the newest source timestamp. Its age is the difference
+between the evaluation time and that source timestamp. Re-reading a cached
+state does not reset its age. Arrival and age comparisons use integer
+nanoseconds. Since the source and evaluation clocks run at 10~Hz and
+arrivals at an evaluation instant are included, 25-, 50-, and 100-ms
+delays produce identical receiver-held histories in this replay.
+
+The original frozen bank computes derivative features with centered
+gradients, which can require the next 10-Hz sample. Buffering that sample
+adds one sample period to feature availability. The primary replay treats
+each precomputed state as available at its source timestamp. A separate
+timing sensitivity adds the corresponding 100~ms of availability delay
+to the saved stream. A separately retrained backward-difference bank
+uses only current and past samples. These analyses distinguish buffering
+the same estimates from changing the estimator and its source trajectories.
+
+The first 30~s provide sensor-only motion-context features for the
+context-aware comparator and are excluded from scored outcomes. Local
+services additionally require enough subsequent history to cover their
+horizon. A sample is observable only if its required reference, receiver
+state, synchronization, and history are available. Otherwise, it is
+unobservable, not a pass or failure. Among observable samples, the evaluator
+calculates physical, freshness, and joint satisfaction. A sequence--service
+case qualifies only if all three satisfaction fractions are at least 0.80
+and the observable fraction is at least 0.95.
+
+The unit of generalization is the physical sequence. Three model seeds are
+aggregated within each sequence before qualification fitting and statistical
+summaries; seeds, timestamps, and delivery cells are not counted as
+additional physical recordings. The doubly nested bank has ten outer folds.
+For each outer test sequence, each of the other nine qualification
+trajectories is generated by a pipeline excluding both its target sequence
+and the outer test sequence from training, normalization, validation, and
+checkpoint selection. The audited bank contains 30 outer-test trajectories
+and 270 qualification-training trajectories across the ten folds.
+
+The remediability ledger compares three fixed delivery points:
+degraded (2~Hz/200~ms), practical (5~Hz/50~ms), and ideal-available
+(10~Hz/0~ms). These rates provide representative low-to-high update settings, from sparse reporting at 1~Hz to the source stream's native 10~Hz. The source trajectory and service contract are unchanged
+across the comparison; only the receiver's arrival history changes. A case
+is \emph{delivery-remediable} if it fails under degraded delivery and
+qualifies under ideal-available delivery. It is \emph{persistent under the
+tested comparison} if it fails under both. It is \emph{already qualified}
+if it passes under degraded delivery. The practical point tests whether
+intermediate delivery restores a remediable case. Ideal-available delivery
+forwards the full recorded 10-Hz stream without added delay or loss; the
+source estimates retain their measured error.
+
+To test which checks affect qualification, we compare four decisions on
+the same cases. Source accuracy applies the physical limits to the
+full-rate, no-added-delay stream. Receiver accuracy applies those limits
+to the state held after the tested delivery. Separate checks require
+physical and freshness satisfaction to meet 0.80 individually. The
+complete contract requires their joint satisfaction to meet 0.80.
+All four require adequate receiver observability, and the source
+comparison also requires adequate source coverage.
+
+\subsection{Held-Out Qualification Protocol and Comparators}
+\label{subsec:heldout_protocol}
+
+This analysis tests whether qualification results from earlier recordings can help an operator choose service--delivery settings to consider for a
+new recording. A setting is one service paired with one update rate and delay. The service--delivery surface scores each setting by the fraction of development recordings that qualified under its contract.
+
+We use ten physical sequences in a doubly nested leave-one-sequence-out
+evaluation. In each outer fold, one sequence is held out for testing and
+the other nine are used for development. The
+recordings share the same robot, sensors, and state-estimation
+pipeline, while covering several environments and showing
+different error patterns. This gives the qualification rule a
+common basis for learning from nine recordings, while leaving
+meaningful variation for testing on the tenth. LOSO therefore
+measures transfer to an unseen recording under the same study
+setup. Each sequence has 80
+service--delivery cells: four services crossed with 20 rate--delay
+settings. Across the ten folds, this produces 800 held-out cells.
+Because cells from the same sequence are related, the physical sequence,
+not each individual cell, is the unit used for uncertainty estimates.
+
+Table~\ref{tab:exp_comparators} compares the surface with six alternatives. Each uses a different
+amount or form of information to rank service--delivery settings. For
+the label-based methods, qualification labels come from the service
+contracts defined earlier. The AoI-only method ranks settings using age
+rather than those labels.
+
+\begin{table}[t]
 \centering
-\safegraphic{figures/heldout_qualification_comparison.pdf}
-\caption{Held-out false-qualification rates at nested-LOSO operating points targeting 30\% acceptance. Bars are 95\% physical-sequence bootstrap intervals; labels show false/accepted conditions. These are pooled, approximately matched comparisons, not per-service matched wins.}
-\label{fig:matchedrisk}
+\caption{Scores used to rank service--delivery settings.}
+\label{tab:exp_comparators}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.28\columnwidth}>{\raggedright\arraybackslash}p{0.66\columnwidth}@{}}
+\toprule
+Method & Score for a service--delivery cell\\
+\midrule
+Service--delivery surface &
+Fraction of development sequences qualifying for that service and rate--delay cell.\\
+Service identity &
+Fraction qualifying for that service, averaged across delivery settings.\\
+Common delivery score &
+Fraction qualifying at that rate--delay setting, averaged across services.\\
+AoI-only &
+Service age limit minus the cell's maximum receiver-state age.\\
+Motion logistic &
+Logistic-regression score using rate, delay, service contract limits, and six sensor-prefix motion features. Numeric inputs are standardized, service is one-hot encoded, and the model uses \(C=1\), balanced class weights, and at most 2000 iterations.\\
+Service-specific logistic &
+A separate logistic model for each service, using $\log_2(r)$, $d/100$, their product, and their squared terms, where $r$ is rate in Hz and $d$ is delay in ms. Inputs are standardized within each fit; \(C=1\), balanced class weights, and at most 2000 iterations are used.\\
+Service-specific tree &
+A separate rate--delay decision tree for each service, with maximum depth three and minimum leaf size equal to twice the number of fitting sequences. The score is the fraction of fitting rows in the leaf that qualified.\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The surface and the two pooled scores are calculated directly from
+development outcomes. The surface keeps both service and delivery
+setting fixed. Service identity keeps the service fixed but ignores the
+delivery setting. The common delivery score does the reverse: it keeps
+the delivery setting fixed but averages across services. A higher score
+means that a larger fraction of the relevant development cases
+qualified.
+
+AoI-only uses no physical-error labels to rank settings. It subtracts
+the maximum receiver-state age from the service's allowed age; a larger
+remaining margin ranks higher. Settings with the same margin receive
+the same score, even if their physical accuracy differs.
+
+The learned methods use one training row per recording--service--delivery
+cell. Motion logistic fits one model across services, using service,
+delivery, contract limits, and six sensor features. The service-specific
+logistic and tree instead fit separate rate--delay relationships for
+each service. For the logistic model, rate and delay are expanded into
+the terms listed in Table~\ref{tab:exp_comparators}. The tree divides
+the rate--delay settings into regions and scores each region by its
+training pass fraction. If a fitting set contains only one qualification
+label, that label is used as the score. Standardization and model fitting
+are repeated using only the training sequences in each fit.
+
+The six motion features use only the first 30~s of sensor data: mean and
+95th-percentile absolute forward speed, mean and 95th-percentile
+absolute IMU yaw rate, 95th-percentile absolute forward acceleration,
+and the fraction of samples with absolute IMU yaw rate above
+0.1~rad/s. No physical-reference error is used as a predictor.
+
+For each outer test sequence, we choose a cutoff using only the other
+nine sequences. We first take turns holding out each development
+sequence. Its score is computed using a rule fitted to the other eight,
+so no sequence is used to score itself. We combine these nine
+cross-fitted scores and choose the cutoff whose acceptance is closest to
+the requested target. Equal scores are kept together rather than split;
+if two cutoffs are equally close, we choose the higher one. We then fit
+the method using all nine development sequences and apply the selected
+cutoff unchanged to the outer test sequence.
+
+For example, when \texttt{building00} is the test sequence, each of the
+other nine recordings is scored using a rule fitted to the remaining
+eight. Those nine scores determine the cutoff. The rule is then fitted
+using all nine development recordings and applied to
+\texttt{building00}. The test sequence does not affect the cutoff or
+fitting. Its accepted fraction can differ from the requested target
+because its scores may differ from the development scores and tied
+scores cannot be split.
+
+At the 25\% requested-acceptance point, the surface, service identity,
+and common delivery score each accept 200 of the 800 held-out cells.
+Motion logistic accepts 199, service-specific logistic 203, and the
+service-specific tree 200. AoI-only accepts 160 because its tied age
+scores make 20\% the closest achievable held-out acceptance. These are
+held-out counts: the target guides cutoff selection on development data
+but does not prescribe how many test cells must be accepted. The
+per-service counts use the same pooled cutoff; each service does not
+receive its own separately selected cutoff.
+
+For each method, false-qualification risk is the number of accepted
+cells that fail the contract divided by the total number of accepted
+cells. We report risk with the actual accepted count and coverage. If
+no cells are accepted, risk is undefined. The held-out labels are used
+only to evaluate the accepted cells, not to choose the cutoff. The
+target range from 10\% to 50\% shows how risk changes as the screening
+rule accepts more or fewer settings.
+
+The resulting surface is an offline screening aid: it shows which
+tested service--delivery settings have support in prior recordings,
+so an operator can decide which settings to investigate or provision.
+\section{Results}
+\label{sec:results}
+
+We begin with the difference between local motion and global pose, then
+follow one recording through the receiver-side evaluation. We next
+examine qualification across the delivery grid and identify which
+failures improve when delivery changes. Component comparisons and
+measured packet arrivals test the roles of receiver reconstruction and
+delivery. Finally, we assess qualification on unseen recordings, vary
+the service requirements and feature timing, and apply the evaluation
+to UGV01 and MAGNET.
+
+\subsection{Local and Global Fidelity Can Give Different Assessments}
+\label{subsec:local_global_result}
+
+Before considering network delivery, we examine the source trajectories themselves.
+Figure~\ref{fig:local_global} compares two ways of describing their error. Each
+point represents one of ten physical sequences, with the three model seeds averaged
+within that sequence. The horizontal axis is 10-s translational relative-pose RMSE
+($RPE_{10}$), which describes error in motion over a finite interval. The vertical
+axis is the 95th-percentile global position discrepancy ($D_p$ p95), which describes
+how far the reported position is from the physical reference.
+
+The two measures rank the recordings differently. For example,
+parking02 has a low $RPE_{10}$ of 0.097~m but a $D_p$ p95 of 22.345~m. Parking00
+has a higher $RPE_{10}$ of 0.453~m but a lower $D_p$ p95 of 3.086~m. In other
+words, a trajectory can represent recent motion well even when its
+reported global position is far from the reference. A single trajectory
+error measure would miss this difference, which is why the service
+contracts test local motion and global pose separately.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=.90\columnwidth]
+    {figures/i2nav_local_global_fidelity.png}
+    \caption{Source-trajectory fidelity across ten frozen V2 i2Nav
+    sequences, with three seeds averaged within each sequence. Each
+    point shows 10-s translational relative-pose RMSE ($RPE_{10}$)
+    versus global position-discrepancy p95 ($D_p$ p95). Lower is
+    better on both axes. Point colors identify sequences, and dashed
+    lines mark the sequence medians.}
+    \label{fig:local_global}
+\end{figure}
+\subsection{Worked Example: Applying the Framework to One Recording}
+\label{subsec:worked_result}
+
+The held-out \texttt{building00} recording shows how the framework
+turns received states into service decisions. We keep its recorded
+twin trajectory fixed and change the delivery condition. The receiver
+therefore holds different states from the same source stream.
+
+The example applies two service contracts to the same recording.
+The local-1-s service evaluates whether the twin reproduces the
+robot's motion over the preceding one second, using position and
+heading tolerances of 0.10~m and $2^\circ$. The global-pose service
+evaluates the robot's current position and heading, with tolerances
+of 1.0~m and $5^\circ$. Their maximum permitted state ages are
+0.6~s and 1.0~s, respectively. For both services, at least 80\% of
+observable samples must meet the physical, freshness, and joint
+requirements, and at least 95\% of evaluation samples must be
+observable.
+
+At each evaluation time, the receiver holds the newest state that has
+arrived. The framework compares that state with the physical reference
+and checks its age against the service limit. Joint satisfaction is the
+fraction of observable samples that pass both checks. Coverage is the
+fraction of evaluation samples with enough evidence to make those checks.
+
+Figure~\ref{fig:worked_result} compares degraded delivery
+(2~Hz/200~ms), practical delivery (5~Hz/50~ms), and
+ideal-available delivery (10~Hz/0~ms). All samples are observable
+(coverage is 1.000), and freshness satisfaction is 1.000 for both
+services under all three conditions. Freshness is evaluated at 10-Hz sample instants, with packets arriving at an evaluation instant included. Under 2-Hz/200-ms delivery, the maximum saved age at those instants is 0.6 s, exactly the Local 1-s limit, which passes under the inclusive age rule. The continuous age between evaluation instants can approach 0.7 s, but is not part of the reported satisfaction calculation. The 30/6/4 ledger uses this 2-Hz condition; 1-Hz settings elsewhere in the delivery grid are separate.
+Consequently, in this example,
+joint satisfaction equals physical satisfaction. The distinction
+between the services comes from the physical discrepancy of the
+receiver-held states.
+
+For local-1-s motion, joint satisfaction is 0.675 under degraded
+delivery, 0.874 under practical delivery, and 0.958 under
+ideal-available delivery. The required value is 0.80, so this service
+fails under degraded delivery and passes under both practical and
+ideal-available delivery. This is a delivery-remediable case, and
+the practical condition restores qualification.
+
+Global pose gives a different result on the same recording. Its joint
+satisfaction is 0.165 under degraded delivery, 0.049 under practical
+delivery, and 0.008 under ideal-available delivery. None reaches
+0.80, so the global-pose service remains unqualified under all three
+tested conditions, including ideal-available delivery. The local
+service checks motion over one second, while the global service checks
+position in the overall coordinate frame. More frequent states can
+improve the motion comparison without correcting the source
+trajectory's global position. On this recording, the states selected
+under practical and ideal-available delivery yield lower global-pose
+satisfaction than those selected under degraded delivery.
+
+The reported values average three model-seed results for this one
+physical recording.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]
+    {figures/i2nav_building00_worked_example.pdf}
+    \caption{Framework walkthrough on the held-out
+    \texttt{building00} recording. Bars show joint satisfaction for
+    local-1-s motion and global pose under degraded, practical, and
+    ideal-available delivery. The dashed line is the required
+    satisfaction of 0.80. All six cases have freshness satisfaction
+    and observable coverage of 1.000, so the joint score here is
+    determined by physical-discrepancy satisfaction. Values average
+    three model seeds from one physical sequence.}
+    \label{fig:worked_result}
 \end{figure}
 
-Within a service, identity-only assigns all 20 delivery cells the same score; at this target it accepts all local-10-s cells and no others. A matched-acceptance within-service identity comparison is therefore unavailable. Most other methods likewise accept different numbers within each service. Only the local-5-s and local-10-s comparisons with logistic regression meet the prespecified five-percentage-point within-service acceptance tolerance, and both paired intervals include zero. The pooled gain is not evidence of superiority for every service. AoI-only is a limited freshness reference; logistic regression is an unfavorable sensitivity result. We make no superiority claim against Li \emph{et al.} or all fidelity-aware synchronization approaches.
+\subsection{Service Qualification and Delivery Remediability}
+\label{subsec:service_delivery_results}
+\label{subsec:ledger_results}
 
-\subsection{Delivery-Remediability and Complete Accounting}
-For every one of the $10\times4=40$ sequence--service cases, we compare degraded, practical, and ideal delivery with the same frozen twin and physical trajectory. The partition is exhaustive: 30 cases fail at 2~Hz/200~ms but qualify under 10-Hz zero-added-delay delivery; six remain unqualified under ideal delivery; and four already qualify while degraded. No nonideal grid condition qualifies when ideal delivery fails.
+We next ask whether the service differences seen in \texttt{building00}
+also appear across the ten recordings and the full rate--delay grid.
+Figure~\ref{fig:qualification_grid} shows the fraction of sequences
+that qualify for each service and delivery setting. Satisfaction and
+observability measurements are averaged across the three model seeds
+within each sequence before qualification is determined. Each cell
+therefore counts physical sequences.
 
-All 30 remediable cases fail the physical-discrepancy requirement alone; none fails freshness at this operating point. The practical 5-Hz/50-ms sampled configuration restores qualification in 27/30. Its represented-state history differs from 5-Hz/0-ms in all 30 saved runs, but 25 and 50 ms alias with each other; we do not attribute recovery to a separately resolved 50-ms delay effect. More frequent sampled delivery reduced the paired held-state discrepancy and restored the specified qualification. It did not recalibrate the twin or repair the robot. The held-minus-ideal discrepancy is descriptive, not an exact additive causal decomposition of model and network error.
+Each heatmap cell answers how often a particular service qualifies at
+one rate and delay. The local services qualify over different parts of
+the grid, while global pose qualifies on fewer recordings across many
+settings. A delivery configuration therefore has no single
+service-independent qualification outcome.
 
 \begin{figure*}[t]
-\centering
-\safegraphic[0.88\textwidth]{figures/held_state_mechanism_and_remediability.pdf}
-\caption{Held-state discrepancy and complete case accounting. Left: mean position discrepancy under 10-Hz/0-ms ideal available delivery and under 2-Hz/200-ms held delivery; the green segment is the descriptive held-minus-ideal increment, not an exact causal decomposition. Right: all 40 sequence--service cases nested within ten physical sequences. Failure components and practical recovery are detailed in the supplement.}
-\label{fig:recovery}
+    \centering
+    \includegraphics[width=.86\textwidth]
+    {figures/i2nav_service_delivery_qualification_grid.pdf}
+    \caption{Fraction of ten physical sequences qualifying for each
+    service and delivery condition. The horizontal axis shows added
+    delay, and the vertical axis shows source-state selection rate.
+    Color and cell labels indicate the qualifying fraction.}
+    \label{fig:qualification_grid}
 \end{figure*}
 
-The 40 cases are repeated service evaluations on ten physical sequences, not 40 independent experiments. There are 18 violations among 640 adjacent delay comparisons and 44 among 600 adjacent rate comparisons, all in the global service. They are retained rather than projected away; no monotone or universal timing boundary is asserted.
+The heatmaps cover the whole grid. The \emph{remediability ledger}
+summarizes what happens when delivery improves for each
+recording--service pair. We compare
+degraded delivery at 2~Hz/200~ms with ideal-available delivery at
+10~Hz/0~ms, keeping the source trajectory and service requirements
+fixed. Across the 40 pairs, 30 fail under degraded delivery but qualify
+under ideal-available delivery and are therefore
+\emph{delivery-remediable}. Six fail under both conditions and are
+\emph{persistent under the tested comparison}. The remaining four
+already qualify under degraded delivery. All 40 pairs meet the
+observability requirement.
 
-\subsection{Frozen-Twin Configuration Sensitivity}
-The previously saved deterministic fixed-physics trajectory is a paired configuration check on the same ten sequences, not another sample of physical robots. Fixed physics has 23 delivery-remediable, 16 persistent-under-ideal, and one already-qualified case; frozen V2 has 30, six, and four, respectively. All ten fixed-physics global cases remain persistent under ideal delivery, versus six for V2. Improved delivery restores some qualification for both. Thus the delivery-induced-versus-persistent distinction is not unique to V2, although its counts depend on the frozen twin. V2 has lower mean ideal-delivery position discrepancy across these cases, but its mean held-minus-ideal increment is larger; ideal fidelity does not by itself specify sensitivity to held delivery. These configurations are never pooled as independent experiments.
+At the intermediate practical condition of 5~Hz/50~ms, 27 of the 30
+remediable cases already qualify. The same source trajectories produced
+both outcomes, so the change follows from which source states arrive
+and when. The six persistent cases still fail when the full recorded
+stream is delivered without added delay.
+
+Under the original age limits, freshness satisfaction is 1.000 at
+the degraded operating point. The 30 remediable cases therefore fail
+because their receiver-held states exceed the physical-discrepancy
+limits, despite satisfying the age requirement. This illustrates why
+delivery affects more than freshness: holding an older state can
+change the evaluated position, heading, or relative motion enough to
+alter service qualification.
+
+
+
+
+\subsection{Contribution of the Evaluation Components}
+\label{subsec:component_comparison}
+
+Figure~\ref{fig:component_comparison} shows how qualification decisions
+change when individual checks are removed. In the primary grid,
+source accuracy alone passes
+680 of 800 cases, while receiver-held physical accuracy passes 390.
+The 290 cases that change status show why judging the source trajectory
+alone can approve settings that fail after delivery.
+
+Under the original age limits, the receiver-physical, separate-check, and
+complete-contract decisions coincide. To expose the contribution of freshness,
+the right panel uses the saved ordinary-LOSO study with a common 0.2-s age
+limit under 5-Hz delivery, 50-ms delay, 20-ms jitter standard deviation,
+and 1\% configured packet loss. Of its 40 sequence--service cases, source
+accuracy passes 34 and receiver physical accuracy passes 31. Requiring
+freshness as well reduces the count to 12. Requiring joint satisfaction
+reduces it to eight.
+
+The final four exclusions are local-1-s and local-5-s motion on
+\texttt{street01} and \texttt{street02}. Their physical and freshness
+satisfaction fractions each exceed 0.80, but their joint fractions range
+from 0.754 to 0.779. Each requirement is met often enough individually,
+yet they are not met together often enough to qualify. The comparison
+therefore identifies the decisions contributed by receiver reconstruction,
+freshness, and their temporal overlap.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=.63\textwidth]
+    {figures/contract_component_comparison.pdf}
+    \caption{Service decisions under four evaluation rules. Left: 800
+    nested outer-test cases in the primary rate--delay grid. Right: 40
+    ordinary-LOSO freshness-study cases under 5-Hz delivery with
+    jitter, loss, and a 0.2-s maximum age. Green denotes cases that pass
+    the complete contract. Orange denotes additional passes when checks
+    are omitted. Counts above bars give the total passing each rule.}
+    \label{fig:component_comparison}
+\end{figure*}
+
+
+\subsection{Measured Network-Emulation Replay}
+\label{subsec:netem_results}
+
+The primary grid uses prescribed rates and delays. We next test the
+ledger with packet-arrival histories captured over a Linux virtual
+Ethernet link shaped with \texttt{tc netem}. The UDP traces contain the
+realized timing and losses. We apply those arrivals by packet index to
+the frozen outer-test trajectories. Table~\ref{tab:netem_result}
+reports what the receiver observed under each configured condition.
+Its configured rate, delay, jitter standard deviation, and loss are
+listed in Hz, ms, ms, and percent. ``Rx'' denotes the measured receive
+rate and loss.
+
+Under this replay, the ledger contains 32 delivery-remediable cases, six persistent
+cases, and two already-qualified cases. Practical delivery restores 27 of the 32
+remediable cases. Compared with the sampled-delivery ledger, two local-10-s cases
+change from already qualified to remediable. The measured ideal path has nonzero
+delay, so these changes reflect the full arrival history, including delay and loss.
+
+\begin{table}[t]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2.5pt}
+    \caption{Configured and measured Linux \texttt{netem} conditions.
+    Config. lists rate/delay/jitter/configured loss. Delay p95 is the
+    mean of three capture-level p95 values, not a pooled packet
+    percentile.}
+    \label{tab:netem_result}
+    \begin{tabular}{@{}lcccc@{}}
+        \toprule
+        Condition &
+        \shortstack{Config.\\R/D/J/L} &
+        \shortstack{Rx rate\\(Hz)} &
+        \shortstack{Rx loss\\(\%)} &
+        \shortstack{Delay\\p95 (ms)} \\
+        \midrule
+        Ideal     & 10/0/0/0        & 10.000 & 0.000  & 1.4 \\
+        Practical & 5/50/20/1       & 4.946  & 1.074  & 97.9 \\
+        Degraded  & 2/200/50/5      & 1.896  & 5.185  & 307.4 \\
+        Stress    & 1/300/100/10     & 0.896  & 10.370 & 475.0 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The partition remains close to the sampled-delivery result despite the
+variation in measured arrivals. The changed cases show why configured
+network parameters alone cannot describe the receiver's arrival history.
+
+
+\subsection{Held-Out Qualification Risk}
+\label{subsec:heldout_results}
+
+The ledger describes outcomes on recordings whose service decisions are
+known. We next ask whether results from earlier recordings can guide the
+choice of service and delivery settings for a new recording. In the
+doubly nested leave-one-sequence-out analysis, each outer test recording
+is excluded from both qualification fitting and cutoff selection.
+
+At the 25\% requested acceptance, the historical service--delivery
+surface accepts 200 of 800 held-out cells. Four accepted cells fail
+their service contract, giving an observed false-qualification risk of
+2.0\%. The 95\% bootstrap interval is 0.0--4.9\% when complete physical
+sequences, including their service and delivery cells, are resampled.
+Table~\ref{tab:heldout_risk} applies this same held-out procedure to
+two separately trained trajectory banks. Centered derivatives can use
+the next sensor sample, while backward differences use only current
+and past samples.
+
+\begin{table*}[t]
+    \centering
+    \small
+    \caption{Held-out qualification at a 25\% requested acceptance on
+    the original centered-feature and backward-difference trajectory banks.
+    Each count is false qualifications divided by accepted cases out of
+    800. Risk intervals are 95\% physical-sequence bootstrap intervals.
+    Achieved acceptance varies with the development-selected cutoffs.}
+    \label{tab:heldout_risk}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{lrllrl}
+        \toprule
+        & \multicolumn{2}{c}{Centered features} &&
+        \multicolumn{2}{c}{Backward-difference features} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){5-6}
+        Method & False / accepted & Risk (\%) [95\% interval] &&
+        False / accepted & Risk (\%) [95\% interval] \\
+        \midrule
+        Service--delivery surface & 4/200 & 2.0 [0.0, 4.9] &&
+            19/168 & 11.3 [0.0, 24.2] \\
+        Service-specific logistic & 3/203 & 1.5 [0.0, 3.4] &&
+            18/204 & 8.8 [0.0, 21.3] \\
+        Service-specific tree & 3/200 & 1.5 [0.0, 4.5] &&
+            19/190 & 10.0 [0.0, 23.5] \\
+        Service identity & 75/200 & 37.5 [26.0, 49.5] &&
+            92/200 & 46.0 [33.5, 61.5] \\
+        AoI only & 28/160 & 17.5 [5.6, 31.3] &&
+            37/160 & 23.1 [5.6, 45.6] \\
+        Common delivery score & 30/200 & 15.0 [7.5, 22.5] &&
+            27/144 & 18.8 [3.3, 39.6] \\
+        Motion logistic & 55/199 & 27.6 [0.0, 48.9] &&
+            49/202 & 24.3 [0.0, 42.4] \\
+        \bottomrule
+    \end{tabular}
+\end{table*}
+
+The two service-specific predictors test whether fitting a relationship
+across rate and delay improves on the surface's historical pass fraction.
+Logistic regression makes three false qualifications among 203 accepted
+cases, and the tree makes three among 200. Their results are close to
+the surface's four among 200. Service identity and common delivery
+score make more false qualifications because each pools over one part
+of the service--delivery pair. AoI-only ranks settings by state age and
+cannot identify physically inaccurate states.
+
+The shared finding is the value of retaining both service identity and
+delivery setting. The surface does this with a pass fraction for each
+cell, while the fitted alternatives learn relationships across cells.
+At this operating point, the surface's
+service-level results are 97/200 accepted local-1-s cells,
+50/200 local-5-s cells, 53/200 local-10-s cells, and no accepted global-pose cells.
+Global false-qualification risk is therefore not estimable at this operating point.
+The pooled cutoff selects the local-motion settings with stronger historical
+support across recordings. The global-pose outcomes remain visible in the
+service--delivery grid and remediability analysis.
+Figure~\ref{fig:risk_coverage_sweep} shows what happens as each method
+accepts more settings. The horizontal axis is the share of the 800
+held-out cells accepted, and the vertical axis is the share of accepted
+cells that fail their contract. A useful screen stays low on this plot
+as acceptance rises. The curves advance in steps because cells with
+equal scores enter together. Larger markers represent larger tied
+groups. This sweep describes the possible score cutoffs on the
+centered-feature bank.
 
 \begin{figure}[t]
-\centering
-\safegraphic{figures/frozen_configuration_remediability.pdf}
-\caption{Paired frozen-twin sensitivity on the same ten physical sequences. Counts partition 40 sequence--service cases per configuration. Fixed physics has ten persistent global cases; V2 has six. Configurations are not independent replicates.}
-\label{fig:configrobust}
+    \centering
+    \includegraphics[width=\columnwidth]
+    {figures/qualification_risk_sweep.pdf}
+    \caption{False-qualification risk versus the percentage of held-out
+    settings accepted for the centered-feature bank. Risk is false
+    qualifications divided by all accepted settings. Each point admits a
+    complete tied-score group. Marker size reflects the number of settings
+    in that group. The displayed range is 0--60\% acceptance. No risk is
+    plotted when no settings are accepted.}
+    \label{fig:risk_coverage_sweep}
 \end{figure}
 
-\section{Supporting Physical and Cross-Domain Evidence}
-\subsection{Local Versus Global Fidelity}
-The timing study is motivated by a measured local/global distinction. On i2Nav, parking02 has 11.350-m ATE but only 0.019-m RPE1, whereas parking00 has 2.107-m ATE and 0.132-m RPE1. Across the prespecified tolerance surfaces, parking00 is preferred at every global point while parking02 is preferred at every local point. Across all ten sequences, local/global rankings invert in 17/45, 17/45, and 15/45 pairwise comparisons for 1-, 5-, and 10-s services. These pairs share ten sequences and are not independent experiments; the result is an existence demonstration, not a prevalence estimate.
+Figure~\ref{fig:risk_coverage_operating} compares development-selected
+cutoffs at 25\% and 50\% requested acceptance. Each point shows the
+false-qualification risk on held-out recordings, and each horizontal
+bar is a 95\% physical-sequence bootstrap interval. The count at the
+right gives the actual number accepted out of 800. At the 50\% request,
+the historical surface accepts 349 centered-feature cells with 41 false
+qualifications and 358 backward-difference cells with 75 false
+qualifications. This broader screen accepts more settings than at 25\%,
+with higher risk on both trajectory banks.
 
-Condition analysis further shows that high wheel--IMU disagreement worsens RPE1 in 10/10 sequences and high turning worsens RPE5/RPE10 in 9/10. Conditioned benign envelopes change sharpness but do not consistently improve held-out coverage; they remain descriptive rather than a superior online predictor. The full local/global counterexample and condition detail are in the supplement.
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=.94\textwidth]
+    {figures/qualification_targets_25_50_compact.pdf}
+    \caption{Held-out false-qualification risk at two requested acceptance
+    levels. The left and right panels use development-selected cutoffs for
+    25\% and 50\% requests, respectively. Filled circles show the
+    centered-feature bank and open diamonds the backward-difference bank.
+    Horizontal bars are 95\% physical-sequence bootstrap intervals. Counts
+    on the right are accepted cases out of 800, which need not equal the
+    requested percentage. Table~\ref{tab:heldout_risk} gives the 25\%
+    false-qualification counts.}
+    \label{fig:risk_coverage_operating}
+\end{figure*}
 
-\subsection{UGV01 Asset-Specific Boundary}
-Three UGV01 runs use an elevation-corrected AprilTag/ChArUco reference in a $2.0\,\mathrm{m}\times1.5\,\mathrm{m}$ area. Asset-specific parameters fitted on one run reduce heading MAE from $35.6^\circ$ to $21.2^\circ$, but frozen transfer is unfavorable: heading MAE rises from $28.8^\circ$ to $76.3^\circ$ and from $35.3^\circ$ to $108.7^\circ$ on two holdouts. This is a physical boundary case, not an additional timing trial or a general UGV01 fidelity claim.
+At the 10-Hz evaluation rate, 25-, 50-, and 100-ms delays produce the
+same receiver histories. We refit all qualification methods after
+retaining only the practical 50-ms setting. At the 25\% request, surface
+risk changes from 2.0\% to 1.7\% with centered features and from 11.3\%
+to 11.2\% with past-only features. At the 50\% request, it changes from
+11.7\% to 12.9\% and from 20.9\% to 24.3\%, respectively. The 25\%
+result is stable, while the broader operating point is more sensitive to
+how the delivery grid is weighted.
 
-\subsection{Cross-Domain Scope and Live Limitation}
-The unchanged robot contract remains computable on five TerraSentia sequences, but frozen i2Nav V2 offers essentially no global gain over its physics baseline; this supports contract portability, not model portability. A quantity--horizon--tolerance specialization also yields target-aligned thermal forecast-fidelity evidence on MAGNET \cite{wilsdon2023magnet,inlmagnetdata}. MAGNET lacks verified forecast issuance and availability timestamps, so it supports no causal delivery, freshness, or remediability claim. Other cross-domain feasibility checks are in the supplement.
+We also repeated the complete doubly nested held-out analysis using
+backward-difference features computed only from current and past samples. At
+the same 25\% target, the causal-feature surface accepted 168 of 800 held-out
+cases (21.0\%) and made 19 false qualifications, for an observed risk of
+11.3\% (95\% physical-sequence bootstrap interval: 0.0--24.2\%).
+Backward-difference retraining changes the source trajectories, their contract
+labels, and the cases selected by the frozen cutoff. The two banks answer
+the same service-qualification question on different source trajectories,
+making the risk increase a sensitivity result for the full
+estimation-and-screening procedure. The service-specific logistic and tree
+produce 18/204 and 19/190, respectively.
+The two feature constructions therefore give the same overall ordering of
+service-specific prediction ahead of the pooled and age-only comparators.
+Paired sequence-bootstrap intervals for the surface versus either close
+predictor include zero. The historical fraction provides a simple empirical
+screen, while the fitted alternatives show how the same contract labels can
+support more flexible service-specific prediction.
+The causal-feature ledger was 29 delivery-remediable,
+seven persistent, and four already qualified. Practical delivery restored 27
+of the 29 remediable cases. Thus, 37 of the 40 sequence--service cases
+retained the same ledger category across feature constructions, while the
+held-out qualification risk differed.
 
-Twenty UGV01 live runs exercise requested-rate policies, but a serial HTTP bottleneck collapses delivered rates to about 1.5~Hz; low-speed GPS course also limits heading observability. They demonstrate implementation limits, not policy-dependent resource savings. The geofence null result and its sparse-boundary limitation are reported in the supplement.
 
-\section{Discussion and Limitations}
-\subsection{What the Evidence Establishes}
-The cross-sequence qualification surface describes which service-specific delivery cells transfer from nine physical sequences to a tenth. The paired replay then distinguishes a failure that fresher sampled delivery can resolve from one that persists with the available source stream. This differs from optimizing a modeled freshness objective: it evaluates specified physical--virtual service outcomes on held-out sequences. It does not constitute a new learned optimizer or a general scheduler.
 
-The result does not establish that 5~Hz/50~ms is universally optimal. It is one predeclared sampled configuration on this grid. Nor does ``remediable'' mean that the model became more physically correct; it means a newer delivered virtual state restored the specified qualification in paired replay. The pooled identity-only advantage is not a matched per-service result: tied service scores prevent that inference.
+\subsection{Sensitivity to Contract Requirements and Freshness}
+\label{subsec:sensitivity_results}
 
-\subsection{Limitations}
-First, requirements are illustrative rather than safety-certified. Second, only ten physical sequences underpin 40 sequence--service cases and 800 nested replay cells; seeds, phases, services, cells, and timestamps are not independent physical experiments. Third, replay changes delivery of saved virtual states rather than packet-level networking or source measurements. Fourth, ideal delivery means the available 10-Hz source stream with zero added delay, not zero model error. Fifth, the saved 10-Hz clock aliases 25- and 50-ms delay histories, and zero-order hold is the primary receiver; causal extrapolation and sampling phase change numerical qualification. The protocol is therefore not implementation-independent. Sixth, global cells show small nonmonotonicities and no monotone boundary is imposed. Seventh, no reference-quality flags exist in the frozen i2Nav trajectory files. Finally, UGV01 calibration does not transfer across two holdouts, the live transport does not realize distinct requested rates, and no communication/energy saving or downstream safety/control improvement has been measured.
+The remediability ledger describes outcomes under a particular service
+contract i.e. its categories can change when the requirements change.
+Figure~\ref{fig:threshold_sensitivity_result} varies one requirement at
+a time across the same 40 recording--service cases. The left panel
+scales each service's position and heading tolerances. The middle panel
+changes the fraction of observable samples that must pass both the
+physical-error and freshness checks. The right panel scales each
+service's maximum permitted state age. All other requirements remain
+at their baseline values.
 
-\subsection{Reproducibility}
-The frozen V2 source is associated with commit \texttt{6540c01f90f3c1074de0d8dae9964a5276fbbc91}. The timing protocol, source hashes, 40-case ledger, held-out predictions, matched operating points, paired bootstrap outputs, and plotting code are machine readable. Reproduction does not retrain the twin. The principal commands are
-\begin{quote}\scriptsize\ttfamily
-python -m DigitalTwin.analysis.service\_timing\_budget\_study\\
-python -m DigitalTwin.analysis.service\_timing\_robustness\\
-python -m DigitalTwin.analysis.final\_timing\_paper\_figures
-\end{quote}
+At the baseline satisfaction requirement of 0.80, the ledger contains
+30 delivery-remediable, six persistent, and four already-qualified
+cases. At a requirement of 0.70, the counts are 17, five, and 18.
+At 0.90, they are 29, nine, and two. Thus, the ledger reports whether
+cases meet the declared service requirements.
 
-\section{Conclusion}
-This paper presents a causal, held-out qualification-and-remediability protocol for frozen IoT digital twins. Explicit service contracts retain discrepancy, horizon, freshness, and observability; the cross-sequence qualification surface estimates transfer for each sampled delivery cell; and paired replay distinguishes delivery-remediable from persistent discrepancy. At approximately matched pooled acceptance, the surface falsely qualifies 5/235 accepted conditions versus 75/200 for service identity alone, a paired difference of $-35.4$ percentage points (95\% interval $-44.4$ to $-25.1$). Thirty cases are remediable under ideal available delivery, six persist, and four already qualify while degraded; the distinction also appears under a frozen fixed-physics twin. This is evidence about qualification transfer and delivery remediability, not an optimal scheduler, safety certificate, or measured communication-saving policy.
+\begin{figure*}[t]
+    \centering
+    \subfloat[Physical-error tolerance\label{fig:threshold_tolerance}]{%
+        \includegraphics[width=0.30\textwidth]
+        {figures/physical_tolerance.png}}
+    \hfill
+    \subfloat[Required sample satisfaction\label{fig:threshold_satisfaction}]{%
+        \includegraphics[width=0.30\textwidth]
+        {figures/satisfaction_requirement.png}}
+    \hfill
+    \subfloat[Maximum state age\label{fig:threshold_age}]{%
+        \includegraphics[width=0.30\textwidth]
+        {figures/freshness_limit.png}}
+    \caption{Sensitivity of the 40 i2Nav recording--service cases to
+    contract requirements. Each panel varies one requirement from its
+    baseline: (a) the multiplier on each service's position and heading
+    tolerances, (b) the required fraction of observable samples that
+    must pass both checks, or (c) the multiplier on each service's
+    maximum permitted state age. Curves count cases already qualified
+    under degraded delivery, delivery-remediable under ideal-available
+    delivery, and persistent under the tested ideal-available delivery.
+    Dotted lines mark the baseline settings.}
+    \label{fig:threshold_sensitivity_result}
+\end{figure*}
 
-\balance
-\begin{thebibliography}{99}
+Under the primary contracts, the original age limits are met, so
+freshness rarely determines qualification. Figure~\ref{fig:freshness_components_result}
+tests whether the framework distinguishes freshness-related failures
+by applying a deliberately tight, common 0.2~s maximum-age limit to
+all four services. We set the age limit to 0.2~s to match the nominal update interval at 5~Hz, making this a direct test of whether one update period of age is acceptable under the evaluated delivery conditions. Each bar counts the same 40 recording--service
+cases under a different delivery condition, and all cases are
+observable.
 
-\bibitem{dtc}
-Digital Twin Consortium, ``Definition of a Digital Twin,'' accessed Aug. 17, 2026.
+With ideal 10-Hz delivery, 34 cases qualify and six fail only the
+physical-error requirement. With 5-Hz delivery, 50~ms added delay,
+20~ms jitter standard deviation, and 1\% packet loss, eight qualify,
+19 fail freshness alone, nine fail both the
+physical and freshness requirements, and four fail the joint
+requirement even though each individual satisfaction fraction meets
+0.80. With 2-Hz delivery, 200~ms added delay, 50~ms jitter standard
+deviation, and 5\% packet loss, two cases fail freshness
+alone and 38 fail both individual requirements.
+A 5-Hz periodic-outage variant yields five freshness-only and 35
+both-marginal failures.
 
-\bibitem{jones2020}
-D. Jones, C. Snider, A. Nassehi, J. Yon, and B. Hicks, ``Characterising the Digital Twin: A systematic literature review,'' \emph{CIRP Journal of Manufacturing Science and Technology}, vol. 29, pp. 36--52, 2020, doi: 10.1016/j.cirpj.2020.02.002.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]
+    {figures/i2nav_freshness_three_rates.pdf}
+    \caption{Failure components for 40 recording--service cases at a
+    common 0.2~s maximum age. The 10-, 5-, and 2-Hz conditions use the
+    delivery settings given in the text. Physical-only or freshness-only
+    means that marginal fails. Both-marginal means both fail. Joint-only
+    means both marginals pass separately but joint satisfaction fails.}
+    \label{fig:freshness_components_result}
+\end{figure}
 
-\bibitem{shao2023}
-G. Shao, J. Hightower, and W. Schindel, ``Credibility consideration for digital twins in manufacturing,'' \emph{Manufacturing Letters}, vol. 35, pp. 24--28, 2023, doi: 10.1016/j.mfglet.2022.11.009.
+Figure~\ref{fig:threshold_sensitivity_result} shows how the ledger
+changes when a service permits more error, requires a larger passing
+fraction, or changes its age limit. Figure~\ref{fig:freshness_components_result}
+then shows what fails under a tight age limit. The 5-Hz case
+contains freshness-only, combined, and joint-only failures. The
+framework distinguishes these outcomes even though the primary
+contracts mainly expose physical-discrepancy failures.
 
-\bibitem{nist8620}
-S. Frechette, G. Shao, and M. Pease, \emph{Digital Twins Workshops Summary Report}, NIST IR 8620, 2026, doi: 10.6028/NIST.IR.8620.
+\subsection{Feature-Timing Sensitivity}
+\label{subsec:feature_timing_results}
 
-\bibitem{maatouk2023}
-A. Maatouk, M. Assaad, and A. Ephremides, ``The Age of Incorrect Information: An Enabler of Semantics-Empowered Communication,'' \emph{IEEE Transactions on Wireless Communications}, vol. 22, no. 4, pp. 2621--2635, 2023, doi: 10.1109/TWC.2022.3213227.
+We test sensitivity to the time at which source features become available.
+Adding 100~ms of availability delay to the saved-state replay changes the
+original-bank ledger from 30/6/4 to 31/6/3. A separate ordinary
+ten-sequence LOSO retraining study using backward-difference features
+produces a 28/8/4 ledger, with 26 of 28 remediable cases restored by
+practical delivery. Mean ATE changes from 2.398 to 3.882~m, and mean
+1-s RPE changes from 0.061 to 0.150~m. The remediability categories
+remain present under causal feature construction, with changed counts
+and trajectory errors. This ordinary LOSO study is separate from the
+full doubly nested causal-feature evaluation reported in
+Section~\ref{subsec:heldout_results}.
 
-\bibitem{chiariotti2022}
-F. Chiariotti, J. Holm, A. E. Kal{\o}r, B. Soret, S. K. Jensen, T. B. Pedersen, and P. Popovski, ``Query Age of Information: Freshness in Pull-Based Communication,'' \emph{IEEE Transactions on Communications}, vol. 70, no. 3, pp. 1606--1622, 2022, doi: 10.1109/TCOMM.2022.3141786.
+\subsection{Additional Evaluations Beyond i2Nav}
+\label{subsec:beyond_i2nav}
 
-\bibitem{tanmatta2024}
-B. Tan and A. Matta, ``The digital twin synchronization problem: Framework, formulations, and analysis,'' \emph{IISE Transactions}, vol. 56, no. 6, pp. 652--665, 2024, doi: 10.1080/24725854.2023.2253869.
+We apply the framework to two additional datasets to examine its use
+beyond the primary i2Nav study. The UGV01 evaluation tests the
+position-only remediability ledger on another robot platform. The MAGNET
+evaluation applies the physical-discrepancy and horizon analysis to
+thermal forecasts.
 
-\bibitem{li2025sync}
-Y. Li, W. Liang, Z. Xu, W. Xu, and X. Jia, ``Budget-Constrained Digital Twin Synchronization and Its Application on Fidelity-Aware Queries in Edge Computing,'' \emph{IEEE Transactions on Mobile Computing}, vol. 24, no. 1, pp. 165--182, 2025, doi: 10.1109/TMC.2024.3455357.
+\noindent\textbf{UGV01 position-only ledger:} Using position-reference
+evidence, the three-recording ledger contains five already-qualified,
+three delivery-remediable, and four persistent cases. The calibration
+recording contributes two already-qualified and two remediable cases,
+with none persistent. The two frozen-parameter holdout recordings
+contribute three already-qualified, one remediable, and four persistent
+cases. The 2-Hz rate is the highest source rate shared by all three
+recordings; 1~Hz/200~ms provides a common lower-rate, delayed comparison.
+Figure~\ref{fig:ugv01_result} shows all twelve recording--service cases
+under degraded (1~Hz/200~ms) and ideal-available (2~Hz/0~ms)
+delivery. The paired points show which individual cases cross the 0.80
+joint-satisfaction requirement. Unlike an average across recordings,
+this view exposes the three remediable cases and the four that remain
+unqualified after delivery improves.
+The ledger can therefore be evaluated even when
+the available physical reference supplies position but not heading.
 
-\bibitem{wanigarathna2026}
-Y. R. Wanigarathna, S. Tarkoma, and R. Morabito, ``Adaptive Digital Twin synchronization under bandwidth constraints: A quantile forecasting and Kullback--Leibler divergence approach,'' \emph{Computer Networks}, Art. no. 112718, 2026, doi: 10.1016/j.comnet.2026.112718.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]
+    {figures/ugv01_paired_case_column.pdf}
+    \caption{Position-only UGV01 qualification for each of three recordings
+    and four services. Circles and diamonds show joint satisfaction under
+    degraded and ideal-available delivery of the same source recording.
+    The dashed line marks the 0.80 requirement. Cases that cross it are
+    delivery-remediable; those already above it qualify under degraded
+    delivery; those below it at both settings remain unqualified.}
+    \label{fig:ugv01_result}
+\end{figure}
 
-\bibitem{kober2023}
-C. Kober, M. Fette, and J. P. Wulfsberg, ``A Method for Calculating Optimum Digital Twin Fidelity,'' \emph{Procedia CIRP}, vol. 120, pp. 1155--1160, 2023, doi: 10.1016/j.procir.2023.09.141.
+\noindent\textbf{MAGNET thermal evaluation:} MAGNET is a heat-pipe
+experiment with paired physical measurements and digital-twin forecasts.
+We use the released MAGNET heat-pipe measurements and forecast data
+\cite{wilsdon2023magnet}. The analysis pairs ten forecasted
+thermowell-temperature channels with the corresponding measured
+temperatures by nearest timestamp. A 600-row forecast window is retained
+only when at least 95\% of its predictions are present for every channel
+and at least 99\% of its timestamps have a physical measurement within
+0.25~s. Of 111 candidate windows, 23 pass these checks and are selected
+greedily in time order without overlap.
 
-\bibitem{zhang2025}
-Y. Zhang, H. Sun, X. Zhang, and W. Liu, ``A fidelity evaluation method for digital twin model of aero-engine assembly characteristics,'' \emph{Journal of Manufacturing Systems}, vol. 78, pp. 444--456, 2025, doi: 10.1016/j.jmsy.2024.12.012.
+For each channel, normalized error is the absolute
+forecast--measurement difference divided by a robust scale computed from
+the measured values in the retained windows: the 95th percentile minus
+the 5th percentile, with a 1\% relative floor. Within each retained
+window, we calculate the 95th-percentile normalized error over 60-,
+300-, and 600-s evaluation horizons and compare it with the declared
+normalized tolerances of 0.01, 0.02, 0.05, 0.10, 0.20, and 0.50. At each
+horizon and tolerance, the physical-
+discrepancy pass fraction is the number of window--channel pairs whose
+95th-percentile error meets the tolerance, divided by the 230 evaluated
+pairs (23 windows and ten channels). Forecast issue and arrival times are not
+established for this analysis, so it evaluates thermal discrepancy over
+time horizons rather than receiver-side freshness or delivery
+remediability. Averaging the pass fraction over the six tested tolerances gives
+0.943 for 60-s windows, 0.819 for 300-s windows, and 0.659 for 600-s
+windows. Longer horizons therefore pass fewer physical-discrepancy
+checks at the same tolerance.
+Figure~\ref{fig:magnet_contract_surface} plots the pass fraction against
+normalized tolerance for each horizon. Its vertical axis gives the
+fraction of window--channel pairs that pass the physical-discrepancy
+check, the component evaluated for MAGNET.
 
-\bibitem{munoz2024}
-P. Mu\~noz, M. Wimmer, J. Troya, and A. Vallecillo, ``Measuring the Fidelity of a Physical and a Digital Twin Using Trace Alignments,'' \emph{IEEE Transactions on Software Engineering}, vol. 50, no. 12, pp. 3122--3145, 2024, doi: 10.1109/TSE.2024.3462978.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=.88\columnwidth]
+    {figures/magnet_physical_discrepancy_pass_fraction.pdf}
+    \caption{MAGNET physical-discrepancy pass fraction across normalized
+    temperature-error tolerances. Each marker is the fraction of 230
+    window--channel pairs whose 95th-percentile error meets the tolerance.
+    Curves show 1-, 5-, and 10-min horizons. The horizontal axis is logarithmic.}
+    \label{fig:magnet_contract_surface}
+\end{figure}
 
-\bibitem{bergs2025}
-L. Bergs, M. Huber, A. Moriz, A. G\"oppert, and R. Schmitt, ``Evaluating mobile robot navigation behavior in flexible assembly systems through digital twin and real-world experiments,'' \emph{Discover Robotics}, vol. 1, Art. no. 10, 2025, doi: 10.1007/s44430-025-00010-4.
+These studies extend two parts of the evaluation beyond i2Nav. UGV01
+shows that the delivery ledger can be formed from position-reference
+data on a second robot. MAGNET shows that a thermal forecast can be
+judged against a quantity-specific tolerance over different horizons.
 
-\bibitem{ding2021}
-X. Ding, H. Wang, H. Li, H. Jiang, and J. He, ``Robopheus: A Virtual-Physical Interactive Mobile Robotic Testbed,'' arXiv:2103.04391, 2021.
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
 
-\bibitem{yang2025}
-H. Yang, Z. Qin, Y. Xia, and F. Cheng, ``Digital Twin-Based Autonomous Navigation and Control of Omnidirectional Mobile Robots,'' \emph{IEEE Transactions on Vehicular Technology}, vol. 74, no. 4, pp. 5687--5697, 2025, doi: 10.1109/TVT.2024.3520991.
+This work presents a receiver-side framework for deciding whether a
+digital-twin state supports a specified service. It evaluates physical
+discrepancy and freshness together, retains an unobservable outcome when
+required evidence is missing, and compares delivery conditions with the
+source trajectory held fixed. The qualification surface uses prior
+sequences to screen tested service--delivery regimes; the paired ledger
+shows whether a tested delivery change restores qualification.
 
-\bibitem{betzer2024}
-J. S. Betzer, J. Boudjadar, M. Frasheri, and P. Talasila, ``Digital Twin Enabled Runtime Verification for Autonomous Mobile Robots under Uncertainty,'' in \emph{Proc. IEEE DS-RT}, 2024, pp. 10--17, doi: 10.1109/DS-RT62209.2024.00012.
+Across the ten i2Nav sequences, the sampled-delivery ledger identified
+30 delivery-remediable, six persistent under the tested ideal-available
+delivery, and four already-qualified sequence--service cases. Practical
+delivery restored 27 of the 30 remediable cases. Measured Linux
+\texttt{tc netem} replay produced a 32/6/2 partition and restored 27 of
+32 remediable cases. At a 25\% requested acceptance, the held-out surface
+made four false qualifications among 200 accepted cases (2.0\%) with
+centered features and 19 among 168 (11.3\%) on the separately trained
+backward-difference bank. The service-specific logistic and tree
+comparators produced similar risk, showing that the useful signal lies
+in preserving the relationship between service requirements and delivery
+conditions, rather than in one particular scoring rule. Together, these
+results give operators evidence about which tested regimes merit
+consideration and whether a delivery change can restore a service.
 
-\bibitem{brossard2019}
-M. Brossard and S. Bonnabel, ``Learning Wheel Odometry and IMU Errors for Localization,'' in \emph{Proc. IEEE ICRA}, 2019, pp. 291--297, doi: 10.1109/ICRA.2019.8794237.
+Analysis code and derived evaluation artifacts are available at
+\url{https://github.com/CEISCA-VT/DigitalTwinDivergence}. The source
+datasets are available from their cited providers.
 
-\bibitem{jiang2025}
-C. Jiang, K. Zhang, S. Yang, S. Shen, C. Xu, and F. Gao, ``WING: Wheel-Inertial Neural Odometry with Ground Manifold Constraints,'' \emph{IEEE Transactions on Intelligent Vehicles}, vol. 10, no. 3, pp. 1510--1525, 2025, doi: 10.1109/TIV.2024.3429167.
+Future work will extend the evaluation to additional physical systems and
+network paths with explicit end-to-end state-availability timing, and
+investigate how the resulting service--delivery evidence can inform
+online resource management.
 
-\bibitem{zhou2025ynet}
-P. Zhou, P. Gu, X. Lyu, M. Liao, and Z. Meng, ``Learning Yaw Velocity for Inertial-Wheel Odometry on Autonomous Vehicles,'' \emph{IEEE Transactions on Intelligent Vehicles}, vol. 10, no. 5, pp. 3517--3530, 2025, doi: 10.1109/TIV.2024.3455566.
-
-\bibitem{tang2025}
-H. Tang \emph{et al.}, ``i2Nav-Robot: A Large-Scale Indoor-Outdoor Robot Dataset for Multi-Sensor Fusion Navigation and Mapping,'' arXiv:2508.11485, 2025, doi: 10.48550/arXiv.2508.11485.
-
-\bibitem{cuaran2024}
-J. Cuaran \emph{et al.}, ``Under-canopy dataset for advancing simultaneous localization and mapping in agricultural robotics,'' \emph{The International Journal of Robotics Research}, vol. 43, no. 6, pp. 739--749, 2024, doi: 10.1177/02783649231215372.
-
-\bibitem{wilsdon2023magnet}
-K. Wilsdon, J. Hansel, M. R. Kunz, and J. Browning, ``Autonomous control of heat pipes through digital twins: Application to fission batteries,'' \emph{Progress in Nuclear Energy}, vol. 163, Art. no. 104813, 2023, doi: 10.1016/j.pnucene.2023.104813.
-
-\bibitem{inlmagnetdata}
-Idaho National Laboratory, ``MAGNET Heat Pipe Data,'' dataset and digital-twin forecast archive, accessed Aug. 22, 2026. [Online]. Available: \url{https://github.com/IdahoLabResearch/MAGNET-Heat-Pipe-Data}
-
-\bibitem{freetwinevmeas2026}
-M. Plz\'{a}k, \v{S}. Berta, A. {\"U}rge, and M. Ba\v{t}a, ``P45B 1s4p Battery Module Measurement,'' Zenodo, 2026, doi: 10.5281/zenodo.18405243.
-
-\bibitem{freetwinevsim2026}
-M. Ba\v{t}a, R. Horobets, M. Plz\'{a}k, and A. {\"U}rge, ``FreeTwinEV 1S4P Battery Module Multiphysics Simulation Package---Identification and Validation,'' Zenodo, 2026, doi: 10.5281/zenodo.19935693.
-
-\bibitem{jankovic2025sng}
-S. Jankovic \emph{et al.}, ``Design and implementation of a digital twin for a biomass-to-gas plant,'' \emph{Applied Energy}, vol. 402, Art. no. 126861, 2025, doi: 10.1016/j.apenergy.2025.126861.
-
-\bibitem{tuwiensngdata}
-S. Jankovic, ``Dataset of an experimental campaign of a Digital Twin for a biomass-to-SNG pilot plant,'' TU Wien Research Data, ver. 1.1.0, 2025, doi: 10.48436/6mmjq-1tj37.
-
-\end{thebibliography}
+\bibliographystyle{IEEEtran}
+\bibliography{ref}
 \end{document}
