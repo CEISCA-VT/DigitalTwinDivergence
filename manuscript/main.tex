@@ -20,6 +20,8 @@
   \setlength{\belowdisplayshortskip}{4pt plus 1pt minus 1pt}%
 }
 \newcommand{\safegraphic}[2][\linewidth]{\IfFileExists{#2}{\includegraphics[width=#1,height=2.1in,keepaspectratio]{#2}}{\fbox{\parbox[c][0.85in][c]{0.94\linewidth}{\centering\scriptsize Figure asset not bundled: \detokenize{#2}}}}}
+\newcommand{\new}[1]{\textcolor{orange}{#1}}
+\newcommand{\prob}[1]{\textcolor{blue}{#1}}
 \title{Digital Twin Fidelity for Networked IoT Services}
 \author{Shreyas Udaya, Aiden Wiehn, Sreya Viswanadha, Leyla Nazhandali}
 \begin{document}
@@ -46,7 +48,11 @@ a separately trained past-only backward-difference bank produced 19 among 168
 do not establish receiver-side adequacy, and how a paired delivery test
 can identify when changing delivery restores a service outcome. Evaluation
 also includes measured Linux network-emulation traces, component comparisons,
-and supporting robot and thermal-twin studies.
+and supporting robot and thermal-twin studies. \new{We additionally derive
+service-feasibility bounds and minimum-communication schedules from the
+frozen trajectories. The bounds identify cases that cannot meet the service
+requirement within a stated delivery class; for feasible cases, optimized
+rate schedules reduce transmissions while preserving qualification.}
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -79,6 +85,7 @@ We then use a paired delivery-remediability analysis. For each recorded source t
 
 We evaluate the framework primarily on ten physical sequences from the i2Nav dataset \cite{tang2025i2nav}.
 At the 25\% requested-acceptance operating point, the surface produced four false qualifications among 200 accepted cases (2.0\%) with precomputed centered features and 19 among 168 (11.3\%) with separately trained past-only features. The centered-feature surface accepted no global-service cases at this point. In the paired delivery analysis, practical saved-state replay restored 27 of the 30 delivery-remediable cases. We also replay measured UDP packet arrivals from a Linux virtual network interface shaped with \texttt{tc netem}, and apply the ledger to position-reference data from UGV01.
+\new{The delivery-planning study also finds qualifying schedules for all three local services on all ten centered-feature recordings and nine causal-feature recordings, with lower median communication use than fixed-rate delivery.}
 The contributions of this work are as follows:
 \begin{enumerate}
     \setlength{\itemsep}{0pt}
@@ -89,6 +96,11 @@ The contributions of this work are as follows:
     \item We introduce a paired delivery-remediability analysis that holds the source twin and its recorded estimates fixed while changing delivery conditions. This identifies whether improved delivery restores a failed service or whether it remains unqualified under the tested ideal-available delivery.
 
     \item We evaluate service qualification across held-out physical sequences and demonstrate the framework with sampled delivery, measured Linux \texttt{tc netem} packet traces, and a position-only UGV01 study.
+
+    \item \new{We extend the evaluation to delivery planning. An optimistic
+    bound certifies when no schedule in a defined delivery class can meet a
+    service contract, while a mixed-integer optimizer finds
+    minimum-transmission schedules within a family of periodic-rate blocks.}
 \end{enumerate}
 \section{Related Work}
 \label{sec:related_work}
@@ -313,6 +325,19 @@ $S_s^P\geq\eta_s$ and $S_s^F\geq\eta_s$, but the joint requirement
 fails, $S_s^J<\eta_s$. The latter can occur because the samples that
 satisfy the physical requirement are not necessarily the same samples
 that satisfy the freshness requirement. Delivery-remediable cases show that improved delivery lets the receiver use states in the frozen source stream to meet the contract; persistent cases remain unqualified under the tested ideal-available condition.
+\new{Beyond these fixed comparisons, we assess whether any delivery
+schedule in a declared class can meet a service contract and how much
+communication a qualifying schedule requires. At each evaluation sample,
+an optimistic bound considers available states that meet the service's
+current age limit and a 1.5-s age cap. For local motion, it also considers
+the earlier state needed to form the motion interval, with the same cap.
+Choices are made independently across samples, so they need not form one
+consistent schedule. A bound below the required joint satisfaction
+therefore certifies infeasibility within this class; a higher bound is
+inconclusive. We also optimize schedules that select 1, 2, 5, or 10~Hz in
+successive 10-s blocks, minimizing transmissions subject to the service
+contracts. The resulting optimum applies to this specified schedule
+family.}
 \section{Experimental Setup}
 \label{sec:exp_setup}
 
@@ -482,6 +507,15 @@ physical and freshness satisfaction to meet 0.80 individually. The
 complete contract requires their joint satisfaction to meet 0.80.
 All four require adequate receiver observability, and the source
 comparison also requires adequate source coverage.
+\new{For delivery planning, we use the same frozen outer-test trajectories
+and service contracts. Centered-feature states include 100~ms of feature
+availability delay; causal backward-difference states use zero modeled
+feature delay. Each bank is evaluated with 0 and 200~ms of added network
+delay. One schedule is shared across the three seeds of a recording. We
+compare the optimized schedule with the best qualifying fixed rate and a
+reference-informed greedy schedule, then replay each schedule through the
+receiver evaluator. Reference-based outcomes construct and assess the
+schedules retrospectively.}
 
 \subsection{Held-Out Qualification Protocol and Comparators}
 \label{subsec:heldout_protocol}
@@ -617,7 +651,8 @@ failures improve when delivery changes. Component comparisons and
 measured packet arrivals test the roles of receiver reconstruction and
 delivery. Finally, we assess qualification on unseen recordings, vary
 the service requirements and feature timing, and apply the evaluation
-to UGV01 and MAGNET.
+to UGV01 and MAGNET. \new{We then test schedule feasibility and the
+communication cost of supporting multiple services.}
 
 \subsection{Local and Global Fidelity Can Give Different Assessments}
 \label{subsec:local_global_result}
@@ -779,6 +814,52 @@ alter service qualification.
 
 
 
+
+\new{\subsection{Feasibility and Minimum-Communication Delivery}}
+\label{subsec:delivery_feasibility}
+
+\new{The preceding results compare selected fixed delivery settings. We
+now ask whether a schedule in a broad, stated delivery class can meet the
+contract and, when it can, how many transmissions are needed. With zero
+added network delay, the optimistic bound certified all six centered-bank
+global-pose cases and five causal-bank global-pose cases as infeasible
+under the 1.5-s age cap. A schedule supporting all three local services
+was found for all ten centered-feature recordings and nine causal-feature
+recordings. The optimized schedules used a median 31.4\% and 12.2\% fewer
+transmissions, respectively, than the best qualifying fixed-rate choices.
+Relative to the greedy schedule, median reductions were 4.5\% and 1.7\%.
+These results show that communication can be reduced while maintaining
+several local-service requirements, and that the bound can identify cases
+where delivery cannot restore global-pose qualification within the tested
+class. Figure~\ref{fig:delivery_feasibility} shows the per-recording
+communication choices and the global-pose feasibility bounds.}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=.92\textwidth]
+    {figures/delivery_feasibility_and_cost.png}
+    \caption{\new{Communication required for service qualification at zero
+    added network delay. Panels (a) and (c) compare the optimized 10-s
+    block schedule with the best qualifying fixed rate and a greedy
+    schedule for all three local services together, using centered and
+    causal feature banks, respectively. Panels (b) and (d) compare global
+    pose under the full recorded stream with an optimistic satisfaction
+    upper bound for timestamp-ordered schedules obeying the service's
+    current age limit and 1.5-s cap. Local-motion bounds also constrain
+    the earlier interval state by the cap. The dashed line marks the 0.80 joint-satisfaction
+    requirement. A bound below the line certifies infeasibility within
+    the stated class; a higher bound does not guarantee a feasible
+    schedule.}}
+    \label{fig:delivery_feasibility}
+\end{figure*}
+
+\new{At 200~ms added network delay, the bound certified 22 of 40
+centered-bank and 11 of 40 causal-bank sequence--service cases as
+infeasible. Across the tested banks, delays, and service groups, the
+optimizer found 143 qualifying schedules. It proved 140 minimum within
+the 10-s block family; the remaining three had optimality gaps below
+0.3\%. The physical references supply the retrospective outcomes used to
+construct the bounds and schedules.}
 
 \subsection{Contribution of the Evaluation Components}
 \label{subsec:component_comparison}
@@ -1234,18 +1315,26 @@ centered features and 19 among 168 (11.3\%) on the separately trained
 backward-difference bank. The service-specific logistic and tree
 comparators produced similar risk, showing that the useful signal lies
 in preserving the relationship between service requirements and delivery
-conditions, rather than in one particular scoring rule. Together, these
-results give operators evidence about which tested regimes merit
-consideration and whether a delivery change can restore a service.
+conditions, rather than in one particular scoring rule. \prob{Together,
+these results give operators evidence about which tested regimes merit
+consideration and whether a delivery change can restore a service.}
+\new{The scheduling results add that, for all three local services together,
+qualifying schedules were found on all ten centered-feature recordings and
+nine causal-feature recordings. Median transmission use was 31.4\% and
+12.2\% lower than the best qualifying fixed-rate choice. The feasibility
+bound certified six centered-feature and five causal-feature global-pose
+cases as infeasible under the stated schedule class.}
 
 Analysis code and derived evaluation artifacts are available at
 \url{https://github.com/CEISCA-VT/DigitalTwinDivergence}. The source
 datasets are available from their cited providers.
 
 Future work will extend the evaluation to additional physical systems and
-network paths with explicit end-to-end state-availability timing, and
-investigate how the resulting service--delivery evidence can inform
-online resource management.
+network paths with explicit end-to-end state-availability timing.
+\prob{The framework may also inform online resource management.}
+\new{The scheduling results provide an offline communication benchmark.
+Future work can develop online scheduling methods using evidence available
+when each decision is made.}
 
 \bibliographystyle{IEEEtran}
 \bibliography{ref}
