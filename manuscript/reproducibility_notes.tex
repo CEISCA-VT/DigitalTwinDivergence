@@ -148,7 +148,8 @@ one transmission shifted earlier by $L$.
 For each of ten recordings, two source banks, and two network delays,
 the six service sets are each service individually, all three local
 services together, and all four together. This gives 240 problems.
-HiGHS minimizes the stated integer cost with a zero relative-gap target.
+The mixed-integer optimization solver minimizes the stated integer cost
+with a zero relative-gap target.
 The initial limit is ten seconds per problem. Four time-limited feasible
 cases were refined with 60-second limits. The stored solver bound and
 incumbent cost determine the reported optimality gap. All returned
