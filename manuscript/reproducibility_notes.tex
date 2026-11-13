@@ -1,0 +1,361 @@
+\documentclass[journal]{IEEEtran}
+\usepackage{amsmath,amssymb,booktabs,array,xcolor,url}
+\definecolor{purple}{HTML}{7030A0}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\revision}[1]{\textcolor{purple}{#1}}
+\title{Reproducibility Notes for Digital Twin Fidelity for Networked IoT Services}
+\author{Shreyas Udaya, Aiden Wiehn, Sreya Viswanadha, Leyla Nazhandali}
+\begin{document}
+\maketitle
+
+\section{Source Estimator and Data}
+The source model settings below are the frozen settings used to generate
+the saved trajectories. Delivery analysis does not refit the source model.
+The fast branch has two GRU layers with 64 hidden units, inter-layer
+dropout 0.10, and a 20-sample history at 10~Hz. Its six features are
+odometer speed, IMU yaw rate, odometer acceleration, IMU yaw acceleration,
+absolute yaw rate, and absolute odometer acceleration. The slow branch
+has two tanh layers of 32 units and a 300-sample history. Its 16 features
+are mean, standard deviation, RMS, and mean magnitude of both IMU and
+wheel yaw rate, mean, standard deviation, and RMS of wheel--IMU yaw
+disagreement, mean and standard deviation of normalized disagreement,
+and mean, standard deviation, and mean magnitude of forward speed.
+Slow correction is zero until the full history is available.
+
+The slow target is the training-only causal 30-s mean of the reference
+yaw correction. The fast target is the remainder. The objective weights
+are listed in Table~\ref{tab:losses}. AdamW uses learning rate $10^{-3}$,
+weight decay $10^{-5}$, batch size eight, at most 25 epochs, and
+early-stopping patience five. Training and validation strides are 50
+and 100 samples. Normalization uses training recordings and checkpoint
+selection uses validation recordings. The speed and fast/slow yaw
+correction limits are 0.15~m/s and 0.020/0.005~rad/s.
+
+\begin{table}[t]
+\centering
+\caption{Frozen source-model loss weights.}
+\label{tab:losses}
+\begin{tabular}{lr}
+\toprule
+Term & Weight\\
+\midrule
+Point correction & 1.00\\
+Propagated trajectory & 0.50\\
+Persistent signed yaw & 1.00\\
+Slow target & 0.75\\
+Fast target & 0.25\\
+Correction magnitude & 0.01\\
+Correction mean & 0.25\\
+Slow smoothness & 0.05\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The implemented source path is sensor preprocessing, learned control
+correction, EKF prediction, gated GNSS update, and saved pose export.
+The fold's frozen V1 model supplies process-noise scales. The preparation
+and evaluation code is in \path{i2nav_gru_dualhead.py},
+\path{i2nav_loso_ablation.py}, and \path{i2nav_v2_full_loso.py}
+under \path{DigitalTwin/analysis/}. The source bank manifests identify
+training and validation members and contain hashes for each exported
+trajectory. Raw source-file discovery and GNSS origin anchoring are
+implemented in \path{i2nav_adaptive_q_baseline.py}.
+
+The common source/reference grid is 10~Hz. Global evaluation starts at
+30~s and local evaluation at $30+H_s$ seconds. Delivery operates before
+that start so receiver history is already available. On the complete
+primary exports, all scored samples are observable. Table~\ref{tab:exposure}
+reports duration and the global-service sample count, which is the same
+across feature banks and seeds. Local 1-, 5-, and 10-s evaluations contain
+10, 50, and 100 fewer samples, respectively.
+
+The Linux network replay uses three 180-s captures per condition, sending
+1800, 900, 360, and 180 packets at 10, 5, 2, and 1~Hz. Captured UDP
+datagrams average approximately 1.13~kB. Packet delay and loss are mapped
+in source-packet order and the captured pattern repeats when exhausted.
+Arrivals are processed in arrival order while retaining the newest source
+timestamp. Satisfaction is averaged across three capture realizations
+and three model seeds before the sequence-level decision is made.
+The two changed sampled-versus-measured ledger labels are local-10-s
+motion on \texttt{playground00} and \texttt{street00}.
+
+\begin{table*}[t]
+\centering
+\caption{Exposure and historical-surface outcomes at the 25\% acceptance
+request. Each screening entry is false qualifications/accepted cells out
+of 80 settings on that recording. These are frozen outer-test outcomes.}
+\label{tab:exposure}
+\begin{tabular}{lrrrr}
+\toprule
+Recording & Duration (s) & Global samples & Centered false/accepted & Past-only false/accepted\\
+\midrule
+building00 & 1200.8 & 11709 & 3/23 & 7/15\\
+building01 & 1368.8 & 13389 & 1/20 & 12/27\\
+building02 & 1871.3 & 18414 & 0/19 & 0/15\\
+parking00 & 1140.8 & 11109 & 0/20 & 0/15\\
+parking01 & 1059.8 & 10299 & 0/19 & 0/15\\
+parking02 & 1256.8 & 12269 & 0/20 & 0/18\\
+playground00 & 1326.2 & 12963 & 0/20 & 0/15\\
+street00 & 1373.7 & 13438 & 0/20 & 0/15\\
+street01 & 1248.2 & 12183 & 0/20 & 0/18\\
+street02 & 1379.8 & 13499 & 0/19 & 0/15\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Planning Formulation}
+Let receiver-time blocks begin at 30~s and have 100 evaluation samples,
+except for a possible shorter final block. The four action indices
+represent rates 10, 5, 2, and 1~Hz, with strides 1, 2, 5, and 10 samples.
+An arrival occurs at each block boundary and then at its selected stride.
+Each source timestamp is the arrival time minus fixed latency $L$.
+For the evaluated conditions, $L$ is 0, 100, 200, or 300~ms. This arrival
+phase, rather than just the maximum horizon, makes the local factorization
+exact: a held state depends on the action in its receiver-time block.
+The two endpoints of any supported motion interval are in the same or
+adjacent blocks.
+
+Create binary edge variables $z_{b,p,c}$ indicating previous action $p$
+and current action $c$ in block $b$. Only $z_{0,0,c}$ exists in the first
+block, where the first zero is a placeholder. Start and flow constraints
+are
+\begin{align}
+\sum_c z_{0,0,c}&=1,\\
+\sum_a z_{b-1,a,p}&=\sum_c z_{b,p,c},\quad b\geq1.
+\end{align}
+These constraints choose one action per block with consistent neighboring
+actions. No scored local endpoint precedes the prefix because local
+scoring begins after its complete horizon.
+
+For every edge and service, independently replay its affected queries
+to obtain the integer count $C_{s,b,p,c}$ of joint passes summed across
+the three seeds. Let $N_s$ be the number of service queries in one seed.
+The required service constraints are
+\begin{equation}
+\sum_{b,p,c} C_{s,b,p,c}z_{b,p,c}
+\geq \left\lceil3N_s\eta_s\right\rceil.
+\end{equation}
+For a block with $n_b$ evaluation samples and current rate $r_c$, its
+cost is $c_{b,c}=\lceil n_b r_c/10\rceil$. Minimize
+\begin{equation}
+\sum_{b,p,c}c_{b,c}z_{b,p,c}.
+\end{equation}
+This includes the final partial block and counts updates in the scored
+receiver window. Shared prefix traffic is excluded from all policies.
+With fixed latency and no loss, every counted arrival corresponds to
+one transmission shifted earlier by $L$.
+
+For each of ten recordings, two source banks, and two network delays,
+the six service sets are each service individually, all three local
+services together, and all four together. This gives 240 problems.
+HiGHS minimizes the stated integer cost with a zero relative-gap target.
+The initial limit is ten seconds per problem. Four time-limited feasible
+cases were refined with 60-second limits. The stored solver bound and
+incumbent cost determine the reported optimality gap. All returned
+schedules are independently replayed against the original service checks.
+
+The fixed comparator tries each of the four constant actions and retains
+the cheapest qualifying one. The greedy comparator starts from each
+qualifying fixed schedule, lowers a single block to the next lower rate,
+and retains only changes preserving every requested contract. Candidate
+changes are ordered by normalized satisfaction loss per saved update,
+then by larger update saving and earlier block index. The least-cost
+completed greedy schedule is retained. These algorithms use the same
+reference outcomes, seed averaging, cost convention, and block family.
+
+\section{Optimistic Bound and Its Domain}
+At query $v$, a candidate 10-Hz source state must have timestamp
+$\tau\leq v-L$ and age at most 1.5~s. The current endpoint additionally
+must meet the service-specific age bound. At a historical endpoint,
+the 1.5-s class cap applies, but the current-endpoint freshness limit
+is not imposed retrospectively. Historical and current timestamps
+are ordered, and a candidate pair is shared across seeds.
+
+All planning queries have available reference values, and the admissible
+schedule class retains a receiver state at every required endpoint.
+Thus, the query set and satisfaction denominator are fixed. At each query,
+maximize the number of seeds passing jointly over all admissible choices.
+An empty set contributes zero. Every realizable schedule selects one of
+these choices, so its seed-averaged indicator is bounded by this maximum.
+Averaging proves the manuscript's upper bound. Allowing choices at
+different queries to be inconsistent only enlarges the set and preserves
+the inequality. The certificate applies to this fully observable,
+timestamp-ordered, bounded-age class on the native source clock.
+
+The audit enumerates 64, 256, 1024, and 4096 schedules for three, four,
+five, and six blocks, respectively, with latency 0, 100, 200, and 300~ms.
+Each case ends in a 37-sample partial block. Direct replay verifies every
+factor count and update cost, and every replay result is below the
+optimistic bound. Exact minima and infeasibility agree with enumeration
+for all six requested service sets.
+
+\section{Screening and Sensitivity Audits}
+The outer test recording is excluded from the source pipelines generating
+development trajectories as well as from screen fitting and cutoff
+selection. Inner cutoff cross-fitting refits only the screen over those
+fixed development trajectories. For development recording $j$, its source
+pipeline excludes $j$ and the outer test. Other development recordings can
+have contributed to that source fit. This dependency differs from fitting
+a new source bank for every inner screening split.
+
+The cutoff minimizes the difference between requested and development
+acceptance, keeps equal scores together, and chooses the higher cutoff
+when the differences tie. Table~\ref{tab:service_screening} reports the
+close predictors' actual service composition under the frozen cutoffs.
+Each service has 200 outer-test cells per bank. Complete per-method,
+per-recording counts and the joint-satisfaction shortfall of every
+accepted failure are in the saved audit CSV files.
+
+\begin{table*}[t]
+\centering
+\caption{Service-specific screening outcomes at the 25\% pooled request.
+Entries are false qualifications/accepted cells. Zero accepted global
+cells have undefined risk.}
+\label{tab:service_screening}
+\begin{tabular}{llrrrr}
+\toprule
+Bank & Screen & Local 1~s & Local 5~s & Local 10~s & Global pose\\
+\midrule
+Centered & Historical surface & 1/97 & 0/50 & 3/53 & 0/0\\
+Centered & Service logistic & 0/90 & 1/52 & 2/61 & 0/0\\
+Centered & Service tree & 0/80 & 0/40 & 3/80 & 0/0\\
+Past-only & Historical surface & 2/82 & 8/32 & 9/54 & 0/0\\
+Past-only & Service logistic & 2/90 & 8/57 & 8/57 & 0/0\\
+Past-only & Service tree & 0/80 & 8/30 & 11/80 & 0/0\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+At the three ledger points, the degraded/practical/ideal pass patterns
+in the centered bank are 000: six, 001: three, 011: 27, and 111: four.
+The past-only counts are seven, two, 27, and four. All other binary pass
+patterns have zero cases. Requiring every seed to pass changes four of
+800 grid decisions per bank. It changes no degraded/ideal ledger label.
+One past-only global-position case changes its practical restoration
+decision, reducing restoration from 27 to 26 of 29.
+
+Query-phase analysis reuses the three ledger delivery conditions at
+0-, 25-, 50-, and 75-ms phases of the 10-Hz query clock. Only reference
+position and unwrapped heading are interpolated. Source estimates stay
+on their native clock, and the receiver continues to hold its last
+arrival. Phase-zero satisfaction reproduces the saved ledger to
+$10^{-12}$. Exact time-weighted freshness is integrated between arrival
+events over the same scored span. Physical satisfaction at shifted
+queries remains a sampled, interpolated-reference measurement.
+
+\begin{table}[t]
+\centering
+\caption{Query-phase ledger sensitivity. Counts are remediable/persistent/
+already qualified. Restoration counts qualifying practical interventions.}
+\begin{tabular}{llrr}
+\toprule
+Bank & Phase (ms) & Counts & Restored\\
+\midrule
+Centered & 0 & 30/6/4 & 27\\
+Centered & 25 & 30/6/4 & 27\\
+Centered & 50 & 30/6/4 & 29\\
+Centered & 75 & 31/6/3 & 29\\
+Past-only & 0 & 29/7/4 & 27\\
+Past-only & 25 & 29/7/4 & 24\\
+Past-only & 50 & 30/7/3 & 29\\
+Past-only & 75 & 30/7/3 & 28\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Run the audit from the repository root with
+\begin{quote}\small\ttfamily
+python -m scripts.audit\_review\_evidence\par
+\hspace*{1em}--validate-planner --query-phase
+\end{quote}
+The output directory is \path{results/reviewer_audit_20261106/}.
+Its manifest records input hashes, source code hash, and completed checks.
+Existing source trajectories, screening predictions, and cutoffs are
+read unchanged.
+\section{\revision{Buffered-Centered Screening and Missing Reference}}
+\revision{The controlled availability experiment uses the complete
+300-trajectory centered bank. It preserves each state's value and source
+timestamp, selects the same rate-grid samples, and adds 100~ms to arrival
+time before the configured network delay. All 24,000 seed-level
+service--delivery rows are reevaluated and averaged into 8,000 nested
+recording-level rows. The 800 outer-test labels and all development labels
+therefore reflect the buffered receiver histories. Each of the seven
+screening rules is refitted and its acceptance-only cutoff reselected
+through the original eight-of-nine development cross-fit.}
+
+\revision{Before interpreting the buffered results, the unbuffered replay
+reproduces all saved measurements within $10^{-10}$, and the original
+seven-method scores and 25\% accepted/false counts are checked. All 300
+trajectory hashes are verified. The output retains predictions, selected
+thresholds, per-recording and per-service counts, risk--coverage summaries,
+and input hashes under
+\path{results/buffered_centered_heldout_100ms/}. Run the experiment with
+\texttt{python -m scripts.run\_buffered\_centered\_heldout}.}
+
+\revision{The main timing table and figure use a common summary procedure
+with 5,000 recording bootstrap resamples and seed 20261016. The paired
+buffered-minus-source-time differences resample the same recordings in
+both protocols, using seed 20261109. At 25\% requested acceptance, the
+historical surface's paired increase is 19.154 percentage points, with
+95\% interval 6.249--31.401. At 50\%, it is 23.300 points, with interval
+13.022--32.844. Accepted sets are determined separately by each protocol's
+development-selected cutoffs. These differences describe the complete
+screening procedure after the availability change.}
+
+\begin{table}[t]
+\centering
+\color{purple}
+\caption{Buffered-centered historical surface at 25\% requested acceptance.
+Each row has 80 held-out settings.}
+\begin{tabular}{lrr}
+\toprule
+Recording & Accepted & False qualifications\\
+\midrule
+building00 & 20 & 13\\
+building01 & 20 & 9\\
+building02 & 17 & 5\\
+parking00 & 15 & 3\\
+parking01 & 15 & 0\\
+parking02 & 12 & 0\\
+playground00 & 15 & 0\\
+street00 & 15 & 0\\
+street01 & 12 & 0\\
+street02 & 15 & 3\\
+\midrule
+Total & 156 & 33\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\revision{The reference-availability demonstration uses the three outer-test
+centered trajectories for \texttt{building00}, the local-1-s contract,
+and 10-Hz source-time delivery without network delay. Each trajectory has
+11,699 eligible queries starting at 31~s. The evaluator masks only the
+reference and excludes queries whose current or one-second-earlier
+reference endpoint is missing. It neither fills the masked interval nor
+changes the source stream or eligible query count. The unmasked result
+reproduces the existing evaluator to $10^{-12}$.}
+
+\begin{table}[t]
+\centering
+\color{purple}
+\caption{Reference masking with seed-averaged satisfaction.}
+\begin{tabular}{lrrl}
+\toprule
+Masked interval & $\Omega_s$ & $S_s^J$ & Outcome\\
+\midrule
+None & 1.000 & 0.958 & Qualified\\
+$[60,72)$~s & 0.989 & 0.958 & Qualified\\
+$[60,180)$~s & 0.897 & 0.954 & Unobservable\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\revision{Run \texttt{python -m} \path{scripts.build_review_revision_20261109}
+to reproduce the reference check and new overview and timing figures.
+The outputs in \path{results/review_revision_20261109/} contain per-seed
+measurements, plotted values, and a hash manifest. Tests verify that both
+local reference endpoints are required, that missing evidence can make
+perfect remaining estimates unobservable, and that satisfaction is
+undefined when no reference is available.}
+\end{document}
