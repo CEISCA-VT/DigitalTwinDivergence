@@ -13,7 +13,7 @@ offline planning study.
 - Bibliography: `manuscript/ref.bib`
 - Figures used by the manuscript: `manuscript/figures/`
 - Additional reproducibility details: `manuscript/reproducibility_notes.tex`
-- Paper workflow and artifact map: `docs/paper_submission.md`
+- Paper workflow and manuscript-to-code-to-evidence map: `docs/paper_submission.md`
 
 ## Main evidence and code
 
@@ -24,10 +24,11 @@ offline planning study.
 - Measured Linux network replay: `results/netem_delivery/`
 - Main analysis modules: `DigitalTwin/analysis/`
 
-The banks and their manifests are the saved inputs for the paper analyses.
-Reproducing the analyses does not require retraining the twin. Full training
-reruns require the prepared i2Nav data and the CUDA environment described in
-`docs/slurm_doubly_nested_loso.md` and
+The analysis scripts operate on saved trajectory banks, so reproducing the
+paper analyses does not require retraining the twin. Generated result tables
+and raw trajectory banks are not all included in this repository. Full
+training reruns require prepared i2Nav data and the CUDA environment described
+in `docs/slurm_doubly_nested_loso.md` and
 `docs/slurm_doubly_nested_causal_loso.md`.
 
 ## Checks
@@ -40,9 +41,10 @@ python scripts/audit_manuscript_syntax.py
 ```
 
 Compile the manuscript from `manuscript/` with the local LaTeX toolchain.
-The package audit checks that the manuscript source, required evidence inputs,
-and referenced figure assets are present. The syntax audit checks labels,
-citations, and figure references.
+The package audit checks the manuscript and its figure assets; add
+`--require-evidence` when the local generated results are available and should
+also be checked. The syntax audit checks labels, citations, and figure
+references.
 
 Security/attack experiments, exploratory analyses, and presentation materials
 remain in the repository as separate project work. They are not part of the
