@@ -6,8 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1] / "manuscript"
-SOURCES = [ROOT / "main.tex", ROOT / "supplementary/supplement.tex",
-           ROOT / "research_compendium.tex"]
+SOURCES = [ROOT / "main.tex", ROOT / "reproducibility_notes.tex"]
 
 
 def strip_comments(source: str) -> str:
@@ -60,8 +59,18 @@ def check_source(path: Path) -> list[str]:
     for label in re.findall(r"\\(?:ref|eqref)\{([^{}]+)\}", source):
         if label not in labels:
             issues.append(f"undefined local reference {label}")
-    if path.name in ("main.tex", "research_compendium.tex"):
+    if path.name in ("main.tex", "aidoc.tex", "research_compendium.tex"):
         bibkeys = set(re.findall(r"\\bibitem(?:\[[^]]*\])?\{([^{}]+)\}", source))
+        for bibliography_group in re.findall(r"\\bibliography\{([^{}]+)\}", source):
+            for bibliography_name in bibliography_group.split(","):
+                bibliography_path = path.parent / f"{bibliography_name.strip()}.bib"
+                if not bibliography_path.is_file():
+                    issues.append(f"missing bibliography {bibliography_path.name}")
+                    continue
+                bibliography = strip_comments(bibliography_path.read_text(encoding="utf-8"))
+                bibkeys.update(
+                    re.findall(r"@[A-Za-z]+\s*\{\s*([^,\s]+)\s*,", bibliography)
+                )
         for group in re.findall(r"\\cite\{([^{}]+)\}", source):
             for key in group.split(","):
                 if key.strip() not in bibkeys:
