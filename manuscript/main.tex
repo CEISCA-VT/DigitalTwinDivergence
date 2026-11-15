@@ -172,7 +172,7 @@ query is made \cite{maatouk2023aoii,chiariotti2022query}. Research on
 digital twin synchronization similarly studies how update and
 communication decisions affect the relationship between physical and
 virtual states. \new{Tan and Matta balance synchronization and prediction-bias
-costs \cite{tan2024synchronization}. These
+costs \cite{tan2024synchronization}.
 Li et al. minimize state staleness
 under update budgets and support fidelity-aware queries
 \cite{li2025budget}. Our controlled delivery comparison freezes the
@@ -419,8 +419,8 @@ change restores qualification.}
 \label{subsec:offline_planning_method}
 
 \rev{Offline planning uses the recorded reference to bound achievable
-qualification and minimize transmissions. With combined state-availability
-and network latency $L$, a candidate held state at query time $v$ has a
+qualification and minimize transmissions. With fixed availability and
+network latency $L$, a candidate held state at query time $v$ has a
 10-Hz source timestamp in $[v-1.5,v-L]$. The current endpoint must also
 meet the service age limit. A local check includes a candidate at
 $v=t_k-H_s$ whose timestamp cannot exceed the current state's timestamp.
@@ -503,10 +503,9 @@ recording excluded from the corresponding qualification fit.
 with wheel-speed and inertial measurements for the twin. We align the
 streams over their shared time interval, interpolate position and speed
 to the 10-Hz evaluation rate, and unwrap heading before interpolation.
-We convert the reference coordinates to the planar frame used to evaluate
-the twin's position and heading. The dataset reports nominal reference
-accuracy of 0.02~m in position and $0.01^\circ$ in attitude
-\cite{i2navRobotDocumentation}. The prepared recordings span
+We convert the reference coordinates to the planar frame used to evaluate the twin’s position and heading. The dataset reports
+nominal reference accuracy of 0.02~m in position and $0.01^\circ$ in
+attitude \cite{i2navRobotDocumentation}. The prepared recordings span
 1059.8--1871.3~s and have reference values throughout the scored
 intervals.}
 
@@ -875,7 +874,7 @@ contracts test local motion and global pose separately.
 \end{figure}
 \subsection{Worked Example: Applying the Framework to One Recording}
 \label{subsec:worked_result}
-
+We use building00 as a worked example and report values averaged across three independently trained model instances for this single physical recording.
 \newrev{The source-time centered benchmark on held-out
 \texttt{building00} shows how the framework turns received states into
 service decisions. We keep its recorded twin trajectory fixed and change
@@ -928,10 +927,8 @@ position in the overall coordinate frame. More frequent states can
 improve the motion comparison without correcting the source
 trajectory's global position. On this recording, the states selected
 under practical and ideal-available delivery yield lower global-pose
-satisfaction than those selected under degraded delivery.
+satisfaction than those selected under degraded delivery. This occurs because delivery changes which timestamped estimate the receiver uses, but does not correct the accumulated global-position error already present in the source trajectory.
 
-The reported values average three model-seed results for this one
-physical recording.
 
 \begin{figure}[!tb]
     \centering
@@ -1397,9 +1394,8 @@ ledger label only when it moves joint satisfaction across the required
 fraction. Consequently, a flat category count does not imply that all
 sample ages or freshness fractions are unchanged.}
 
-\revision{Figure~\ref{fig:freshness_components_result} uses the saved
-ordinary-LOSO centered-feature study to test a regime in which freshness
-constrains qualification. Its common 0.2-s age limit
+\revision{Figure~\ref{fig:freshness_components_result} tests a regime in
+which freshness constrains qualification. Its common 0.2-s age limit
 equals one nominal update period at 5~Hz, so delayed or missed updates
 can exceed the permitted age. Each bar counts the same 40
 recording--service cases under a different delivery condition, with

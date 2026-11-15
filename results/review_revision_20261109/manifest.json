@@ -1,0 +1,16 @@
+{
+  "status": "complete",
+  "input_hashes": {
+    "results/doubly_nested_loso_slurm/outer_building00/outer_test/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv": "134b936d31e77740ca608666e9c48aeedccff84612cda26ee81a721b0256d026",
+    "results/doubly_nested_loso_slurm/outer_building00/outer_test/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv": "c202a618447de926c5a589d19b5e874a6e75c9ded87502844bac15a574cc219e",
+    "results/doubly_nested_loso_slurm/outer_building00/outer_test/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv": "17e282903fa6049e1822cb45f6f5ebb011311da5d9a08fb73c608e8e3b72ea40",
+    "results\\buffered_centered_heldout_100ms\\unbuffered_control\\operating_point_summary.csv": "85e697b3a9b0ea91471362ebcbcf5590adbacf9be374e86f398a6d20e31ae1bb",
+    "results\\buffered_centered_heldout_100ms\\buffered_100ms\\operating_point_summary.csv": "da7aaee897925735190ebcc386a9229a57883148d4036cbb386b7eec81ae7a91",
+    "results\\structured_qualification_baselines\\causal\\operating_point_summary.csv": "192d6448f07a8f2aef09879cdc2053809660cbe5f25b96f3fdb28360c4690d1a",
+    "scripts\\build_review_revision_20261109.py": "549b4f06b56162f90f081a93ebd36129eb65aae46253b26e22afbd84731611f1"
+  },
+  "reference_mask_intervals": "[60,72) and [60,180) seconds; no interpolation",
+  "reference_requirements": "current and previous endpoint for local motion",
+  "qualification": "mean seed satisfaction >=0.80 and mean coverage >=0.95",
+  "baseline_check": "unmasked measurements reproduce original evaluator to 1e-12"
+}

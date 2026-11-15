@@ -1,0 +1,14 @@
+{
+  "inputs": {
+    "results\\doubly_nested_loso_evidence\\per_sequence_response_surface.csv": "8d6081f09abda537bf0c78e9bfd06b08dd0db1164b974fc0e1e04adf89878d77",
+    "results\\doubly_nested_loso_evidence\\heldout_predictions.csv": "3c2aa4364fdc56f18950656d2955b3de13010a1cacc3e3d2618b4478b5092a73",
+    "C:\\Users\\shrey\\Documents\\DigitalTwinDivergence\\scripts\\compare_structured_qualification.py": "a15c3150252cf3c95dc3798b2b0ead95898b591f70f244ae6a84e783d6a37234"
+  },
+  "models": {
+    "service_specific_logistic": "One per service; standardized log2(rate), delay/100, product, and both squared terms; C=1; balanced classes; max_iter=2000",
+    "service_specific_tree": "One per service; rate/delay; max_depth=3; min_samples_leaf=2*n_training_recordings; unweighted class counts"
+  },
+  "parameter_selection": "Fixed before outcomes inspected; no hyperparameter selection on outer labels",
+  "evaluation": "Original inner-LOSO acceptance-only cutoff selection and tie handling; pooled cutoffs; sequence bootstrap 5000",
+  "purpose": "Qualification-predictor comparison within the framework, not replacement fidelity frameworks"
+}

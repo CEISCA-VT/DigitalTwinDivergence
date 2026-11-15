@@ -12,6 +12,7 @@ commands needed to check or reproduce it.
 - `manuscript/figures/`: figure assets referenced by the manuscript
 - `manuscript/reproducibility_notes.tex`: extended model, evaluation, and
   optimization details
+- `manuscript/reproducibility_notes.pdf`: compiled supplementary notes for upload
 
 ## Evidence map
 
@@ -26,14 +27,47 @@ commands needed to check or reproduce it.
 | MAGNET thermal discrepancy analysis | `DigitalTwin/analysis/` cross-domain analysis modules | `results/cross_domain_contract_generalization/` |
 
 The centered and causal banks each contain 300 verified trajectories, with
-2,400 run/service/delivery measurements per bank. The buffered study reuses
+24,000 seed-level run/service/delivery measurements per bank. Of these,
+2,400 are outer-test measurements, aggregated across three seeds into
+800 outer-test cells. The buffered study reuses
 the 300 centered trajectories and verifies that its zero-buffer control
 reproduces the original measurements before adding the 100-ms availability
 delay. UGV01 and MAGNET apply selected framework components, as described in
-the manuscript. The result paths above are local output locations; generated
-result tables and raw trajectory banks are not all distributed in the GitHub
-repository. The source code, manuscript figures, and available provenance
-artifacts are kept separate from exploratory analyses.
+the manuscript.
+
+## Included supporting evidence
+
+The repository includes CSV/JSON evidence for the centered, past-only, and
+buffered studies, including response tables, predictions, frozen-cutoff
+outcomes, and provenance. The close-comparator outputs are under
+`results/structured_qualification_baselines/`. The supplementary tables are
+supported by `results/reviewer_audit_20261106/` and
+`results/review_revision_20261109/`. Historical manifests preserve original
+run paths and hashes as provenance, including paths from the cluster.
+
+To check saved screening counts and seed aggregation without training or raw
+sensor data, run:
+
+```powershell
+python -m scripts.audit_review_evidence --output tmp/submission_evidence_check
+```
+
+Add `--validate-planner` to check the optimizer against synthetic exhaustive
+enumeration. Add `--query-phase` only when exported trajectories for both
+banks are available. Use a separate output directory to preserve the archived
+audit, whose `audit.json` records the original full checks.
+
+Large nested-bank trajectory exports and model checkpoints are not bundled
+with these supporting tables. Their manifests alone do not enable replay.
+For full reconstruction, acquire the i2Nav data cited in the manuscript,
+prepare the dataset directory expected by the driver
+(`public_datasets/im2nav`), and follow `docs/slurm_doubly_nested_loso.md` and
+`docs/slurm_doubly_nested_causal_loso.md`. The frozen V1 configuration is in
+`results/i2nav_v1_frozen/FROZEN_MANIFEST.json`. The drivers retrain the nested
+pipelines and write new trajectory exports and manifests. Use those newly
+generated manifests for replay rather than editing historical provenance.
+Reconstruction requires training resources and is distinct from auditing
+the supplied numerical results.
 
 ## Reproducing analyses
 

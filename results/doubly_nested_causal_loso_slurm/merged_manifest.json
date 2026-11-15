@@ -1,0 +1,2430 @@
+{
+  "schema": "verified_kaggle_trajectory_bank_v1",
+  "study": "doubly_nested",
+  "feature_derivative_mode": "causal_backward",
+  "source_state_availability_assumption": "causal feature construction uses current and earlier samples; replay timestamps each saved state at its source-grid time before configured network delay; inference computation latency is not measured",
+  "causal_no_lookahead_preflight": {
+    "schema": "causal_feature_preflight_v1",
+    "status": "PASS",
+    "passed": true,
+    "derivative_mode": "causal_backward",
+    "checks": {
+      "v1": true,
+      "v2_fast": true,
+      "v2_trailing_sensor_windows": true
+    },
+    "first_sample_derivative_rule": "forward and yaw acceleration are initialized to zero at the first grid sample",
+    "future_perturbation_rule": "changing samples from index 6 onward leaves features through index 5 unchanged"
+  },
+  "status": "complete",
+  "ready_for_evidence_analysis": true,
+  "repository_commits": [
+    "28666b1c3b12f62f08c9d321b172ad2bd1da4181"
+  ],
+  "expected_total_tasks": 300,
+  "verified_trajectories": 300,
+  "problems": [],
+  "trajectories": [
+    {
+      "outer": "building00",
+      "role": "outer_test",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/outer_test/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "ad33ae26caa74c2182c09454ac183e0070f1a0e643f4f77a7a7b4fd3c792e274"
+    },
+    {
+      "outer": "building00",
+      "role": "outer_test",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/outer_test/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "19a4b17caa5537d14c7e807db442164e1fee9029ff441a7359772cb60a1feffa"
+    },
+    {
+      "outer": "building00",
+      "role": "outer_test",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/outer_test/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "52e38df0bcf0282724b49fe458963120a94ed83324987e443c146abc42971dbc"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "26e4e7f8189ad35282262173a21efcecd1d484aeff56a445106e47a76944e22f"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "3ddd2fec464ae132ef9bdbef85f97d76bb21c1f6771e117328cd8ece1192412c"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "6a81a92e67bb954462eb5d6c5956965021de9f82f7ac03836ae99273aeeb665a"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "8add2a4f172d235f73078de4aec3fa9480669f0860d7a94e9edb163001cb99ed"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "787a3911476ca9fc184cc2961018067a4c28be9c2bd4afc1afa3d86761f512a8"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "6ff9f84215d2ba0343502770d85c61dab61039b0ab988dce4957706359a7a7ee"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "fbecbb9c7a74c9e10dfe5b5d536a9fd20517a5ba371f07d428630d9f1282fe43"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "d0fb56f5ae60bec4a5bf726ce2e9c24588a609a1572f655f3a3541075cbbf86e"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "17b455c6da474bc02bcaad8762cdbeb96f6f3c0ebaf4b0aedb226a72b6d98edf"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "7b81cc57b12c39a27d3219fd85656b7fc16d7f79cc5e744ee45485ad14328d79"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "f394aa850215a37d7363e5d3682f8e705251882c190857415f2b1924753a4ced"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "04a180f43428a23b6ce908aa5104e53d47ce690c0b87b60e5dee505207877836"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "d57c855b1c1b615af4b8e9640d3bf657e0afed8f3fae9f269370bd9524d1fe89"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "84b1d3486131d3c616da3f5cc238487a1535f6de354efa04adb7f0f387db82ae"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "a09b500d136ad8a3c06c473d75c34039fbd2ca47610a4e7bfe94ca5308ef4793"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "98b1277892367d850b149fd9a81c53ed496bf9b4b8cacf84990f77380e9da67b"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "bc20d21e83cb049bfcba20abdaa4b332342542c9791fcd582d3455a2bdf80f06"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "b4a26d059f14de4487c5fda3b858fce700bbf205c326bbf04acae5fde67a7237"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "12477d199ccb0c1ca1e9455967795e99179319033133e847fe02b335cb6e0618"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "459ea19dca52343d17526b1aef7d52107789fd868e3df78b8bcd5b6621c87f3b"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "a869bde29af3ee1233e37ada06efc25eda2edf346ce26eba58a1327424f8227a"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "1d402cc7b7a14830403928cf74b01ca96c33287f2b0275c1e0623a6c854e7269"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "47d63313de1659fafbfac74df44ab08ef9ffd355917e57163fd0bb9362e80178"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "82cc3273f0f2e3901eea287158cea2b1dd508196ab80035eb1a9625bcfafb1fd"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "8638de0864a605b2ac83e644dd0dbde066cd6d52baaec8922a24ac5c9df827fa"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "6b58602dc2ebbe612f5c95a646958bb1d808a61f361680c463b4510f7a0e4ba7"
+    },
+    {
+      "outer": "building00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building00/qualification_train/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "4626be67ac7f0e83910ad56e4200f6382f1bc988b94732d6d4553effd2e5b176"
+    },
+    {
+      "outer": "building01",
+      "role": "outer_test",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/outer_test/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "f23dca7ced58c008b8565f4bddc7353643f67baae25e40c94a123044e35f014f"
+    },
+    {
+      "outer": "building01",
+      "role": "outer_test",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/outer_test/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "a0a519b68399004d2ef02656c4c929cd14f916046e3f73358cd6eead399c7cac"
+    },
+    {
+      "outer": "building01",
+      "role": "outer_test",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/outer_test/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "edc127cc96bb475743d053043d114a5deeafba8a584d7f4297a389bf3a4989f8"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "c7a80fe0447f3df14e8c3a3f2a07726b0d6ae282c47a0d21a13eca34051f9e34"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "f35c012a7d8b246c4760140d5a1d04d1438bf68a1b8cc422eca8cec9fb88eabe"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "0f7058fa6b4c110fdef376d3ada8995ad9be9127a6c908824ad850258e482dc2"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "e42ab7581dc64bbbe0fe329d1ab28de984e00ff0ed7800aaf8bfc8e83730f276"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "80dd7877ce3d743de378f43ee939fe2d6c1a2075803e7e1ac5e09d6d6a156f07"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "7eca3839f3ddf43d22dea13ceb95239103d00af2f990e3f36908d458b61b32e8"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "9b4c5c34840332015e0bdef748e0bf574211bbeccb468a147770512f1b8d767d"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "fd1f0fb58f5dbfc4e97ddcd7172d35a6ac2080e9cff5aa5c042b64b0492254ee"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "df1b8a3a1d082d52db58922e9d2a9cde67c71c0d753b2571769af7c3b2190070"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "ffa40a35145fd2421c8ce8796c9a7fd94b850da1876a54a8df4b6855824206b5"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "58b10eef997384868409e75f32b0eefb7e18ff8b85b968a1fcc0e64e4e265ed3"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "32bf3b4eec27b58059660015d4f122bc5e7dd37ff751d310fe1bba080af36b0a"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "6ecb3f2fe04f2be1944b1cd9f8da897e7b11cf83dab84a7a59170d06cf90eed2"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "464b7eca88f886f1361b59219018a50912c9fa81a486f720a93890cac88a2f19"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "cb28fef930cda24baeb09c5bf54df0ad313722706f6594b8e69209445220dcbc"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "296cfb04329fb9b071e9ae72eb1e41fccb5fd8ef08cd25e02a044d84bdb6e5fb"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "fe18113659c78c731c23a729b77d9f5cd3f19f33544e4835935d82bd19eed224"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "9afeef5a56fa1ed31062c433ce06d22aa929fa31d93a53628d2c57af4cc41d38"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "525d5e247fd77a13e2ea720288bf36b37f23ac144f7b8b61dac06a1acbf8f883"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "8f53791f0bbe8452d0fe71643d12951482b9b71004b3cac22183fd8c81934351"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "2c93c3c19b3776e3b95e315b3d0d6df1156f5b9af269e9a59c784e5e9fb2a70f"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "4f10e05db46ff4def4dc37d633f642fbc3373cf737cc98057a431038dbd90607"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "47d63313de1659fafbfac74df44ab08ef9ffd355917e57163fd0bb9362e80178"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "9d356dc2ea409b5aa6f66c9b353ab601b9a22f38f8ce20afae41477523a006df"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "ca028dc6c8078d7acc8f10a5a597b5b2572df410ddb107a80a22fa2377edff67"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "6b58602dc2ebbe612f5c95a646958bb1d808a61f361680c463b4510f7a0e4ba7"
+    },
+    {
+      "outer": "building01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building01/qualification_train/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "4626be67ac7f0e83910ad56e4200f6382f1bc988b94732d6d4553effd2e5b176"
+    },
+    {
+      "outer": "building02",
+      "role": "outer_test",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/outer_test/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "e59bae8064b1cc43e356d4b1822f1da7dd83edfeb3aa39efd84c67ab3f210744"
+    },
+    {
+      "outer": "building02",
+      "role": "outer_test",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/outer_test/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "f341e8d5bd9d28f1671a5a9a3398dba757de16801d6141cd6115ff58435d519e"
+    },
+    {
+      "outer": "building02",
+      "role": "outer_test",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/outer_test/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "7cbb96809abd2b6e4ca8f74ea69d46b83ef3a570a13cf761c1383e9fd5c8da51"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "0d686610bef3ad1eb07fbb27f02b609e238f2b57e436c4384e3e538fac3a6d27"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "171ffa0193f56d978e9a896ebde54492ba9e8fb9710900aa5bd5f15b7dd720ad"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "79c36fe64587c1789352046e91fa4ff1aab44e6aa21ee9c60d12d87e1b83f454"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "e3911f44ec55519f20cd0636838ee2b932c7814aecddbf126f183493910573a4"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "4778d070ec3413e6df968542b1e37c4153a4632edc455e0dbbd46e7af7ded198"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "0cd03e93e182bbbd38b2f61d71b68ea5d5d02e9b5d28b6023d6e7ea906e76f63"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "2f30b1ab5b9833686bfa2d5282bd5e141ae5c352b6b68494a3c29e446de27383"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "db2fa6ae08385300807435c74fcf8e2925dd165f30e471ec892d1247a6239a02"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "7e3901b15dc477a51f99d3428ae76a567fd6778f2762e8ed265fbb793afc3cda"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "adf66c6a8585e4c2bbffffadf3fc83195a96fcd4cacb10e2af74dfa083b8c1ae"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "8f4410e9cdf90ce6337e9b49820b6ea2f69b3f904af9bf5e1a2726b33208bd7d"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "cadbfabd3e13a82b292a492a266a98adb58ba2b5cfedaf4007ce12bbece91b41"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "bff88927bd7b31b66eb798fe1a10b383357d0a7ac011c06fd81155e818e8acbf"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "74088f04f1bea1e250ccc074d2be3cb6de1d85a160c5632ca7b615cb94e98e5b"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "8f696079230fe71c63d7d4d2ca5c75b6a0dd7bc1ea888b10fd5bad417cad9fe0"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "67ae0c3e5aa56c06441a99344ac133eebae7fe2178a798da90263a58f5b90dfb"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "cd89cc1938e350301a0be01a5484bdaccd6f23d155496e9e4175e78341b40565"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "b165a6bc3f67f0f85a222bbe0ab662a326b0462b643a4a706f561bbb762c5f87"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "6be62c8ce06f3b874b5c35f82a77cc6e84a14ba6e8d263a39edb6bc607d44b9c"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "17f71d2f3abeddb2524f5dc6fe2761f1ff7fc32933d33f801389bffa3f57bfbc"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "c87fbbe624a3ccb564abb4e1eb463e3b05c723013569f040e2be7cc32fb67426"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "dc6b19bfca909200c6941b38e56b996d5a5ce7658cbb248024b69ef6c7ac4c34"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "69c0cb076f7841b668e584b515171ec6970bfbbb5beba95eca76ffb32c00b9e4"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "3fb184db13120af7e8832a31764face15f1bbf38abd2bb11719d9f6ec28a36a8"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "ef5f70fb70aed7491f95b8888bde14b09d26d29deb4df837ee0f7d7cc3f0ae87"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "88a1410afca483236f08728e651ea79f9a7a0f3d6310d8a17f09b27d470bc78c"
+    },
+    {
+      "outer": "building02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_building02/qualification_train/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "4626be67ac7f0e83910ad56e4200f6382f1bc988b94732d6d4553effd2e5b176"
+    },
+    {
+      "outer": "parking00",
+      "role": "outer_test",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/outer_test/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "ab850b8e2aca979255283ec2df989056e42db23b7fdc7321230cb9e6942edbb6"
+    },
+    {
+      "outer": "parking00",
+      "role": "outer_test",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/outer_test/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "07514d6bf702b94653885ea4b958cb0e9aba3b37b1d08bffad5d4e51c5785415"
+    },
+    {
+      "outer": "parking00",
+      "role": "outer_test",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/outer_test/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "c0b27fa19ec5961e94715e81abe97ad84b17495283dc25bc0fc87be21f956e25"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "c7a80fe0447f3df14e8c3a3f2a07726b0d6ae282c47a0d21a13eca34051f9e34"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "f35c012a7d8b246c4760140d5a1d04d1438bf68a1b8cc422eca8cec9fb88eabe"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "d60a7f790a3e2964192f9c2799c5f480d14669162d7b3eb3a920c72f1e069c83"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "ed8159b51d7980210c1089eb31685930f69cc8cb5fce6e18105b868c6398b2d7"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "d498dadb84ae61c825e09d867922336a5f39ffb5d19321c7b7d334f296a31801"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "f9f52cfe523330afe46775615371ab6b2532529d8c56118aca9445471bf23e72"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "34cc0e8f036e83adbb0b676b250cd760a7e6dc321daa0dc21f9b1c72b3071f62"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "0682dccc1ab0b57dabc2b6cf92f37312d425f642667f77d862465db07c4919e4"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "a377f3c731309986d59202901cdcc28f057c9be38371e80562a87a56bff75098"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "d3f36301604a9a32331636583d7b82312e82d94477e52ed2b6fb42ebdf9ffec0"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "3b9b310bedf6c6d41ab16c2f39920d0a85d64bb12be99855a378ad9423707d25"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "9592ccfba47585f9a80bdaf99f29ae7fc5abb8f1838daffe0e868b846b8fb550"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "80d7a17124e1623c400b399176a04658b53304e69b397500e4e849a208770c72"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "d94a7679dede85542977484a3dceac5507b51bd035692aac2ad3203e42e88d67"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "566448729b530ffd385b31fd0b1dc7e4988ccfccfe0ccb5b65f4c2fbf86177f9"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "cc2ad29b932c620f1c907bcce1b1aa0650be6f11becca465b103435aeac6fd05"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "d44079adf6d31cd63916b9a6a7a6741cd3847edc2f8d4954fdc7135e0b14637e"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "68ec0a2f48ad11a4cc3ae24127db76cec04f8a41d69c80dcb67ad5af9a38a1a1"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "0e0eb52f131967fd697dd33cbb547f940f369858d81e5092bd8361d483d680e3"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "8ab277e149b5d79478610c0fdb9fc877d1d7563116a295604721c05607e17206"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "8b7ce956c05cd4790382ff97082f869bf9da7365490cebaa86c26ce78c00c153"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "fbd72759eebec6fa3e60d8f08a2ea31617744ac3ada57dc30050d953e714c724"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "cd6d7efa0630d7cd34fdd491f433ad323a875b795b055e92aa1d0bfdc1732f5c"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "c18db65e97ebad07cf39db90cfee84df68c4bd6c000e7a05e43cc300da3b388f"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "8518846d26cd36e050bd7184dfefcecbf2b54d5053e104d41664d66864513d1b"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "732b6d4f6d6727f6700e67195ecf3e759eb5a63652fc4b5207036abf08eb5207"
+    },
+    {
+      "outer": "parking00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking00/qualification_train/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "93cbe2e2b66dadf093ecb2ef26b5b95ec4682c3b4b782c6f0cbb8188f6263d08"
+    },
+    {
+      "outer": "parking01",
+      "role": "outer_test",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/outer_test/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "4cb11f8ec6152f87378d7d5338020d276b7f71f7bf6e36e07b7f97ec0ed62e82"
+    },
+    {
+      "outer": "parking01",
+      "role": "outer_test",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/outer_test/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "8c00abdf172b2a867afbbaaeec9410c6bab50b503ae233595e8ea3b66c50a832"
+    },
+    {
+      "outer": "parking01",
+      "role": "outer_test",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/outer_test/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "9a65bb80e40de0fa516c71f495f7cfadc9b9ba7336d7429a6838e118c9497a88"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "1623429fa83e5a91525f28fae00fddacfc1ee5757ce15b8bf6f208fe46e7c3ce"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "01c0247fd219ccc7b0e1ee189904856ac1077aa2d72e6ec15c4d4c41cf484212"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "5a4753640f179fb16da1d16194ee4b3f5ea11a9e16cf9095002bba20b68c8d37"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "ed8159b51d7980210c1089eb31685930f69cc8cb5fce6e18105b868c6398b2d7"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "17f4fee6ffd347cfc6a432e9cafc7603f17d00f3ef4049ef4b41edaecc9232a9"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "24cd363611c4f59cc8716472f718e7253e333df9a9d1fed00400a6e917b6c36c"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "2d8db36ea14a4b588b57a43512ace2347dc221f3232d919439bf54565f95e629"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "459f6e9f5af12b55661090e015ca4364037410ab36c23f5bc41bd251fefcfe41"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "87ec3025676c3a8fefa98253dbab6a2ad2bdb43e95bc081c27740741c26b00b7"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "a16437050d7eaffe36d27e686b27ff93160803a45939cd5a07f337f9fe724d3f"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "3d062878a073960c40491787744aeba4fc91552842da744bd14ecf596e6a3682"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "ca465cdbd80fba17ecc758b20c138fd81e1d0614c68f6c726fdc5243dc6cda31"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "34d7c27768ed8dd9ebf0d86c7a7b3269bce8aea83ea072fec0ee41fa71916d8d"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "aaaeb4320589e19ebd728d6fa98b8417bc7e8d58bab6c65042e2b4320a27a6af"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "21b51235412c4a6de11637f988951c4cf04776f51c616d07205587353316288a"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "e2bb92e8fb32e11f3e33c671a511c2be75222b6bba7f10ad41076447f8e5e1c3"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "133e0e9aed8a09caac02db403249e7cf3edc29e486f6861a6f95c730151e8e75"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "8f550221d1f2f87841e1bb44b417e6e94c839bc8b4d2c471b2d83e6deae0919c"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "e95050fbadfa862e8a5066ca3bbbfe7046c2797de9a63cf81a6b2fe353029e44"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "e0b87b99def1bd20a60ad3e71056f2ea2e08f13edecd02d72a095d514753c95e"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "06ebbfb53cfd7c2c717c1663f60ae6a648f71f498d229f2602e317d216aab6a7"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "01e5b67b8f3a723b1d12a633da4473edab61e24b7da1f1b6c481a0d2f5dd3867"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "979a0f5b60bb728f4b2163bdc8542d42b9f68054e7e5cc79a07e70b20b44aa2b"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "c7c0b8ee25e388f51e2dcfd79b8cda6dea34c80d68dfac1bf78052df8026eda2"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "c0444717dbf796080bc4b071ffadc121c180ef95c401f1a71b09a1c3b31ff8db"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "c38a077f0ed4cce8266988b0a65457406b016dffc2d56d74286b11a1c62c284d"
+    },
+    {
+      "outer": "parking01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking01/qualification_train/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "c5e9a4103a413eeeec419ec8cd615ab5f02632c09809700e23902d166aeac0ae"
+    },
+    {
+      "outer": "parking02",
+      "role": "outer_test",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/outer_test/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "97137123c5d5bede83a8df5da0f30244ac1eb5e85fdec777e666cc082db5411d"
+    },
+    {
+      "outer": "parking02",
+      "role": "outer_test",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/outer_test/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "f7c30af6b6aa0ab30d7f0a2833d607cc3f87d162789620d61334188bf872ec8b"
+    },
+    {
+      "outer": "parking02",
+      "role": "outer_test",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/outer_test/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "cfa7418637489ec8e47b354d10c3a5ba9e4a64825a483f412ec90d0a0dd10c62"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "8faeb4d474225f9af31940997a2e480900bbb0568a1a11ff63116e0efbaf864d"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "4d37eb6ef72e0677fa9bef46a6a4d00aaf2c6d8378857cddb442c53ff5d98e01"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "241dfacf8794663f45532fe3fd50b00cb6861f2079323a0abb5381cf29296fea"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "2b7ba64c0fe8e7bc03987c8bf0ada54edd3f3247ebcfa132f5cba5e1908aafb4"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "170148364ba871aabeaa4283e303e40bf3e5587c005d8df35ada570be662e855"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "5cd7473f8c6c7cac319e550b1c452b1962019e150c5e560d83e7a6706948115b"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "a7a1c51596c0da1043d3bb230146b3e725f967ee22b83e8995898e723c8ad903"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "459f6e9f5af12b55661090e015ca4364037410ab36c23f5bc41bd251fefcfe41"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "4d13429a757d2e87c241eb5e797059380605ae49225602f1939573441504f9a4"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "fd35b1b884ff842f2c0d02f029be098aee0053a7e60b49db61fa3e95d4723722"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "033fc302263ea107c7f14e35c93d39ab6d2811a00815cf70fcb1a11569398496"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "557b0cab6de26a9244995c734b90923a816066744b5cb313a812a313287f8e79"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "8a7792507f90fcd78d7027eb137eddce2ac61c8bd88679606bbee93c95d2f2ea"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "92ca5fd4fc97e0e384049a239a47403751b13df747795d314ab9e157a0b5534c"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "7394281d1fb6c5897b3bf2793e92c4cda37e2fbc86e6cf906dbbb7512e3d98f1"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "779b1d3cce7578590c1a191004f41fc9dd5b11ee81422e0b4c4e87ba286b081a"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "f66306f0428ade0cb4d1d5fc251582e93bf44e3734858cf5f82185f2d7369de4"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "7050895933f1f1853a7168431ad2d804cd1a568c3bf0b1cb7dd88017ec34ddf0"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "e95b2e0eb152ae911b0ea1fa3672fef082a03e7e6bcd359681895382e49da81a"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "e4a95739f134e2e201c1acf27470418d65872ac36bcc79f931875992df4a4ff3"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "8f0eca68b1ae408b2ebc2f85a1496cde5ff7dcd54f2c204bc5e25ce851b7c95f"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "074b0b06d4c42297b23a112b42eb8513fabbcbf2b751ce2cf1aa1cec92ed8f98"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "5a475b5749720bcc69a29697a89bc95d7c4f06c0c193726bb418936bdc3078d4"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "903cb34f863c85261f541f221ddaac9f51c1edc88b626086fad655a80f874d7d"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "57b4538ec0c51a32876774cdd998b8390c163d78f38c4c0ab8c0c938805a7e61"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "815ea89cd42b7771c224c4c6af74411be55ad05838fe42173672087c1443e80d"
+    },
+    {
+      "outer": "parking02",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_parking02/qualification_train/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "a4696dc1e2f728f913a3c6b82649b116267cde71e74159d494ae2aa2180cb25c"
+    },
+    {
+      "outer": "playground00",
+      "role": "outer_test",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/outer_test/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "597804f906977c4b918cc9b46c37f8dbae6776d322d6ad7e9a87fddc029da736"
+    },
+    {
+      "outer": "playground00",
+      "role": "outer_test",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/outer_test/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "d4b534fd87b7f7a10c5a886721c08de3052cd729f731d7ef0db11bed1fdc6b2a"
+    },
+    {
+      "outer": "playground00",
+      "role": "outer_test",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/outer_test/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "c1a7a1da3d5b2ce452d038b4d88e31789841da662261dd98bc83c806526feaef"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "c44eede5f649bd63645304416d788e3801c2b178e249455344ce5ff3324e77fd"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "25dbb5c7e0bc6434d328a1e65dd868e3de4e7c797c867203f10c93eafe8def4c"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "2e0ea2cbbae533cf000ca26876bd21d47c7459146e9a20a072a75eb571a810b1"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "d218f44774444babdf7a8324b2b1db1ec09a6f0567e2721e88a20d0cd63d68f7"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "b9fb3849e4c2993595d79f89285fe0b3ad436ad2106cf4b04e202f2cba3ae7cd"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "778a6997ed8b7488dc6ca027c81bfa3efdd720da08bf56442100b189b594a7fa"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "e1faa5a8cc9abe1aa9bbbac53a8df9627c2fdddad86f1d6bb6f03bbad45a3723"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "f6af6cdf17cf58be4c038fca2860ec986fc59d6f70e08726ee22573674f18109"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "badd7d52ac5dd6aa1ce29f572411651f4555006c4c15f0cbf79062b9f44194da"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "aa47a30478ddbcf5dff6b36056173e291a1804572fa903e33b5a08156139949e"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "d3c0fc1fa536c8b5a1a7e4bd7fb890643e9188715d1a695216249d71650615ef"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "d7dcbc1919eefa11d3a1fddfd0fcd84ff7f7f872a62d27bba8df78bb2ea2d35f"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "c5fd04f3cdb56470e65cba44f5d2641b90967127181a41add83960ac5bf7b689"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "58c3ce017b99854809ed3868b2d364cd5f695d1cd7318829174a970ed8787bc7"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "0b14dfb41795e1f4df7edf4e0bf68ee2ae4556e65c9b5028c30a9c2143cad645"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "e8780b15c10977b14d7bb5c9bf0a718b9f11fcb4c95e455158fe8f56d92bbcfb"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "6ed9412ec44b0bf3e652552cfe7efaebba04f2f51e344f991fa6831bc9b84b76"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "a047174eff8792db7f2610c0344435f9f5ac66b2774aa6e661d4451b98ebd70f"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "af1201929e4fd9108d2b497ec453fb33972a347e2b9b6d9dbb520d6b6964b395"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "92f330b28aa7d86060511db56a3b8cf4baadb17829822e67393f893bfa820acf"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "fa2f858b196812d57eda1b94e48bdd954adab5d55bfcb620cec9b3d983c752be"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "ea82ece89542a3ae8bbc3120a664a4f5d2ce1d9ad306042459b90aea4c085878"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "b258ef7620312836a5a18213a52aba4d902c0a191b663dfa7de455e1869b7b1b"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "7344d1348636c6a2e7b7f2bf9444f7cc1309c3535f907d862191f9a375336b63"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "7a4bd60fdfd987959658beaff6ae069540a9829732ac5b4bca216b1ad429bdc6"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "445c495a9d616fd1a1eaf0ec512a68ff3addadcf7ebba55820cb7a00d0bb5678"
+    },
+    {
+      "outer": "playground00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_playground00/qualification_train/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "3338f82d7b7f03ceca5f492d31574c4186c62069d052152b69ab619264918753"
+    },
+    {
+      "outer": "street00",
+      "role": "outer_test",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/outer_test/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "36fd1540f7316ccfa73a5a584218245c2b612c487bb9931057b39f26f045e207"
+    },
+    {
+      "outer": "street00",
+      "role": "outer_test",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/outer_test/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "1ae6261d770d87813ceb1dfd4a5d545866d7f4239c768c530d1ce831d9d32ed3"
+    },
+    {
+      "outer": "street00",
+      "role": "outer_test",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/outer_test/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "0ed8476d48a068fa895fa4ad03985647dbdd4b8b5fbb658f7763912c25286940"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "60bf7d72a856d03e1ff33dee37f38e6421ac82dd72a5b05e431bf34d03624021"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "760f0843a0fa590eea97f57cc9f3bbf3a616e92bab7f9bc7b6aedd27b31ddd0a"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "6665f94b06f8a63b15108d35607c8325bfbeb3c9bdaa3a0578ff589209ce7aa0"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "3336b4f9277f11f38cc58687338c88b1046e40dd91ad1cbbedce3d862a99fcd5"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "a767c704292769bdae3675a59f2a85dcfcfe7a32bf6da9f904728c467e949a59"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "2b247e68f570e40c63dd4faf704734cd7477bf49c8247b8bc17bd9db59a5f773"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "1610fae80290bb98aaede212a341cf4b50ac5ce8410f0ceb5c3d39bda216c08b"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "8d72669ea384ba96684d7646c118e682f80231f84fac1cc462973b986d7d90e0"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "6451637749fc5baa3383185cc6cf498807214a31847b7deaf2bdb5b841ba1a8b"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "62951eb911dbbcbc5fbf72e99f6e4b2adf8940e04333edf17abbd4b411ca44d0"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "7508c8d88faa79d5ad64c81d175ee6698b99e22130cadfd9c8035948bd0999fe"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "dbaa62e4116424c19184d0eaccaf1dbd8dc61c49d56a4e44c8e5989785704637"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "8bb07bc6efb5909094cdcac032cd95059462b33d2fa09769a1d750d2ce9a0825"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "92ca5fd4fc97e0e384049a239a47403751b13df747795d314ab9e157a0b5534c"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "8906a4884651d9d5d059fe16a598e11ea2a86677e4f30ec78d724487211829d7"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "4d7430a804f723d60b6fdf6bf0e0b30e9d3a6666e4a1c8ac3faaba9796d7e8c5"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "55afac440fee0720aeb1fd4b654fd07c6a4ff2111647a05a49442441f5e4bfc1"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "4125c8b96d682f648955c3904a20f9598b4d5d2e96578d1f43b67a969f8b3ae4"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "da82a90369e906319fc284d006542852cfdb8a3376bfee9b49afba743736d59b"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "aefc344d4191ca88159112eaac7bbfde8ab8229fa9305033fe1866adb790bc06"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "c31d1120a34722f6facf65be8d44e95c5eab2177886971282ad6a50ee695c9a0"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "eb8be55121c7ffb5dc683b002590e955b4a818177ed2edfa6bcdd49257dad806"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "fac476f7a489fd2b4a99630e791bc5d88d1ea4f716b707ecb2c61e14cf7ee8d8"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "c3c97453df2344f65f97d2626be7b9e4f06b81392cbd1a50738e894e0aef7cb6"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "10adf52e6bfc5b79011284ddd4fb23b80af1e2f9196f29e899cf462988d29fb5"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "295a67d6286d7fc1fa78323519d918fbcaec8e4ac5096a0fc98a207dcd07e375"
+    },
+    {
+      "outer": "street00",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street00/qualification_train/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "dc111d64698ceb1787be957b366954839e981cd8ede1a86ca1d90facbc88cb41"
+    },
+    {
+      "outer": "street01",
+      "role": "outer_test",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/outer_test/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "8018c9da50c069fa43a71f3952b74022df9f3c7e57189eafcde2a4fd4bad1d27"
+    },
+    {
+      "outer": "street01",
+      "role": "outer_test",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/outer_test/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "7f7c61717d042f943a73bd6779a41a579d12c679b1573bde4d3d846861dd4e8c"
+    },
+    {
+      "outer": "street01",
+      "role": "outer_test",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/outer_test/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "9fa3d5b4aaa12a1659a7a8b12beac26018e5d8cb14c709334e652a8a4aed3a12"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "7d366b049f713d5983f13abe067920e725b0a2d238270489741ef099298e9b66"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "0f647e62ead5293dfcaebf3446dd04c487532196d448c31c20bb0817b72362d8"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "781100f59d4da3c41efa7918fb300f9d01ba0787c6ad1f7cab8989f2f75220f7"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "feb5236c701746521e9bbd57b2d5cdd396f6d12a1a748cca16452639de0dc621"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "f48e51c2a4e273da3b9dcb92bd921f74bc4087de7db6f1e0d9e7c614831d483e"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "7581de431c5fcc0a8dabb2f8c101a572b90726ccd379561c2d9fb5ccec054329"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "a75f41f02c4cc442b9b3ce3b50a3d153e289ab3deb42a31779f2c1415adcb69a"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "2c0c32abd4a7c83454fbb1146a23b420b85cd30180b96603aac84fa59b6733bb"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "4a3dd64287f2d60c115bea0db351aaba5d1b418f0877bba2760940213a81efd7"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "acedd058728eabe74c45312d3923aa725fdd924336eb102ecbbe23b9826826fc"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "cc856ed0c3fcde96cc14cfca496db797ad90a039880fbbdb9bcbcf2fe1821892"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "dd7f0d9569ac07e4d9d1740d40d9714739177ef02dffddf60ed0fe156db7bf78"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "c77ddbec8f6b700592f78fd389c5e85d593ae305df9f350ec86c73654b41dbcc"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "b5585fc97ff9e8e61a97f8bc550747dc3c00e63f8011adbe4a585dc9a19addde"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "7937ba49982beb9446bc0f5d5861029fb48ce704b0952acca6915ec8e2d5daf3"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "1945d2d851105988a9b7a95953a93f054c0f4b1fa84a7b603e7b470f3923b8ee"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "9bfab1c788bd77431465a44f81225e0617e1be9a2ac4bdf46bfcd5d60ca58582"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "21b7f8af7466cce81de506b453d65be42b0c7e989d5a72c1b30f7fd84517733a"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "3571f274091c2767c8249038b6339e8ee9248fa4c82f74db44ff1ec6bd5a7199"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "b24ee33ee171812f049c7a8a10bdc755200aee8de48d19747d4ec76401c1ed09"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "2ffb7df92be313fe6feb37b983bf69c77fb3de379ce570407e1ecaeed5b0f7b9"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "831bfa17fe1ae75c0fd11bb4bae1e2082411d95904dca99215452557567885b9"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "cb17bc3ae317b84a0afc298fe05864659a5b69500c9ad3cf80bb875156819983"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "162dde9b3343e261435702d3956618f373920a28965a55b37073b9ae381dd755"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "842df4a3b527378ee1b014605d190a00627c3c6630d0e7b9a5ecc6d6607dd072"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "cf142b4ff243bb37d85f9891cdc486f153ffc7f9a443724cfc1411c6ee743c36"
+    },
+    {
+      "outer": "street01",
+      "role": "qualification_train",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street01/qualification_train/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "8b22f4acf2660d450ecd44d2d016c7908e6ce687bf2da130741273ae5e1fcb70"
+    },
+    {
+      "outer": "street02",
+      "role": "outer_test",
+      "target": "street02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/outer_test/target_street02/v2/replicate_01_base42/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "a46cce22bfbed336e2f97759066541fcc2d03227a82e1133e1e133f188fd501c"
+    },
+    {
+      "outer": "street02",
+      "role": "outer_test",
+      "target": "street02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/outer_test/target_street02/v2/replicate_02_base1042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "7fa26fd4186d61dc4c35233a9c49c62f7aac14936329b2d829a1bb72412b9b30"
+    },
+    {
+      "outer": "street02",
+      "role": "outer_test",
+      "target": "street02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/outer_test/target_street02/v2/replicate_03_base2042/fold_10_street02/v2_evaluated_trajectory.csv",
+      "sha256": "be725fbedaaa2e04a01406452f59bf68e8dfc260eac2731dd36ffe205178c4c4"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_building00/v2/replicate_01_base42/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "60c3d17cfa0f17ea312a495e9b1084ea1967af90870c5f4fb800f1cdb6d5664f"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_building00/v2/replicate_02_base1042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "1fced1d9725d933ae4ba029c19841a0d35ea1a9f4f39fd9fd5b520d38b792862"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_building00/v2/replicate_03_base2042/fold_01_building00/v2_evaluated_trajectory.csv",
+      "sha256": "336d96caad397b6e877020631aa529de384d073116d8c783adab7b6af4de201f"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_building01/v2/replicate_01_base42/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "aa595cf522e552a79e03a9e27717b55e681efa72d1b4d21b9ebc765387aa4862"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_building01/v2/replicate_02_base1042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "ac8cf3074d631c9db47774a062f5ece331bdb2ae6ba5a871ef5f1adbf24c7304"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_building01/v2/replicate_03_base2042/fold_02_building01/v2_evaluated_trajectory.csv",
+      "sha256": "eb92685707faf1c4e5697a19688157b31a8ad0884f6257faef9a0fe3db731e88"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_building02/v2/replicate_01_base42/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "55190fcbc83526d5a2b8bf8fbf04da55e764d1cecffa1eab4b2f3d837d51a3e6"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_building02/v2/replicate_02_base1042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "d476276d32f15d50fbd7a2abbffdd0d6b78fa5fa0ed2d3f7c335f5d00cc10917"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "building02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_building02/v2/replicate_03_base2042/fold_03_building02/v2_evaluated_trajectory.csv",
+      "sha256": "0e21ffff4c68c9ce31cff88efe13134132d7a866b43db0b1ce865d2cb6084e0d"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_parking00/v2/replicate_01_base42/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "1916b296f45b39c1adfbad0e912edc0005ebe5c7c45c2a8ecdc34ab010002327"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_parking00/v2/replicate_02_base1042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "f0b0cc8abc09a6305e4fb7aa9f749df87dc0663bdc7331f61f5046d3127657e5"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_parking00/v2/replicate_03_base2042/fold_04_parking00/v2_evaluated_trajectory.csv",
+      "sha256": "178b0c86932ff2b913be5cc9751661a18e5afe0fea0d11a942aae3d650bce97c"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_parking01/v2/replicate_01_base42/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "8dee46bedeb47ca3fd978b4fe86b14a9aab529f1b7f6608bdc8ae97590b8d502"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_parking01/v2/replicate_02_base1042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "00b02222f269f49a8835e8d4c0fb900532485aa3dd7c3e6741ab7631e9dcc013"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_parking01/v2/replicate_03_base2042/fold_05_parking01/v2_evaluated_trajectory.csv",
+      "sha256": "076beb8f6e76355252c4f4895a63a10ead793de3e33fe7ad82cb3ed86c4cc53f"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_parking02/v2/replicate_01_base42/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "f5990711397e28ac46567e0de4296a3bdee8357bf5b452fa6cb7f48494b2f17b"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_parking02/v2/replicate_02_base1042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "9fef377bbca67796ded1753637c05ff3582535b0aa9b522c11dd9995afef0d67"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "parking02",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_parking02/v2/replicate_03_base2042/fold_06_parking02/v2_evaluated_trajectory.csv",
+      "sha256": "048ea0a2af350adbe77f9734a39ca9ae8d2bf14a678658947b3fefd19def76a3"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_playground00/v2/replicate_01_base42/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "e5b134f76bcfbd454794611364cca90fdcb1d6cf08fb2317dc4766758c991662"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_playground00/v2/replicate_02_base1042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "7d3ddcd850a4ee659ade9951aa97580d61e8d6828d14d786af1ef813a57af02e"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "playground00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_playground00/v2/replicate_03_base2042/fold_07_playground00/v2_evaluated_trajectory.csv",
+      "sha256": "4d497398039e849f27fdf1c0f61849d60be4d05f07ee074b749c0c342bdc2d40"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_street00/v2/replicate_01_base42/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "6981d35fc566935b8f41d0ee19303816a586424d62d2ff3345a72f1fb6a069d8"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_street00/v2/replicate_02_base1042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "486ca2d8e15ef2187538c36634752a043d92e114a26b9004c3e52e85832a2f4a"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street00",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_street00/v2/replicate_03_base2042/fold_08_street00/v2_evaluated_trajectory.csv",
+      "sha256": "a869bde29af3ee1233e37ada06efc25eda2edf346ce26eba58a1327424f8227a"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 42,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_street01/v2/replicate_01_base42/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "c7457cdee528ffbe845f753b7de2ca7c6b8027c9f3fae2a1bb845dc01186266e"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 1042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_street01/v2/replicate_02_base1042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "0cac8de25ca692c8be07585f97746fdf26447e63c9f03a6853a73b6826619b9b"
+    },
+    {
+      "outer": "street02",
+      "role": "qualification_train",
+      "target": "street01",
+      "seed": 2042,
+      "trajectory": "results/doubly_nested_causal_loso_slurm/outer_street02/qualification_train/target_street01/v2/replicate_03_base2042/fold_09_street01/v2_evaluated_trajectory.csv",
+      "sha256": "d0ef2727ded7481151a011f15510e76504a7d7cb54c6a7618a271ba37f9b32c8"
+    }
+  ],
+  "wall_time_s": 146585.73327732086
+}

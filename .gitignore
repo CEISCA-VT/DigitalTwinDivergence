@@ -39,6 +39,7 @@ manuscript/*
 !manuscript/main.tex
 !manuscript/ref.bib
 !manuscript/reproducibility_notes.tex
+!manuscript/reproducibility_notes.pdf
 !manuscript/figures/
 manuscript/figures/*
 !manuscript/figures/framework_receiver_contract_overview.png

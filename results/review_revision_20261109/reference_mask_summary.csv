@@ -1,0 +1,4 @@
+condition,start_s,end_s,eligible_samples,observable_samples,coverage,joint_satisfaction,status
+complete,0.0,0.0,11699,11699,1.0,0.9584864803259538,qualified
+short_gap,60.0,72.0,11699,11569,0.9888879391400974,0.9580199959662316,qualified
+long_gap,60.0,180.0,11699,10489,0.8965723566116762,0.9536975243906314,unobservable

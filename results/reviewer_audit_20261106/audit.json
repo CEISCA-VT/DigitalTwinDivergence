@@ -1,0 +1,203 @@
+{
+  "inputs": {
+    "results\\doubly_nested_loso_evidence\\per_run_response_surface.csv": "ca84acd3576aab9c63076bd24c594aa17d4da09999817df8b58153720d1224fb",
+    "results\\doubly_nested_loso_evidence\\per_sequence_response_surface.csv": "8d6081f09abda537bf0c78e9bfd06b08dd0db1164b974fc0e1e04adf89878d77",
+    "results\\doubly_nested_loso_evidence\\sequence_service_case_ledger.csv": "99edcf7db42c2684a346149b014f36cd45db171b7f7335088405aa3aed56d439",
+    "results\\structured_qualification_baselines\\centered\\predictions.csv": "ed879894afb809c3cc064c6e0ec7d659f015e4be0be89ed4d858411c1c6e58b1",
+    "results\\structured_qualification_baselines\\centered\\per_sequence_operating_points.csv": "34b753e06df414e4f29b64d360adf19c39ff73db9d549f37ee81c56cb7d15fd1",
+    "results\\doubly_nested_causal_loso_slurm\\service_evidence\\per_run_response_surface.csv": "dddb4a382c189513482c9a3ae8257f9716dbe12157c21cad365ad25039371ea1",
+    "results\\doubly_nested_causal_loso_slurm\\service_evidence\\per_sequence_response_surface.csv": "3992219bd60ac055ab9240905f5a5d939741fe8ae5734a2d25f16aae76f00c81",
+    "results\\doubly_nested_causal_loso_slurm\\service_evidence\\sequence_service_case_ledger.csv": "225846e7f2e681d52cef4014bb15b93caf7a0400af233068b4dce9e366413b86",
+    "results\\structured_qualification_baselines\\causal\\predictions.csv": "cc57363034acb89dbbead57b1d750f024c6712c4257999fb4dbf225861f05c76",
+    "results\\structured_qualification_baselines\\causal\\per_sequence_operating_points.csv": "449671c13090bfcfeaefa081cc55f69d7f41e4c2b83dbbfed413b4e83bc44756",
+    "results\\doubly_nested_loso_slurm\\merged_manifest.json": "c78cd9f118f120d7a26fed47b4b327bad205c1d1a9ec5b733bea910423602b26",
+    "results\\doubly_nested_loso_slurm\\outer_building00\\outer_test\\target_building00\\v2\\replicate_01_base42\\fold_01_building00\\v2_evaluated_trajectory.csv": "134b936d31e77740ca608666e9c48aeedccff84612cda26ee81a721b0256d026",
+    "results\\doubly_nested_loso_slurm\\outer_building00\\outer_test\\target_building00\\v2\\replicate_02_base1042\\fold_01_building00\\v2_evaluated_trajectory.csv": "c202a618447de926c5a589d19b5e874a6e75c9ded87502844bac15a574cc219e",
+    "results\\doubly_nested_loso_slurm\\outer_building00\\outer_test\\target_building00\\v2\\replicate_03_base2042\\fold_01_building00\\v2_evaluated_trajectory.csv": "17e282903fa6049e1822cb45f6f5ebb011311da5d9a08fb73c608e8e3b72ea40",
+    "results\\doubly_nested_loso_slurm\\outer_building01\\outer_test\\target_building01\\v2\\replicate_01_base42\\fold_02_building01\\v2_evaluated_trajectory.csv": "e1950e214ba353034e6996b0d50813d7ae394b23efa1eef8bf60f36526c442d9",
+    "results\\doubly_nested_loso_slurm\\outer_building01\\outer_test\\target_building01\\v2\\replicate_02_base1042\\fold_02_building01\\v2_evaluated_trajectory.csv": "c07e949ee799bafde40d0b658b7ac6239b012e63678270274307b14f6e34fd6e",
+    "results\\doubly_nested_loso_slurm\\outer_building01\\outer_test\\target_building01\\v2\\replicate_03_base2042\\fold_02_building01\\v2_evaluated_trajectory.csv": "bac9edb059d725cd1bf07ab3500143b0c91e8da27d4bc1edde3cbfb11a3ec8f9",
+    "results\\doubly_nested_loso_slurm\\outer_building02\\outer_test\\target_building02\\v2\\replicate_01_base42\\fold_03_building02\\v2_evaluated_trajectory.csv": "f76e5daff1a466fab6df2b518bd405b3133f6dd5e36acca9aaafafccd6d63260",
+    "results\\doubly_nested_loso_slurm\\outer_building02\\outer_test\\target_building02\\v2\\replicate_02_base1042\\fold_03_building02\\v2_evaluated_trajectory.csv": "e30bb97fddae680225b2687d148b1fc86acbf619d263e07bcc2107fbbdcd4cfb",
+    "results\\doubly_nested_loso_slurm\\outer_building02\\outer_test\\target_building02\\v2\\replicate_03_base2042\\fold_03_building02\\v2_evaluated_trajectory.csv": "f0e6e5155e6e6d798f8fda4ac671b504c13efbcdd70028888d53ddebeccb5abb",
+    "results\\doubly_nested_loso_slurm\\outer_parking00\\outer_test\\target_parking00\\v2\\replicate_01_base42\\fold_04_parking00\\v2_evaluated_trajectory.csv": "828eddb73db9043454ce0a1b931f678115f9d6fbd3deea524567654dd8f8f217",
+    "results\\doubly_nested_loso_slurm\\outer_parking00\\outer_test\\target_parking00\\v2\\replicate_02_base1042\\fold_04_parking00\\v2_evaluated_trajectory.csv": "10c09ad921a2c9bfcd986b161b218654892a5cae77ade21f7cd2c24f3a9a1b9b",
+    "results\\doubly_nested_loso_slurm\\outer_parking00\\outer_test\\target_parking00\\v2\\replicate_03_base2042\\fold_04_parking00\\v2_evaluated_trajectory.csv": "205449652e0b50ee1f7e5f5abde631551c0bf5726538dbf98aae775e4176178e",
+    "results\\doubly_nested_loso_slurm\\outer_parking01\\outer_test\\target_parking01\\v2\\replicate_01_base42\\fold_05_parking01\\v2_evaluated_trajectory.csv": "b542e236b434cf9b888fcd49fafb8271b335c35c3314e7f9e7a45ec506cec230",
+    "results\\doubly_nested_loso_slurm\\outer_parking01\\outer_test\\target_parking01\\v2\\replicate_02_base1042\\fold_05_parking01\\v2_evaluated_trajectory.csv": "78919e7abc60dc190d8822e1ec16567a133b4e3324d543353ba340acffc67d43",
+    "results\\doubly_nested_loso_slurm\\outer_parking01\\outer_test\\target_parking01\\v2\\replicate_03_base2042\\fold_05_parking01\\v2_evaluated_trajectory.csv": "2a45bb8f51ad024c799b06b8a0a5d24065fac9146739653b891ce6d24df13d88",
+    "results\\doubly_nested_loso_slurm\\outer_parking02\\outer_test\\target_parking02\\v2\\replicate_01_base42\\fold_06_parking02\\v2_evaluated_trajectory.csv": "b40f2e117cf59c6a11178e543a76b081adef79b63520ee14c7cad5faf429dcd6",
+    "results\\doubly_nested_loso_slurm\\outer_parking02\\outer_test\\target_parking02\\v2\\replicate_02_base1042\\fold_06_parking02\\v2_evaluated_trajectory.csv": "14d28d0aa926214a22f186e2fc89d0a37b76339027c3a30b830f2603b6b1fd87",
+    "results\\doubly_nested_loso_slurm\\outer_parking02\\outer_test\\target_parking02\\v2\\replicate_03_base2042\\fold_06_parking02\\v2_evaluated_trajectory.csv": "3dcb5de24a4ac4e7eb9f6dcaac433b5fe40d6baea9752fb4cf3740aed41b345e",
+    "results\\doubly_nested_loso_slurm\\outer_playground00\\outer_test\\target_playground00\\v2\\replicate_01_base42\\fold_07_playground00\\v2_evaluated_trajectory.csv": "8f321f071b503e906668003b61f7671100d5c8ae6ceec2260ee395ccbe5c438e",
+    "results\\doubly_nested_loso_slurm\\outer_playground00\\outer_test\\target_playground00\\v2\\replicate_02_base1042\\fold_07_playground00\\v2_evaluated_trajectory.csv": "eb31a47a98cdd776c8e8ea5bbb654abe9efef6b11724b9c5413f11fb26e3cf7c",
+    "results\\doubly_nested_loso_slurm\\outer_playground00\\outer_test\\target_playground00\\v2\\replicate_03_base2042\\fold_07_playground00\\v2_evaluated_trajectory.csv": "c7541e859a5ca161e71a0b7f9ea3008a74783c37629fe405447c1915d0433160",
+    "results\\doubly_nested_loso_slurm\\outer_street00\\outer_test\\target_street00\\v2\\replicate_01_base42\\fold_08_street00\\v2_evaluated_trajectory.csv": "1f1ae7803385ff76424fe2b9e4bb5802637d80fa8b42c3aec0502b7cf81fed95",
+    "results\\doubly_nested_loso_slurm\\outer_street00\\outer_test\\target_street00\\v2\\replicate_02_base1042\\fold_08_street00\\v2_evaluated_trajectory.csv": "8a8cd5cebbfc0b7d180fdf312aaba76a45ab335dfba700f52f70e0e7bba3c61b",
+    "results\\doubly_nested_loso_slurm\\outer_street00\\outer_test\\target_street00\\v2\\replicate_03_base2042\\fold_08_street00\\v2_evaluated_trajectory.csv": "baea8bfa13d9c966ed543cd0124e66600c5a66e3b0d272ea67425b598248f36b",
+    "results\\doubly_nested_loso_slurm\\outer_street01\\outer_test\\target_street01\\v2\\replicate_01_base42\\fold_09_street01\\v2_evaluated_trajectory.csv": "d239463f3c09ee0d99f0e7e34d2ed37cf29272942f0adb1df46faecb2f7aa512",
+    "results\\doubly_nested_loso_slurm\\outer_street01\\outer_test\\target_street01\\v2\\replicate_02_base1042\\fold_09_street01\\v2_evaluated_trajectory.csv": "d5cfb40aff13ea63ad9601ea4209de865a00cd6c30db6c1d5f4263d2164d2752",
+    "results\\doubly_nested_loso_slurm\\outer_street01\\outer_test\\target_street01\\v2\\replicate_03_base2042\\fold_09_street01\\v2_evaluated_trajectory.csv": "ac90ff98f78b358cae5056983f2b396358b6cfb85d2c1b4642d2a1d270f54b94",
+    "results\\doubly_nested_loso_slurm\\outer_street02\\outer_test\\target_street02\\v2\\replicate_01_base42\\fold_10_street02\\v2_evaluated_trajectory.csv": "e4b907fb2214bc6c97cafb650f03c54ae77f2d307b5f7a0916036ac0571e43d5",
+    "results\\doubly_nested_loso_slurm\\outer_street02\\outer_test\\target_street02\\v2\\replicate_02_base1042\\fold_10_street02\\v2_evaluated_trajectory.csv": "4fc1a8f30dbbcaffdbd364ec466a25a6efb58d995dea67c4f1c84b8dc074ccc1",
+    "results\\doubly_nested_loso_slurm\\outer_street02\\outer_test\\target_street02\\v2\\replicate_03_base2042\\fold_10_street02\\v2_evaluated_trajectory.csv": "63a9e4d53ba1cf9eb1b24c2accbd4ab5f42a11cde71381c358a5a009673acdaf",
+    "results\\doubly_nested_causal_loso_slurm\\merged_manifest.json": "e0d45e1b0099ed22317c677546eb3d98ca5d8089d3bd040141a3d52d6ce983c3",
+    "results\\doubly_nested_causal_loso_slurm\\outer_building00\\outer_test\\target_building00\\v2\\replicate_01_base42\\fold_01_building00\\v2_evaluated_trajectory.csv": "ad33ae26caa74c2182c09454ac183e0070f1a0e643f4f77a7a7b4fd3c792e274",
+    "results\\doubly_nested_causal_loso_slurm\\outer_building00\\outer_test\\target_building00\\v2\\replicate_02_base1042\\fold_01_building00\\v2_evaluated_trajectory.csv": "19a4b17caa5537d14c7e807db442164e1fee9029ff441a7359772cb60a1feffa",
+    "results\\doubly_nested_causal_loso_slurm\\outer_building00\\outer_test\\target_building00\\v2\\replicate_03_base2042\\fold_01_building00\\v2_evaluated_trajectory.csv": "52e38df0bcf0282724b49fe458963120a94ed83324987e443c146abc42971dbc",
+    "results\\doubly_nested_causal_loso_slurm\\outer_building01\\outer_test\\target_building01\\v2\\replicate_01_base42\\fold_02_building01\\v2_evaluated_trajectory.csv": "f23dca7ced58c008b8565f4bddc7353643f67baae25e40c94a123044e35f014f",
+    "results\\doubly_nested_causal_loso_slurm\\outer_building01\\outer_test\\target_building01\\v2\\replicate_02_base1042\\fold_02_building01\\v2_evaluated_trajectory.csv": "a0a519b68399004d2ef02656c4c929cd14f916046e3f73358cd6eead399c7cac",
+    "results\\doubly_nested_causal_loso_slurm\\outer_building01\\outer_test\\target_building01\\v2\\replicate_03_base2042\\fold_02_building01\\v2_evaluated_trajectory.csv": "edc127cc96bb475743d053043d114a5deeafba8a584d7f4297a389bf3a4989f8",
+    "results\\doubly_nested_causal_loso_slurm\\outer_building02\\outer_test\\target_building02\\v2\\replicate_01_base42\\fold_03_building02\\v2_evaluated_trajectory.csv": "e59bae8064b1cc43e356d4b1822f1da7dd83edfeb3aa39efd84c67ab3f210744",
+    "results\\doubly_nested_causal_loso_slurm\\outer_building02\\outer_test\\target_building02\\v2\\replicate_02_base1042\\fold_03_building02\\v2_evaluated_trajectory.csv": "f341e8d5bd9d28f1671a5a9a3398dba757de16801d6141cd6115ff58435d519e",
+    "results\\doubly_nested_causal_loso_slurm\\outer_building02\\outer_test\\target_building02\\v2\\replicate_03_base2042\\fold_03_building02\\v2_evaluated_trajectory.csv": "7cbb96809abd2b6e4ca8f74ea69d46b83ef3a570a13cf761c1383e9fd5c8da51",
+    "results\\doubly_nested_causal_loso_slurm\\outer_parking00\\outer_test\\target_parking00\\v2\\replicate_01_base42\\fold_04_parking00\\v2_evaluated_trajectory.csv": "ab850b8e2aca979255283ec2df989056e42db23b7fdc7321230cb9e6942edbb6",
+    "results\\doubly_nested_causal_loso_slurm\\outer_parking00\\outer_test\\target_parking00\\v2\\replicate_02_base1042\\fold_04_parking00\\v2_evaluated_trajectory.csv": "07514d6bf702b94653885ea4b958cb0e9aba3b37b1d08bffad5d4e51c5785415",
+    "results\\doubly_nested_causal_loso_slurm\\outer_parking00\\outer_test\\target_parking00\\v2\\replicate_03_base2042\\fold_04_parking00\\v2_evaluated_trajectory.csv": "c0b27fa19ec5961e94715e81abe97ad84b17495283dc25bc0fc87be21f956e25",
+    "results\\doubly_nested_causal_loso_slurm\\outer_parking01\\outer_test\\target_parking01\\v2\\replicate_01_base42\\fold_05_parking01\\v2_evaluated_trajectory.csv": "4cb11f8ec6152f87378d7d5338020d276b7f71f7bf6e36e07b7f97ec0ed62e82",
+    "results\\doubly_nested_causal_loso_slurm\\outer_parking01\\outer_test\\target_parking01\\v2\\replicate_02_base1042\\fold_05_parking01\\v2_evaluated_trajectory.csv": "8c00abdf172b2a867afbbaaeec9410c6bab50b503ae233595e8ea3b66c50a832",
+    "results\\doubly_nested_causal_loso_slurm\\outer_parking01\\outer_test\\target_parking01\\v2\\replicate_03_base2042\\fold_05_parking01\\v2_evaluated_trajectory.csv": "9a65bb80e40de0fa516c71f495f7cfadc9b9ba7336d7429a6838e118c9497a88",
+    "results\\doubly_nested_causal_loso_slurm\\outer_parking02\\outer_test\\target_parking02\\v2\\replicate_01_base42\\fold_06_parking02\\v2_evaluated_trajectory.csv": "97137123c5d5bede83a8df5da0f30244ac1eb5e85fdec777e666cc082db5411d",
+    "results\\doubly_nested_causal_loso_slurm\\outer_parking02\\outer_test\\target_parking02\\v2\\replicate_02_base1042\\fold_06_parking02\\v2_evaluated_trajectory.csv": "f7c30af6b6aa0ab30d7f0a2833d607cc3f87d162789620d61334188bf872ec8b",
+    "results\\doubly_nested_causal_loso_slurm\\outer_parking02\\outer_test\\target_parking02\\v2\\replicate_03_base2042\\fold_06_parking02\\v2_evaluated_trajectory.csv": "cfa7418637489ec8e47b354d10c3a5ba9e4a64825a483f412ec90d0a0dd10c62",
+    "results\\doubly_nested_causal_loso_slurm\\outer_playground00\\outer_test\\target_playground00\\v2\\replicate_01_base42\\fold_07_playground00\\v2_evaluated_trajectory.csv": "597804f906977c4b918cc9b46c37f8dbae6776d322d6ad7e9a87fddc029da736",
+    "results\\doubly_nested_causal_loso_slurm\\outer_playground00\\outer_test\\target_playground00\\v2\\replicate_02_base1042\\fold_07_playground00\\v2_evaluated_trajectory.csv": "d4b534fd87b7f7a10c5a886721c08de3052cd729f731d7ef0db11bed1fdc6b2a",
+    "results\\doubly_nested_causal_loso_slurm\\outer_playground00\\outer_test\\target_playground00\\v2\\replicate_03_base2042\\fold_07_playground00\\v2_evaluated_trajectory.csv": "c1a7a1da3d5b2ce452d038b4d88e31789841da662261dd98bc83c806526feaef",
+    "results\\doubly_nested_causal_loso_slurm\\outer_street00\\outer_test\\target_street00\\v2\\replicate_01_base42\\fold_08_street00\\v2_evaluated_trajectory.csv": "36fd1540f7316ccfa73a5a584218245c2b612c487bb9931057b39f26f045e207",
+    "results\\doubly_nested_causal_loso_slurm\\outer_street00\\outer_test\\target_street00\\v2\\replicate_02_base1042\\fold_08_street00\\v2_evaluated_trajectory.csv": "1ae6261d770d87813ceb1dfd4a5d545866d7f4239c768c530d1ce831d9d32ed3",
+    "results\\doubly_nested_causal_loso_slurm\\outer_street00\\outer_test\\target_street00\\v2\\replicate_03_base2042\\fold_08_street00\\v2_evaluated_trajectory.csv": "0ed8476d48a068fa895fa4ad03985647dbdd4b8b5fbb658f7763912c25286940",
+    "results\\doubly_nested_causal_loso_slurm\\outer_street01\\outer_test\\target_street01\\v2\\replicate_01_base42\\fold_09_street01\\v2_evaluated_trajectory.csv": "8018c9da50c069fa43a71f3952b74022df9f3c7e57189eafcde2a4fd4bad1d27",
+    "results\\doubly_nested_causal_loso_slurm\\outer_street01\\outer_test\\target_street01\\v2\\replicate_02_base1042\\fold_09_street01\\v2_evaluated_trajectory.csv": "7f7c61717d042f943a73bd6779a41a579d12c679b1573bde4d3d846861dd4e8c",
+    "results\\doubly_nested_causal_loso_slurm\\outer_street01\\outer_test\\target_street01\\v2\\replicate_03_base2042\\fold_09_street01\\v2_evaluated_trajectory.csv": "9fa3d5b4aaa12a1659a7a8b12beac26018e5d8cb14c709334e652a8a4aed3a12",
+    "results\\doubly_nested_causal_loso_slurm\\outer_street02\\outer_test\\target_street02\\v2\\replicate_01_base42\\fold_10_street02\\v2_evaluated_trajectory.csv": "a46cce22bfbed336e2f97759066541fcc2d03227a82e1133e1e133f188fd501c",
+    "results\\doubly_nested_causal_loso_slurm\\outer_street02\\outer_test\\target_street02\\v2\\replicate_02_base1042\\fold_10_street02\\v2_evaluated_trajectory.csv": "7fa26fd4186d61dc4c35233a9c49c62f7aac14936329b2d829a1bb72412b9b30",
+    "results\\doubly_nested_causal_loso_slurm\\outer_street02\\outer_test\\target_street02\\v2\\replicate_03_base2042\\fold_10_street02\\v2_evaluated_trajectory.csv": "be725fbedaaa2e04a01406452f59bf68e8dfc260eac2731dd36ffe205178c4c4"
+  },
+  "summary": {
+    "centered": {
+      "grid_seed_rule_changes": 4,
+      "ledger_point_seed_rule_changes": 0,
+      "ledger_pairs_with_seed_rule_changes": 0,
+      "practical_pass_ideal_fail": 0,
+      "degraded_pass_ideal_fail": 0
+    },
+    "past_only": {
+      "grid_seed_rule_changes": 4,
+      "ledger_point_seed_rule_changes": 1,
+      "ledger_pairs_with_seed_rule_changes": 1,
+      "practical_pass_ideal_fail": 0,
+      "degraded_pass_ideal_fail": 0
+    }
+  },
+  "planner_checks": [
+    {
+      "blocks": 3,
+      "lag_samples": 0,
+      "final_block_samples": 37,
+      "schedules_checked": 64,
+      "groups_checked": 6
+    },
+    {
+      "blocks": 4,
+      "lag_samples": 1,
+      "final_block_samples": 37,
+      "schedules_checked": 256,
+      "groups_checked": 6
+    },
+    {
+      "blocks": 5,
+      "lag_samples": 2,
+      "final_block_samples": 37,
+      "schedules_checked": 1024,
+      "groups_checked": 6
+    },
+    {
+      "blocks": 6,
+      "lag_samples": 3,
+      "final_block_samples": 37,
+      "schedules_checked": 4096,
+      "groups_checked": 6
+    }
+  ],
+  "query_phase_checks": [
+    {
+      "bank": "centered",
+      "phase_ms": 0,
+      "remediable": 30,
+      "persistent": 6,
+      "already": 4,
+      "changed_from_aligned": 0,
+      "practical_restores": 27
+    },
+    {
+      "bank": "centered",
+      "phase_ms": 25,
+      "remediable": 30,
+      "persistent": 6,
+      "already": 4,
+      "changed_from_aligned": 0,
+      "practical_restores": 27
+    },
+    {
+      "bank": "centered",
+      "phase_ms": 50,
+      "remediable": 30,
+      "persistent": 6,
+      "already": 4,
+      "changed_from_aligned": 0,
+      "practical_restores": 29
+    },
+    {
+      "bank": "centered",
+      "phase_ms": 75,
+      "remediable": 31,
+      "persistent": 6,
+      "already": 3,
+      "changed_from_aligned": 1,
+      "practical_restores": 29
+    },
+    {
+      "bank": "past_only",
+      "phase_ms": 0,
+      "remediable": 29,
+      "persistent": 7,
+      "already": 4,
+      "changed_from_aligned": 0,
+      "practical_restores": 27
+    },
+    {
+      "bank": "past_only",
+      "phase_ms": 25,
+      "remediable": 29,
+      "persistent": 7,
+      "already": 4,
+      "changed_from_aligned": 0,
+      "practical_restores": 24
+    },
+    {
+      "bank": "past_only",
+      "phase_ms": 50,
+      "remediable": 30,
+      "persistent": 7,
+      "already": 3,
+      "changed_from_aligned": 1,
+      "practical_restores": 29
+    },
+    {
+      "bank": "past_only",
+      "phase_ms": 75,
+      "remediable": 30,
+      "persistent": 7,
+      "already": 3,
+      "changed_from_aligned": 1,
+      "practical_restores": 28
+    }
+  ],
+  "source_sha256": "4d4f19f653c03202e5d19f03c7c5305f82a6d50432685539bbe748c088679d7d",
+  "verification_code_hashes": {
+    "DigitalTwin/analysis/delivery_feasibility.py": "04698bd09fb308c8027c25cfda3d7e02fa509ca4e492896b335cc6863ff63341",
+    "DigitalTwin/analysis/service_timing_budget_study.py": "62472777121119fd36a39e464ab1ba575b2e0ab795ac0e43349497c7d42ce31c",
+    "tests/test_delivery_feasibility.py": "93665fbd483352e108aed59bae352423738a3a2014e864b481d5a98dc3f9abfe"
+  },
+  "interpretation": "Saved frozen-cutoff outcomes; no refitting or trajectory changes"
+}

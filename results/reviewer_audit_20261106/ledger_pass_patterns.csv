@@ -1,0 +1,17 @@
+bank,degraded_practical_ideal,cases
+centered,000,6
+centered,001,3
+centered,010,0
+centered,011,27
+centered,100,0
+centered,101,0
+centered,110,0
+centered,111,4
+past_only,000,7
+past_only,001,2
+past_only,010,0
+past_only,011,27
+past_only,100,0
+past_only,101,0
+past_only,110,0
+past_only,111,4

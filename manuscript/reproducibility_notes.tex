@@ -2,9 +2,9 @@
 \usepackage{amsmath,amssymb,booktabs,array,xcolor,url}
 \definecolor{purple}{HTML}{7030A0}
 \usepackage[hidelinks]{hyperref}
-\newcommand{\revision}[1]{\textcolor{purple}{#1}}
+\newcommand{\revision}[1]{#1}
 \title{Reproducibility Notes for Digital Twin Fidelity for Networked IoT Services}
-\author{Shreyas Udaya, Aiden Wiehn, Sreya Viswanadha, Leyla Nazhandali}
+\author{Shreyas Udaya, Sreya Viswanadha, Aiden Wiehn, Leyla Nazhandali}
 \begin{document}
 \maketitle
 
@@ -270,7 +270,7 @@ python -m scripts.audit\_review\_evidence\par
 \hspace*{1em}--validate-planner --query-phase
 \end{quote}
 The output directory is \path{results/reviewer_audit_20261106/}.
-Its manifest records input hashes, source code hash, and completed checks.
+Its \path{audit.json} records input hashes, source code hash, and completed checks.
 Existing source trajectories, screening predictions, and cutoffs are
 read unchanged.
 \section{\revision{Buffered-Centered Screening and Missing Reference}}
@@ -305,7 +305,6 @@ screening procedure after the availability change.}
 
 \begin{table}[t]
 \centering
-\color{purple}
 \caption{Buffered-centered historical surface at 25\% requested acceptance.
 Each row has 80 held-out settings.}
 \begin{tabular}{lrr}
@@ -339,7 +338,6 @@ reproduces the existing evaluator to $10^{-12}$.}
 
 \begin{table}[t]
 \centering
-\color{purple}
 \caption{Reference masking with seed-averaged satisfaction.}
 \begin{tabular}{lrrl}
 \toprule

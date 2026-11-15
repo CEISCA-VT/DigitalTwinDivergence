@@ -1,0 +1,13 @@
+{
+  "schema": "causal_feature_preflight_v1",
+  "status": "PASS",
+  "passed": true,
+  "derivative_mode": "causal_backward",
+  "checks": {
+    "v1": true,
+    "v2_fast": true,
+    "v2_trailing_sensor_windows": true
+  },
+  "first_sample_derivative_rule": "forward and yaw acceleration are initialized to zero at the first grid sample",
+  "future_perturbation_rule": "changing samples from index 6 onward leaves features through index 5 unchanged"
+}

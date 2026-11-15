@@ -1,0 +1,9 @@
+bank,phase_ms,remediable,persistent,already,changed_from_aligned,practical_restores
+centered,0,30,6,4,0,27
+centered,25,30,6,4,0,27
+centered,50,30,6,4,0,29
+centered,75,31,6,3,1,29
+past_only,0,29,7,4,0,27
+past_only,25,29,7,4,0,24
+past_only,50,30,7,3,1,29
+past_only,75,30,7,3,1,28
